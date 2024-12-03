@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
 val ktorVersion = "3.0.1"
+val komponenterVersjon = "1.0.67"
 
 plugins {
     id("behandlingsflyt.conventions")
@@ -47,10 +48,9 @@ fun getCheckedOutGitCommitHash(): String {
     return runCommand("git rev-parse --verify HEAD")
 }
 
-
-val komponenterVersjon = "1.0.67"
-
 dependencies {
+    implementation(project(":flate"))
+
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 

@@ -22,6 +22,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangExceptio
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.commonKtorModule
+import no.nav.aap.meldekort.flate.arena.meldekortInfoApi
+import no.nav.aap.meldekort.flate.routingApi
 import org.slf4j.LoggerFactory
 
 class App
@@ -105,7 +107,8 @@ internal fun Application.server(dbConfig: DbConfig) {
     routing {
         authenticate(AZURE) {
             apiRouting {
-
+                routingApi(dataSource)
+                meldekortInfoApi(dataSource)
             }
         }
         actuator(prometheus)

@@ -7,3 +7,4 @@ include(
     "app",
     "lib-test"
 )
+include("flate")
