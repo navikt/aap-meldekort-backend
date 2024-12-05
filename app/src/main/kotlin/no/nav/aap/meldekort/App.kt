@@ -53,10 +53,8 @@ fun initDatasource(dbConfig: DbConfig) = HikariDataSource(HikariConfig().apply {
 })
 
 class DbConfig(
-    val host: String = System.getenv("DB_HOST"), // FIXME: referanse
-    val port: String = System.getenv("DB_PORT"), // FIXME: referanse
     val database: String = System.getenv("DB_DATABASE"), // FIXME: referanse
-    val url: String = "jdbc:postgresql://$host:$port/$database",
+    val url: String = System.getenv("DB_JDBC_URL"),
     val username: String = System.getenv("DB_USERNAME"), // FIXME: referanse
     val password: String = System.getenv("DB_PASSWORD") // FIXME: referanse
 )
