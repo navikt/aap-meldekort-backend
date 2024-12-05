@@ -53,12 +53,12 @@ fun initDatasource(dbConfig: DbConfig) = HikariDataSource(HikariConfig().apply {
 })
 
 class DbConfig(
-    val host: String = System.getenv("NAIS_DATABASE_BEHANDLINGSFLYT_BEHANDLINGSFLYT_HOST"), // FIXME: referanse
-    val port: String = System.getenv("NAIS_DATABASE_BEHANDLINGSFLYT_BEHANDLINGSFLYT_PORT"), // FIXME: referanse
-    val database: String = System.getenv("NAIS_DATABASE_BEHANDLINGSFLYT_BEHANDLINGSFLYT_DATABASE"), // FIXME: referanse
+    val host: String = System.getenv("DB_HOST"), // FIXME: referanse
+    val port: String = System.getenv("DB_PORT"), // FIXME: referanse
+    val database: String = System.getenv("DB_DATABASE"), // FIXME: referanse
     val url: String = "jdbc:postgresql://$host:$port/$database",
-    val username: String = System.getenv("NAIS_DATABASE_BEHANDLINGSFLYT_BEHANDLINGSFLYT_USERNAME"), // FIXME: referanse
-    val password: String = System.getenv("NAIS_DATABASE_BEHANDLINGSFLYT_BEHANDLINGSFLYT_PASSWORD") // FIXME: referanse
+    val username: String = System.getenv("DB_USERNAME"), // FIXME: referanse
+    val password: String = System.getenv("DB_PASSWORD") // FIXME: referanse
 )
 
 internal fun Application.server(dbConfig: DbConfig) {
