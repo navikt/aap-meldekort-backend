@@ -49,30 +49,21 @@ fun getCheckedOutGitCommitHash(): String {
 }
 
 dependencies {
-    implementation(project(":flate"))
+    implementation(project(":meldekortdomene"))
+    implementation(project(":http-flate"))
+    implementation(project(":postgres-repositories"))
 
-    implementation("io.ktor:ktor-server-cors:$ktorVersion")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.14.1")
     implementation("ch.qos.logback:logback-classic:1.5.12")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
-    implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:dbmigrering:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
 
-    implementation("com.zaxxer:HikariCP:6.2.1")
-    implementation("org.flywaydb:flyway-database-postgresql:10.22.0")
-    runtimeOnly("org.postgresql:postgresql:42.7.4")
+    testImplementation(testFixtures(project(":postgres-repositories")))
 
-    testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
     testImplementation("org.assertj:assertj-core:3.26.3")
-    testImplementation("org.testcontainers:postgresql:1.20.3")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")

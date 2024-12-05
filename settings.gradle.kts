@@ -5,6 +5,8 @@ rootProject.name = "meldekort-backend"
 
 include(
     "app",
+    "meldekortdomene",
+    "postgres-repositories",
+    "http-flate",
     "lib-test"
 )
-include("flate")

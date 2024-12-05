@@ -35,9 +35,12 @@ spec:
     prometheus:
         enabled: true
         path: /actuator/metrics
+    tokenx:
+        enabled: true
     azure:
         application:
             enabled: true
+            ## Dette blir feil, er ikke nav-ansatte som logger inn ...
             allowAllUsers: true
             claims:
                 extra:
@@ -59,6 +62,12 @@ spec:
         inbound:
             rules:
                 - application: meldekort
+                - application: tokenx-token-generator
+                  namespace: aura
+
+                  # TODO: fjern, skal bare bruke tokenx for innkommende kall
+                - application: azure-token-generator
+                  namespace: aura
     gcp:
         sqlInstances:
             - type: POSTGRES_16
