@@ -8,8 +8,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.OnBehalfOfTokenProvider
 import no.nav.aap.meldekort.InnloggetBruker
-import java.io.InputStream
 import java.net.URI
 
 class ArenaClient(
@@ -20,11 +20,11 @@ class ArenaClient(
 ): Arena {
     private val meldekortserviceClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = meldekortkontrollScope),
-        tokenProvider = TODO(),
+        tokenProvider = OnBehalfOfTokenProvider()
     )
     private val meldekortkontrollClient = RestClient.withDefaultResponseHandler(
         config = ClientConfig(scope = meldekortserviceScope),
-        tokenProvider = TODO(),
+        tokenProvider = OnBehalfOfTokenProvider()
     )
 
     override fun meldegrupper(innloggetBruker: InnloggetBruker): List<Arena.Meldegruppe> {
