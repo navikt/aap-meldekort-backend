@@ -40,12 +40,6 @@ spec:
     azure:
         application:
             enabled: true
-            ## Dette blir feil, er ikke nav-ansatte som logger inn ...
-            allowAllUsers: true
-            claims:
-                extra:
-                    - "NAVident"
-                    - "azp_name"
     liveness:
         path: /actuator/live
         initialDelay: 5
@@ -63,10 +57,6 @@ spec:
             rules:
                 - application: meldekort
                 - application: tokenx-token-generator
-                  namespace: aura
-
-                  # TODO: fjern, skal bare bruke tokenx for innkommende kall
-                - application: azure-token-generator
                   namespace: aura
     gcp:
         sqlInstances:
