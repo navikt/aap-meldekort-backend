@@ -3,6 +3,7 @@ package no.nav.aap.meldekort
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.test.FakeServers
@@ -19,6 +20,6 @@ fun main() {
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         meldekortService = meldekortService,
         applikasjonsVersjon = "TestApp",
-        azureConfig = AzureConfig()
+        tokenxConfig = TokenxConfig()
     )
 }

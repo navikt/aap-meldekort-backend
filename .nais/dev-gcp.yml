@@ -58,6 +58,17 @@ spec:
                 - application: meldekort
                 - application: tokenx-token-generator
                   namespace: aura
+        outbound:
+            rules:
+                - application: meldekortkontroll-api-q2
+                  namespace: meldekort
+                  cluster: dev-fss
+                - application: meldekortservice-q2
+                  namespace: meldekort
+                  cluster: dev-fss
+            external:
+                - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
+                - host: meldekortservice-q2.dev-fss-pub.nais.io
     gcp:
         sqlInstances:
             - type: POSTGRES_16
@@ -65,3 +76,12 @@ spec:
               databases:
                   - name: meldekort-backend
                     envVarPrefix: DB
+    env:
+        - name: MELDEKORTSERVICE_URL
+          value: https://meldekortservice-q2.dev-fss-pub.nais.io
+        - name: MELDEKORTSERVICE_SCOPE
+          value: dev-fss:meldekort:meldekortservice-q2
+        - name: MELDEKORTKONTROLL_URL
+          value: https://meldekortkontroll-api-q2.dev-fss-pub.nais.io
+        - name: MELDEKORTKONTROLL_SCOPE
+          value: dev-fss:meldekort:meldekortkontroll-api-q2

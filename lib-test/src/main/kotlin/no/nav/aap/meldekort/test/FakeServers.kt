@@ -77,11 +77,11 @@ object FakeServers : AutoCloseable {
     }
 
     private fun setAzureProperties() {
-        System.setProperty("azure.openid.config.token.endpoint", "http://localhost:${azure.port()}/token")
-        System.setProperty("azure.app.client.id", "behandlingsflyt")
-        System.setProperty("azure.app.client.secret", "")
-        System.setProperty("azure.openid.config.jwks.uri", "http://localhost:${azure.port()}/jwks")
-        System.setProperty("azure.openid.config.issuer", "behandlingsflyt")
+        System.setProperty("token.x.token.endpoint", "http://localhost:${azure.port()}/token")
+        System.setProperty("token.x.client.id", "behandlingsflyt")
+        System.setProperty("token.x.private.jwk", "")
+        System.setProperty("token.x.jwks.uri", "http://localhost:${azure.port()}/jwks")
+        System.setProperty("token.x.issuer", "behandlingsflyt")
     }
 
     private fun setProperties() {

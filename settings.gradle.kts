@@ -8,5 +8,6 @@ include(
     "meldekortdomene",
     "postgres-repositories",
     "http-flate",
+    "arena-integrasjon",
     "lib-test"
 )

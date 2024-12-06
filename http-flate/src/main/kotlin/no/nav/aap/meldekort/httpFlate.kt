@@ -14,8 +14,9 @@ import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.server.AZURE
+import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.arena.meldekortApi
@@ -28,7 +29,7 @@ fun startHttpServer(
     prometheus: PrometheusMeterRegistry,
     meldekortService: MeldekortService,
     applikasjonsVersjon: String,
-    azureConfig: AzureConfig,
+    tokenxConfig: TokenxConfig,
 ) {
     embeddedServer(Netty, configure = {
         connectionGroupSize = 8
@@ -39,16 +40,16 @@ fun startHttpServer(
         }
     }) {
         commonKtorModule(
-            prometheus,
-            azureConfig,
-            InfoModel(
+            prometheus = prometheus,
+            infoModel = InfoModel(
                 title = "AAP - Meldekort",
                 version = applikasjonsVersjon,
                 description = """
-                For å teste API i dev, besøk
-                <a href="https://tokenx-token-generator.intern.dev.nav.no/api/obo?aud=dev-gcp:aap:meldeplikt-backend">Token Generator</a> for å få token.
-                """.trimIndent(),
-            )
+                            For å teste API i dev, besøk
+                            <a href="https://tokenx-token-generator.intern.dev.nav.no/api/obo?aud=dev-gcp:aap:meldeplikt-backend">Token Generator</a> for å få token.
+                            """.trimIndent(),
+            ),
+            tokenxConfig = tokenxConfig,
         )
         install(StatusPages) {
             exception<Throwable> { call, cause ->
@@ -79,7 +80,7 @@ fun startHttpServer(
             allowHeader(HttpHeaders.ContentType)
         }
         routing {
-            authenticate(AZURE) {
+            authenticate(TOKENX) {
                 apiRouting {
                     meldekortApi(meldekortService)
                 }
