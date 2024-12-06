@@ -53,6 +53,8 @@ dependencies {
     implementation(project(":http-flate"))
     implementation(project(":postgres-repositories"))
 
+    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.14.1")
     implementation("ch.qos.logback:logback-classic:1.5.12")

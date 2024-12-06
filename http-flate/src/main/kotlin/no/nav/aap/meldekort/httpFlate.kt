@@ -28,6 +28,7 @@ fun startHttpServer(
     prometheus: PrometheusMeterRegistry,
     meldekortService: MeldekortService,
     applikasjonsVersjon: String,
+    azureConfig: AzureConfig,
 ) {
     embeddedServer(Netty, configure = {
         connectionGroupSize = 8
@@ -39,7 +40,7 @@ fun startHttpServer(
     }) {
         commonKtorModule(
             prometheus,
-            AzureConfig(),
+            azureConfig,
             InfoModel(
                 title = "AAP - Meldekort",
                 version = applikasjonsVersjon,
