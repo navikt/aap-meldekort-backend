@@ -5,8 +5,14 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
+import no.nav.aap.komponenter.httpklient.auth.personBruker
+import no.nav.aap.komponenter.httpklient.auth.token
+import no.nav.aap.meldekort.InnloggetBruker
 
-fun NormalOpenAPIRoute.meldekortApi(meldekortService: MeldekortService) {
+fun NormalOpenAPIRoute.meldekortApi(
+    meldekortService: MeldekortService,
+    arena: Arena,
+) {
     route("/api/arena/meldekort") {
         get<Unit, MeldekortResponse> { _ ->
             val nåværendeTilstand = meldekortService.meldekorttilstand()
@@ -20,6 +26,20 @@ fun NormalOpenAPIRoute.meldekortApi(meldekortService: MeldekortService) {
         route("/lagre").post<Unit, MeldekortResponse, MeldekortRequest> { _, meldekortRequest ->
             respond(MeldekortResponse(meldekortService.lagre(meldekortRequest.meldekorttilstand())))
         }
+    }
+    route("/test/meldegrupper").get<Unit, Any> { call ->
+        val innloggetBruker = InnloggetBruker(
+            ident = personBruker().pid,
+            token = token().token(),
+        )
+        respond(arena.meldegrupper(innloggetBruker))
+    }
+    route("/test/meldekort").get<Unit, Any> { call ->
+        val innloggetBruker = InnloggetBruker(
+            ident = personBruker().pid,
+            token = token().token(),
+        )
+        respond(arena.meldekort(innloggetBruker) ?: "null")
     }
 }
 

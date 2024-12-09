@@ -10,7 +10,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.OnBehalfOfTokenProvider
 import no.nav.aap.meldekort.InnloggetBruker
+import org.slf4j.MDC
 import java.net.URI
+import java.util.*
 
 class ArenaClient(
     private val meldekortserviceUrl: String,
@@ -61,7 +63,10 @@ class ArenaClient(
     private fun getRequest(innloggetBruker: InnloggetBruker): GetRequest {
         return GetRequest(
             currentToken = OidcToken(innloggetBruker.token),
-            additionalHeaders = listOf(Header("ident", innloggetBruker.ident))
+            additionalHeaders = listOf(
+                Header("ident", innloggetBruker.ident),
+                Header("x-request-id", MDC.get("callId") ?: "aap-meldekort-${UUID.randomUUID()}")
+            ),
         )
     }
 }
