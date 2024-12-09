@@ -48,7 +48,7 @@ fun startHttpServer(
                 version = applikasjonsVersjon,
                 description = """
                             For å teste API i dev, besøk
-                            <a href="https://tokenx-token-generator.intern.dev.nav.no/api/obo?aud=dev-gcp:aap:meldeplikt-backend">Token Generator</a> for å få token.
+                            <a href="https://tokenx-token-generator.intern.dev.nav.no/api/obo?aud=dev-gcp:aap:meldekort-backend">Token Generator</a> for å få token.
                             """.trimIndent(),
             ),
             tokenxConfig = tokenxConfig,
