@@ -8,6 +8,7 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.InnloggetBruker
+import java.time.LocalDate
 
 fun NormalOpenAPIRoute.meldekortApi(
     meldekortService: MeldekortService,
@@ -91,12 +92,19 @@ data class MeldekortRequest(
     }
 }
 
+class PeriodeDto(
+    val fom: LocalDate,
+    val tom: LocalDate,
+)
+
 data class MeldekortResponse(
     val steg: StegNavn,
+    val periode: PeriodeDto,
     val meldekort: MeldekortDto,
 ) {
     constructor(meldekorttilstand: Meldekorttilstand) : this(
         steg = meldekorttilstand.steg.navn,
         meldekort = MeldekortDto(meldekorttilstand.meldekort),
+        periode = PeriodeDto(LocalDate.now().minusDays(14), LocalDate.now()),
     )
 }
