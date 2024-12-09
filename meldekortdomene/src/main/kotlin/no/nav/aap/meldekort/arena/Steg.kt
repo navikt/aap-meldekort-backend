@@ -31,9 +31,8 @@ object JobbetIMeldeperioden: Steg {
 
     override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
         return when (meldekortskjema.harDuJobbet) {
-            true -> TimerArbeidet
-            false -> Kvittering
             null -> null
+            else -> TimerArbeidet
         }
     }
 }
