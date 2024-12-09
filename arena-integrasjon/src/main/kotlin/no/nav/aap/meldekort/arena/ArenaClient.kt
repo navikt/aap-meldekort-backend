@@ -21,11 +21,11 @@ class ArenaClient(
     meldekortkontrollScope: String,
 ): Arena {
     private val meldekortserviceClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(scope = meldekortkontrollScope),
+        ClientConfig(scope = meldekortserviceScope),
         tokenProvider = OnBehalfOfTokenProvider()
     )
     private val meldekortkontrollClient = RestClient.withDefaultResponseHandler(
-        config = ClientConfig(scope = meldekortserviceScope),
+        config = ClientConfig(scope = meldekortkontrollScope),
         tokenProvider = OnBehalfOfTokenProvider()
     )
 
