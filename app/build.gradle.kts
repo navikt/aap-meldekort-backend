@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
 val ktorVersion = "3.0.1"
-val komponenterVersjon = "1.0.79"
+val komponenterVersjon = "1.0.81"
 
 plugins {
     id("behandlingsflyt.conventions")
