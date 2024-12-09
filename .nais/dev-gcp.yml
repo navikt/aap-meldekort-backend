@@ -80,7 +80,7 @@ spec:
                     envVarPrefix: DB
     env:
         - name: MELDEKORTSERVICE_URL
-          value: https://meldekortservice-q2.dev-fss-pub.nais.io
+          value: https://meldekortservice-q2.dev-fss-pub.nais.io/meldekortservice/api
         - name: MELDEKORTSERVICE_SCOPE
           value: dev-fss:meldekort:meldekortservice-q2
         - name: MELDEKORTKONTROLL_URL
