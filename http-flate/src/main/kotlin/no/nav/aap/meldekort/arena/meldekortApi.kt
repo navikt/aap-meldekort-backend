@@ -14,17 +14,28 @@ fun NormalOpenAPIRoute.meldekortApi(
     arena: Arena,
 ) {
     route("/api/arena/meldekort") {
-        get<Unit, MeldekortResponse> { _ ->
-            val nåværendeTilstand = meldekortService.meldekorttilstand()
-            respond(MeldekortResponse(nåværendeTilstand))
-        }
+        route("/{meldekortId}") {
+            get<Long, MeldekortResponse> { meldekortId ->
+                val nåværendeTilstand = meldekortService.meldekorttilstand(meldekortId)
+                respond(MeldekortResponse(nåværendeTilstand))
+            }
 
-        route("/neste-steg").post<Unit, MeldekortResponse, MeldekortRequest> { _, meldekortRequest ->
-            respond(MeldekortResponse(meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand())))
-        }
+            route("/neste-steg").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
+                respond(
+                    MeldekortResponse(
+                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortId))
+                    )
+                )
+            }
 
-        route("/lagre").post<Unit, MeldekortResponse, MeldekortRequest> { _, meldekortRequest ->
-            respond(MeldekortResponse(meldekortService.lagre(meldekortRequest.meldekorttilstand())))
+            route("/lagre").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
+                respond(
+                    MeldekortResponse(
+                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortId))
+                    )
+                )
+            }
+
         }
     }
     route("/test/meldegrupper").get<Unit, Any> { call ->
@@ -56,24 +67,26 @@ class MeldekortDto(
         timerArbeidet = meldekort.timerArbeidet,
         stemmerOpplysningene = meldekort.stemmerOpplysningene,
     )
+
+    fun tilDomene(): Meldekort {
+        return Meldekort(
+            svarerDuSant = svarerDuSant,
+            harDuJobbet = harDuJobbet,
+            timerArbeidet = timerArbeidet,
+            stemmerOpplysningene = stemmerOpplysningene
+        )
+    }
 }
 
 data class MeldekortRequest(
     val nåværendeSteg: StegNavn,
-    val svarerDuSant: Boolean?,
-    val harDuJobbet: Boolean?,
-    val timerArbeidet: List<Int?>,
-    val stemmerOpplysningene: Boolean?
+    val meldekort: MeldekortDto
 ) {
-    fun meldekorttilstand(): Meldekorttilstand {
+    fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
         return Meldekorttilstand(
+            meldekortId = meldekortId,
             steg = nåværendeSteg.steg,
-            meldekort = Meldekort(
-                svarerDuSant = svarerDuSant,
-                harDuJobbet = harDuJobbet,
-                timerArbeidet = timerArbeidet,
-                stemmerOpplysningene = stemmerOpplysningene
-            )
+            meldekort = meldekort.tilDomene(),
         )
     }
 }

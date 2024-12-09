@@ -4,7 +4,7 @@ package no.nav.aap.meldekort.arena
 class MeldekortRepositoryFake: MeldekortRepository {
     private var meldekorttilstand: Meldekorttilstand? = null
 
-    override fun loadMeldekorttilstand(): Meldekorttilstand? {
+    override fun loadMeldekorttilstand(meldekortId: Long): Meldekorttilstand? {
         return meldekorttilstand
     }
 

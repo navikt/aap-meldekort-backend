@@ -3,8 +3,9 @@ package no.nav.aap.meldekort.arena
 class MeldekortService(
     private val meldekortRepository: MeldekortRepository,
 ) {
-    fun meldekorttilstand(): Meldekorttilstand {
-        return meldekortRepository.loadMeldekorttilstand() ?: Meldekorttilstand(
+    fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
+        return meldekortRepository.loadMeldekorttilstand(meldekortId) ?: Meldekorttilstand(
+            meldekortId = meldekortId,
             meldekort = Meldekort.tomtMeldekort(),
             steg = BekreftSvarerÆrlig,
         )
@@ -20,6 +21,7 @@ class MeldekortService(
             error("")
         }
         val nesteTilstand = Meldekorttilstand(
+            meldekortId = meldekorttilstand.meldekortId,
             steg = nesteSteg,
             meldekort = meldekorttilstand.meldekort
         )
