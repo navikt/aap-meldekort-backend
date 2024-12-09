@@ -4,51 +4,40 @@ import no.nav.aap.meldekort.InnloggetBruker
 import java.time.LocalDate
 import java.util.*
 
-private const val AAP_KODE = "AAP"
+private const val AAP_KODE = "ATTF" // attføringsstønad
+
 class ArenaService(
     private val arena: Arena
 ) {
+    fun meldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
+        val person = arena.person(innloggetBruker)
+        val meldekortListe = person ?.meldekortListe ?: emptyList()
+
+        return meldekortListe
+            .filter { meldekort ->
+                meldekort.hoyesteMeldegruppe == AAP_KODE && meldekort.beregningstatus in arrayOf("OPPRE", "SENDT")
+            }
+            .map { meldekort ->
+                val kanSendesFra = meldekort.tilDato.minusDays(1)
+                Meldeperiode(
+                    meldekortId = meldekort.meldekortId,
+                    periode = Periode(meldekort.fraDato, meldekort.tilDato),
+                    kanSendesFra = kanSendesFra,
+                    kanSendes = !LocalDate.now().isBefore(kanSendesFra),
+                    kanEndres = kanEndres(meldekort, meldekortListe),
+                    status = Meldeperiode.Status.TIL_UTFYLLING,
+                )
+            }
+    }
+
 
     /* Hva betyr egentlig dette her? Er denne relevant? */
     fun harMeldeplikt(innloggetBruker: InnloggetBruker): Boolean {
         return arena.meldegrupper(innloggetBruker).any { it.meldegruppeKode == AAP_KODE }
     }
 
-    fun meldeperioder(innloggetBruker: InnloggetBruker) {
-        val meldekort = arena.meldekort(innloggetBruker)
-            ?.meldekortListe
-            ?.filter { meldekort ->
-                meldekort.hoyesteMeldegruppe == AAP_KODE && meldekort.beregningstatus in arrayOf("OPPRE", "SENDT")
-            }
-
-        // TODO: Lage domeneobjekt? Mappe om som under?
-        //map { meldekort ->
-        //    val kanSendesFra = meldekort.tilDato.minusDays(1)
-
-        //    Rapporteringsperiode(
-        //        meldekort.meldekortId,
-        //        Periode(
-        //            meldekort.fraDato,
-        //            meldekort.tilDato
-        //        ),
-        //        List(14) { index ->
-        //            Dag(
-        //                meldekort.fraDato.plusDays(index.toLong()),
-        //                mutableListOf(),
-        //                index
-        //            )
-        //        },
-        //        kanSendesFra,
-        //        !LocalDate.now().isBefore(kanSendesFra),
-        //        kanEndres(meldekort, person.meldekortListe),
-        //        RapporteringsperiodeStatus.TilUtfylling
-        //    )
-        //} ?: emptyList()
-
-    }
-
     fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
-        return arena.meldekort(innloggetBruker)
+        return arena.person(innloggetBruker)
     }
 
     fun sendtemeldekort(innloggetBruker: InnloggetBruker) {
@@ -157,7 +146,11 @@ class ArenaService(
         return if (meldekort.kortType == "10" || meldekort.beregningstatus == "UBEHA") {
             false
         } else {
-            meldekortListe.find { mk -> (meldekort.meldekortId != mk.meldekortId && meldekort.meldeperiode == mk.meldeperiode && mk.kortType == "10") } == null
+            meldekortListe.none { mk ->
+                meldekort.meldekortId != mk.meldekortId &&
+                        meldekort.meldeperiode == mk.meldeperiode &&
+                        mk.kortType == "10"
+            }
         }
     }
 

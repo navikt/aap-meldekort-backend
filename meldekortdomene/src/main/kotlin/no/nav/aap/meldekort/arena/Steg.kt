@@ -9,15 +9,15 @@ enum class StegNavn(val steg: Steg) {
 
 interface Steg {
     val navn: StegNavn
-    fun nesteSteg(meldekort: Meldekort): Steg?
+    fun nesteSteg(meldekortskjema: Meldekortskjema): Steg?
 }
 
 object BekreftSvarerÆrlig: Steg {
     override val navn: StegNavn
         get() = StegNavn.BEKREFT_SVARER_ÆRLIG
 
-    override fun nesteSteg(meldekort: Meldekort): Steg? {
-        return when (meldekort.svarerDuSant) {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+        return when (meldekortskjema.svarerDuSant) {
             true -> JobbetIMeldeperioden
             false -> Kvittering
             null -> null
@@ -29,8 +29,8 @@ object JobbetIMeldeperioden: Steg {
     override val navn: StegNavn
         get() = StegNavn.JOBBET_I_MELDEPERIODEN
 
-    override fun nesteSteg(meldekort: Meldekort): Steg? {
-        return when (meldekort.harDuJobbet) {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+        return when (meldekortskjema.harDuJobbet) {
             true -> TimerArbeidet
             false -> Kvittering
             null -> null
@@ -42,8 +42,8 @@ object TimerArbeidet: Steg {
     override val navn: StegNavn
         get() = StegNavn.TIMER_ARBEIDET
 
-    override fun nesteSteg(meldekort: Meldekort): Steg? {
-        return when (meldekort.stemmerOpplysningene) {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+        return when (meldekortskjema.stemmerOpplysningene) {
             true -> Kvittering
             false -> null
             null -> null
@@ -55,7 +55,7 @@ object Kvittering: Steg {
     override val navn: StegNavn
         get() = StegNavn.KVITTERING
 
-    override fun nesteSteg(meldekort: Meldekort): Steg? {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
         return null
     }
 }

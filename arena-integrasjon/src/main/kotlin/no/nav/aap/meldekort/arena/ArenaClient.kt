@@ -33,7 +33,7 @@ class ArenaClient(
         return requireNotNull(getMeldekortservice("/v2/meldegrupper", innloggetBruker))
     }
 
-    override fun meldekort(innloggetBruker: InnloggetBruker): Arena.Person? {
+    override fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
         return getMeldekortservice("/v2/meldekort", innloggetBruker)
     }
 

@@ -15,10 +15,10 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
-import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.Arena
+import no.nav.aap.meldekort.arena.ArenaService
 import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.arena.meldekortApi
 import org.slf4j.LoggerFactory
@@ -30,6 +30,7 @@ fun startHttpServer(
     prometheus: PrometheusMeterRegistry,
     meldekortService: MeldekortService,
     arena: Arena,
+    arenaService: ArenaService,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
 ) {
@@ -84,7 +85,11 @@ fun startHttpServer(
         routing {
             authenticate(TOKENX) {
                 apiRouting {
-                    meldekortApi(meldekortService, arena)
+                    meldekortApi(
+                        meldekortService = meldekortService,
+                        arena = arena,
+                        arenaService = arenaService,
+                    )
                 }
             }
             actuator(prometheus)

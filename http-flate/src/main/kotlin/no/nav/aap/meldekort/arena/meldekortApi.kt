@@ -3,6 +3,7 @@ package no.nav.aap.meldekort.arena
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
+import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
@@ -12,10 +13,16 @@ import java.time.LocalDate
 
 fun NormalOpenAPIRoute.meldekortApi(
     meldekortService: MeldekortService,
+    arenaService: ArenaService,
     arena: Arena,
 ) {
-    route("/api/arena/meldekort") {
-        route("/{meldekortId}") {
+    route("/api/arena") {
+        route("/meldeperiode").get<Unit, List<MeldeperiodeDto>> {
+            val meldeperioder = arenaService.meldeperioder(innloggetBruker())
+            respond(meldeperioder.map { MeldeperiodeDto(it) })
+        }
+
+        route("/meldekort/meldekortId}") {
             get<Long, MeldekortResponse> { meldekortId ->
                 val nåværendeTilstand = meldekortService.meldekorttilstand(meldekortId)
                 respond(MeldekortResponse(nåværendeTilstand))
@@ -36,24 +43,40 @@ fun NormalOpenAPIRoute.meldekortApi(
                     )
                 )
             }
-
         }
     }
-    route("/test/meldegrupper").get<Unit, Any> { call ->
-        val innloggetBruker = InnloggetBruker(
-            ident = personBruker().pid,
-            token = token().token(),
-        )
-        respond(arena.meldegrupper(innloggetBruker))
+
+    route("/test/proxy/meldegrupper").get<Unit, Any> { call ->
+        respond(arena.meldegrupper(innloggetBruker()))
     }
-    route("/test/meldekort").get<Unit, Any> { call ->
-        val innloggetBruker = InnloggetBruker(
-            ident = personBruker().pid,
-            token = token().token(),
-        )
-        respond(arena.meldekort(innloggetBruker) ?: "null")
+    route("/test/proxy/meldekort").get<Unit, Any> { call ->
+        respond(arena.person(innloggetBruker()) ?: "null")
     }
 }
+
+private fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
+    InnloggetBruker(
+        ident = personBruker().pid,
+        token = token().token(),
+    )
+
+@Suppress("unused")
+class MeldeperiodeDto(
+    val meldekortId: Long,
+    val periode: PeriodeDto,
+    val status: Status,
+) {
+    enum class Status {
+        KLAR_FOR_INNSENDING,
+    }
+
+    constructor(meldeperiode: Meldeperiode) : this(
+        meldekortId = meldeperiode.meldekortId,
+        periode = PeriodeDto(meldeperiode.periode),
+        status = Status.KLAR_FOR_INNSENDING
+    )
+}
+
 
 @Suppress("unused")
 class MeldekortDto(
@@ -62,15 +85,15 @@ class MeldekortDto(
     val timerArbeidet: List<Int?>,
     val stemmerOpplysningene: Boolean?
 ) {
-    constructor(meldekort: Meldekort) : this(
-        svarerDuSant = meldekort.svarerDuSant,
-        harDuJobbet = meldekort.harDuJobbet,
-        timerArbeidet = meldekort.timerArbeidet,
-        stemmerOpplysningene = meldekort.stemmerOpplysningene,
+    constructor(meldekortskjema: Meldekortskjema) : this(
+        svarerDuSant = meldekortskjema.svarerDuSant,
+        harDuJobbet = meldekortskjema.harDuJobbet,
+        timerArbeidet = meldekortskjema.timerArbeidet,
+        stemmerOpplysningene = meldekortskjema.stemmerOpplysningene,
     )
 
-    fun tilDomene(): Meldekort {
-        return Meldekort(
+    fun tilDomene(): Meldekortskjema {
+        return Meldekortskjema(
             svarerDuSant = svarerDuSant,
             harDuJobbet = harDuJobbet,
             timerArbeidet = timerArbeidet,
@@ -87,7 +110,7 @@ data class MeldekortRequest(
         return Meldekorttilstand(
             meldekortId = meldekortId,
             steg = nåværendeSteg.steg,
-            meldekort = meldekort.tilDomene(),
+            meldekortskjema = meldekort.tilDomene(),
         )
     }
 }
@@ -95,7 +118,9 @@ data class MeldekortRequest(
 class PeriodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
-)
+) {
+    constructor(periode: Periode): this(periode.fom, periode.tom)
+}
 
 data class MeldekortResponse(
     val steg: StegNavn,
@@ -104,7 +129,7 @@ data class MeldekortResponse(
 ) {
     constructor(meldekorttilstand: Meldekorttilstand) : this(
         steg = meldekorttilstand.steg.navn,
-        meldekort = MeldekortDto(meldekorttilstand.meldekort),
+        meldekort = MeldekortDto(meldekorttilstand.meldekortskjema),
         periode = PeriodeDto(LocalDate.now().minusDays(14), LocalDate.now()),
     )
 }

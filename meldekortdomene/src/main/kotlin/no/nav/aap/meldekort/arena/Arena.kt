@@ -6,7 +6,7 @@ import java.time.LocalDate
 interface Arena {
     fun meldegrupper(innloggetBruker: InnloggetBruker): List<Meldegruppe>
 
-    fun meldekort(innloggetBruker: InnloggetBruker): Person?
+    fun person(innloggetBruker: InnloggetBruker): Person?
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): Person
 

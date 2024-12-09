@@ -4,6 +4,7 @@ import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.arena.ArenaClient
+import no.nav.aap.meldekort.arena.ArenaService
 import no.nav.aap.meldekort.arena.MeldekortRepositoryFake
 import no.nav.aap.meldekort.arena.MeldekortService
 import org.slf4j.LoggerFactory
@@ -34,5 +35,6 @@ fun main() {
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
         arena = arena,
+        arenaService = ArenaService(arena),
     )
 }

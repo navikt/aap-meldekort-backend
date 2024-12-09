@@ -6,7 +6,7 @@ class MeldekortService(
     fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
         return meldekortRepository.loadMeldekorttilstand(meldekortId) ?: Meldekorttilstand(
             meldekortId = meldekortId,
-            meldekort = Meldekort.tomtMeldekort(),
+            meldekortskjema = Meldekortskjema.tomtMeldekort(),
             steg = BekreftSvarerÆrlig,
         )
     }
@@ -16,14 +16,14 @@ class MeldekortService(
     }
 
     fun lagreOgNeste(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
-        val nesteSteg = meldekorttilstand.steg.nesteSteg(meldekorttilstand.meldekort)
+        val nesteSteg = meldekorttilstand.steg.nesteSteg(meldekorttilstand.meldekortskjema)
         if (nesteSteg == null) {
             error("")
         }
         val nesteTilstand = Meldekorttilstand(
             meldekortId = meldekorttilstand.meldekortId,
             steg = nesteSteg,
-            meldekort = meldekorttilstand.meldekort
+            meldekortskjema = meldekorttilstand.meldekortskjema
         )
         return meldekortRepository.storeMeldekorttilstand(nesteTilstand)
     }
