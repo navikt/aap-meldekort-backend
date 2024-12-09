@@ -1,60 +1,78 @@
 package no.nav.aap.meldekort.arena
 
-enum class StegNavn(val steg: Steg) {
-    BEKREFT_SVARER_ÆRLIG(BekreftSvarerÆrlig),
-    JOBBET_I_MELDEPERIODEN(JobbetIMeldeperioden),
-    TIMER_ARBEIDET(TimerArbeidet),
-    KVITTERING(Kvittering)
+import no.nav.aap.meldekort.arena.StegNavn.*
+import org.slf4j.LoggerFactory
+
+enum class StegNavn {
+    BEKREFT_SVARER_ÆRLIG,
+    JOBBET_I_MELDEPERIODEN,
+    TIMER_ARBEIDET,
+    KVITTERING,
 }
 
 interface Steg {
     val navn: StegNavn
-    fun nesteSteg(meldekortskjema: Meldekortskjema): Steg?
+    fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall
 }
+
+sealed interface NesteUtfall
+object InnsendingFeilet: NesteUtfall
+class GåTilSteg(val steg: StegNavn): NesteUtfall
 
 object BekreftSvarerÆrlig: Steg {
     override val navn: StegNavn
-        get() = StegNavn.BEKREFT_SVARER_ÆRLIG
+        get() = BEKREFT_SVARER_ÆRLIG
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
         return when (meldekortskjema.svarerDuSant) {
-            true -> JobbetIMeldeperioden
-            false -> Kvittering
-            null -> null
+            true -> GåTilSteg(JOBBET_I_MELDEPERIODEN)
+            false -> GåTilSteg(KVITTERING)
+            null -> error("kan ikke gå videre uten å ha svart")
         }
     }
 }
 
 object JobbetIMeldeperioden: Steg {
     override val navn: StegNavn
-        get() = StegNavn.JOBBET_I_MELDEPERIODEN
+        get() = JOBBET_I_MELDEPERIODEN
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
         return when (meldekortskjema.harDuJobbet) {
-            null -> null
-            else -> TimerArbeidet
+            null -> error("kan ikke gå videre uten å ha svart")
+            else -> GåTilSteg(TIMER_ARBEIDET)
         }
     }
 }
 
-object TimerArbeidet: Steg {
+class TimerArbeidet(
+    private val meldekortService: MeldekortService,
+): Steg {
+    private val log = LoggerFactory.getLogger(this::class.java)
     override val navn: StegNavn
-        get() = StegNavn.TIMER_ARBEIDET
+        get() = TIMER_ARBEIDET
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
         return when (meldekortskjema.stemmerOpplysningene) {
-            true -> Kvittering
-            false -> null
-            null -> null
+            true -> {
+                try {
+                    meldekortService.sendInn(meldekortskjema)
+                    GåTilSteg(KVITTERING)
+                } catch (e: Exception) {
+                    log.error("innsending av meldekort til arena feilet", e)
+                    InnsendingFeilet
+                }
+            }
+            false -> GåTilSteg(KVITTERING)
+            null -> error("kan ikke gå videre uten å ha svart")
         }
     }
 }
 
 object Kvittering: Steg {
     override val navn: StegNavn
-        get() = StegNavn.KVITTERING
+        get() = KVITTERING
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): Steg? {
-        return null
+    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
+        error("kan ikke gå videre uten å ha svart")
     }
 }

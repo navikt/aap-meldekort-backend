@@ -31,7 +31,7 @@ fun NormalOpenAPIRoute.meldekortApi(
             route("/neste-steg").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortId))
+                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortService, meldekortId))
                     )
                 )
             }
@@ -39,7 +39,7 @@ fun NormalOpenAPIRoute.meldekortApi(
             route("/lagre").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortId))
+                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortService, meldekortId))
                     )
                 )
             }
@@ -106,10 +106,10 @@ data class MeldekortRequest(
     val nåværendeSteg: StegNavn,
     val meldekort: MeldekortDto
 ) {
-    fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
+    fun meldekorttilstand(meldekortService: MeldekortService, meldekortId: Long): Meldekorttilstand {
         return Meldekorttilstand(
             meldekortId = meldekortId,
-            steg = nåværendeSteg.steg,
+            steg = meldekortService.stegForNavn(nåværendeSteg),
             meldekortskjema = meldekort.tilDomene(),
         )
     }
