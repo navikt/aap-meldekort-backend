@@ -8,12 +8,11 @@ class Flyt private constructor(
 
     fun stegForNavn(navn: StegNavn): Steg {
         return requireNotNull(steg.find { it.navn == navn }) {
-            "steg $navn finnes ikke i flyt ($this)"
+            "steg $navn finnes ikke i flyt $this"
         }
     }
 
     override fun toString(): String {
-        return steg.joinToString { steg -> steg.navn.toString() }
+        return steg.joinToString(prefix = "(", postfix = ")") { steg -> steg.navn.toString() }
     }
-
 }
