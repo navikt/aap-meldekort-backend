@@ -3,7 +3,7 @@ package no.nav.aap.meldekort.arena
 class MeldekortService(
     private val meldekortRepository: MeldekortRepository,
 ) {
-    private val flyt = listOf(
+    private val flyt = Flyt(
         BekreftSvarerÆrlig,
         JobbetIMeldeperioden,
         TimerArbeidet(this),
@@ -11,7 +11,7 @@ class MeldekortService(
     )
 
     fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
-        return meldekortRepository.loadMeldekorttilstand(meldekortId) ?: Meldekorttilstand(
+        return meldekortRepository.loadMeldekorttilstand(meldekortId, flyt) ?: Meldekorttilstand(
             meldekortId = meldekortId,
             meldekortskjema = Meldekortskjema.tomtMeldekort(),
             steg = BekreftSvarerÆrlig,
@@ -30,16 +30,14 @@ class MeldekortService(
         }
         val nesteTilstand = Meldekorttilstand(
             meldekortId = meldekorttilstand.meldekortId,
-            steg = stegForNavn(nesteSteg),
+            steg = flyt.stegForNavn(nesteSteg),
             meldekortskjema = meldekorttilstand.meldekortskjema
         )
         return meldekortRepository.storeMeldekorttilstand(nesteTilstand)
     }
 
     fun stegForNavn(stegNavn: StegNavn): Steg {
-        return requireNotNull(flyt.find { it.navn == stegNavn }) {
-            "steg $stegNavn finnes ikke i flyt (${flyt.joinToString { it.navn.toString() }})"
-        }
+        return flyt.stegForNavn(stegNavn)
     }
 
     fun sendInn(meldekortskjema: Meldekortskjema) {

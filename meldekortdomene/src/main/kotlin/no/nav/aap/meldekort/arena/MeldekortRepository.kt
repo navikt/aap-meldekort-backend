@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.arena
 
 interface MeldekortRepository {
-    fun loadMeldekorttilstand(meldekortId: Long): Meldekorttilstand?
+    fun loadMeldekorttilstand(meldekortId: Long, flyt: Flyt): Meldekorttilstand?
     fun storeMeldekorttilstand(meldekorttilstand: Meldekorttilstand): Meldekorttilstand
 }
