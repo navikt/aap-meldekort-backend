@@ -12,19 +12,20 @@ enum class StegNavn {
 
 interface Steg {
     val navn: StegNavn
-    fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall
+    fun nesteSteg(meldekorttilstand: Meldekorttilstand): NesteUtfall
 }
 
 sealed interface NesteUtfall
-object InnsendingFeilet: NesteUtfall
+
+data object InnsendingFeilet: NesteUtfall
 class GåTilSteg(val steg: StegNavn): NesteUtfall
 
 object BekreftSvarerÆrlig: Steg {
     override val navn: StegNavn
         get() = BEKREFT_SVARER_ÆRLIG
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
-        return when (meldekortskjema.svarerDuSant) {
+    override fun nesteSteg(meldekorttilstand: Meldekorttilstand): NesteUtfall {
+        return when (meldekorttilstand.meldekortskjema.svarerDuSant) {
             true -> GåTilSteg(JOBBET_I_MELDEPERIODEN)
             false -> GåTilSteg(KVITTERING)
             null -> error("kan ikke gå videre uten å ha svart")
@@ -36,8 +37,8 @@ object JobbetIMeldeperioden: Steg {
     override val navn: StegNavn
         get() = JOBBET_I_MELDEPERIODEN
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
-        return when (meldekortskjema.harDuJobbet) {
+    override fun nesteSteg(meldekorttilstand: Meldekorttilstand): NesteUtfall {
+        return when (meldekorttilstand.meldekortskjema.harDuJobbet) {
             null -> error("kan ikke gå videre uten å ha svart")
             else -> GåTilSteg(TIMER_ARBEIDET)
         }
@@ -51,11 +52,11 @@ class TimerArbeidet(
     override val navn: StegNavn
         get() = TIMER_ARBEIDET
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
-        return when (meldekortskjema.stemmerOpplysningene) {
+    override fun nesteSteg(meldekorttilstand: Meldekorttilstand): NesteUtfall {
+        return when (meldekorttilstand.meldekortskjema.stemmerOpplysningene) {
             true -> {
                 try {
-                    meldekortService.sendInn(meldekortskjema)
+                    meldekortService.sendInn(meldekorttilstand.meldekortskjema, meldekorttilstand.meldekortId)
                     GåTilSteg(KVITTERING)
                 } catch (e: Exception) {
                     log.error("innsending av meldekort til arena feilet", e)
@@ -72,7 +73,7 @@ object Kvittering: Steg {
     override val navn: StegNavn
         get() = KVITTERING
 
-    override fun nesteSteg(meldekortskjema: Meldekortskjema): NesteUtfall {
+    override fun nesteSteg(meldekorttilstand: Meldekorttilstand): NesteUtfall {
         error("kan ikke gå videre uten å ha svart")
     }
 }

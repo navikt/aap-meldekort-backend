@@ -1,26 +1,14 @@
 package no.nav.aap.meldekort.arena
 
-/* TODO: Flytt til test-mappen når serveren ikke lenger bruker fake versjonen. */
 class MeldekortRepositoryFake: MeldekortRepository {
-    private val meldekorttilstander: MutableList<MeldekorttilstandEntity> = mutableListOf()
+    private val innsendteMeldekort: MutableList<InnsendtMeldekort> = mutableListOf()
 
-    override fun loadMeldekorttilstand(meldekortId: Long, flyt: Flyt): Meldekorttilstand? {
-        return meldekorttilstander.singleOrNull { it.meldekortId == meldekortId && it.aktiv }?.tilDomene(flyt)
+    override fun storeMeldekort(meldekort: InnsendtMeldekort): InnsendtMeldekort {
+        innsendteMeldekort.add(meldekort)
+        return meldekort
     }
 
-    override fun storeMeldekorttilstand(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
-        setToInactive()
-        this.meldekorttilstander.add(
-            MeldekorttilstandEntity.fraDomene(meldekorttilstand = meldekorttilstand, aktiv = true)
-        )
-        return meldekorttilstand
-    }
-
-    private fun setToInactive() {
-        val aktivTilstand = meldekorttilstander.single { it.aktiv }
-
-        meldekorttilstander.apply {
-            set(this.indexOf(aktivTilstand), aktivTilstand.copy(aktiv = false))
-        }
+    override fun loadMeldekort(): List<InnsendtMeldekort> {
+        return innsendteMeldekort
     }
 }

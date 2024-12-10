@@ -5,8 +5,9 @@ import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.arena.ArenaClient
 import no.nav.aap.meldekort.arena.ArenaService
-import no.nav.aap.meldekort.arena.MeldekortRepositoryFake
+import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.MeldekortService
+import no.nav.aap.meldekort.arena.MeldekortSkjemaRepositoryPostgres
 import org.slf4j.LoggerFactory
 
 class App
@@ -16,9 +17,7 @@ fun main() {
         LoggerFactory.getLogger(App::class.java).error("Uhåndtert feil.", e)
     }
 
-//    val dataSource = createPostgresDatasource(DbConfig.fromEnv())
-//    val meldekortRepository = MeldekortRepositoryPostgres(dataSource)
-    val meldekortRepository = MeldekortRepositoryFake()
+    val dataSource = createPostgresDataSource(DbConfig.fromEnv())
 
     val arena = ArenaClient(
         meldekortserviceScope = requiredConfigForKey("meldekortservice.scope"),
@@ -27,7 +26,11 @@ fun main() {
         meldekortkontrollUrl = requiredConfigForKey("meldekortkontroll.url"),
     )
 
-    val meldekortService = MeldekortService(meldekortRepository)
+    val meldekortService = MeldekortService(
+        meldekortSkjemaRepository = MeldekortSkjemaRepositoryPostgres(dataSource),
+        meldekortRepository = MeldekortRepositoryPostgres(dataSource),
+    )
+
     startHttpServer(
         port = 8080,
         prometheus = prometheus,

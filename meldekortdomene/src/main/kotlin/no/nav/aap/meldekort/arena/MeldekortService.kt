@@ -1,7 +1,8 @@
 package no.nav.aap.meldekort.arena
 
 class MeldekortService(
-    private val meldekortRepository: MeldekortRepository,
+    private val meldekortSkjemaRepository: MeldekortSkjemaRepository,
+    private val meldekortRepository: MeldekortRepository
 ) {
     private val flyt = Flyt(
         BekreftSvarerÆrlig,
@@ -11,7 +12,7 @@ class MeldekortService(
     )
 
     fun meldekorttilstand(meldekortId: Long): Meldekorttilstand {
-        return meldekortRepository.loadMeldekorttilstand(meldekortId, flyt) ?: Meldekorttilstand(
+        return meldekortSkjemaRepository.loadMeldekorttilstand(meldekortId, flyt) ?: Meldekorttilstand(
             meldekortId = meldekortId,
             meldekortskjema = Meldekortskjema.tomtMeldekort(),
             steg = BekreftSvarerÆrlig,
@@ -19,12 +20,11 @@ class MeldekortService(
     }
 
     fun lagre(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
-        return meldekortRepository.storeMeldekorttilstand(meldekorttilstand)
+        return meldekortSkjemaRepository.storeMeldekorttilstand(meldekorttilstand)
     }
 
     fun lagreOgNeste(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
-        val utfall = meldekorttilstand.steg.nesteSteg(meldekorttilstand.meldekortskjema)
-        val nesteSteg = when (utfall) {
+        val nesteSteg = when (val utfall = meldekorttilstand.nesteSteg()) {
             is InnsendingFeilet -> meldekorttilstand.steg.navn
             is GåTilSteg -> utfall.steg
         }
@@ -33,15 +33,17 @@ class MeldekortService(
             steg = flyt.stegForNavn(nesteSteg),
             meldekortskjema = meldekorttilstand.meldekortskjema
         )
-        return meldekortRepository.storeMeldekorttilstand(nesteTilstand)
+        return meldekortSkjemaRepository.storeMeldekorttilstand(nesteTilstand)
     }
 
     fun stegForNavn(stegNavn: StegNavn): Steg {
         return flyt.stegForNavn(stegNavn)
     }
 
-    fun sendInn(meldekortskjema: Meldekortskjema) {
-
-
+    fun sendInn(meldekortskjema: Meldekortskjema, meldekortId: Long) {
+        //TODO - send inn i arena
+        meldekortRepository.storeMeldekort(
+            meldekortskjema.innsendtMeldekort(meldekortId)
+        )
     }
 }
