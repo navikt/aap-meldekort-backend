@@ -22,7 +22,7 @@ fun NormalOpenAPIRoute.meldekortApi(
             respond(meldeperioder.map { MeldeperiodeDto(it) })
         }
 
-        route("/meldekort/meldekortId}") {
+        route("/meldekort/{meldekortId}") {
             get<Long, MeldekortResponse> { meldekortId ->
                 val nåværendeTilstand = meldekortService.meldekorttilstand(meldekortId)
                 respond(MeldekortResponse(nåværendeTilstand))
