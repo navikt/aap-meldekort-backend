@@ -23,23 +23,26 @@ fun NormalOpenAPIRoute.meldekortApi(
         }
 
         route("/meldekort/{meldekortId}") {
-            get<Long, MeldekortResponse> { meldekortId ->
-                val nåværendeTilstand = meldekortService.meldekorttilstand(meldekortId)
+            class Params(
+                val meldekortId: Long,
+            )
+            get<Params, MeldekortResponse> { params ->
+                val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId)
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 
-            route("/neste-steg").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
+            route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortService, meldekortId))
+                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId))
                     )
                 )
             }
 
-            route("/lagre").post<Long, MeldekortResponse, MeldekortRequest> { meldekortId, meldekortRequest ->
+            route("/lagre").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortService, meldekortId))
+                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId))
                     )
                 )
             }
