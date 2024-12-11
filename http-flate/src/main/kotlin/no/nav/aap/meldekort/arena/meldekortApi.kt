@@ -1,5 +1,7 @@
 package no.nav.aap.meldekort.arena
 
+import com.fasterxml.jackson.annotation.JsonValue
+import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
@@ -24,7 +26,7 @@ fun NormalOpenAPIRoute.meldekortApi(
 
         route("/meldekort/{meldekortId}") {
             class Params(
-                val meldekortId: Long,
+                @JsonValue @PathParam("meldekortId") val meldekortId: Long,
             )
             get<Params, MeldekortResponse> { params ->
                 val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId)
@@ -34,7 +36,12 @@ fun NormalOpenAPIRoute.meldekortApi(
             route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagreOgNeste(meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId))
+                        meldekortService.lagreOgNeste(
+                            meldekortRequest.meldekorttilstand(
+                                meldekortService,
+                                params.meldekortId
+                            )
+                        )
                     )
                 )
             }
@@ -122,7 +129,7 @@ class PeriodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
 ) {
-    constructor(periode: Periode): this(periode.fom, periode.tom)
+    constructor(periode: Periode) : this(periode.fom, periode.tom)
 }
 
 data class MeldekortResponse(
