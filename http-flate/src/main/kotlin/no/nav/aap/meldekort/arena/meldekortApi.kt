@@ -2,7 +2,6 @@ package no.nav.aap.meldekort.arena
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -161,7 +160,7 @@ data class MeldekortResponse(
     constructor(meldekorttilstand: Meldekorttilstand, feil: Feil? = null) : this(
         steg = meldekorttilstand.steg.navn,
         meldekort = MeldekortDto(meldekorttilstand.meldekortskjema),
-        periode = PeriodeDto(LocalDate.now().minusDays(14), LocalDate.now()),
+        periode = PeriodeDto(meldekorttilstand.meldeperiode),
         feil = feil
     )
 }
