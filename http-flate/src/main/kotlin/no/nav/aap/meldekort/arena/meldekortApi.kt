@@ -1,6 +1,8 @@
 package no.nav.aap.meldekort.arena
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -139,7 +141,13 @@ class PeriodeDto(
     constructor(periode: Periode) : this(periode.fom, periode.tom)
 }
 
-interface Feil
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+    property = "type",
+)
+sealed interface Feil
+
 class InnsendingFeil(
     val innsendingFeil: List<ArenaService.InnsendingFeil>
 ) : Feil
