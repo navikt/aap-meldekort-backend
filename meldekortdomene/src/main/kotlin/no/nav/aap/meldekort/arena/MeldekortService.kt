@@ -24,16 +24,19 @@ class MeldekortService(
     }
 
     fun lagreOgNeste(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
-        val nesteSteg = when (val utfall = meldekorttilstand.nesteSteg()) {
-            is InnsendingFeilet -> meldekorttilstand.steg.navn
-            is GåTilSteg -> utfall.steg
+        return try {
+            val nesteTilstand = Meldekorttilstand(
+                meldekortId = meldekorttilstand.meldekortId,
+                steg = flyt.nesteSteg(meldekorttilstand),
+                meldekortskjema = meldekorttilstand.meldekortskjema
+            )
+
+            meldekortSkjemaRepository.storeMeldekorttilstand(nesteTilstand)
+        } catch (e: Exception) {
+            meldekortSkjemaRepository.storeMeldekorttilstand(meldekorttilstand)
+            throw e
         }
-        val nesteTilstand = Meldekorttilstand(
-            meldekortId = meldekorttilstand.meldekortId,
-            steg = flyt.stegForNavn(nesteSteg),
-            meldekortskjema = meldekorttilstand.meldekortskjema
-        )
-        return meldekortSkjemaRepository.storeMeldekorttilstand(nesteTilstand)
+
     }
 
     fun stegForNavn(stegNavn: StegNavn): Steg {

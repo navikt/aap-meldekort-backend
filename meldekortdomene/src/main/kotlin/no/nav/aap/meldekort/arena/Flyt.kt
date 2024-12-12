@@ -3,13 +3,19 @@ package no.nav.aap.meldekort.arena
 class Flyt private constructor(
     private val steg: List<Steg>
 ) {
-
     constructor(vararg steg: Steg) : this(listOf(*steg))
 
     fun stegForNavn(navn: StegNavn): Steg {
         return requireNotNull(steg.find { it.navn == navn }) {
             "steg $navn finnes ikke i flyt $this"
         }
+    }
+
+    fun nesteSteg(meldekorttilstand: Meldekorttilstand): Steg {
+        require(meldekorttilstand.steg in steg) { "steg ${meldekorttilstand.steg} er ikke i flyt" }
+        return stegForNavn(
+            meldekorttilstand.steg.nesteSteg(meldekorttilstand)
+        )
     }
 
     override fun toString(): String {

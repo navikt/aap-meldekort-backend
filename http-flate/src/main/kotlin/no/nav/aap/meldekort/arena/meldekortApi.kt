@@ -11,6 +11,7 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arena.Feilkode.FEIL_VED_INNSENDING_TIL_ARENA
 import java.time.LocalDate
 
 fun NormalOpenAPIRoute.meldekortApi(
@@ -34,16 +35,20 @@ fun NormalOpenAPIRoute.meldekortApi(
             }
 
             route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
-                respond(
+                val response = try {
                     MeldekortResponse(
                         meldekortService.lagreOgNeste(
-                            meldekortRequest.meldekorttilstand(
-                                meldekortService,
-                                params.meldekortId
-                            )
+                            meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId)
                         )
                     )
-                )
+                } catch (e: InnsendingFeiletException) {
+                    MeldekortResponse(
+                        meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId),
+                        feilkode = FEIL_VED_INNSENDING_TIL_ARENA
+                    )
+                }
+
+                respond(response)
             }
 
             route("/lagre").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
@@ -132,14 +137,20 @@ class PeriodeDto(
     constructor(periode: Periode) : this(periode.fom, periode.tom)
 }
 
+enum class Feilkode {
+    FEIL_VED_INNSENDING_TIL_ARENA,
+}
+
 data class MeldekortResponse(
     val steg: StegNavn,
     val periode: PeriodeDto,
     val meldekort: MeldekortDto,
+    val feilkode: Feilkode?
 ) {
-    constructor(meldekorttilstand: Meldekorttilstand) : this(
+    constructor(meldekorttilstand: Meldekorttilstand, feilkode: Feilkode? = null) : this(
         steg = meldekorttilstand.steg.navn,
         meldekort = MeldekortDto(meldekorttilstand.meldekortskjema),
         periode = PeriodeDto(LocalDate.now().minusDays(14), LocalDate.now()),
+        feilkode = feilkode
     )
 }
