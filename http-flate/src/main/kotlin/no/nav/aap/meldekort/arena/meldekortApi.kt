@@ -11,7 +11,6 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.arena.Feilkode.FEIL_VED_INNSENDING_TIL_ARENA
 import java.time.LocalDate
 
 fun NormalOpenAPIRoute.meldekortApi(
@@ -30,21 +29,28 @@ fun NormalOpenAPIRoute.meldekortApi(
                 @JsonValue @PathParam("meldekortId") val meldekortId: Long,
             )
             get<Params, MeldekortResponse> { params ->
-                val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId)
+                val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId, innloggetBruker())
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 
             route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
+                val meldekorttilstand = meldekortService.meldekorttilstandMedSkjema(
+                    meldekortId = params.meldekortId,
+                    meldekortskjema = meldekortRequest.meldekort.tilDomene(),
+                    stegNavn = meldekortRequest.nåværendeSteg
+                )
+
                 val response = try {
                     MeldekortResponse(
                         meldekortService.lagreOgNeste(
-                            meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId)
+                            meldekorttilstand = meldekorttilstand,
+                            innloggetBruker = innloggetBruker()
                         )
                     )
                 } catch (e: InnsendingFeiletException) {
                     MeldekortResponse(
-                        meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId),
-                        feilkode = FEIL_VED_INNSENDING_TIL_ARENA
+                        meldekorttilstand = meldekorttilstand,
+                        feil = InnsendingFeil(e.innsendingFeil)
                     )
                 }
 
@@ -54,7 +60,11 @@ fun NormalOpenAPIRoute.meldekortApi(
             route("/lagre").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagre(meldekortRequest.meldekorttilstand(meldekortService, params.meldekortId))
+                        meldekortService.lagre(meldekortService.meldekorttilstandMedSkjema(
+                            meldekortId = params.meldekortId,
+                            meldekortskjema = meldekortRequest.meldekort.tilDomene(),
+                            stegNavn = meldekortRequest.nåværendeSteg
+                        ))
                     )
                 )
             }
@@ -97,7 +107,7 @@ class MeldeperiodeDto(
 class MeldekortDto(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
-    val timerArbeidet: List<Int?>,
+    val timerArbeidet: List<Double?>,
     val stemmerOpplysningene: Boolean?
 ) {
     constructor(meldekortskjema: Meldekortskjema) : this(
@@ -120,15 +130,7 @@ class MeldekortDto(
 data class MeldekortRequest(
     val nåværendeSteg: StegNavn,
     val meldekort: MeldekortDto
-) {
-    fun meldekorttilstand(meldekortService: MeldekortService, meldekortId: Long): Meldekorttilstand {
-        return Meldekorttilstand(
-            meldekortId = meldekortId,
-            steg = meldekortService.stegForNavn(nåværendeSteg),
-            meldekortskjema = meldekort.tilDomene(),
-        )
-    }
-}
+)
 
 class PeriodeDto(
     val fom: LocalDate,
@@ -137,20 +139,21 @@ class PeriodeDto(
     constructor(periode: Periode) : this(periode.fom, periode.tom)
 }
 
-enum class Feilkode {
-    FEIL_VED_INNSENDING_TIL_ARENA,
-}
+interface Feil
+class InnsendingFeil(
+    val innsendingFeil: List<ArenaService.InnsendingFeil>
+) : Feil
 
 data class MeldekortResponse(
     val steg: StegNavn,
     val periode: PeriodeDto,
     val meldekort: MeldekortDto,
-    val feilkode: Feilkode?
+    val feil: Feil?
 ) {
-    constructor(meldekorttilstand: Meldekorttilstand, feilkode: Feilkode? = null) : this(
+    constructor(meldekorttilstand: Meldekorttilstand, feil: Feil? = null) : this(
         steg = meldekorttilstand.steg.navn,
         meldekort = MeldekortDto(meldekorttilstand.meldekortskjema),
         periode = PeriodeDto(LocalDate.now().minusDays(14), LocalDate.now()),
-        feilkode = feilkode
+        feil = feil
     )
 }

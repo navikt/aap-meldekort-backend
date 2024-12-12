@@ -115,30 +115,30 @@ interface Arena {
     )
 
     data class MeldekortkontrollRequest(
-        var meldekortId: Long = 0,
-        var fnr: String,
-        var personId: Long = 0,
-        var kilde: String,
-        var kortType: String,
+        val meldekortId: Long,
+        val fnr: String,
+        val personId: Long,
+        val kortType: String,
         val meldedato: LocalDate,
         val periodeFra: LocalDate,
         val periodeTil: LocalDate,
-        var meldegruppe: String,
-        var annetFravaer: Boolean,
-        var arbeidet: Boolean,
-        var arbeidssoker: Boolean,
-        var kurs: Boolean,
-        var syk: Boolean,
-        var begrunnelse: String?,
-        var meldekortdager: List<MeldekortkontrollFravaer>
+        val meldegruppe: String,
+        val begrunnelse: String?,
+        val meldekortdager: List<MeldekortkontrollFravaer>,
+        val arbeidet: Boolean,
+        val kilde: String,
+        val arbeidssoker: Boolean = false,
+        val annetFravaer: Boolean = false,
+        val kurs: Boolean = false,
+        val syk: Boolean = false,
     )
 
     data class MeldekortkontrollFravaer(
         val dato: LocalDate,
-        val syk: Boolean,
-        val kurs: Boolean,
-        val annetFravaer: Boolean,
-        val arbeidTimer: Double
+        val arbeidTimer: Double,
+        val syk: Boolean = false,
+        val kurs: Boolean = false,
+        val annetFravaer: Boolean = false,
     )
 
     data class MeldekortkontrollResponse(

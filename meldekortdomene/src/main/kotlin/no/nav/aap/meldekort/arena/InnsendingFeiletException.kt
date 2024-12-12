@@ -1,3 +1,5 @@
 package no.nav.aap.meldekort.arena
 
-class InnsendingFeiletException: Exception("Innsending mot arena feilet")
+class InnsendingFeiletException(
+    val innsendingFeil: List<ArenaService.InnsendingFeil>
+): Exception()

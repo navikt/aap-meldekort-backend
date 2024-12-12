@@ -85,47 +85,39 @@ class ArenaService(
         return arena.korrigertMeldekort(innloggetBruker, meldekortId)
     }
 
-    fun sendInn(innloggetBruker: InnloggetBruker, rapporteringsperiode: Any): Arena.MeldekortkontrollResponse {
-        val meldekortdetaljer = arena.meldekortdetaljer(innloggetBruker, TODO("rapporteringsperiode"))
+    fun sendInn(innsendtMeldekort: InnsendtMeldekort, innloggetBruker: InnloggetBruker): InnsendingResponse {
+        val meldekortdetaljer = arena.meldekortdetaljer(innloggetBruker, innsendtMeldekort.meldekortId)
+        check(meldekortdetaljer.fodselsnr == innloggetBruker.ident)
 
-//        // Henter meldekortdetaljer og meldekortservice sjekker at ident stemmer med FNR i dette meldekortet
-//        // Mapper meldekortdager
-//        val meldekortdager: List<MeldekortkontrollFravaer> = rapporteringsperiode.dager.map { dag ->
-//            MeldekortkontrollFravaer(
-//                dag.dato,
-//                dag.finnesAktivitetMedType(Aktivitet.AktivitetsType.Syk),
-//                dag.finnesAktivitetMedType(Aktivitet.AktivitetsType.Utdanning),
-//                dag.finnesAktivitetMedType(Aktivitet.AktivitetsType.Fravaer),
-//                dag.hentArbeidstimer()
-//            )
-//        }
-//
-//        // Oppretter MeldekortkontrollRequest
-//        val meldekortkontrollRequest = MeldekortkontrollRequest(
-//            meldekortId = meldekortdetaljer.meldekortId,
-//            fnr = meldekortdetaljer.fodselsnr,
-//            personId = meldekortdetaljer.personId,
-//            kilde = "DP",
-//            kortType = meldekortdetaljer.kortType,
-//            meldedato = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK" && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
-//            periodeFra = rapporteringsperiode.periode.fraOgMed,
-//            periodeTil = rapporteringsperiode.periode.tilOgMed,
-//            meldegruppe = meldekortdetaljer.meldegruppe,
-//            annetFravaer = rapporteringsperiode.finnesDagMedAktivitetsType(Aktivitet.AktivitetsType.Fravaer),
-//            arbeidet = rapporteringsperiode.finnesDagMedAktivitetsType(Aktivitet.AktivitetsType.Arbeid),
-//            arbeidssoker = rapporteringsperiode.registrertArbeidssoker!!,
-//            kurs = rapporteringsperiode.finnesDagMedAktivitetsType(Aktivitet.AktivitetsType.Utdanning),
-//            syk = rapporteringsperiode.finnesDagMedAktivitetsType(Aktivitet.AktivitetsType.Syk),
-//            begrunnelse = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK") rapporteringsperiode.begrunnelseEndring else null,
-//            meldekortdager = meldekortdager
-//        )
-//
-        val meldekortkontrollResponse = arena.sendInn(innloggetBruker, TODO())
+        val meldekortdager = innsendtMeldekort.timerArbeidet.mapIndexed { offset, timerArbeidet ->
+            Arena.MeldekortkontrollFravaer(
+                dato = innsendtMeldekort.meldeperiode.fom.plusDays(offset.toLong()),
+                arbeidTimer = timerArbeidet ?: 0.0,
+            )
+        }
 
-        val innsendingResponse = InnsendingResponse(
-            meldekortkontrollResponse.meldekortId,
-            if (meldekortkontrollResponse.kontrollStatus in arrayOf("OK", "OKOPP")) "OK" else "FEIL",
-            meldekortkontrollResponse.feilListe.map { feil -> InnsendingFeil(feil.kode, feil.params) }
+        // Oppretter MeldekortkontrollRequest
+        val meldekortkontrollRequest = Arena.MeldekortkontrollRequest(
+            meldekortId = innsendtMeldekort.meldekortId,
+            fnr = meldekortdetaljer.fodselsnr,
+            personId = meldekortdetaljer.personId,
+            kilde = AAP_KODE,
+            kortType = meldekortdetaljer.kortType,
+            meldedato = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK" && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
+            periodeFra = innsendtMeldekort.meldeperiode.fom,
+            periodeTil = innsendtMeldekort.meldeperiode.tom,
+            meldegruppe = meldekortdetaljer.meldegruppe,
+            arbeidet = innsendtMeldekort.harDuJobbet,
+            begrunnelse = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK") TODO() else null,
+            meldekortdager = meldekortdager
+        )
+
+        val meldekortkontrollResponse = arena.sendInn(innloggetBruker, meldekortkontrollRequest)
+
+        return InnsendingResponse(
+            id = meldekortkontrollResponse.meldekortId,
+            status = if (meldekortkontrollResponse.kontrollStatus in arrayOf("OK", "OKOPP")) "OK" else "FEIL",
+            feil = meldekortkontrollResponse.feilListe.map { feil -> InnsendingFeil(feil.kode, feil.params) }
         )
     }
 

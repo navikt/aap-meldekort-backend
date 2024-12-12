@@ -16,6 +16,7 @@ fun main() {
     val meldekortService = MeldekortService(
         meldekortSkjemaRepository = MeldekortSkjemaRepositoryPostgres(dataSource),
         meldekortRepository = MeldekortRepositoryPostgres(dataSource),
+        ArenaService(FakeArena),
     )
 
     startHttpServer(

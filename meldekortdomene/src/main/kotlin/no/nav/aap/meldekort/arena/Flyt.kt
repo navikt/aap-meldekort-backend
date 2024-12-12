@@ -1,5 +1,7 @@
 package no.nav.aap.meldekort.arena
 
+import no.nav.aap.meldekort.InnloggetBruker
+
 class Flyt private constructor(
     private val steg: List<Steg>
 ) {
@@ -11,10 +13,10 @@ class Flyt private constructor(
         }
     }
 
-    fun nesteSteg(meldekorttilstand: Meldekorttilstand): Steg {
+    fun nesteSteg(meldekorttilstand: Meldekorttilstand, innloggetBruker: InnloggetBruker): Steg {
         require(meldekorttilstand.steg in steg) { "steg ${meldekorttilstand.steg} er ikke i flyt" }
         return stegForNavn(
-            meldekorttilstand.steg.nesteSteg(meldekorttilstand)
+            meldekorttilstand.steg.nesteSteg(meldekorttilstand, innloggetBruker)
         )
     }
 
