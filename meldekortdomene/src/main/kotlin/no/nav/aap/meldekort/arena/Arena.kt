@@ -2,6 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
 import java.time.LocalDate
+import java.util.HashMap
 
 interface Arena {
     fun meldegrupper(innloggetBruker: InnloggetBruker): List<Meldegruppe>
@@ -51,7 +52,7 @@ interface Arena {
          *    En type meldekort som kun kan opprettes/intieres av bruker på nav.no, og som alltid
          *    vil være en korrigering av et eksisterende innlevert kort.
          */
-        val kortType: String,
+        val kortType: KortType,
         val meldeperiode: String,
         val fraDato: LocalDate,
         val tilDato: LocalDate,
@@ -73,7 +74,7 @@ interface Arena {
          * VENTE Kortet feilet i beregning fordi forrige kort mangler. HØY Venter på behandling av tidligere meldekort
          * SLETT Kortet er slettet <Ingen> Vises ikke
          */
-        val beregningstatus: String,
+        val beregningstatus: KortStatus,
         val forskudd: Boolean,
         val mottattDato: LocalDate? = null,
         val bruttoBelop: Float = 0F
@@ -152,4 +153,55 @@ interface Arena {
         var kode: String,
         var params: List<String>? = null
     )
+
+    enum class KortStatus {
+        OPPRE,
+        SENDT,
+        SLETT,
+        REGIS,
+        FMOPP,
+        FUOPP,
+        KLAR,
+        KAND,
+        IKKE,
+        OVERM,
+        NYKTR,
+        FERDI,
+        FEIL,
+        VENTE,
+        OPPF,
+        UBEHA  // OBS: "Fiktiv" status som benyttes for meldekort som er klare for innlesing til Arena
+    }
+
+    enum class KortType(val code: String) {
+        ORDINAER("01"),
+        ERSTATNING("03"),
+        RETUR("04"),
+        ELEKTRONISK("05"),
+        AAP("06"),
+        ORDINAER_MANUELL("07"),
+        MASKINELT_OPPDATERT("08"),
+        MANUELL_ARENA("09"),
+        KORRIGERT_ELEKTRONISK("10");
+
+        override fun toString(): String {
+            return code
+        }
+
+        companion object {
+            private var values: MutableMap<String, KortType>? = null
+
+            init {
+                values = HashMap()
+                for (kortType in values()) {
+                    values!![kortType.code] = kortType
+                }
+            }
+
+            fun getByCode(code: String): KortType {
+                val kortType = values!![code]
+                return kortType ?: throw IllegalArgumentException("Ugyldig kode [ $code ]")
+            }
+        }
+    }
 }

@@ -1,6 +1,13 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arena.Arena.*
+import no.nav.aap.meldekort.arena.Arena.KortStatus.*
+import no.nav.aap.meldekort.arena.Arena.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.meldekort.arena.Arena.KortType.MANUELL_ARENA
+import no.nav.aap.meldekort.arena.Meldeperiode.Status.ANNET
+import no.nav.aap.meldekort.arena.Meldeperiode.Status.ETTERREGISTRERING
+import no.nav.aap.meldekort.arena.Meldeperiode.Status.ORDINAER
 import java.time.LocalDate
 import java.util.*
 
@@ -15,28 +22,31 @@ class ArenaService(
 
         return meldekortListe
             .filter { meldekort ->
-                meldekort.hoyesteMeldegruppe == AAP_KODE && meldekort.beregningstatus in arrayOf("OPPRE", "SENDT")
-            }
-            .map { meldekort ->
+                meldekort.hoyesteMeldegruppe == AAP_KODE && meldekort.beregningstatus in arrayOf(OPPRE, SENDT)
+            }.map { meldekort ->
                 val kanSendesFra = meldekort.tilDato.minusDays(1)
+                val kanSendes = !LocalDate.now().isBefore(kanSendesFra)
                 Meldeperiode(
                     meldekortId = meldekort.meldekortId,
                     periode = Periode(meldekort.fraDato, meldekort.tilDato),
                     kanSendesFra = kanSendesFra,
-                    kanSendes = !LocalDate.now().isBefore(kanSendesFra),
+                    kanSendes = kanSendes,
                     kanEndres = kanEndres(meldekort, meldekortListe),
-                    status = Meldeperiode.Status.TIL_UTFYLLING,
+                    status = when {
+                        meldekort.kortType == MANUELL_ARENA && meldekort.beregningstatus == OPPRE && kanSendes -> ETTERREGISTRERING
+                        meldekort.kortType != MANUELL_ARENA -> ORDINAER
+                        else -> ANNET
+                    }
                 )
             }
     }
-
 
     /* Hva betyr egentlig dette her? Er denne relevant? */
     fun harMeldeplikt(innloggetBruker: InnloggetBruker): Boolean {
         return arena.meldegrupper(innloggetBruker).any { it.meldegruppeKode == AAP_KODE }
     }
 
-    fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
+    fun person(innloggetBruker: InnloggetBruker): Person? {
         return arena.person(innloggetBruker)
     }
 
@@ -90,14 +100,14 @@ class ArenaService(
         check(meldekortdetaljer.fodselsnr == innloggetBruker.ident)
 
         val meldekortdager = innsendtMeldekort.timerArbeidet.mapIndexed { offset, timerArbeidet ->
-            Arena.MeldekortkontrollFravaer(
+            MeldekortkontrollFravaer(
                 dato = innsendtMeldekort.meldeperiode.fom.plusDays(offset.toLong()),
                 arbeidTimer = timerArbeidet ?: 0.0,
             )
         }
 
         // Oppretter MeldekortkontrollRequest
-        val meldekortkontrollRequest = Arena.MeldekortkontrollRequest(
+        val meldekortkontrollRequest = MeldekortkontrollRequest(
             meldekortId = innsendtMeldekort.meldekortId,
             fnr = meldekortdetaljer.fodselsnr,
             personId = meldekortdetaljer.personId,
@@ -134,14 +144,14 @@ class ArenaService(
 
 
 
-    private fun kanEndres(meldekort: Arena.Meldekort, meldekortListe: List<Arena.Meldekort>): Boolean {
-        return if (meldekort.kortType == "10" || meldekort.beregningstatus == "UBEHA") {
+    private fun kanEndres(meldekort: Meldekort, meldekortListe: List<Meldekort>): Boolean {
+        return if (meldekort.kortType == KORRIGERT_ELEKTRONISK || meldekort.beregningstatus == UBEHA) {
             false
         } else {
             meldekortListe.none { mk ->
                 meldekort.meldekortId != mk.meldekortId &&
                         meldekort.meldeperiode == mk.meldeperiode &&
-                        mk.kortType == "10"
+                        mk.kortType == KORRIGERT_ELEKTRONISK
             }
         }
     }
@@ -173,7 +183,7 @@ class ArenaService(
         }
     }
 
-    private fun mapAktivitetsdager(fom: LocalDate, meldekortdetaljer: Arena.Meldekortdetaljer): List<Dag> {
+    private fun mapAktivitetsdager(fom: LocalDate, meldekortdetaljer: Meldekortdetaljer): List<Dag> {
         val aktivitetsdager = List(14) { index ->
             Dag(fom.plusDays(index.toLong()), mutableListOf(), index)
         }

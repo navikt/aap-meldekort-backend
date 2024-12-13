@@ -16,7 +16,8 @@ class Meldeperiode(
     val status: Status,
 ) {
     enum class Status {
-        TIL_UTFYLLING,
-        INNSENDT,
+        ORDINAER,
+        ETTERREGISTRERING,
+        ANNET,
     }
 }

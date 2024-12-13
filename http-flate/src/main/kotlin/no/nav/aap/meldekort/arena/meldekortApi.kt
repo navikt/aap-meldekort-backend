@@ -30,7 +30,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                 @JsonValue @PathParam("meldekortId") val meldekortId: Long,
             )
             get<Params, MeldekortResponse> { params ->
-                val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId, innloggetBruker())
+                val nåværendeTilstand = meldekortService.hentEllerOpprettMeldekorttilstand(params.meldekortId, innloggetBruker())
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 

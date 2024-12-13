@@ -14,7 +14,7 @@ class MeldekortService(
         Kvittering,
     )
 
-    fun meldekorttilstand(meldekortId: Long, innloggetBruker: InnloggetBruker): Meldekorttilstand {
+    fun hentEllerOpprettMeldekorttilstand(meldekortId: Long, innloggetBruker: InnloggetBruker): Meldekorttilstand {
         return meldekortSkjemaRepository.loadMeldekorttilstand(meldekortId, flyt)
             ?: meldekortSkjemaRepository.storeMeldekorttilstand(Meldekorttilstand(
                 meldekortId = meldekortId,
