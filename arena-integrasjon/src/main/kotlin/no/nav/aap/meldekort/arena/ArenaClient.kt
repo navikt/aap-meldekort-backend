@@ -19,7 +19,7 @@ class ArenaClient(
     meldekortserviceScope: String,
     private val meldekortkontrollUrl: String,
     meldekortkontrollScope: String,
-): Arena {
+) : Arena {
     private val meldekortserviceClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = meldekortserviceScope),
         tokenProvider = OnBehalfOfTokenProvider()
@@ -38,7 +38,12 @@ class ArenaClient(
     }
 
     override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): Arena.Person {
-        return requireNotNull(getMeldekortservice("/v2/historiskemeldekort?antallMeldeperioder=$antallMeldeperioder", innloggetBruker))
+        return requireNotNull(
+            getMeldekortservice(
+                "/v2/historiskemeldekort?antallMeldeperioder=$antallMeldeperioder",
+                innloggetBruker
+            )
+        )
     }
 
     override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): Arena.Meldekortdetaljer {
@@ -51,20 +56,37 @@ class ArenaClient(
         return requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=$meldekortId", innloggetBruker))
     }
 
-    override fun sendInn(innloggetBruker: InnloggetBruker, request: Arena.MeldekortkontrollRequest): Arena.MeldekortkontrollResponse {
-        return requireNotNull(meldekortkontrollClient.post(URI("$meldekortkontrollUrl/api/v1/kontroll"), PostRequest(
-            body = request
-        )))
+    override fun sendInn(
+        innloggetBruker: InnloggetBruker,
+        request: Arena.MeldekortkontrollRequest
+    ): Arena.MeldekortkontrollResponse {
+        return requireNotNull(
+            meldekortkontrollClient.post(
+                URI("$meldekortkontrollUrl/api/v1/kontroll"), PostRequest(
+                    body = request,
+                    currentToken = OidcToken(innloggetBruker.token),
+                    additionalHeaders = listOf(
+                        Header("accept", "application/json"),
+                        Header("x-request-id", MDC.get("callId") ?: "aap-meldekort-${UUID.randomUUID()}"),
+                    )
+                )
+            )
+        )
     }
 
-    private inline fun <reified Response> getMeldekortservice(path: String, innloggetBruker: InnloggetBruker): Response? {
+    private inline fun <reified Response> getMeldekortservice(
+        path: String,
+        innloggetBruker: InnloggetBruker
+    ): Response? {
         return meldekortserviceClient.get(URI(meldekortserviceUrl + path), getRequest(innloggetBruker))
     }
+
     private fun getRequest(innloggetBruker: InnloggetBruker): GetRequest {
         return GetRequest(
             currentToken = OidcToken(innloggetBruker.token),
             additionalHeaders = listOf(
                 Header("ident", innloggetBruker.ident),
+                Header("accept", "application/json"),
                 Header("x-request-id", MDC.get("callId") ?: "aap-meldekort-${UUID.randomUUID()}")
             ),
         )
