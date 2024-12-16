@@ -93,22 +93,40 @@ private fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
 class MeldeperiodeDto(
     val meldekortId: Long,
     val periode: PeriodeDto,
-    val status: Status,
+    val type: MeldeperiodeTypeDto,
+    val klarForInnsending: Boolean,
+    val kanEndres: Boolean,
 ) {
-    enum class Status {
-        KLAR_FOR_INNSENDING,
-    }
-
     constructor(meldeperiode: Meldeperiode) : this(
         meldekortId = meldeperiode.meldekortId,
         periode = PeriodeDto(meldeperiode.periode),
-        status = Status.KLAR_FOR_INNSENDING
+        type = MeldeperiodeTypeDto.fraDomene(meldeperiode.type),
+        klarForInnsending = meldeperiode.kanSendes,
+        kanEndres = meldeperiode.kanEndres,
     )
+
+    enum class MeldeperiodeTypeDto {
+        ORDINÆRT,
+        ETTERREGISTRERT;
+
+        companion object {
+            fun fraDomene(type: Meldeperiode.Type): MeldeperiodeTypeDto {
+                return when(type) {
+                    Meldeperiode.Type.ORDINÆRT -> ORDINÆRT
+                    Meldeperiode.Type.ETTERREGISTRERT -> ETTERREGISTRERT
+                }
+            }
+        }
+
+    }
+
 }
 
 
+
+
 @Suppress("unused")
-class MeldekortDto(
+class MeldekortSkjemaDto(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
     val timerArbeidet: List<TimerArbeidetDto>,
@@ -154,7 +172,7 @@ data class TimerArbeidetDto(
 
 data class MeldekortRequest(
     val nåværendeSteg: StegNavn,
-    val meldekort: MeldekortDto
+    val meldekort: MeldekortSkjemaDto
 )
 
 class PeriodeDto(
@@ -178,12 +196,12 @@ class InnsendingFeil(
 data class MeldekortResponse(
     val steg: StegNavn,
     val periode: PeriodeDto,
-    val meldekort: MeldekortDto,
+    val meldekort: MeldekortSkjemaDto,
     val feil: Feil?
 ) {
     constructor(meldekorttilstand: Meldekorttilstand, feil: Feil? = null) : this(
         steg = meldekorttilstand.steg.navn,
-        meldekort = MeldekortDto(meldekorttilstand.meldekortskjema),
+        meldekort = MeldekortSkjemaDto(meldekorttilstand.meldekortskjema),
         periode = PeriodeDto(meldekorttilstand.meldeperiode),
         feil = feil
     )
