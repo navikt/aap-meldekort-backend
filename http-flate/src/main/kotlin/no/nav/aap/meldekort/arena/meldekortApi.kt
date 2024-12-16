@@ -72,11 +72,14 @@ fun NormalOpenAPIRoute.meldekortApi(
         }
     }
 
-    route("/test/proxy/meldegrupper").get<Unit, Any> { call ->
+    route("/test/proxy/meldegrupper").get<Unit, Any> {
         respond(arena.meldegrupper(innloggetBruker()))
     }
-    route("/test/proxy/meldekort").get<Unit, Any> { call ->
+    route("/test/proxy/meldekort").get<Unit, Any> {
         respond(arena.person(innloggetBruker()) ?: "null")
+    }
+    route("/test/proxy/historiskemeldekort").get<Unit, Any> {
+        respond(arena.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
     }
 }
 
