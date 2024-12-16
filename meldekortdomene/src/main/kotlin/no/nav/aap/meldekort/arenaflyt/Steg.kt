@@ -1,7 +1,7 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.arena.StegNavn.*
+import no.nav.aap.meldekort.arenaflyt.StegNavn.*
 
 enum class StegNavn {
     BEKREFT_SVARER_ÆRLIG,

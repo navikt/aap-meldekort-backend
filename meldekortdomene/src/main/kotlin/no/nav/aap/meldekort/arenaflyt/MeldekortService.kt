@@ -1,6 +1,7 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arena.ArenaService
 
 class MeldekortService(
     private val meldekortSkjemaRepository: MeldekortSkjemaRepository,
@@ -21,12 +22,14 @@ class MeldekortService(
 
         val meldeperiode = arenaService.meldeperioder(innloggetBruker).single { it.meldekortId == meldekortId }.periode
 
-        return meldekortSkjemaRepository.storeMeldekorttilstand(Meldekorttilstand(
+        return meldekortSkjemaRepository.storeMeldekorttilstand(
+            Meldekorttilstand(
                 meldekortId = meldekortId,
                 meldekortskjema = Meldekortskjema.tomtMeldekortskjema(meldeperiode),
                 steg = BekreftSvarerÆrligSteg,
                 meldeperiode = meldeperiode
-            ))
+            )
+        )
     }
 
     fun lagre(meldekorttilstand: Meldekorttilstand): Meldekorttilstand {
@@ -68,9 +71,7 @@ class MeldekortService(
 
     fun sendInn(meldekorttilstand: Meldekorttilstand, innloggetBruker: InnloggetBruker)  {
         val innsendtMeldekort = meldekorttilstand.innsendtMeldekort()
-
-        val innsendingResponse = arenaService.sendInn(innsendtMeldekort, innloggetBruker)
-        if (innsendingResponse.feil.isNotEmpty()) throw InnsendingFeiletException(innsendingResponse.feil)
+        arenaService.sendInn(innsendtMeldekort, innloggetBruker)
         meldekortRepository.storeMeldekort(innsendtMeldekort)
     }
 }

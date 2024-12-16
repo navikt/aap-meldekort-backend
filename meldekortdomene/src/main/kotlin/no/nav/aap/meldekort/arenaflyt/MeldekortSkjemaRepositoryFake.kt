@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 /* TODO: Flytt til test-mappen når serveren ikke lenger bruker fake versjonen. */
 class MeldekortSkjemaRepositoryFake: MeldekortSkjemaRepository {

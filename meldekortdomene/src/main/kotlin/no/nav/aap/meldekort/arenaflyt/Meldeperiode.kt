@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 import java.time.LocalDate
 

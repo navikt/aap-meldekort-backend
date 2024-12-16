@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 interface MeldekortSkjemaRepository {
     fun loadMeldekorttilstand(meldekortId: Long, flyt: Flyt): Meldekorttilstand?

@@ -17,9 +17,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangExceptio
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
-import no.nav.aap.meldekort.arena.Arena
+import no.nav.aap.meldekort.arena.ArenaClient
 import no.nav.aap.meldekort.arena.ArenaService
-import no.nav.aap.meldekort.arena.MeldekortService
+import no.nav.aap.meldekort.arenaflyt.MeldekortService
 import no.nav.aap.meldekort.arena.meldekortApi
 import org.slf4j.LoggerFactory
 
@@ -29,7 +29,7 @@ fun startHttpServer(
     port: Int,
     prometheus: PrometheusMeterRegistry,
     meldekortService: MeldekortService,
-    arena: Arena,
+    arenaClient: ArenaClient,
     arenaService: ArenaService,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
@@ -87,7 +87,7 @@ fun startHttpServer(
                 apiRouting {
                     meldekortApi(
                         meldekortService = meldekortService,
-                        arena = arena,
+                        arenaClient = arenaClient,
                         arenaService = arenaService,
                     )
                 }

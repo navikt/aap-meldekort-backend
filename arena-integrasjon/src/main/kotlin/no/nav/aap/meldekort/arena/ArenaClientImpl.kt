@@ -15,12 +15,12 @@ import java.net.URI
 import java.time.LocalDate
 import java.util.*
 
-class ArenaClient(
+class ArenaClientImpl(
     private val meldekortserviceUrl: String,
     meldekortserviceScope: String,
     private val meldekortkontrollUrl: String,
     meldekortkontrollScope: String,
-) : Arena {
+) : ArenaClient {
 
     private val meldekortserviceClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = meldekortserviceScope),
@@ -31,17 +31,17 @@ class ArenaClient(
         tokenProvider = OnBehalfOfTokenProvider()
     )
 
-    override fun meldegrupper(innloggetBruker: InnloggetBruker): List<Arena.Meldegruppe> {
+    override fun meldegrupper(innloggetBruker: InnloggetBruker): List<ArenaMeldegruppe> {
         return requireNotNull(getMeldekortservice<List<MeldegruppeDto>>("/v2/meldegrupper", innloggetBruker))
             .map { it.tilDomene() }
     }
 
-    override fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
+    override fun person(innloggetBruker: InnloggetBruker): ArenaPerson? {
         return getMeldekortservice<PersonDto?>("/v2/meldekort", innloggetBruker)
             ?.tilDomene(historisk = false)
     }
 
-    override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): Arena.Person {
+    override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): ArenaPerson {
         return requireNotNull(
             getMeldekortservice<PersonDto>(
                 "/v2/historiskemeldekort?antallMeldeperioder=$antallMeldeperioder",
@@ -51,7 +51,7 @@ class ArenaClient(
             .tilDomene(historisk = true)
     }
 
-    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): Arena.Meldekortdetaljer {
+    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): ArenaMeldekortdetaljer {
         return requireNotNull(
             getMeldekortservice<MeldekortdetaljerDto>(
                 "/v2/meldekortdetaljer?meldekortId=$meldekortId",
@@ -67,8 +67,8 @@ class ArenaClient(
 
     override fun sendInn(
         innloggetBruker: InnloggetBruker,
-        request: Arena.MeldekortkontrollRequest
-    ): Arena.MeldekortkontrollResponse {
+        request: ArenaMeldekortkontrollRequest
+    ): MeldekortkontrollResponse {
         return requireNotNull(
             meldekortkontrollClient.post<_, MeldekortkontrollResponseDto>(
                 URI("$meldekortkontrollUrl/api/v1/kontroll"), PostRequest(
@@ -111,7 +111,7 @@ class ArenaClient(
         val begrunnelse: String,
         val styrendeVedtakId: Long? = null
     ) {
-        fun tilDomene() = Arena.Meldegruppe(
+        fun tilDomene() = ArenaMeldegruppe(
             fodselsnr = fodselsnr,
             meldegruppeKode = meldegruppeKode,
             datoFra = datoFra,
@@ -131,13 +131,13 @@ class ArenaClient(
         val meldeform: String,
         val meldekortListe: List<MeldekortDto>? = null,
     ) {
-        fun tilDomene(historisk: Boolean) = Arena.Person(
+        fun tilDomene(historisk: Boolean) = ArenaPerson(
             personId = personId,
             etternavn = etternavn,
             fornavn = fornavn,
             maalformkode = maalformkode,
             meldeform = meldeform,
-            meldekortListe = meldekortListe?.map { it.tilDomene(historisk) },
+            arenaMeldekortListe = meldekortListe.orEmpty().map { it.tilDomene(historisk) },
         )
     }
 
@@ -155,14 +155,14 @@ class ArenaClient(
         val mottattDato: LocalDate? = null,
         val bruttoBelop: Float = 0F
     ) {
-        fun tilDomene(historisk: Boolean) = Arena.Meldekort(
+        fun tilDomene(historisk: Boolean) = ArenaMeldekort(
             meldekortId = meldekortId,
-            kortType = Arena.KortType.getByCode(kortType),
+            kortType = ArenaClient.KortType.getByCode(kortType),
             meldeperiode = meldeperiode,
             fraDato = fraDato,
             tilDato = tilDato,
             hoyesteMeldegruppe = hoyesteMeldegruppe,
-            beregningstatus = Arena.KortStatus.valueOf(beregningstatus),
+            beregningstatus = ArenaMeldekort.KortStatus.valueOf(beregningstatus),
             forskudd = forskudd,
             mottattDato = mottattDato,
             bruttoBelop = bruttoBelop,
@@ -184,7 +184,7 @@ class ArenaClient(
         val sporsmal: SporsmalDto? = null,
         val begrunnelse: String? = ""
     ) {
-        fun tilDomene() = Arena.Meldekortdetaljer(
+        fun tilDomene() = ArenaMeldekortdetaljer(
             id = id,
             personId = personId,
             fodselsnr = fodselsnr,
@@ -192,7 +192,7 @@ class ArenaClient(
             meldeperiode = meldeperiode,
             meldegruppe = meldegruppe,
             arkivnokkel = arkivnokkel,
-            kortType = Arena.KortType.getByCode(kortType),
+            kortType = ArenaClient.KortType.getByCode(kortType),
             meldeDato = meldeDato,
             lestDato = lestDato,
             sporsmal = sporsmal?.tilDomene(),
@@ -210,7 +210,7 @@ class ArenaClient(
         val signatur: Boolean? = null,
         val meldekortDager: List<MeldekortDagDto>? = null
     ) {
-        fun tilDomene() = Arena.Sporsmal(
+        fun tilDomene() = ArenaMeldekortdetaljer.Sporsmal(
             arbeidssoker = arbeidssoker,
             arbeidet = arbeidet,
             syk = syk,
@@ -230,7 +230,7 @@ class ArenaClient(
         val kurs: Boolean? = null,
         val meldegruppe: String? = null
     ) {
-        fun tilDomene() = Arena.MeldekortDag(
+        fun tilDomene() = ArenaMeldekortdetaljer.MeldekortDag(
             dag = dag,
             arbeidetTimerSum = arbeidetTimerSum,
             syk = syk,
@@ -258,7 +258,7 @@ class ArenaClient(
         val kurs: Boolean = false,
         val syk: Boolean = false,
     ) {
-        constructor(domene: Arena.MeldekortkontrollRequest) : this(
+        constructor(domene: ArenaMeldekortkontrollRequest) : this(
             meldekortId = domene.meldekortId,
             fnr = domene.fnr,
             personId = domene.personId,
@@ -285,7 +285,7 @@ class ArenaClient(
         val kurs: Boolean = false,
         val annetFravaer: Boolean = false,
     ) {
-        constructor(domene: Arena.MeldekortkontrollFravaer) : this(
+        constructor(domene: ArenaMeldekortkontrollRequest.MeldekortkontrollFravaer) : this(
             dato = domene.dato,
             arbeidTimer = domene.arbeidTimer,
             syk = domene.syk,
@@ -300,7 +300,7 @@ class ArenaClient(
         var feilListe: List<MeldekortkontrollFeilDto> = emptyList(),
         var oppfolgingListe: List<MeldekortkontrollFeilDto> = emptyList()
     ) {
-        fun tilDomene() = Arena.MeldekortkontrollResponse(
+        fun tilDomene() = MeldekortkontrollResponse(
             meldekortId = meldekortId,
             kontrollStatus = kontrollStatus,
             feilListe = feilListe.map { it.tilDomene() },
@@ -312,7 +312,7 @@ class ArenaClient(
         var kode: String,
         var params: List<String>? = null
     ) {
-        fun tilDomene() = Arena.MeldekortkontrollFeil(
+        fun tilDomene() = MeldekortkontrollResponse.MeldekortkontrollFeil(
             kode = kode,
             params = params,
         )

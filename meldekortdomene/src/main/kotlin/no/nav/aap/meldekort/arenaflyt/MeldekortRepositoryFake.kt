@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort.arenaflyt
 
 class MeldekortRepositoryFake: MeldekortRepository {
     private val innsendteMeldekort: MutableList<InnsendtMeldekort> = mutableListOf()

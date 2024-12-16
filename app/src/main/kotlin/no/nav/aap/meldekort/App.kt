@@ -3,10 +3,10 @@ package no.nav.aap.meldekort
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
-import no.nav.aap.meldekort.arena.ArenaClient
+import no.nav.aap.meldekort.arena.ArenaClientImpl
 import no.nav.aap.meldekort.arena.ArenaService
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
-import no.nav.aap.meldekort.arena.MeldekortService
+import no.nav.aap.meldekort.arenaflyt.MeldekortService
 import no.nav.aap.meldekort.arena.MeldekortSkjemaRepositoryPostgres
 import org.slf4j.LoggerFactory
 
@@ -19,7 +19,7 @@ fun main() {
 
     val dataSource = createPostgresDataSource(DbConfig.fromEnv())
 
-    val arena = ArenaClient(
+    val arena = ArenaClientImpl(
         meldekortserviceScope = requiredConfigForKey("meldekortservice.scope"),
         meldekortkontrollScope = requiredConfigForKey("meldekortkontroll.scope"),
         meldekortserviceUrl = requiredConfigForKey("meldekortservice.url"),
@@ -41,7 +41,7 @@ fun main() {
         meldekortService = meldekortService,
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
-        arena = arena,
+        arenaClient = arena,
         arenaService = arenaService,
     )
 }

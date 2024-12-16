@@ -12,12 +12,19 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arenaflyt.MeldekortService
+import no.nav.aap.meldekort.arenaflyt.Meldekortskjema
+import no.nav.aap.meldekort.arenaflyt.Meldekorttilstand
+import no.nav.aap.meldekort.arenaflyt.Meldeperiode
+import no.nav.aap.meldekort.arenaflyt.Periode
+import no.nav.aap.meldekort.arenaflyt.StegNavn
+import no.nav.aap.meldekort.arenaflyt.TimerArbeidet
 import java.time.LocalDate
 
 fun NormalOpenAPIRoute.meldekortApi(
     meldekortService: MeldekortService,
     arenaService: ArenaService,
-    arena: Arena,
+    arenaClient: ArenaClient,
 ) {
     route("/api/arena") {
         route("/meldeperiode").get<Unit, List<MeldeperiodeDto>> {
@@ -48,7 +55,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                             innloggetBruker = innloggetBruker()
                         )
                     )
-                } catch (e: InnsendingFeiletException) {
+                } catch (e: ArenaInnsendingFeiletException) {
                     MeldekortResponse(
                         meldekorttilstand = meldekorttilstand,
                         feil = InnsendingFeil(e.innsendingFeil)
@@ -73,13 +80,13 @@ fun NormalOpenAPIRoute.meldekortApi(
     }
 
     route("/test/proxy/meldegrupper").get<Unit, Any> {
-        respond(arena.meldegrupper(innloggetBruker()))
+        respond(arenaClient.meldegrupper(innloggetBruker()))
     }
     route("/test/proxy/meldekort").get<Unit, Any> {
-        respond(arena.person(innloggetBruker()) ?: "null")
+        respond(arenaClient.person(innloggetBruker()) ?: "null")
     }
     route("/test/proxy/historiskemeldekort").get<Unit, Any> {
-        respond(arena.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
+        respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
     }
 }
 
@@ -190,7 +197,7 @@ class PeriodeDto(
 sealed interface Feil
 
 class InnsendingFeil(
-    val innsendingFeil: List<ArenaService.InnsendingFeil>
+    val innsendingFeil: List<ArenaInnsendingFeiletException.InnsendingFeil>
 ) : Feil
 
 data class MeldekortResponse(
