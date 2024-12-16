@@ -3,10 +3,10 @@ plugins {
 }
 
 val komponenterVersjon = "1.0.81"
-val ktorVersion = "3.0.1"
+val ktorVersion = "3.0.2"
 
 dependencies {
-    api("no.nav:ktor-openapi-generator:1.0.50")
+    api("no.nav:ktor-openapi-generator:1.0.63")
     implementation(project(":meldekortdomene"))
 
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")

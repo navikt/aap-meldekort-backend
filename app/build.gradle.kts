@@ -1,12 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
-val ktorVersion = "3.0.1"
 val komponenterVersjon = "1.0.81"
 
 plugins {
     id("behandlingsflyt.conventions")
-    id("io.ktor.plugin") version "3.0.1"
+    id("io.ktor.plugin") version "3.0.2"
 }
 
 application {
