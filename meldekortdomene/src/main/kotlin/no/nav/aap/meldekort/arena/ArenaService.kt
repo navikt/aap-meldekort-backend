@@ -2,6 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.arena.Arena.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.meldekort.arena.Arena.Meldekort.Companion.tilMeldeperioder
 import no.nav.aap.meldekort.arena.Arena.Person
 import java.time.LocalDate
 import java.util.*
@@ -13,11 +14,15 @@ class ArenaService(
     private val meldekortRepository: MeldekortRepository,
 ) {
     fun meldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        val person = arena.person(innloggetBruker)
         val innsendteMeldekort = meldekortRepository.loadMeldekort().map { it.meldekortId }
-        val meldekortListe = person?.meldekortListe ?: emptyList()
-        return meldekortListe.mapNotNull { it.tilMeldeperiodeHvisRelevant(meldekortListe) }
-            .filter { it.meldekortId !in innsendteMeldekort }
+        val person = arena.person(innloggetBruker)
+        val meldekortListe = (person?.meldekortListe ?: emptyList())
+            .map { if (it.meldekortId in innsendteMeldekort) it.copy(historisk = true) else it }
+
+        val historiskeMeldekortListe =
+            arena.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).meldekortListe ?: emptyList()
+
+        return (meldekortListe + historiskeMeldekortListe).tilMeldeperioder()
     }
 
     /* Hva betyr egentlig dette her? Er denne relevant? */

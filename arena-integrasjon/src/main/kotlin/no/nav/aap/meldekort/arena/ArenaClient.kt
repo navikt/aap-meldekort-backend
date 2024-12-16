@@ -38,7 +38,7 @@ class ArenaClient(
 
     override fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
         return getMeldekortservice<PersonDto?>("/v2/meldekort", innloggetBruker)
-            ?.tilDomene()
+            ?.tilDomene(historisk = false)
     }
 
     override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): Arena.Person {
@@ -48,7 +48,7 @@ class ArenaClient(
                 innloggetBruker
             )
         )
-            .tilDomene()
+            .tilDomene(historisk = true)
     }
 
     override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): Arena.Meldekortdetaljer {
@@ -131,13 +131,13 @@ class ArenaClient(
         val meldeform: String,
         val meldekortListe: List<MeldekortDto>? = null,
     ) {
-        fun tilDomene() = Arena.Person(
+        fun tilDomene(historisk: Boolean) = Arena.Person(
             personId = personId,
             etternavn = etternavn,
             fornavn = fornavn,
             maalformkode = maalformkode,
             meldeform = meldeform,
-            meldekortListe = meldekortListe?.map { it.tilDomene() },
+            meldekortListe = meldekortListe?.map { it.tilDomene(historisk) },
         )
     }
 
@@ -155,7 +155,7 @@ class ArenaClient(
         val mottattDato: LocalDate? = null,
         val bruttoBelop: Float = 0F
     ) {
-        fun tilDomene() = Arena.Meldekort(
+        fun tilDomene(historisk: Boolean) = Arena.Meldekort(
             meldekortId = meldekortId,
             kortType = Arena.KortType.getByCode(kortType),
             meldeperiode = meldeperiode,
@@ -166,6 +166,7 @@ class ArenaClient(
             forskudd = forskudd,
             mottattDato = mottattDato,
             bruttoBelop = bruttoBelop,
+            historisk = historisk,
         )
     }
 

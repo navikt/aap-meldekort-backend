@@ -54,7 +54,9 @@ interface Arena {
         val beregningstatus: KortStatus,
         val forskudd: Boolean,
         val mottattDato: LocalDate? = null,
-        val bruttoBelop: Float = 0F
+        val bruttoBelop: Float = 0F,
+
+        val historisk: Boolean,
     ) {
 
         fun tilMeldeperiodeHvisRelevant(meldekortListe: List<Meldekort>): Meldeperiode? {
@@ -87,6 +89,14 @@ interface Arena {
                 kortType != KortType.MANUELL_ARENA && beregningstatus in arrayOf(OPPRE, SENDT) -> ORDINÆRT
                 kortType == KortType.MANUELL_ARENA && beregningstatus == OPPRE -> ETTERREGISTRERT
                 else -> null
+            }
+        }
+
+        companion object {
+            fun List<Meldekort>.tilMeldeperioder(): List<Meldeperiode> {
+                return this
+                    .filterNot { it.historisk }
+                    .mapNotNull { it.tilMeldeperiodeHvisRelevant(this) }
             }
         }
     }
