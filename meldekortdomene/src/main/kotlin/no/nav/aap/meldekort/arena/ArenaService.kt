@@ -1,42 +1,30 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arena.Arena.Meldekort
+import no.nav.aap.meldekort.arena.Arena.KortStatus.*
+import no.nav.aap.meldekort.arena.Arena.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.meldekort.arena.Arena.Person
 import java.time.LocalDate
 import java.util.*
 
-private const val AAP_KODE = "ATTF" // attføringsstønad
+const val AAP_KODE = "ATTF" // attføringsstønad
 
 class ArenaService(
     private val arena: Arena
 ) {
     fun meldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
         val person = arena.person(innloggetBruker)
-        val meldekortListe = person ?.meldekortListe ?: emptyList()
-
-        return meldekortListe
-            .filter { meldekort ->
-                meldekort.hoyesteMeldegruppe == AAP_KODE && meldekort.beregningstatus in arrayOf("OPPRE", "SENDT")
-            }
-            .map { meldekort ->
-                val kanSendesFra = meldekort.tilDato.minusDays(1)
-                Meldeperiode(
-                    meldekortId = meldekort.meldekortId,
-                    periode = Periode(meldekort.fraDato, meldekort.tilDato),
-                    kanSendesFra = kanSendesFra,
-                    kanSendes = !LocalDate.now().isBefore(kanSendesFra),
-                    kanEndres = kanEndres(meldekort, meldekortListe),
-                    status = Meldeperiode.Status.TIL_UTFYLLING,
-                )
-            }
+        val meldekortListe = person?.meldekortListe ?: emptyList()
+        return meldekortListe.mapNotNull { it.tilMeldeperiodeHvisRelevant(meldekortListe) }
     }
-
 
     /* Hva betyr egentlig dette her? Er denne relevant? */
     fun harMeldeplikt(innloggetBruker: InnloggetBruker): Boolean {
         return arena.meldegrupper(innloggetBruker).any { it.meldegruppeKode == AAP_KODE }
     }
 
-    fun person(innloggetBruker: InnloggetBruker): Arena.Person? {
+    fun person(innloggetBruker: InnloggetBruker): Person? {
         return arena.person(innloggetBruker)
     }
 
@@ -103,12 +91,12 @@ class ArenaService(
             personId = meldekortdetaljer.personId,
             kilde = AAP_KODE,
             kortType = meldekortdetaljer.kortType,
-            meldedato = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK" && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
+            meldedato = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
             periodeFra = innsendtMeldekort.meldeperiode.fom,
             periodeTil = innsendtMeldekort.meldeperiode.tom,
             meldegruppe = meldekortdetaljer.meldegruppe,
             arbeidet = innsendtMeldekort.harDuJobbet,
-            begrunnelse = if (meldekortdetaljer.kortType == "KORRIGERT_ELEKTRONISK") TODO() else null,
+            begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK) TODO() else null,
             meldekortdager = meldekortdager
         )
 
@@ -133,19 +121,6 @@ class ArenaService(
     )
 
 
-
-    private fun kanEndres(meldekort: Arena.Meldekort, meldekortListe: List<Arena.Meldekort>): Boolean {
-        return if (meldekort.kortType == "10" || meldekort.beregningstatus == "UBEHA") {
-            false
-        } else {
-            meldekortListe.none { mk ->
-                meldekort.meldekortId != mk.meldekortId &&
-                        meldekort.meldeperiode == mk.meldeperiode &&
-                        mk.kortType == "10"
-            }
-        }
-    }
-
     data class Aktivitet(
         val uuid: UUID,
         val type: AktivitetsType,
@@ -169,7 +144,8 @@ class ArenaService(
         }
 
         fun hentArbeidstimer(): Double {
-            return this.aktiviteter.find { aktivitet -> aktivitet.type == Aktivitet.AktivitetsType.Arbeid }?.timer ?: 0.0
+            return this.aktiviteter.find { aktivitet -> aktivitet.type == Aktivitet.AktivitetsType.Arbeid }?.timer
+                ?: 0.0
         }
     }
 

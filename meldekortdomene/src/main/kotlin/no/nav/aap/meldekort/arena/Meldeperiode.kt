@@ -13,10 +13,10 @@ class Meldeperiode(
     val kanSendesFra: LocalDate,
     val kanSendes: Boolean,
     val kanEndres: Boolean,
-    val status: Status,
+    val type: Type,
 ) {
-    enum class Status {
-        TIL_UTFYLLING,
-        INNSENDT,
+    enum class Type {
+        ORDINÆRT,
+        ETTERREGISTRERT,
     }
 }

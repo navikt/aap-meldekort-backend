@@ -1,6 +1,12 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.arena.Arena.KortStatus.OPPRE
+import no.nav.aap.meldekort.arena.Arena.KortStatus.SENDT
+import no.nav.aap.meldekort.arena.Arena.KortStatus.UBEHA
+import no.nav.aap.meldekort.arena.Arena.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.meldekort.arena.Meldeperiode.Type.ETTERREGISTRERT
+import no.nav.aap.meldekort.arena.Meldeperiode.Type.ORDINÆRT
 import java.time.LocalDate
 
 interface Arena {
@@ -39,45 +45,51 @@ interface Arena {
     data class Meldekort(
         val meldekortId: Long,
 
-        /**
-         * 05 Elektronisk kort
-         * 06 Automatisk kort
-         * 07 Manuelt kort
-         * 08 Maskinelt oppdatert kort
-         * 09 Manuelt kort - opprettet av saksbehandler eller kort som opprettes tilbake i tid
-         *    Brukes både ved korrigering og etterregistrering. Ved etterregistrering kan
-         *    kortet fylles ut av saksbehandler i Arena eller bruker på nav.no.
-         * 10 Elektronisk kort - korrigert av bruker
-         *    En type meldekort som kun kan opprettes/intieres av bruker på nav.no, og som alltid
-         *    vil være en korrigering av et eksisterende innlevert kort.
-         */
-        val kortType: String,
+        val kortType: KortType,
         val meldeperiode: String,
         val fraDato: LocalDate,
         val tilDato: LocalDate,
         val hoyesteMeldegruppe: String,
 
-        /**
-         * OPPRE Kortet er opprettet for en periode LAV Kortet er opprettet
-         * SENDT Kortet er sendt til print (kun papir) LAV Kortet er sendt ut
-         * REGIS Kortet er mottatt fra Amelding (kun temporær status) HØY Til behandling
-         * FMOPP Kortet har feilet i Amelding og det er sendt til oppfølging i Arena HØY Til manuell saksbehandling
-         * FUOPP Kortet har feilet i Amelding, og returkort er sendt til arbeidssøker HØY Til behandling *)
-         * KLAR Kortet er OK i Amelding, personen har ytelse i perioden og kortet er klar til beregning HØY Klar til beregning
-         * KAND Person har ikke vedtak om ytelser men meldegruppen tilsier at det vil fattes et vedtak HØY Klar til beregning
-         * IKKE Kortet skal ikke beregnes siden personen ikke har vedtak eller at et annet kort er beregnet for hele vedtaksperioden i samme meldeperiode HØY Ingen beregning
-         * OVERM Et annet kort for samme periode har overstyrt dette kortet HØY Ingen beregning
-         * NYKTR Kortet er kontrollert etter for lav meldegruppe og er sendt til ny kontroll i Amelding HØY Til behandling
-         * FERDI Kortet er ferdig beregnet HØY Ferdig beregnet
-         * FEIL Kortet har feilet i beregning HØY Til manuell saksbehandling
-         * VENTE Kortet feilet i beregning fordi forrige kort mangler. HØY Venter på behandling av tidligere meldekort
-         * SLETT Kortet er slettet <Ingen> Vises ikke
-         */
-        val beregningstatus: String,
+        val beregningstatus: KortStatus,
         val forskudd: Boolean,
         val mottattDato: LocalDate? = null,
         val bruttoBelop: Float = 0F
-    )
+    ) {
+
+        fun tilMeldeperiodeHvisRelevant(meldekortListe: List<Meldekort>): Meldeperiode? {
+            if (hoyesteMeldegruppe != AAP_KODE) return null
+            val type = type() ?: return null
+
+            val kanSendesFra = tilDato.minusDays(1)
+            return Meldeperiode(
+                meldekortId = meldekortId,
+                periode = Periode(fraDato, tilDato),
+                kanSendesFra = kanSendesFra,
+                kanSendes = !LocalDate.now().isBefore(kanSendesFra),
+                kanEndres = kanEndres(this, meldekortListe),
+                type = type,
+            )
+        }
+
+        private fun kanEndres(meldekort: Meldekort, meldekortListe: List<Meldekort>): Boolean {
+            return meldekort.kortType != KORRIGERT_ELEKTRONISK &&
+                    meldekort.beregningstatus != UBEHA &&
+                    meldekortListe.none { mk ->
+                        meldekort.meldekortId != mk.meldekortId &&
+                                meldekort.meldeperiode == mk.meldeperiode &&
+                                mk.kortType == KORRIGERT_ELEKTRONISK
+                    }
+        }
+
+        private fun type(): Meldeperiode.Type? {
+            return when {
+                kortType != KortType.MANUELL_ARENA && beregningstatus in arrayOf(OPPRE, SENDT) -> ORDINÆRT
+                kortType == KortType.MANUELL_ARENA && beregningstatus == OPPRE -> ETTERREGISTRERT
+                else -> null
+            }
+        }
+    }
 
     data class Meldekortdetaljer(
         val id: String,
@@ -87,7 +99,7 @@ interface Arena {
         val meldeperiode: String,
         val meldegruppe: String,
         val arkivnokkel: String,
-        val kortType: String,
+        val kortType: KortType,
         val meldeDato: LocalDate? = null,
         val lestDato: LocalDate? = null,
         val sporsmal: Sporsmal? = null,
@@ -118,7 +130,7 @@ interface Arena {
         val meldekortId: Long,
         val fnr: String,
         val personId: Long,
-        val kortType: String,
+        val kortType: KortType,
         val meldedato: LocalDate,
         val periodeFra: LocalDate,
         val periodeTil: LocalDate,
@@ -152,4 +164,43 @@ interface Arena {
         var kode: String,
         var params: List<String>? = null
     )
+
+    enum class KortStatus {
+        OPPRE,
+        SENDT,
+        SLETT,
+        REGIS,
+        FMOPP,
+        FUOPP,
+        KLAR,
+        KAND,
+        IKKE,
+        OVERM,
+        NYKTR,
+        FERDI,
+        FEIL,
+        VENTE,
+        OPPF,
+        UBEHA  // OBS: "Fiktiv" status som benyttes for meldekort som er klare for innlesing til Arena
+    }
+
+    enum class KortType(val code: String) {
+        ORDINAER("01"),
+        ERSTATNING("03"),
+        RETUR("04"),
+        ELEKTRONISK("05"),
+        AAP("06"),
+        ORDINAER_MANUELL("07"),
+        MASKINELT_OPPDATERT("08"),
+        MANUELL_ARENA("09"),
+        KORRIGERT_ELEKTRONISK("10");
+
+        companion object {
+            fun getByCode(code: String): KortType {
+                return requireNotNull(entries.find { it.code == code }) {
+                    "ukjent KortType $code fra arena"
+                }
+            }
+        }
+    }
 }
