@@ -26,10 +26,13 @@ fun main() {
         meldekortkontrollUrl = requiredConfigForKey("meldekortkontroll.url"),
     )
 
+    val meldekortRepository = MeldekortRepositoryPostgres(dataSource)
+    val arenaService = ArenaService(arena, meldekortRepository)
+
     val meldekortService = MeldekortService(
         meldekortSkjemaRepository = MeldekortSkjemaRepositoryPostgres(dataSource),
-        meldekortRepository = MeldekortRepositoryPostgres(dataSource),
-        arenaService = ArenaService(arena)
+        meldekortRepository = meldekortRepository,
+        arenaService = arenaService
     )
 
     startHttpServer(
@@ -39,6 +42,6 @@ fun main() {
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
         arena = arena,
-        arenaService = ArenaService(arena),
+        arenaService = arenaService,
     )
 }

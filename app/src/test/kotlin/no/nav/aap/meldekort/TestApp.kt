@@ -13,10 +13,12 @@ fun main() {
     FakeServers.start() // azurePort = 8081
 
     val dataSource = createTestcontainerPostgresDataSource()
+    val meldekortRepository = MeldekortRepositoryPostgres(dataSource)
+    val arenaService = ArenaService(FakeArena, meldekortRepository)
     val meldekortService = MeldekortService(
         meldekortSkjemaRepository = MeldekortSkjemaRepositoryPostgres(dataSource),
-        meldekortRepository = MeldekortRepositoryPostgres(dataSource),
-        ArenaService(FakeArena),
+        meldekortRepository = meldekortRepository,
+        arenaService,
     )
 
     startHttpServer(
@@ -26,6 +28,6 @@ fun main() {
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),
         arena = FakeArena,
-        arenaService = ArenaService(FakeArena),
+        arenaService = arenaService,
     )
 }

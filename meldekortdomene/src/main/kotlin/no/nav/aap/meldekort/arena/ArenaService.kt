@@ -9,12 +9,15 @@ import java.util.*
 const val AAP_KODE = "ATTF" // attføringsstønad
 
 class ArenaService(
-    private val arena: Arena
+    private val arena: Arena,
+    private val meldekortRepository: MeldekortRepository,
 ) {
     fun meldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
         val person = arena.person(innloggetBruker)
+        val innsendteMeldekort = meldekortRepository.loadMeldekort().map { it.meldekortId }
         val meldekortListe = person?.meldekortListe ?: emptyList()
         return meldekortListe.mapNotNull { it.tilMeldeperiodeHvisRelevant(meldekortListe) }
+            .filter { it.meldekortId !in innsendteMeldekort }
     }
 
     /* Hva betyr egentlig dette her? Er denne relevant? */

@@ -62,12 +62,15 @@ class MeldekortService(
         return meldekorttilstand
     }
 
+    /* TODO:
+     *  - håndtere at systemet krasjer mellom innsending til kontroll og lagring til database
+     */
+
     fun sendInn(meldekorttilstand: Meldekorttilstand, innloggetBruker: InnloggetBruker)  {
         val innsendtMeldekort = meldekorttilstand.innsendtMeldekort()
 
-        meldekortRepository.storeMeldekort(innsendtMeldekort)
         val innsendingResponse = arenaService.sendInn(innsendtMeldekort, innloggetBruker)
-
         if (innsendingResponse.feil.isNotEmpty()) throw InnsendingFeiletException(innsendingResponse.feil)
+        meldekortRepository.storeMeldekort(innsendtMeldekort)
     }
 }
