@@ -15,7 +15,7 @@ interface Steg {
     fun nesteSteg(meldekorttilstand: Meldekorttilstand, innloggetBruker: InnloggetBruker): StegNavn
 }
 
-object BekreftSvarerÆrlig : Steg {
+object BekreftSvarerÆrligSteg : Steg {
     override val navn: StegNavn
         get() = BEKREFT_SVARER_ÆRLIG
 
@@ -28,7 +28,7 @@ object BekreftSvarerÆrlig : Steg {
     }
 }
 
-object JobbetIMeldeperioden : Steg {
+object JobbetIMeldeperiodenSteg : Steg {
     override val navn: StegNavn
         get() = JOBBET_I_MELDEPERIODEN
 
@@ -40,7 +40,7 @@ object JobbetIMeldeperioden : Steg {
     }
 }
 
-class TimerArbeidet(
+class TimerArbeidetSteg(
     private val meldekortService: MeldekortService,
 ) : Steg {
     override val navn: StegNavn
@@ -59,7 +59,7 @@ class TimerArbeidet(
     }
 }
 
-object Kvittering : Steg {
+object KvitteringSteg : Steg {
     override val navn: StegNavn
         get() = KVITTERING
 

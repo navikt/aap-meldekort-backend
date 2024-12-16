@@ -1,8 +1,6 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.arena.Arena.Meldekort
-import no.nav.aap.meldekort.arena.Arena.KortStatus.*
 import no.nav.aap.meldekort.arena.Arena.KortType.KORRIGERT_ELEKTRONISK
 import no.nav.aap.meldekort.arena.Arena.Person
 import java.time.LocalDate
@@ -77,10 +75,10 @@ class ArenaService(
         val meldekortdetaljer = arena.meldekortdetaljer(innloggetBruker, innsendtMeldekort.meldekortId)
         check(meldekortdetaljer.fodselsnr == innloggetBruker.ident)
 
-        val meldekortdager = innsendtMeldekort.timerArbeidet.mapIndexed { offset, timerArbeidet ->
+        val meldekortdager = innsendtMeldekort.timerArbeidet.map { timerArbeidet ->
             Arena.MeldekortkontrollFravaer(
-                dato = innsendtMeldekort.meldeperiode.fom.plusDays(offset.toLong()),
-                arbeidTimer = timerArbeidet ?: 0.0,
+                dato = timerArbeidet.dato,
+                arbeidTimer = timerArbeidet.timer ?: 0.0,
             )
         }
 

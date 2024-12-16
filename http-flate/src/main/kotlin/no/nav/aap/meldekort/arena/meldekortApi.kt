@@ -111,13 +111,13 @@ class MeldeperiodeDto(
 class MeldekortDto(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
-    val timerArbeidet: List<Double?>,
+    val timerArbeidet: List<TimerArbeidetDto>,
     val stemmerOpplysningene: Boolean?
 ) {
     constructor(meldekortskjema: Meldekortskjema) : this(
         svarerDuSant = meldekortskjema.svarerDuSant,
         harDuJobbet = meldekortskjema.harDuJobbet,
-        timerArbeidet = meldekortskjema.timerArbeidet,
+        timerArbeidet = meldekortskjema.timerArbeidet.map { TimerArbeidetDto.fraDomene(it) },
         stemmerOpplysningene = meldekortskjema.stemmerOpplysningene,
     )
 
@@ -125,8 +125,29 @@ class MeldekortDto(
         return Meldekortskjema(
             svarerDuSant = svarerDuSant,
             harDuJobbet = harDuJobbet,
-            timerArbeidet = timerArbeidet,
+            timerArbeidet = timerArbeidet.map { it.tilDomene() },
             stemmerOpplysningene = stemmerOpplysningene
+        )
+    }
+}
+
+data class TimerArbeidetDto(
+    val timer: Double?,
+    val dato: LocalDate,
+) {
+    companion object {
+        fun fraDomene(timerArbeidet: TimerArbeidet): TimerArbeidetDto {
+            return TimerArbeidetDto(
+                timer = timerArbeidet.timer,
+                dato = timerArbeidet.dato
+            )
+        }
+    }
+
+    fun tilDomene(): TimerArbeidet {
+        return TimerArbeidet(
+            timer = timer,
+            dato = dato
         )
     }
 }

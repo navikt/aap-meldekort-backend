@@ -5,7 +5,7 @@ class InnsendtMeldekort(
     val meldekortId: Long,
     val svarerDuSant: Boolean,
     val harDuJobbet: Boolean,
-    val timerArbeidet: List<Double?>,
+    val timerArbeidet: List<TimerArbeidet>,
     val stemmerOpplysningene: Boolean,
     val meldeperiode: Periode,
 )

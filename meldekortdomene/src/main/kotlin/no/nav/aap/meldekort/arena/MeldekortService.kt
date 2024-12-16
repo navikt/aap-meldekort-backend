@@ -8,19 +8,24 @@ class MeldekortService(
     private val arenaService: ArenaService
 ) {
     private val flyt = Flyt(
-        BekreftSvarerÆrlig,
-        JobbetIMeldeperioden,
-        TimerArbeidet(this),
-        Kvittering,
+        BekreftSvarerÆrligSteg,
+        JobbetIMeldeperiodenSteg,
+        TimerArbeidetSteg(this),
+        KvitteringSteg,
     )
 
     fun meldekorttilstand(meldekortId: Long, innloggetBruker: InnloggetBruker): Meldekorttilstand {
-        return meldekortSkjemaRepository.loadMeldekorttilstand(meldekortId, flyt)
-            ?: meldekortSkjemaRepository.storeMeldekorttilstand(Meldekorttilstand(
+        val eksisterendeMeldekorttilstand = meldekortSkjemaRepository.loadMeldekorttilstand(meldekortId, flyt)
+
+        if (eksisterendeMeldekorttilstand != null) return eksisterendeMeldekorttilstand
+
+        val meldeperiode = arenaService.meldeperioder(innloggetBruker).single { it.meldekortId == meldekortId }.periode
+
+        return meldekortSkjemaRepository.storeMeldekorttilstand(Meldekorttilstand(
                 meldekortId = meldekortId,
-                meldekortskjema = Meldekortskjema.tomtMeldekortskjema(),
-                steg = BekreftSvarerÆrlig,
-                meldeperiode = arenaService.meldeperioder(innloggetBruker).single { it.meldekortId == meldekortId }.periode
+                meldekortskjema = Meldekortskjema.tomtMeldekortskjema(meldeperiode),
+                steg = BekreftSvarerÆrligSteg,
+                meldeperiode = meldeperiode
             ))
     }
 
