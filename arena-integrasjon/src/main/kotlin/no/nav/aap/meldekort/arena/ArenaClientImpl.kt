@@ -192,7 +192,7 @@ class ArenaClientImpl(
             meldeperiode = meldeperiode,
             meldegruppe = meldegruppe,
             arkivnokkel = arkivnokkel,
-            kortType = ArenaClient.KortType.getByCode(kortType),
+            kortType = ArenaClient.KortType.valueOf(kortType),
             meldeDato = meldeDato,
             lestDato = lestDato,
             sporsmal = sporsmal?.tilDomene(),
