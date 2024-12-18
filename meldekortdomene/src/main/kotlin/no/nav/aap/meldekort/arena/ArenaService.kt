@@ -78,7 +78,7 @@ class ArenaService(
 
     fun sendInn(innsendtMeldekort: InnsendtMeldekort, innloggetBruker: InnloggetBruker) {
         val meldekortdetaljer = arenaClient.meldekortdetaljer(innloggetBruker, innsendtMeldekort.meldekortId)
-        check(meldekortdetaljer.fodselsnr == innloggetBruker.ident)
+        check(meldekortdetaljer.fodselsnr == innloggetBruker.ident.asString)
 
         val arenaMeldekortkontrollRequest = ArenaMeldekortkontrollRequest.konstruer(innsendtMeldekort, meldekortdetaljer)
 

@@ -94,7 +94,7 @@ class ArenaClientImpl(
         return GetRequest(
             currentToken = OidcToken(innloggetBruker.token),
             additionalHeaders = listOf(
-                Header("ident", innloggetBruker.ident),
+                Header("ident", innloggetBruker.ident.asString),
                 Header("accept", "application/json"),
                 Header("x-request-id", MDC.get("callId") ?: "aap-meldekort-${UUID.randomUUID()}")
             ),

@@ -11,6 +11,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
+import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.arenaflyt.MeldekortService
 import no.nav.aap.meldekort.arenaflyt.Meldekortskjema
@@ -37,22 +38,25 @@ fun NormalOpenAPIRoute.meldekortApi(
                 @JsonValue @PathParam("meldekortId") val meldekortId: Long,
             )
             get<Params, MeldekortResponse> { params ->
-                val nåværendeTilstand = meldekortService.meldekorttilstand(params.meldekortId, innloggetBruker())
+                val nåværendeTilstand = meldekortService.hentEllerOpprettMeldekorttilstand(params.meldekortId, innloggetBruker())
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 
             route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
-                val meldekorttilstand = meldekortService.meldekorttilstandMedSkjema(
+                val innloggetBruker = innloggetBruker()
+
+                val meldekorttilstand = meldekortService.konstruerMeldekorttilstand(
+                    innloggetBruker = innloggetBruker,
                     meldekortId = params.meldekortId,
                     meldekortskjema = meldekortRequest.meldekort.tilDomene(),
-                    stegNavn = meldekortRequest.nåværendeSteg
+                    stegNavn = meldekortRequest.nåværendeSteg,
                 )
 
                 val response = try {
                     MeldekortResponse(
                         meldekortService.lagreOgNeste(
                             meldekorttilstand = meldekorttilstand,
-                            innloggetBruker = innloggetBruker()
+                            innloggetBruker = innloggetBruker,
                         )
                     )
                 } catch (e: ArenaInnsendingFeiletException) {
@@ -68,10 +72,11 @@ fun NormalOpenAPIRoute.meldekortApi(
             route("/lagre").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
-                        meldekortService.lagre(meldekortService.meldekorttilstandMedSkjema(
+                        meldekortService.lagre(meldekortService.konstruerMeldekorttilstand(
                             meldekortId = params.meldekortId,
                             meldekortskjema = meldekortRequest.meldekort.tilDomene(),
-                            stegNavn = meldekortRequest.nåværendeSteg
+                            stegNavn = meldekortRequest.nåværendeSteg,
+                            innloggetBruker = innloggetBruker(),
                         ))
                     )
                 )
@@ -92,7 +97,7 @@ fun NormalOpenAPIRoute.meldekortApi(
 
 private fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
     InnloggetBruker(
-        ident = personBruker().pid,
+        ident = Ident(personBruker().pid),
         token = token().token(),
     )
 

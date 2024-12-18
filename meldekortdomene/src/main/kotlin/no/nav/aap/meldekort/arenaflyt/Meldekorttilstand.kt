@@ -1,9 +1,11 @@
 package no.nav.aap.meldekort.arenaflyt
 
+import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 
 class Meldekorttilstand(
     val meldekortId: Long,
+    val ident: Ident,
     val meldekortskjema: Meldekortskjema,
     val steg: Steg,
     val meldeperiode: Periode,
@@ -13,7 +15,8 @@ class Meldekorttilstand(
             meldekortId = meldekortId,
             steg = flyt.nesteSteg(this, innloggetBruker),
             meldekortskjema = meldekortskjema,
-            meldeperiode = meldeperiode
+            meldeperiode = meldeperiode,
+            ident = ident,
         )
     }
 
