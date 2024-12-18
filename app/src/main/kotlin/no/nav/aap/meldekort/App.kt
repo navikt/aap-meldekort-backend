@@ -4,10 +4,11 @@ import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.arena.ArenaClientImpl
-import no.nav.aap.meldekort.arena.ArenaService
+import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
+import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
-import no.nav.aap.meldekort.arenaflyt.MeldekortService
-import no.nav.aap.meldekort.arena.MeldekortSkjemaRepositoryPostgres
+import no.nav.aap.meldekort.arena.SkjemaService
+import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import org.slf4j.LoggerFactory
 
 class App
@@ -19,29 +20,32 @@ fun main() {
 
     val dataSource = createPostgresDataSource(DbConfig.fromEnv())
 
-    val arena = ArenaClientImpl(
+    val arenaClient = ArenaClientImpl(
         meldekortserviceScope = requiredConfigForKey("meldekortservice.scope"),
         meldekortkontrollScope = requiredConfigForKey("meldekortkontroll.scope"),
         meldekortserviceUrl = requiredConfigForKey("meldekortservice.url"),
         meldekortkontrollUrl = requiredConfigForKey("meldekortkontroll.url"),
     )
 
-    val meldekortRepository = MeldekortRepositoryPostgres(dataSource)
-    val arenaService = ArenaService(arena, meldekortRepository)
-
     val meldekortService = MeldekortService(
-        meldekortSkjemaRepository = MeldekortSkjemaRepositoryPostgres(dataSource),
-        meldekortRepository = meldekortRepository,
-        arenaService = arenaService
+        arenaClient = arenaClient,
+        meldekortRepository = MeldekortRepositoryPostgres(dataSource),
+    )
+
+    val skjemaService = SkjemaService(
+        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
+        meldekortService = meldekortService,
     )
 
     startHttpServer(
         port = 8080,
         prometheus = prometheus,
-        meldekortService = meldekortService,
+        arenaSkjemaFlate = ArenaSkjemaFlate(
+            meldekortService = meldekortService,
+            skjemaService = skjemaService,
+        ),
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
-        arenaClient = arena,
-        arenaService = arenaService,
+        arenaClient = arenaClient,
     )
 }

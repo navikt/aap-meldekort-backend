@@ -1,7 +1,8 @@
 package no.nav.aap.meldekort.arena
 
-class ArenaInnsendingFeiletException(
-    val innsendingFeil: List<InnsendingFeil>
+data class ArenaInnsendingFeiletException(
+    val innsendingFeil: List<InnsendingFeil>,
+    val skjema: Skjema? = null,
 ): Exception() {
     data class InnsendingFeil(
         val kode: String,

@@ -1,89 +1,95 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.arena.ArenaClient.KortType.KORRIGERT_ELEKTRONISK
-import no.nav.aap.meldekort.arena.ArenaMeldekort.KortStatus.OPPRE
-import no.nav.aap.meldekort.arena.ArenaMeldekort.KortStatus.SENDT
-import no.nav.aap.meldekort.arena.ArenaMeldekort.KortStatus.UBEHA
-import no.nav.aap.meldekort.arenaflyt.Meldeperiode
-import no.nav.aap.meldekort.arenaflyt.Meldeperiode.Type.ETTERREGISTRERT
-import no.nav.aap.meldekort.arenaflyt.Meldeperiode.Type.ORDINÆRT
-import no.nav.aap.meldekort.arenaflyt.Periode
+import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.UBEHA
+import no.nav.aap.meldekort.arena.MeldekortStatus.FEILET
+import no.nav.aap.meldekort.arena.MeldekortStatus.FERDIG
+import no.nav.aap.meldekort.arena.MeldekortStatus.INNSENDT
+import no.nav.aap.meldekort.arena.MeldekortStatus.KORRIGERT
 import java.time.LocalDate
+import java.time.temporal.WeekFields
 
 data class ArenaMeldekort(
     val meldekortId: Long,
 
-    val kortType: ArenaClient.KortType,
-    val meldeperiode: String,
+    private val kortType: ArenaClient.KortType,
+    private val meldeperiode: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val hoyesteMeldegruppe: String,
+    private val hoyesteMeldegruppe: String,
 
-    val beregningstatus: KortStatus,
-    val forskudd: Boolean,
+    val beregningstatus: ArenaStatus,
+    private val forskudd: Boolean,
     val mottattDato: LocalDate? = null,
-    val bruttoBelop: Float = 0F,
-
-    val historisk: Boolean,
+    private val bruttoBelop: Float = 0F,
 ) {
+    val erForAap: Boolean = hoyesteMeldegruppe == AAP_KODE
 
-    fun tilMeldeperiodeHvisRelevant(arenaMeldekortListe: List<ArenaMeldekort>): Meldeperiode? {
-        if (hoyesteMeldegruppe != AAP_KODE) return null
-        val type = type() ?: return null
-
-        val kanSendesFra = tilDato.minusDays(1)
-        return Meldeperiode(
-            meldekortId = meldekortId,
-            periode = Periode(fraDato, tilDato),
-            kanSendesFra = kanSendesFra,
-            kanSendes = !LocalDate.now().isBefore(kanSendesFra),
-            kanEndres = kanEndres(this, arenaMeldekortListe),
-            type = type,
-        )
+    val periodekode: String = run {
+        val år = fraDato.get(WeekFields.ISO.weekBasedYear())
+        val uke = fraDato.get(WeekFields.ISO.weekOfWeekBasedYear()).toString().padStart(2, '0')
+        "$år$uke"
     }
 
-    private fun kanEndres(arenaMeldekort: ArenaMeldekort, arenaMeldekortListe: List<ArenaMeldekort>): Boolean {
-        return arenaMeldekort.kortType != KORRIGERT_ELEKTRONISK &&
-                arenaMeldekort.beregningstatus != UBEHA &&
-                arenaMeldekortListe.none { mk ->
-                    arenaMeldekort.meldekortId != mk.meldekortId &&
-                            arenaMeldekort.meldeperiode == mk.meldeperiode &&
+    val type: MeldekortType = kortType.meldekortType
+
+    fun erUbehandletEllerKorrigeringForPerioden(arenaMeldekortListe: List<ArenaMeldekort>): Boolean {
+        return kortType == KORRIGERT_ELEKTRONISK ||
+                beregningstatus == UBEHA ||
+                arenaMeldekortListe.any { mk ->
+                    meldekortId != mk.meldekortId &&
+                            meldeperiode == mk.meldeperiode &&
                             mk.kortType == KORRIGERT_ELEKTRONISK
                 }
     }
 
-    private fun type(): Meldeperiode.Type? {
-        return when {
-            kortType != ArenaClient.KortType.MANUELL_ARENA && beregningstatus in arrayOf(OPPRE, SENDT) -> ORDINÆRT
-            kortType == ArenaClient.KortType.MANUELL_ARENA && beregningstatus == OPPRE -> ETTERREGISTRERT
-            else -> null
-        }
-    }
 
-    companion object {
-        fun List<ArenaMeldekort>.tilMeldeperioder(): List<Meldeperiode> {
-            return this
-                .filterNot { it.historisk }
-                .mapNotNull { it.tilMeldeperiodeHvisRelevant(this) }
-        }
-    }
+    enum class ArenaStatus(
+        val historiskStatus: MeldekortStatus,
+    ) {
+        /** Kortet er opprettet for en periode. */
+        OPPRE(INNSENDT),
 
-    enum class KortStatus {
-        OPPRE,
-        SENDT,
-        SLETT,
-        REGIS,
-        FMOPP,
-        FUOPP,
-        KLAR,
-        KAND,
-        IKKE,
-        OVERM,
-        NYKTR,
-        FERDI,
-        FEIL,
-        VENTE,
-        OPPF,
-        UBEHA  // OBS: "Fiktiv" status som benyttes for meldekort som er klare for innlesing til Arena
+        /** Kortet er sendt til print (kun papir). */
+        SENDT(INNSENDT),
+
+        /** Kortet er slettet. */
+        SLETT(INNSENDT),
+
+        /** Kortet er mottatt fra Amelding (kun temporær status). */
+        REGIS(INNSENDT),
+
+        /** Kortet har feilet i Amelding og det er sendt til oppfølging i Arena */
+        FMOPP(INNSENDT),
+
+        /** Kortet har feilet i Amelding, og returkort er sendt til arbeidssøker. */
+        FUOPP(INNSENDT),
+
+        /** Kortet er OK i Amelding, personen har ytelse i perioden og kortet er klar til beregning. */
+        KLAR(INNSENDT),
+
+        /** Person har ikke vedtak om ytelser men meldegruppen tilsier at det vil fattes et vedtak. */
+        KAND(INNSENDT),
+
+        /** Kortet skal ikke beregnes siden personen ikke har vedtak eller at et annet kort er
+         *  beregnet for hele vedtaksperioden i samme meldeperiode. */
+        IKKE(FERDIG),
+
+        /** Et annet kort for samme periode har overstyrt dette kortet. */
+        OVERM(KORRIGERT),
+
+        /** Kortet er kontrollert etter for lav meldegruppe og er sendt til ny kontroll i Amelding. */
+        NYKTR(INNSENDT),
+
+        /** Kortet er ferdig beregnet. */
+        FERDI(FERDIG),
+
+        /** Kortet har feilet i beregning. */
+        FEIL(FEILET),
+
+        /** Kortet feilet i beregning fordi forrige kort mangler. */
+        VENTE(INNSENDT),
+        OPPF(INNSENDT),
+        UBEHA(INNSENDT)  // OBS: "Fiktiv" status som benyttes for meldekort som er klare for innlesing til Arena
     }
 }

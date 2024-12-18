@@ -1,7 +1,6 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.arena.ArenaClient.KortType.KORRIGERT_ELEKTRONISK
-import no.nav.aap.meldekort.arenaflyt.InnsendtMeldekort
 import java.time.LocalDate
 
 data class ArenaMeldekortkontrollRequest(
@@ -31,8 +30,11 @@ data class ArenaMeldekortkontrollRequest(
     )
 
     companion object {
-        fun konstruer(innsendtMeldekort: InnsendtMeldekort, meldekortdetaljer: ArenaMeldekortdetaljer): ArenaMeldekortkontrollRequest {
-            val meldekortdager = innsendtMeldekort.timerArbeidet.map { timerArbeidet ->
+        fun konstruer(
+            skjema: Skjema,
+            meldekortdetaljer: ArenaMeldekortdetaljer
+        ): ArenaMeldekortkontrollRequest {
+            val meldekortdager = skjema.payload.timerArbeidet.map { timerArbeidet ->
                 MeldekortkontrollFravaer(
                     dato = timerArbeidet.dato,
                     arbeidTimer = timerArbeidet.timer ?: 0.0,
@@ -40,16 +42,18 @@ data class ArenaMeldekortkontrollRequest(
             }
 
             return ArenaMeldekortkontrollRequest(
-                meldekortId = innsendtMeldekort.meldekortId,
+                meldekortId = skjema.meldekortId,
                 fnr = meldekortdetaljer.fodselsnr,
                 personId = meldekortdetaljer.personId,
                 kilde = AAP_KODE,
                 kortType = meldekortdetaljer.kortType,
                 meldedato = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
-                periodeFra = innsendtMeldekort.meldeperiode.fom,
-                periodeTil = innsendtMeldekort.meldeperiode.tom,
+                periodeFra = skjema.meldeperiode.fom,
+                periodeTil = skjema.meldeperiode.tom,
                 meldegruppe = meldekortdetaljer.meldegruppe,
-                arbeidet = innsendtMeldekort.harDuJobbet,
+                arbeidet = requireNotNull(skjema.payload.harDuJobbet) {
+                    "alle felter må være fylt ut for innsending, harDuJobbet er ikke fylt ut"
+                },
                 begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK) TODO() else null,
                 meldekortdager = meldekortdager
             )

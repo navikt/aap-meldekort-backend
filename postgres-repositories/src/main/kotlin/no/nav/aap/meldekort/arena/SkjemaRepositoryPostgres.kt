@@ -2,6 +2,8 @@ package no.nav.aap.meldekort.arena
 
 import javax.sql.DataSource
 
-class MeldekortRepositoryPostgres(
+class SkjemaRepositoryPostgres(
     private val dataSource: DataSource,
-): MeldekortRepository by MeldekortRepositoryFake()
+): SkjemaRepository by SkjemaRepositoryFake()
+
+

@@ -1,8 +1,8 @@
-package no.nav.aap.meldekort.arenaflyt
+package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
 
-class Flyt private constructor(
+class SkjemaFlyt private constructor(
     private val steg: List<Steg>
 ) {
     constructor(vararg steg: Steg) : this(listOf(*steg))
@@ -13,10 +13,10 @@ class Flyt private constructor(
         }
     }
 
-    fun nesteSteg(meldekorttilstand: Meldekorttilstand, innloggetBruker: InnloggetBruker): Steg {
-        require(meldekorttilstand.steg in steg) { "steg ${meldekorttilstand.steg} er ikke i flyt" }
+    fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): Steg {
+        require(skjema.steg in steg) { "steg ${skjema.steg} er ikke i flyt" }
         return stegForNavn(
-            meldekorttilstand.steg.nesteSteg(meldekorttilstand, innloggetBruker)
+            skjema.steg.nesteSteg(skjema, innloggetBruker)
         )
     }
 

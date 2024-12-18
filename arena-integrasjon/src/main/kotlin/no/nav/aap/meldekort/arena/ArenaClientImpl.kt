@@ -38,7 +38,7 @@ class ArenaClientImpl(
 
     override fun person(innloggetBruker: InnloggetBruker): ArenaPerson? {
         return getMeldekortservice<PersonDto?>("/v2/meldekort", innloggetBruker)
-            ?.tilDomene(historisk = false)
+            ?.tilDomene()
     }
 
     override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): ArenaPerson {
@@ -48,7 +48,7 @@ class ArenaClientImpl(
                 innloggetBruker
             )
         )
-            .tilDomene(historisk = true)
+            .tilDomene()
     }
 
     override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): ArenaMeldekortdetaljer {
@@ -131,13 +131,13 @@ class ArenaClientImpl(
         val meldeform: String,
         val meldekortListe: List<MeldekortDto>? = null,
     ) {
-        fun tilDomene(historisk: Boolean) = ArenaPerson(
+        fun tilDomene() = ArenaPerson(
             personId = personId,
             etternavn = etternavn,
             fornavn = fornavn,
             maalformkode = maalformkode,
             meldeform = meldeform,
-            arenaMeldekortListe = meldekortListe.orEmpty().map { it.tilDomene(historisk) },
+            arenaMeldekortListe = meldekortListe.orEmpty().map { it.tilDomene() },
         )
     }
 
@@ -155,18 +155,17 @@ class ArenaClientImpl(
         val mottattDato: LocalDate? = null,
         val bruttoBelop: Float = 0F
     ) {
-        fun tilDomene(historisk: Boolean) = ArenaMeldekort(
+        fun tilDomene() = ArenaMeldekort(
             meldekortId = meldekortId,
             kortType = ArenaClient.KortType.getByCode(kortType),
             meldeperiode = meldeperiode,
             fraDato = fraDato,
             tilDato = tilDato,
             hoyesteMeldegruppe = hoyesteMeldegruppe,
-            beregningstatus = ArenaMeldekort.KortStatus.valueOf(beregningstatus),
+            beregningstatus = ArenaMeldekort.ArenaStatus.valueOf(beregningstatus),
             forskudd = forskudd,
             mottattDato = mottattDato,
             bruttoBelop = bruttoBelop,
-            historisk = historisk,
         )
     }
 

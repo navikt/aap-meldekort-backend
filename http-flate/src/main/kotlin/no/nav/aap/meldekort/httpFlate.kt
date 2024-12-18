@@ -18,8 +18,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxC
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.ArenaClient
-import no.nav.aap.meldekort.arena.ArenaService
-import no.nav.aap.meldekort.arenaflyt.MeldekortService
+import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.arena.meldekortApi
 import org.slf4j.LoggerFactory
 
@@ -28,9 +27,8 @@ class HttpServer
 fun startHttpServer(
     port: Int,
     prometheus: PrometheusMeterRegistry,
-    meldekortService: MeldekortService,
+    arenaSkjemaFlate: ArenaSkjemaFlate,
     arenaClient: ArenaClient,
-    arenaService: ArenaService,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
 ) {
@@ -86,9 +84,8 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     meldekortApi(
-                        meldekortService = meldekortService,
+                        arenaSkjemaFlate = arenaSkjemaFlate,
                         arenaClient = arenaClient,
-                        arenaService = arenaService,
                     )
                 }
             }
