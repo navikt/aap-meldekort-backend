@@ -12,10 +12,11 @@ class ArenaService(
     private val meldekortRepository: MeldekortRepository,
 ) {
     fun meldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        val innsendteMeldekort = meldekortRepository.loadMeldekort().map { it.meldekortId }
-        val meldekort = (arenaClient.person(innloggetBruker)?.arenaMeldekortListe ?: emptyList())
-            .map { if (it.meldekortId in innsendteMeldekort) it.copy(historisk = true) else it }
+        val person = arenaClient.person(innloggetBruker) ?: return listOf()
 
+        val innsendteMeldekort = meldekortRepository.loadMeldekort().map { it.meldekortId }
+        val meldekort = person.arenaMeldekortListe
+            .map { if (it.meldekortId in innsendteMeldekort) it.copy(historisk = true) else it }
         val historiskeMeldekort = arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
         return (meldekort + historiskeMeldekort).tilMeldeperioder()
