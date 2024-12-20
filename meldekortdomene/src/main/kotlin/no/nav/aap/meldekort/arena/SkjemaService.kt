@@ -27,6 +27,7 @@ class SkjemaService(
         meldekortId: Long
     ): Skjema {
         val meldeperiode = meldekortService.kommendeMeldekort(innloggetBruker)
+            .orEmpty()
             .single { it.meldekortId == meldekortId }
             .periode
         return skjemaRepository.lagrSkjema(

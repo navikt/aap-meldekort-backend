@@ -14,11 +14,12 @@ class MeldekortService(
     /* TODO: finn ut hva dette er. */ private val innsendingstidspunktProvider: (String) -> Long = { -1 },
 ) {
     fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort> {
-        return kommendeMeldekort(innloggetBruker) + historiskeMeldekort(innloggetBruker)
+        val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return emptyList()
+        return kommendeMeldekort + historiskeMeldekort(innloggetBruker)
     }
 
-    fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort> {
-        val arenaMeldekort = arenaClient.person(innloggetBruker)?.arenaMeldekortListe.orEmpty()
+    fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort>? {
+        val arenaMeldekort = arenaClient.person(innloggetBruker)?.arenaMeldekortListe ?: return null
         val dbMeldekort = meldekortRepository.hent(innloggetBruker.ident, arenaMeldekort.map { it.meldekortId })
 
         return arenaMeldekort
