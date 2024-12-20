@@ -32,7 +32,7 @@ class ArenaSkjemaFlate(
     val meldekortService: MeldekortService,
     val skjemaService: SkjemaService,
 ) {
-    fun listMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort> {
+    fun listMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
         return meldekortService.alleMeldekort(innloggetBruker)
     }
 

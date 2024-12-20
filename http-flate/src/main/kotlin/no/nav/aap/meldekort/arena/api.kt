@@ -7,10 +7,11 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.respond
+import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
+import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
-import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 
@@ -21,6 +22,7 @@ fun NormalOpenAPIRoute.meldekortApi(
     route("/api/arena") {
         route("/meldeperiode").get<Unit, List<MeldeperiodeDto>> {
             val meldeperioder = arenaSkjemaFlate.listMeldekort(innloggetBruker())
+                ?: return@get respondWithStatus(HttpStatusCode.NotFound)
             respond(meldeperioder.map { MeldeperiodeDto(it) })
         }
 

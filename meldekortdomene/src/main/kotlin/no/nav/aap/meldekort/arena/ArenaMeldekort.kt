@@ -12,16 +12,16 @@ import java.time.temporal.WeekFields
 data class ArenaMeldekort(
     val meldekortId: Long,
 
-    private val kortType: ArenaClient.KortType,
-    private val meldeperiode: String,
+    val kortType: ArenaClient.KortType,
+    val meldeperiode: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    private val hoyesteMeldegruppe: String,
+    val hoyesteMeldegruppe: String,
 
     val beregningstatus: ArenaStatus,
-    private val forskudd: Boolean,
+    val forskudd: Boolean,
     val mottattDato: LocalDate? = null,
-    private val bruttoBelop: Float = 0F,
+    val bruttoBelop: Float = 0F,
 ) {
     val erForAap: Boolean = hoyesteMeldegruppe == AAP_KODE
 

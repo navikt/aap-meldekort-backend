@@ -13,9 +13,10 @@ class MeldekortService(
     private val meldekortRepository: MeldekortRepository,
     /* TODO: finn ut hva dette er. */ private val innsendingstidspunktProvider: (String) -> Long = { -1 },
 ) {
-    fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort> {
-        val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return emptyList()
-        return kommendeMeldekort + historiskeMeldekort(innloggetBruker)
+    fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
+        val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return null
+        return (kommendeMeldekort + historiskeMeldekort(innloggetBruker))
+            .sortedBy { it.periode.fom }
     }
 
     fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort>? {
