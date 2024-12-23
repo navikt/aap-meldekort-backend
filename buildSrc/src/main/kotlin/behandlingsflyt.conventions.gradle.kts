@@ -28,5 +28,6 @@ kotlin {
 
 kotlin.sourceSets["main"].kotlin.srcDirs("main")
 kotlin.sourceSets["test"].kotlin.srcDirs("test")
+kotlin.sourceSets["test"].kotlin.srcDirs("testFixtures")
 sourceSets["main"].resources.srcDirs("main")
 sourceSets["test"].resources.srcDirs("test")

@@ -1,12 +1,13 @@
-val ktorVersion = "3.0.2"
-val komponenterVersjon = "1.0.81"
-val tilgangVersjon = "0.0.46"
+val ktorVersion = "3.0.3"
+val komponenterVersjon = "1.0.101"
+val tilgangVersjon = "0.0.72"
 
 plugins {
     id("behandlingsflyt.conventions")
 }
 
 dependencies {
+    implementation("io.micrometer:micrometer-core:1.14.2")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")

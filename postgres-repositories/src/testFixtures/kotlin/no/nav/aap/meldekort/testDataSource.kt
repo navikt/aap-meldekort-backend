@@ -3,13 +3,14 @@ package no.nav.aap.meldekort
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.time.Duration
+import io.micrometer.core.instrument.MeterRegistry
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
-fun createTestcontainerPostgresDataSource(): DataSource {
+fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSource {
     val postgres = postgreSQLContainer()
     // Useful for connecting to the test database locally
-    // jdbc URL contains the host and port and database name.
+    // jdbc 'URL contains the host and port and database name.
     println("jdbcUrl: ${postgres.jdbcUrl}. Password: ${postgres.password}. Username: ${postgres.username}.")
 
     val dbConfig = DbConfig(
@@ -18,7 +19,7 @@ fun createTestcontainerPostgresDataSource(): DataSource {
         username = postgres.username,
         password = postgres.password
     )
-    return createPostgresDataSource(dbConfig)
+    return createPostgresDataSource(dbConfig, meterRegistry)
 }
 
 private fun postgreSQLContainer(): PostgreSQLContainer<Nothing> {

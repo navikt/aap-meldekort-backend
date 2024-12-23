@@ -18,7 +18,7 @@ fun main() {
         LoggerFactory.getLogger(App::class.java).error("Uhåndtert feil.", e)
     }
 
-    val dataSource = createPostgresDataSource(DbConfig.fromEnv())
+    val dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus)
 
     val arenaClient = ArenaClientImpl(
         meldekortserviceScope = requiredConfigForKey("meldekortservice.scope"),

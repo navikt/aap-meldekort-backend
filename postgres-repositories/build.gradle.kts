@@ -1,4 +1,4 @@
-val komponenterVersjon = "1.0.81"
+val komponenterVersjon = "1.0.101"
 
 plugins {
     id("behandlingsflyt.conventions")
@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.14.1")
+    implementation("io.micrometer:micrometer-core:1.14.2")
     implementation("ch.qos.logback:logback-classic:1.5.12")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
@@ -30,6 +30,7 @@ dependencies {
         }
     }
     testFixturesImplementation("org.testcontainers:postgresql:1.20.3")
+    testFixturesImplementation("io.micrometer:micrometer-core:1.14.2")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")

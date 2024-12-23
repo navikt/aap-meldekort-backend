@@ -2,6 +2,7 @@ package no.nav.aap.meldekort
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.komponenter.dbmigrering.Migrering
 import javax.sql.DataSource
 
@@ -21,7 +22,7 @@ class DbConfig(
     }
 }
 
-fun createPostgresDataSource(dbConfig: DbConfig): DataSource {
+fun createPostgresDataSource(dbConfig: DbConfig, meterRegistry: MeterRegistry): DataSource {
     val dataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = dbConfig.url
         username = dbConfig.username
@@ -30,6 +31,7 @@ fun createPostgresDataSource(dbConfig: DbConfig): DataSource {
         minimumIdle = 1
         driverClassName = "org.postgresql.Driver"
         connectionTestQuery = "SELECT 1"
+        metricRegistry = meterRegistry
     })
 
     Migrering.migrate(dataSource)
