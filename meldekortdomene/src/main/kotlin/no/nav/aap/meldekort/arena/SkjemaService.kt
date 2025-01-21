@@ -15,7 +15,7 @@ class SkjemaService(
     )
 
     fun hentSkjema(ident: Ident, meldekortId: Long): Skjema? {
-        return skjemaRepository.lastSkjema(ident, meldekortId, flyt)
+        return skjemaRepository.last(ident, meldekortId, flyt)
     }
 
     fun hentEllerOpprettSkjema(meldekortId: Long, innloggetBruker: InnloggetBruker): Skjema {
@@ -30,21 +30,23 @@ class SkjemaService(
             .orEmpty()
             .single { it.meldekortId == meldekortId }
             .periode
-        return skjemaRepository.lagrSkjema(
-            Skjema(
-                meldekortId = meldekortId,
-                payload = InnsendingPayload.tomtSkjema(meldeperiode),
-                steg = flyt.stegForNavn(navn = BekreftSvarerÆrligSteg.navn),
-                meldeperiode = meldeperiode,
-                ident = innloggetBruker.ident,
-                flyt = flyt,
-                tilstand = SkjemaTilstand.UTKAST,
-            )
+        val skjema = Skjema(
+            meldekortId = meldekortId,
+            payload = InnsendingPayload.tomtSkjema(meldeperiode),
+            steg = flyt.stegForNavn(navn = BekreftSvarerÆrligSteg.navn),
+            meldeperiode = meldeperiode,
+            ident = innloggetBruker.ident,
+            flyt = flyt,
+            tilstand = SkjemaTilstand.UTKAST,
         )
+        skjemaRepository.lagrSkjema(skjema)
+
+        return skjema
     }
 
     fun lagre(skjema: Skjema): Skjema {
-        return skjemaRepository.lagrSkjema(skjema)
+        skjemaRepository.lagrSkjema(skjema)
+        return skjema
     }
 
     fun lagreOgNeste(
@@ -52,7 +54,9 @@ class SkjemaService(
         skjema: Skjema,
     ): Skjema {
         return try {
-            skjemaRepository.lagrSkjema(skjema.nesteSteg(innloggetBruker))
+            skjema.nesteSteg(innloggetBruker).also {
+                skjemaRepository.lagrSkjema(it)
+            }
         } catch (e: Exception) {
             skjemaRepository.lagrSkjema(skjema)
             throw e

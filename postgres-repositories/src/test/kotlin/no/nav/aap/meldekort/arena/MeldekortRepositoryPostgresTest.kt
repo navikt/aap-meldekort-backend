@@ -1,7 +1,6 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
-import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.arena.MeldekortType.KORRIGERING
 import no.nav.aap.meldekort.arena.MeldekortType.VANLIG
@@ -14,7 +13,7 @@ class MeldekortRepositoryPostgresTest {
     @Test
     fun `lagre, oppdatere og hente ut meldekort`() {
         val repo = MeldekortRepositoryPostgres(InitTestDatabase.dataSource)
-        val ident = Ident("0".repeat(9))
+        val ident = nextIdent()
         val kommendeMeldekort = KommendeMeldekort(
             meldekortId = 0,
             type = VANLIG,
@@ -28,7 +27,7 @@ class MeldekortRepositoryPostgresTest {
             kanKorrigeres = false,
             begrunnelseEndring = "Kort",
             mottattIArena = LocalDate.of(2020, 1, 1),
-            orginalMeldekortId = 0,
+            originalMeldekortId = 0,
             beregningStatus = MeldekortStatus.INNSENDT,
         )
         repo.upsert(ident, listOf(kommendeMeldekort, historiskMeldekort))
@@ -43,7 +42,7 @@ class MeldekortRepositoryPostgresTest {
             kanKorrigeres = false,
             begrunnelseEndring = null,
             mottattIArena = null,
-            orginalMeldekortId = null,
+            originalMeldekortId = null,
             beregningStatus = MeldekortStatus.INNSENDT,
         )
 
@@ -54,7 +53,7 @@ class MeldekortRepositoryPostgresTest {
     @Test
     fun `hent batch av meldekort`() {
         val repo = MeldekortRepositoryPostgres(InitTestDatabase.dataSource)
-        val ident = Ident("0".repeat(11))
+        val ident = nextIdent()
         val kommendeMeldekort = KommendeMeldekort(
             meldekortId = 0,
             type = VANLIG,
@@ -68,7 +67,7 @@ class MeldekortRepositoryPostgresTest {
             kanKorrigeres = false,
             begrunnelseEndring = "Kort",
             mottattIArena = LocalDate.of(2020, 1, 1),
-            orginalMeldekortId = 0,
+            originalMeldekortId = 0,
             beregningStatus = MeldekortStatus.INNSENDT,
         )
         val ikkeHentesUtMeldekort = KommendeMeldekort(
@@ -78,7 +77,7 @@ class MeldekortRepositoryPostgresTest {
             kanKorrigeres = false,
         )
         repo.upsert(ident, listOf(kommendeMeldekort, historiskMeldekort, ikkeHentesUtMeldekort))
-        repo.upsert(Ident("1".repeat(11)), kommendeMeldekort.copy(type = KORRIGERING))
+        repo.upsert(nextIdent(), kommendeMeldekort.copy(type = KORRIGERING))
 
         val meldekort = repo.hent(ident, listOf(0, 1))
 

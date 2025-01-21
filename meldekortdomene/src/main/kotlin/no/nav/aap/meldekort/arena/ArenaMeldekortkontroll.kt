@@ -37,7 +37,7 @@ data class ArenaMeldekortkontrollRequest(
             val meldekortdager = skjema.payload.timerArbeidet.map { timerArbeidet ->
                 MeldekortkontrollFravaer(
                     dato = timerArbeidet.dato,
-                    arbeidTimer = timerArbeidet.timer ?: 0.0,
+                    arbeidTimer = if (skjema.payload.harDuJobbet == true) timerArbeidet.timer ?: 0.0 else 0.0,
                 )
             }
 

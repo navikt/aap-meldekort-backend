@@ -20,7 +20,7 @@ class MeldekortRepositoryPostgres(
                         kan_korrigeres,
                         periode,
                         type,
-                        foo,
+                        tilstand,
                         begrunnelse_endring,
                         mottatt,
                         original_meldekort_id,
@@ -32,7 +32,7 @@ class MeldekortRepositoryPostgres(
                         kan_korrigeres = excluded.kan_korrigeres,
                         periode = excluded.periode,
                         type = excluded.type,
-                        foo = excluded.foo,
+                        tilstand = excluded.tilstand,
                         begrunnelse_endring = excluded.begrunnelse_endring,
                         mottatt = excluded.mottatt,
                         original_meldekort_id = excluded.original_meldekort_id,
@@ -48,17 +48,17 @@ class MeldekortRepositoryPostgres(
                     setEnumName(5, it.type)
                     when (it) {
                         is KommendeMeldekort -> {
-                            setEnumName(6, Foo.KOMMENDE)
+                            setEnumName(6, Tilstand.KOMMENDE)
                             setString(7, null)
                             setLocalDate(8, null)
                             setLong(9, null)
                             setEnumName(10, null)
                         }
                         is HistoriskMeldekort -> {
-                            setEnumName(6, Foo.HISTORISK)
+                            setEnumName(6, Tilstand.HISTORISK)
                             setString(7, it.begrunnelseEndring)
                             setLocalDate(8, it.mottattIArena)
-                            setLong(9, it.orginalMeldekortId)
+                            setLong(9, it.originalMeldekortId)
                             setEnumName(10, it.beregningStatus)
                         }
                     }
@@ -97,15 +97,15 @@ class MeldekortRepositoryPostgres(
     }
 
     private fun mapTilMeldekort(row: Row): Meldekort {
-        return when (row.getEnum<Foo>("foo")) {
-            Foo.KOMMENDE -> KommendeMeldekort(
+        return when (row.getEnum<Tilstand>("tilstand")) {
+            Tilstand.KOMMENDE -> KommendeMeldekort(
                 meldekortId = row.getLong("meldekort_id"),
                 type = row.getEnum("type"),
                 periode = row.getPeriode("periode").let { dbPeriode -> Periode(dbPeriode.fom, dbPeriode.tom) },
                 kanKorrigeres = row.getBoolean("kan_korrigeres"),
             )
 
-            Foo.HISTORISK -> mapTilHistoriskeMeldekort(row)
+            Tilstand.HISTORISK -> mapTilHistoriskeMeldekort(row)
         }
     }
 
@@ -117,24 +117,24 @@ class MeldekortRepositoryPostgres(
             kanKorrigeres = row.getBoolean("kan_korrigeres"),
             begrunnelseEndring = row.getStringOrNull("begrunnelse_endring"),
             mottattIArena = row.getLocalDateOrNull("mottatt"),
-            orginalMeldekortId = row.getLongOrNull("original_meldekort_id"),
+            originalMeldekortId = row.getLongOrNull("original_meldekort_id"),
             beregningStatus = row.getEnum("beregning_status")
         )
     }
 
     override fun hentAlleHistoriskeMeldekort(ident: Ident): List<HistoriskMeldekort> {
         return dataSource.transaction { connection ->
-            connection.queryList("select * from arena_meldekort where ident = ? and foo = ?") {
+            connection.queryList("select * from arena_meldekort where ident = ? and tilstand = ?") {
                 setParams {
                     setString(1, ident.asString)
-                    setEnumName(2, Foo.HISTORISK)
+                    setEnumName(2, Tilstand.HISTORISK)
                 }
                 setRowMapper { mapTilHistoriskeMeldekort(it) }
             }
         }
     }
 
-    private enum class Foo {
+    private enum class Tilstand {
         KOMMENDE, HISTORISK
     }
 }

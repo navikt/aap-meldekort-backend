@@ -50,7 +50,7 @@ data class HistoriskMeldekort(
     override val kanKorrigeres: Boolean,
     val begrunnelseEndring: String?,
     val mottattIArena: LocalDate?,
-    val orginalMeldekortId: Long?,
+    val originalMeldekortId: Long?,
     val beregningStatus: MeldekortStatus,
 ) : Meldekort {
     fun erLengreIProsessen(other: HistoriskMeldekort): Boolean {

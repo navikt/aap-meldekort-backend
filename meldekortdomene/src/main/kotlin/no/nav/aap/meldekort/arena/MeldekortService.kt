@@ -73,7 +73,7 @@ class MeldekortService(
                         type = it.type,
                         begrunnelseEndring = detaljer(it.meldekortId).begrunnelse?.ifBlank { null },
                         mottattIArena = it.mottattDato,
-                        orginalMeldekortId = if (it.meldekortId != orginalMeldekortId) orginalMeldekortId else null,
+                        originalMeldekortId = if (it.meldekortId != orginalMeldekortId) orginalMeldekortId else null,
                     )
                 }
             }
@@ -124,17 +124,16 @@ class MeldekortService(
         meldekortkontrollResponse.validerVellykket()
 
         meldekortRepository.upsert(
-            innloggetBruker.ident, listOf<Meldekort>(
-                HistoriskMeldekort(
-                    meldekortId = skjema.meldekortId,
-                    type = meldekortdetaljer.kortType.meldekortType,
-                    periode = skjema.meldeperiode,
-                    kanKorrigeres = false,  // TODO: når vi har flyt for korrigering må denne settes
-                    begrunnelseEndring = arenaMeldekortkontrollRequest.begrunnelse,
-                    mottattIArena = null,
-                    orginalMeldekortId = null, // TODO: når vi har flyt for korrigering må det propageres her
-                    beregningStatus = INNSENDT,
-                )
+            innloggetBruker.ident,
+            HistoriskMeldekort(
+                meldekortId = skjema.meldekortId,
+                type = meldekortdetaljer.kortType.meldekortType,
+                periode = skjema.meldeperiode,
+                kanKorrigeres = false,  // TODO: når vi har flyt for korrigering må denne settes
+                begrunnelseEndring = arenaMeldekortkontrollRequest.begrunnelse,
+                mottattIArena = null,
+                originalMeldekortId = null, // TODO: når vi har flyt for korrigering må det propageres her
+                beregningStatus = INNSENDT,
             )
         )
     }
