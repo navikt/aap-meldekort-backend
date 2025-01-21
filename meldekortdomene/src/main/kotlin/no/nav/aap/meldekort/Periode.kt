@@ -3,7 +3,7 @@ package no.nav.aap.meldekort
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-class Periode(
+data class Periode(
     val fom: LocalDate,
     val tom: LocalDate,
 ) : Iterable<LocalDate> {

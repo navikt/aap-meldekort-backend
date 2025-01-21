@@ -11,7 +11,6 @@ import java.time.LocalDate
 class MeldekortService(
     private val arenaClient: ArenaClient,
     private val meldekortRepository: MeldekortRepository,
-    /* TODO: finn ut hva dette er. */ private val innsendingstidspunktProvider: (String) -> Long = { -1 },
 ) {
     fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
         val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return null
@@ -27,24 +26,28 @@ class MeldekortService(
             .asSequence()
             .filter { it.erForAap }
             /* TODO: Er neste linje (filter != KORRIGERING) riktig? */
-            .filter { it.type != MeldekortType.KORRIGERING /* Kort for korrigering opprettes samtidig som det sendes inn */}
+            .filter { it.type != MeldekortType.KORRIGERING /* Kort for korrigering opprettes samtidig som det sendes inn */ }
             .filter { it.beregningstatus in arrayOf(OPPRE, SENDT) }
-            .filter { meldekort -> dbMeldekort.none { it.meldekortId == meldekort.meldekortId && it is HistoriskMeldekort } }
+            .filterNot { meldekort -> erSendtInn(dbMeldekort, meldekort) }
             .map { meldekort ->
                 KommendeMeldekort(
                     meldekortId = meldekort.meldekortId,
                     periode = Periode(meldekort.fraDato, meldekort.tilDato),
                     type = meldekort.type,
-                    kanSendesFra = meldekort.tilDato.plusDays(innsendingstidspunktProvider(meldekort.periodekode)),
                     kanKorrigeres = !meldekort.erUbehandletEllerKorrigeringForPerioden(arenaMeldekort)
                 )
             }
             .toList()
-            .also { meldekortRepository.upsertFraArena(innloggetBruker.ident, it) }
+            .also { meldekortRepository.upsert(innloggetBruker.ident, it) }
     }
 
-    fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
-        val råMeldekortFraArena = arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
+    private fun erSendtInn(dbMeldekort: List<Meldekort>, meldekort: ArenaMeldekort): Boolean {
+        return dbMeldekort.singleOrNull { it.meldekortId == meldekort.meldekortId } is HistoriskMeldekort
+    }
+
+    private fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
+        val råMeldekortFraArena =
+            arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
         val detaljerCache = mutableMapOf<Long, ArenaMeldekortdetaljer>()
         fun detaljer(meldekortId: Long) = detaljerCache.computeIfAbsent(meldekortId) {
@@ -66,10 +69,10 @@ class MeldekortService(
                         meldekortId = it.meldekortId,
                         periode = Periode(it.fraDato, it.tilDato),
                         kanKorrigeres = !it.erUbehandletEllerKorrigeringForPerioden(råMeldekortFraArena),
-                        status = status,
+                        beregningStatus = status,
                         type = it.type,
                         begrunnelseEndring = detaljer(it.meldekortId).begrunnelse?.ifBlank { null },
-                        mottatt = it.mottattDato,
+                        mottattIArena = it.mottattDato,
                         orginalMeldekortId = if (it.meldekortId != orginalMeldekortId) orginalMeldekortId else null,
                     )
                 }
@@ -78,11 +81,14 @@ class MeldekortService(
 
         meldekortRepository.hentAlleHistoriskeMeldekort(innloggetBruker.ident)
             .forEach { meldekortFraDb ->
-                val periodeIndex = meldekortene.indexOfFirst { it.meldekortId == meldekortFraDb.meldekortId }
-                if (periodeIndex < 0) {
+                val meldekortIndex = meldekortene.indexOfFirst { it.meldekortId == meldekortFraDb.meldekortId }
+                val meldekortFraArena = meldekortene.getOrNull(meldekortIndex)
+                if (meldekortFraArena == null) {
                     meldekortene.add(meldekortFraDb)
-                } else if (meldekortFraDb.status.ordinal >= meldekortene[periodeIndex].status.ordinal) {
-                    meldekortene[periodeIndex] = meldekortFraDb
+                } else if (meldekortFraArena.erLengreIProsessen(meldekortFraDb)) {
+                    meldekortRepository.upsert(innloggetBruker.ident, meldekortFraArena)
+                } else {
+                    meldekortene[meldekortIndex] = meldekortFraDb
                 }
             }
 
@@ -100,31 +106,36 @@ class MeldekortService(
                 .flatten()
                 .sortedWith(
                     compareByDescending<HistoriskMeldekort> { it.periode.fom }
-                        .thenByDescending { it.mottatt },
+                        .thenByDescending { it.mottattIArena },
                 )
         return nåværendePeriode + sisteFemPerioderSortert
     }
 
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
         // TODO: Håndtere at systemet krasjer mellom de forskjellige stegene.
-        // TODO: Hvis det er korrigering, må vi opprette selve meldekortet her, før vi prøver å sende det inn.
         val meldekortdetaljer = arenaClient.meldekortdetaljer(innloggetBruker, skjema.meldekortId)
         check(meldekortdetaljer.fodselsnr == innloggetBruker.ident.asString)
 
         val arenaMeldekortkontrollRequest = ArenaMeldekortkontrollRequest.konstruer(skjema, meldekortdetaljer)
+        // TODO: Hvis det er korrigering, må vi opprette selve meldekortet her, før vi prøver å sende det inn.
+//        arenaClient.korrigertMeldekort()
 
         val meldekortkontrollResponse = arenaClient.sendInn(innloggetBruker, arenaMeldekortkontrollRequest)
         meldekortkontrollResponse.validerVellykket()
 
-        meldekortRepository.oppdater(innloggetBruker.ident, HistoriskMeldekort(
-            meldekortId = skjema.meldekortId,
-            type = meldekortdetaljer.kortType.meldekortType,
-            periode = skjema.meldeperiode,
-            kanKorrigeres = false,  // TODO: når vi har flyt for korrigering må denne settes
-            begrunnelseEndring = arenaMeldekortkontrollRequest.begrunnelse,
-            mottatt = null,
-            orginalMeldekortId = null, // TODO: når vi har flyt for korrigering må det propageres her
-            status = INNSENDT,
-        ))
+        meldekortRepository.upsert(
+            innloggetBruker.ident, listOf<Meldekort>(
+                HistoriskMeldekort(
+                    meldekortId = skjema.meldekortId,
+                    type = meldekortdetaljer.kortType.meldekortType,
+                    periode = skjema.meldeperiode,
+                    kanKorrigeres = false,  // TODO: når vi har flyt for korrigering må denne settes
+                    begrunnelseEndring = arenaMeldekortkontrollRequest.begrunnelse,
+                    mottattIArena = null,
+                    orginalMeldekortId = null, // TODO: når vi har flyt for korrigering må det propageres her
+                    beregningStatus = INNSENDT,
+                )
+            )
+        )
     }
 }

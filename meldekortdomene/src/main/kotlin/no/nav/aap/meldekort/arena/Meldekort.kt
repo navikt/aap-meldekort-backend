@@ -37,10 +37,10 @@ data class KommendeMeldekort(
     override val type: MeldekortType,
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
-    val kanSendesFra: LocalDate,
 ) : Meldekort {
+    private val tidligsteInnsendingsdato: LocalDate = periode.tom.minusDays(1)
     val kanSendes: Boolean
-        get() = kanSendesFra <= LocalDate.now()
+        get() = tidligsteInnsendingsdato <= LocalDate.now()
 }
 
 data class HistoriskMeldekort(
@@ -49,7 +49,11 @@ data class HistoriskMeldekort(
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
     val begrunnelseEndring: String?,
-    val mottatt: LocalDate?,
+    val mottattIArena: LocalDate?,
     val orginalMeldekortId: Long?,
-    val status: MeldekortStatus,
-) : Meldekort
+    val beregningStatus: MeldekortStatus,
+) : Meldekort {
+    fun erLengreIProsessen(other: HistoriskMeldekort): Boolean {
+        return beregningStatus.ordinal > other.beregningStatus.ordinal
+    }
+}

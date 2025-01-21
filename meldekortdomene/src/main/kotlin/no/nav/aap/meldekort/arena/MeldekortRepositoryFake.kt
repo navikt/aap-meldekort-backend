@@ -6,7 +6,7 @@ import no.nav.aap.meldekort.Ident
 class MeldekortRepositoryFake: MeldekortRepository {
     private val store: MutableMap<Pair<Ident, Long>, Meldekort> = mutableMapOf()
 
-    override fun oppdater(ident: Ident, meldekort: Meldekort) {
+    fun oppdater(ident: Ident, meldekort: Meldekort) {
         store[ident to meldekort.meldekortId] = meldekort
     }
 
@@ -30,7 +30,7 @@ class MeldekortRepositoryFake: MeldekortRepository {
             .toList()
     }
 
-    override fun upsertFraArena(ident: Ident, meldekort: List<Meldekort>) {
+    override fun upsert(ident: Ident, meldekort: List<Meldekort>) {
         meldekort.forEach {
             oppdater(ident, it)
         }
