@@ -33,8 +33,8 @@ class ArenaSkjemaFlate(
     val skjemaService: SkjemaService,
     val arenaClient: ArenaClient
 ) {
-    fun listMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
-        return meldekortService.alleMeldekort(innloggetBruker)
+    fun korrigerMeldekort(innloggetBruker: InnloggetBruker, originalMeldekortId: Long, timerArbeidet: List<TimerArbeidet>) {
+        skjemaService.sendInnKorrigering(innloggetBruker, originalMeldekortId, timerArbeidet)
     }
 
     fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort> {

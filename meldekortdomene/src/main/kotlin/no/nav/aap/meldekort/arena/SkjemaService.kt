@@ -5,7 +5,8 @@ import no.nav.aap.meldekort.InnloggetBruker
 
 class SkjemaService(
     private val skjemaRepository: SkjemaRepository,
-    private val meldekortService: MeldekortService
+    private val meldekortService: MeldekortService,
+    private val arenaClient: ArenaClient
 ) {
     private val flyt = SkjemaFlyt(
         BekreftSvarerÆrligSteg,
@@ -67,5 +68,28 @@ class SkjemaService(
         skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA))
         meldekortService.sendInn(skjema, innloggetBruker)
         skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.SENDT_ARENA))
+    }
+
+    fun sendInnKorrigering(innloggetBruker: InnloggetBruker, originalMeldekortId: Long, timerArbeidet: List<TimerArbeidet>) {
+        val originaltMeldekort =
+            meldekortService.historiskeMeldekort(innloggetBruker).single { it.meldekortId == originalMeldekortId }
+        check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }
+
+        val skjema = Skjema(
+            flyt = flyt,
+            tilstand = SkjemaTilstand.UTKAST,
+            meldekortId = arenaClient.korrigertMeldekort(innloggetBruker, originalMeldekortId),
+            ident = innloggetBruker.ident,
+            steg = KvitteringSteg,
+            meldeperiode = originaltMeldekort.periode,
+            payload = InnsendingPayload(
+                svarerDuSant = true,
+                harDuJobbet = true,
+                timerArbeidet = timerArbeidet,
+                stemmerOpplysningene = true
+            )
+        )
+
+        sendInn(skjema, innloggetBruker)
     }
 }

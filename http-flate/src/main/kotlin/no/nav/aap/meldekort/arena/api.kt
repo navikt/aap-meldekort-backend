@@ -101,8 +101,12 @@ fun NormalOpenAPIRoute.meldekortApi(
                 )
             }
 
-            route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { meldekortId, request ->
-
+            route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { param, request ->
+                arenaSkjemaFlate.korrigerMeldekort(
+                    innloggetBruker(),
+                    param.meldekortId,
+                    request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
+                )
             }
         }
 
