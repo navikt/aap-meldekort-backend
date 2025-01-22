@@ -153,7 +153,7 @@ class ArenaClientImpl(
         val beregningstatus: String,
         val forskudd: Boolean,
         val mottattDato: LocalDate? = null,
-        val bruttoBelop: Float = 0F
+        val bruttoBelop: Double = 0.0
     ) {
         fun tilDomene() = ArenaMeldekort(
             meldekortId = meldekortId,
@@ -223,7 +223,7 @@ class ArenaClientImpl(
 
     data class MeldekortDagDto(
         val dag: Int = 0,
-        val arbeidetTimerSum: Float? = null,
+        val arbeidetTimerSum: Double? = null,
         val syk: Boolean? = null,
         val annetFravaer: Boolean? = null,
         val kurs: Boolean? = null,

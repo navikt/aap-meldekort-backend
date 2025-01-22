@@ -7,9 +7,7 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.respond
-import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
-import io.ktor.http.*
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.Ident
@@ -20,22 +18,16 @@ fun NormalOpenAPIRoute.meldekortApi(
     arenaClient: ArenaClient,
 ) {
     route("/api/arena") {
-        route("/meldeperiode").get<Unit, List<MeldeperiodeDto>> {
-            val meldeperioder = arenaSkjemaFlate.listMeldekort(innloggetBruker())
-                ?: return@get respondWithStatus(HttpStatusCode.NotFound)
-            respond(meldeperioder.map { MeldeperiodeDto(it) })
-        }
-
-        route("/meldekort/{meldekortId}") {
-            class Params(
-                @JsonValue @PathParam("meldekortId") val meldekortId: Long,
-            )
-            get<Params, MeldekortResponse> { params ->
+        class MeldekortIdParam(
+            @JsonValue @PathParam("meldekortId") val meldekortId: Long,
+        )
+        route("/skjema/{meldekortId}") {
+            get<MeldekortIdParam, MeldekortResponse> { params ->
                 val nåværendeTilstand = arenaSkjemaFlate.hentEllerOpprettSkjema(innloggetBruker(), params.meldekortId)
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 
-            route("/neste-steg").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
+            route("/neste-steg").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     try {
                         MeldekortResponse(
@@ -55,7 +47,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                 )
             }
 
-            route("/lagre").post<Params, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
+            route("/lagre").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     MeldekortResponse(
                         arenaSkjemaFlate.lagreSteg(
@@ -68,16 +60,61 @@ fun NormalOpenAPIRoute.meldekortApi(
                 )
             }
         }
-    }
 
-    route("/test/proxy/meldegrupper").get<Unit, Any> {
-        respond(arenaClient.meldegrupper(innloggetBruker()))
-    }
-    route("/test/proxy/meldekort").get<Unit, Any> {
-        respond(arenaClient.person(innloggetBruker()) ?: "null")
-    }
-    route("/test/proxy/historiskemeldekort").get<Unit, Any> {
-        respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
+        route("meldekort") {
+            route("/neste").get<Unit, KommendeMeldekortDto> {
+                val kommendeMeldekort = arenaSkjemaFlate.kommendeMeldekort(innloggetBruker())
+                respond(
+                    KommendeMeldekortDto(
+                        antallUbesvarteMeldekort = kommendeMeldekort.size,
+                        nesteMeldekort = kommendeMeldekort.minByOrNull { it.periode }?.let {
+                            NesteMeldekortDto(
+                                meldeperiode = PeriodeDto(it.periode),
+                                meldekortId = it.meldekortId,
+                                tidligsteInnsendingsDato = it.tidligsteInnsendingsdato,
+                                kanSendesInn = it.kanSendes
+                            )
+                        }
+                    )
+                )
+            }
+
+            route("/historisk").get<Unit, List<HistoriskMeldekortDto>> {
+                respond(
+                    arenaSkjemaFlate.historiskeMeldekort(
+                        innloggetBruker()
+                    ).map {
+                        HistoriskMeldekortDto(
+                            meldeperiode = PeriodeDto(it.periode),
+                            meldekortId = it.meldekortId,
+                            status = it.beregningStatus
+                        )
+                    }
+                )
+            }
+
+            route("/historisk/{meldekortId}").get<MeldekortIdParam, HistoriskMeldekortDetaljerDto> { param ->
+                respond(
+                    HistoriskMeldekortDetaljerDto(
+                        arenaSkjemaFlate.historiskMeldekort(innloggetBruker(), param.meldekortId)
+                    )
+                )
+            }
+
+            route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { meldekortId, request ->
+
+            }
+        }
+
+        route("/test/proxy/meldegrupper").get<Unit, Any> {
+            respond(arenaClient.meldegrupper(innloggetBruker()))
+        }
+        route("/test/proxy/meldekort").get<Unit, Any> {
+            respond(arenaClient.person(innloggetBruker()) ?: "null")
+        }
+        route("/test/proxy/historiskemeldekort").get<Unit, Any> {
+            respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
+        }
     }
 }
 

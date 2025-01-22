@@ -21,7 +21,7 @@ data class ArenaMeldekort(
     val beregningstatus: ArenaStatus,
     val forskudd: Boolean,
     val mottattDato: LocalDate? = null,
-    val bruttoBelop: Float = 0F,
+    val bruttoBelop: Double?,
 ) {
     val erForAap: Boolean = hoyesteMeldegruppe == AAP_KODE
 

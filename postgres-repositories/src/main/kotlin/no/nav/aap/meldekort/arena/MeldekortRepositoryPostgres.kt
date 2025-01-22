@@ -24,9 +24,10 @@ class MeldekortRepositoryPostgres(
                         begrunnelse_endring,
                         mottatt,
                         original_meldekort_id,
-                        beregning_status
+                        beregning_status,
+                        brutto_beløp
                     )
-                    values (?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?)
+                    values (?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?, ?)
                     on conflict (ident, meldekort_id)
                     do update set
                         kan_korrigeres = excluded.kan_korrigeres,
@@ -36,7 +37,8 @@ class MeldekortRepositoryPostgres(
                         begrunnelse_endring = excluded.begrunnelse_endring,
                         mottatt = excluded.mottatt,
                         original_meldekort_id = excluded.original_meldekort_id,
-                        beregning_status = excluded.beregning_status
+                        beregning_status = excluded.beregning_status,
+                        brutto_beløp = excluded.brutto_beløp
         """.trimIndent(),
                 meldekort,
             ) {
@@ -53,6 +55,7 @@ class MeldekortRepositoryPostgres(
                             setLocalDate(8, null)
                             setLong(9, null)
                             setEnumName(10, null)
+                            setDouble(11, null)
                         }
                         is HistoriskMeldekort -> {
                             setEnumName(6, Tilstand.HISTORISK)
@@ -60,6 +63,7 @@ class MeldekortRepositoryPostgres(
                             setLocalDate(8, it.mottattIArena)
                             setLong(9, it.originalMeldekortId)
                             setEnumName(10, it.beregningStatus)
+                            setDouble(11, it.bruttoBeløp)
                         }
                     }
                 }
@@ -118,7 +122,8 @@ class MeldekortRepositoryPostgres(
             begrunnelseEndring = row.getStringOrNull("begrunnelse_endring"),
             mottattIArena = row.getLocalDateOrNull("mottatt"),
             originalMeldekortId = row.getLongOrNull("original_meldekort_id"),
-            beregningStatus = row.getEnum("beregning_status")
+            beregningStatus = row.getEnum("beregning_status"),
+            bruttoBeløp = row.getDoubleOrNull("brutto_beløp")
         )
     }
 

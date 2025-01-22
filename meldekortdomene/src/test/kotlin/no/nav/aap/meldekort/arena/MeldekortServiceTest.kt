@@ -61,7 +61,7 @@ class MeldekortServiceTest {
             beregningstatus = OPPRE,
             forskudd = false,
             mottattDato = null,
-            bruttoBelop = 0f,
+            bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
             meldekortId = 1684229709,
@@ -73,7 +73,7 @@ class MeldekortServiceTest {
             beregningstatus = OPPRE,
             forskudd = false,
             mottattDato = null,
-            bruttoBelop = 0f,
+            bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
             meldekortId = 1684229717,
@@ -85,7 +85,7 @@ class MeldekortServiceTest {
             beregningstatus = OPPRE,
             forskudd = false,
             mottattDato = null,
-            bruttoBelop = 0f,
+            bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
             meldekortId = 1684229725,
@@ -97,7 +97,7 @@ class MeldekortServiceTest {
             beregningstatus = OPPRE,
             forskudd = false,
             mottattDato = null,
-            bruttoBelop = 0f,
+            bruttoBelop = 0.0,
         )
     )
 }

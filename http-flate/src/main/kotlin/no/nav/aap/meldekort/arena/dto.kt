@@ -4,6 +4,47 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.aap.meldekort.Periode
 import java.time.LocalDate
 
+data class KommendeMeldekortDto(
+    val antallUbesvarteMeldekort: Int,
+    val nesteMeldekort: NesteMeldekortDto?
+)
+
+data class NesteMeldekortDto(
+    val meldeperiode: PeriodeDto,
+    val meldekortId: Long,
+    val tidligsteInnsendingsDato: LocalDate,
+    val kanSendesInn: Boolean,
+)
+
+data class HistoriskMeldekortDto(
+    val meldeperiode: PeriodeDto,
+    val meldekortId: Long,
+    val status: MeldekortStatus,
+)
+
+data class HistoriskMeldekortDetaljerDto(
+    val meldeperiode: PeriodeDto,
+    val meldekortId: Long,
+    val status: MeldekortStatus,
+    val bruttoBeløp: Double?,
+    val innsendtDato: LocalDate?,
+    val kanEndres: Boolean,
+    val timerArbeidet: List<TimerArbeidetDto>?
+) {
+    constructor(historiskMeldekortDetaljer: ArenaSkjemaFlate.HistoriskMeldekortDetaljer) : this(
+        meldeperiode = PeriodeDto(historiskMeldekortDetaljer.meldekort.periode),
+        meldekortId = historiskMeldekortDetaljer.meldekort.meldekortId,
+        status = historiskMeldekortDetaljer.meldekort.beregningStatus,
+        bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
+        innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
+        kanEndres = historiskMeldekortDetaljer.meldekort.kanKorrigeres,
+        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(TimerArbeidetDto::fraDomene)
+    )
+}
+
+data class MeldekortKorrigeringRequest(
+    val timerArbeidet: List<TimerArbeidetDto>
+)
 
 @Suppress("unused")
 class MeldeperiodeDto(

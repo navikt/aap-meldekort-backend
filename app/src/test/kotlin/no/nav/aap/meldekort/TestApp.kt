@@ -32,6 +32,7 @@ fun main() {
         arenaSkjemaFlate = ArenaSkjemaFlate(
             meldekortService = meldekortService,
             skjemaService = skjemaService,
+            arenaClient = FakeArenaClient,
         ),
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),

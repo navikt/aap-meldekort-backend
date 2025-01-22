@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit
 data class Periode(
     val fom: LocalDate,
     val tom: LocalDate,
-) : Iterable<LocalDate> {
+) : Iterable<LocalDate>, Comparable<Periode> {
     init {
         require(fom <= tom)
     }
@@ -20,5 +20,10 @@ data class Periode(
 
     fun inneholder(dato: LocalDate): Boolean {
         return dato in fom..tom
+    }
+
+    override fun compareTo(other: Periode): Int {
+        val compare = fom.compareTo(other.fom)
+        return if (compare != 0) compare else tom.compareTo(other.tom)
     }
 }

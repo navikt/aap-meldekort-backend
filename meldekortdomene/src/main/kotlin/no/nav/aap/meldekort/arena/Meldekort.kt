@@ -38,7 +38,7 @@ data class KommendeMeldekort(
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
 ) : Meldekort {
-    private val tidligsteInnsendingsdato: LocalDate = periode.tom.minusDays(1)
+    val tidligsteInnsendingsdato: LocalDate = periode.tom.minusDays(1)
     val kanSendes: Boolean
         get() = tidligsteInnsendingsdato <= LocalDate.now()
 }
@@ -52,8 +52,10 @@ data class HistoriskMeldekort(
     val mottattIArena: LocalDate?,
     val originalMeldekortId: Long?,
     val beregningStatus: MeldekortStatus,
+    val bruttoBeløp: Double?
 ) : Meldekort {
     fun erLengreIProsessen(other: HistoriskMeldekort): Boolean {
         return beregningStatus.ordinal > other.beregningStatus.ordinal
     }
 }
+

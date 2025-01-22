@@ -31,9 +31,35 @@ data class TimerArbeidet(
 class ArenaSkjemaFlate(
     val meldekortService: MeldekortService,
     val skjemaService: SkjemaService,
+    val arenaClient: ArenaClient
 ) {
     fun listMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
         return meldekortService.alleMeldekort(innloggetBruker)
+    }
+
+    fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort> {
+        return requireNotNull(meldekortService.kommendeMeldekort(innloggetBruker))
+    }
+
+    data class HistoriskMeldekortDetaljer(
+        val meldekort: HistoriskMeldekort,
+        val timerArbeidet: List<TimerArbeidet>?
+    )
+
+    fun historiskMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): HistoriskMeldekortDetaljer {
+        val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).single { it.meldekortId == meldekortId }
+        return HistoriskMeldekortDetaljer(
+            meldekort = meldekort,
+            timerArbeidet = arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
+                .timerArbeidet(meldekort.periode.fom)
+        )
+
+    }
+
+    fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
+        return meldekortService.historiskeMeldekort(innloggetBruker).groupBy { it.periode }.values.map {
+            it.maxBy { meldekort -> meldekort.beregningStatus.ordinal }
+        }
     }
 
     fun hentEllerOpprettSkjema(innloggetBruker: InnloggetBruker, meldekortId: Long): Skjema {

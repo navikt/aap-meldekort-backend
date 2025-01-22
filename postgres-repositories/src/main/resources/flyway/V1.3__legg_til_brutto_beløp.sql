@@ -1,0 +1,1 @@
+alter table arena_meldekort add column brutto_beløp numeric null;

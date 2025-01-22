@@ -30,68 +30,21 @@ data class ArenaMeldekortdetaljer(
 
     data class MeldekortDag(
         val dag: Int = 0,
-        val arbeidetTimerSum: Float? = null,
+        val arbeidetTimerSum: Double? = null,
         val syk: Boolean? = null,
         val annetFravaer: Boolean? = null,
         val kurs: Boolean? = null,
         val meldegruppe: String? = null
     )
 
-    class Dag(
-        val dato: LocalDate,
-        val aktiviteter: List<Aktivitet> = emptyList(),
-        val dagIndex: Int
-    ) {
-        fun finnesAktivitetMedType(aktivitetsType: Aktivitet.AktivitetsType): Boolean {
-            return this.aktiviteter.find { aktivitet -> aktivitet.type == aktivitetsType } != null
+    fun timerArbeidet(fom: LocalDate): List<TimerArbeidet> {
+        val aktivitetsdager = MutableList(14) { index ->
+            TimerArbeidet(null, fom.plusDays(index.toLong()))
         }
 
-        fun hentArbeidstimer(): Double {
-            return this.aktiviteter.find { aktivitet -> aktivitet.type == Aktivitet.AktivitetsType.Arbeid }?.timer
-                ?: 0.0
-        }
-    }
-
-    private fun mapAktivitetsdager(fom: LocalDate): List<Dag> {
-        val aktivitetsdager = List(14) { index ->
-            Dag(fom.plusDays(index.toLong()), mutableListOf(), index)
-        }
         this.sporsmal?.meldekortDager?.forEach { dag ->
             if (dag.arbeidetTimerSum != null && dag.arbeidetTimerSum > 0) {
-                (aktivitetsdager[dag.dag - 1].aktiviteter as MutableList).add(
-                    Aktivitet(
-                        UUID.randomUUID(),
-                        Aktivitet.AktivitetsType.Arbeid,
-                        dag.arbeidetTimerSum.toDouble()
-                    )
-                )
-            }
-            if (dag.syk == true) {
-                (aktivitetsdager[dag.dag - 1].aktiviteter as MutableList).add(
-                    Aktivitet(
-                        UUID.randomUUID(),
-                        Aktivitet.AktivitetsType.Syk,
-                        null
-                    )
-                )
-            }
-            if (dag.kurs == true) {
-                (aktivitetsdager[dag.dag - 1].aktiviteter as MutableList).add(
-                    Aktivitet(
-                        UUID.randomUUID(),
-                        Aktivitet.AktivitetsType.Utdanning,
-                        null
-                    )
-                )
-            }
-            if (dag.annetFravaer == true) {
-                (aktivitetsdager[dag.dag - 1].aktiviteter as MutableList).add(
-                    Aktivitet(
-                        UUID.randomUUID(),
-                        Aktivitet.AktivitetsType.Fravaer,
-                        null
-                    )
-                )
+                aktivitetsdager[dag.dag - 1] = aktivitetsdager[dag.dag - 1].copy(timer = dag.arbeidetTimerSum)
             }
         }
 

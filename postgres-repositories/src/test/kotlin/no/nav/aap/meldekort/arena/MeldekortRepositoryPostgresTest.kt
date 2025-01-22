@@ -29,6 +29,7 @@ class MeldekortRepositoryPostgresTest {
             mottattIArena = LocalDate.of(2020, 1, 1),
             originalMeldekortId = 0,
             beregningStatus = MeldekortStatus.INNSENDT,
+            bruttoBeløp = 0.0
         )
         repo.upsert(ident, listOf(kommendeMeldekort, historiskMeldekort))
 
@@ -44,6 +45,7 @@ class MeldekortRepositoryPostgresTest {
             mottattIArena = null,
             originalMeldekortId = null,
             beregningStatus = MeldekortStatus.INNSENDT,
+            bruttoBeløp = 0.0
         )
 
         repo.upsert(ident, nyttMeldekort)
@@ -69,6 +71,7 @@ class MeldekortRepositoryPostgresTest {
             mottattIArena = LocalDate.of(2020, 1, 1),
             originalMeldekortId = 0,
             beregningStatus = MeldekortStatus.INNSENDT,
+            bruttoBeløp = 0.0
         )
         val ikkeHentesUtMeldekort = KommendeMeldekort(
             meldekortId = 2,

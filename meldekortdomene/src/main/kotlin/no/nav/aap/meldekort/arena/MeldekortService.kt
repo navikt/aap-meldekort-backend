@@ -5,7 +5,6 @@ import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.SENDT
 import no.nav.aap.meldekort.arena.MeldekortStatus.INNSENDT
-import java.time.LocalDate
 
 
 class MeldekortService(
@@ -45,7 +44,7 @@ class MeldekortService(
         return dbMeldekort.singleOrNull { it.meldekortId == meldekort.meldekortId } is HistoriskMeldekort
     }
 
-    private fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
+    fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
         val råMeldekortFraArena =
             arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
@@ -53,7 +52,6 @@ class MeldekortService(
         fun detaljer(meldekortId: Long) = detaljerCache.computeIfAbsent(meldekortId) {
             arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
         }
-
         val meldekortene = råMeldekortFraArena
             .filter { it.erForAap }
             .groupBy { it.fraDato }
@@ -74,6 +72,7 @@ class MeldekortService(
                         begrunnelseEndring = detaljer(it.meldekortId).begrunnelse?.ifBlank { null },
                         mottattIArena = it.mottattDato,
                         originalMeldekortId = if (it.meldekortId != orginalMeldekortId) orginalMeldekortId else null,
+                        bruttoBeløp = it.bruttoBelop
                     )
                 }
             }
@@ -91,24 +90,7 @@ class MeldekortService(
                     meldekortene[meldekortIndex] = meldekortFraDb
                 }
             }
-
-        val idag = LocalDate.now()
-        val nåværendePeriode = meldekortene.filter { it.periode.inneholder(idag) }
-        val sisteFemPerioderSortert =
-            meldekortene
-                .filterNot { it in nåværendePeriode }
-                .groupBy { it.periode.fom }
-                .toSortedMap(compareByDescending { it })
-                .entries
-                .take(5)
-                .associate { it.toPair() }
-                .values
-                .flatten()
-                .sortedWith(
-                    compareByDescending<HistoriskMeldekort> { it.periode.fom }
-                        .thenByDescending { it.mottattIArena },
-                )
-        return nåværendePeriode + sisteFemPerioderSortert
+        return meldekortene
     }
 
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
@@ -134,6 +116,7 @@ class MeldekortService(
                 mottattIArena = null,
                 originalMeldekortId = null, // TODO: når vi har flyt for korrigering må det propageres her
                 beregningStatus = INNSENDT,
+                bruttoBeløp = null
             )
         )
     }
