@@ -24,6 +24,7 @@ fun main() {
     val skjemaService = SkjemaService(
         skjemaRepository = SkjemaRepositoryPostgres(dataSource),
         meldekortService = meldekortService,
+        arenaClient = FakeArenaClient,
     )
 
     startHttpServer(
