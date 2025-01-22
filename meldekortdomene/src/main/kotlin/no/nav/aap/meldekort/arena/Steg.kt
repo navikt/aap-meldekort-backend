@@ -41,7 +41,7 @@ object JobbetIMeldeperiodenSteg : Steg {
 }
 
 class TimerArbeidetSteg(
-    private val meldekortService: SkjemaService,
+    private val skjemaService: SkjemaService,
 ) : Steg {
     override val navn: StegNavn
         get() = TIMER_ARBEIDET
@@ -50,7 +50,7 @@ class TimerArbeidetSteg(
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
         return when (skjema.payload.stemmerOpplysningene) {
             true -> {
-                meldekortService.sendInn(skjema, innloggetBruker)
+                skjemaService.sendInn(skjema, innloggetBruker)
                 KVITTERING
             }
             false -> KVITTERING

@@ -23,7 +23,7 @@ fun NormalOpenAPIRoute.meldekortApi(
         )
         route("/skjema/{meldekortId}") {
             get<MeldekortIdParam, MeldekortResponse> { params ->
-                val nåværendeTilstand = arenaSkjemaFlate.hentEllerOpprettSkjema(innloggetBruker(), params.meldekortId)
+                val nåværendeTilstand = arenaSkjemaFlate.hentEllerOpprettUtfylling(innloggetBruker(), params.meldekortId)
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 

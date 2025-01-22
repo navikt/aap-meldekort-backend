@@ -29,9 +29,10 @@ data class TimerArbeidet(
 )
 
 class ArenaSkjemaFlate(
-    val meldekortService: MeldekortService,
-    val skjemaService: SkjemaService,
-    val arenaClient: ArenaClient
+    private val meldekortService: MeldekortService,
+    private val utfyllingService: UtfyllingService,
+    private val skjemaService: SkjemaService,
+    private val arenaClient: ArenaClient
 ) {
     fun korrigerMeldekort(innloggetBruker: InnloggetBruker, originalMeldekortId: Long, timerArbeidet: List<TimerArbeidet>) {
         skjemaService.sendInnKorrigering(innloggetBruker, originalMeldekortId, timerArbeidet)
@@ -62,8 +63,8 @@ class ArenaSkjemaFlate(
         }
     }
 
-    fun hentEllerOpprettSkjema(innloggetBruker: InnloggetBruker, meldekortId: Long): Skjema {
-        return skjemaService.hentEllerOpprettSkjema(meldekortId, innloggetBruker)
+    fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: Long): Utfylling {
+        return utfyllingService.hentEllerStartUtfylling(meldekortId, innloggetBruker)
     }
 
     fun gåTilNesteSteg(
@@ -71,37 +72,37 @@ class ArenaSkjemaFlate(
         meldekortId: Long,
         fraSteg: StegNavn,
         nyPayload: InnsendingPayload
-    ): Skjema {
-        val skjema = skjemaService.hentSkjema(
+    ): Utfylling {
+        val utfylling = utfyllingService.hentUtfylling(
             ident = innloggetBruker.ident,
             meldekortId = meldekortId,
         )
             ?.medSteg(fraSteg)
-            ?.copy(payload = nyPayload)
+            ?.nyPayload(nyPayload)
             ?: throw Error() /* todo: 404 not found */
 
-        skjema.validerUtkast()
+        utfylling.validerUtkast()
 
         try {
-            return skjemaService.lagreOgNeste(
+            return utfyllingService.lagreOgNeste(
                 innloggetBruker = innloggetBruker,
-                skjema = skjema,
+                utfylling = utfylling,
             )
         } catch (e: ArenaInnsendingFeiletException) {
-            throw e.copy(skjema = skjema)
+            throw e.copy(skjema = utfylling)
         }
     }
 
-    fun lagreSteg(ident: Ident, meldekortId: Long, nyPayload: InnsendingPayload, settSteg: StegNavn): Skjema {
-        val skjema = skjemaService.hentSkjema(
+    fun lagreSteg(ident: Ident, meldekortId: Long, nyPayload: InnsendingPayload, settSteg: StegNavn): Utfylling {
+        val utfylling = utfyllingService.hentUtfylling(
             ident = ident,
             meldekortId = meldekortId,
         )
             ?.medSteg(settSteg)
-            ?.copy(payload = nyPayload)
+            ?.nyPayload(nyPayload)
             ?: throw Error() /* todo: 404 not found */
 
-        skjema.validerUtkast()
-        return skjemaService.lagre(skjema)
+        utfylling.validerUtkast()
+        return utfyllingService.lagre(utfylling)
     }
 }

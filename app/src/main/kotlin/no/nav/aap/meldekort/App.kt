@@ -7,8 +7,10 @@ import no.nav.aap.meldekort.arena.ArenaClientImpl
 import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
-import no.nav.aap.meldekort.arena.SkjemaService
 import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
+import no.nav.aap.meldekort.arena.SkjemaService
+import no.nav.aap.meldekort.arena.UtfyllingService
+import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
 import org.slf4j.LoggerFactory
 
 class App
@@ -33,9 +35,15 @@ fun main() {
     )
 
     val skjemaService = SkjemaService(
-        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
         meldekortService = meldekortService,
         arenaClient = arenaClient,
+        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
+    )
+
+    val utfyllingService = UtfyllingService(
+        utfyllingRepository = UtfyllingRepositoryPostgres(dataSource),
+        meldekortService = meldekortService,
+        skjemaService = skjemaService,
     )
 
     startHttpServer(
@@ -43,8 +51,9 @@ fun main() {
         prometheus = prometheus,
         arenaSkjemaFlate = ArenaSkjemaFlate(
             meldekortService = meldekortService,
-            skjemaService = skjemaService,
+            utfyllingService = utfyllingService,
             arenaClient = arenaClient,
+            skjemaService = skjemaService,
         ),
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),

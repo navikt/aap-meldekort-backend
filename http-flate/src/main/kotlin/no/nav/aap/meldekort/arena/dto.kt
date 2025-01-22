@@ -156,10 +156,10 @@ data class MeldekortResponse(
     val meldekort: MeldekortSkjemaDto,
     val feil: Feil?
 ) {
-    constructor(skjema: Skjema, feil: Feil? = null) : this(
+    constructor(skjema: Utfylling, feil: Feil? = null) : this(
         steg = skjema.steg.navn,
-        meldekort = MeldekortSkjemaDto(skjema.payload),
-        periode = PeriodeDto(skjema.meldeperiode),
+        meldekort = MeldekortSkjemaDto(skjema.skjema.payload),
+        periode = PeriodeDto(skjema.skjema.meldeperiode),
         feil = feil
     )
 }

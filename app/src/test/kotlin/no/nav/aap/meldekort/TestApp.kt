@@ -9,6 +9,8 @@ import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.MeldekortService
 import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import no.nav.aap.meldekort.arena.SkjemaService
+import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
+import no.nav.aap.meldekort.arena.UtfyllingService
 import no.nav.aap.meldekort.test.FakeServers
 
 fun main() {
@@ -22,9 +24,14 @@ fun main() {
     )
 
     val skjemaService = SkjemaService(
-        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
         meldekortService = meldekortService,
         arenaClient = FakeArenaClient,
+        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
+    )
+    val utfyllingService = UtfyllingService(
+        utfyllingRepository = UtfyllingRepositoryPostgres(dataSource),
+        meldekortService = meldekortService,
+        skjemaService = skjemaService,
     )
 
     startHttpServer(
@@ -32,8 +39,9 @@ fun main() {
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         arenaSkjemaFlate = ArenaSkjemaFlate(
             meldekortService = meldekortService,
-            skjemaService = skjemaService,
+            utfyllingService = utfyllingService,
             arenaClient = FakeArenaClient,
+            skjemaService = skjemaService,
         ),
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),
