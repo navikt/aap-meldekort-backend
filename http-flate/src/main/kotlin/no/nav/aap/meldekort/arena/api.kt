@@ -119,6 +119,9 @@ fun NormalOpenAPIRoute.meldekortApi(
         route("/test/proxy/historiskemeldekort").get<Unit, Any> {
             respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
         }
+        route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
+            respond(arenaClient.meldekortdetaljer(innloggetBruker(), params.meldekortId))
+        }
     }
 }
 
