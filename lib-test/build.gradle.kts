@@ -30,5 +30,5 @@ dependencies {
 
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
 
-    implementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+    implementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
 }
