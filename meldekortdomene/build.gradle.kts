@@ -1,9 +1,14 @@
+val komponenterVersjon = "1.0.118"
+
 plugins {
     id("behandlingsflyt.conventions")
 }
 
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.16")
+    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
+    implementation(kotlin("reflect"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")

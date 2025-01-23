@@ -1,59 +1,58 @@
 package no.nav.aap.meldekort.arena
 
-import javax.sql.DataSource
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.Periode
 import no.nav.aap.komponenter.type.Periode as dbPeriode
 
-class SkjemaRepositoryPostgres(private val dataSource: DataSource) : SkjemaRepository {
-    fun last(connection: DBConnection, skjemaId: SkjemaId): Skjema {
+class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRepository {
+    companion object : Factory<SkjemaRepositoryPostgres> {
+        override fun konstruer(connection: DBConnection): SkjemaRepositoryPostgres {
+            return SkjemaRepositoryPostgres(connection)
+        }
+    }
+
+    fun last(skjemaId: SkjemaId): Skjema {
         return connection.queryFirst("select * from arena_skjema where id = ?") {
             setParams {
                 setLong(1, skjemaId.asLong)
             }
-            setRowMapper { row ->
-                mapSkjema(row, connection)
-            }
+            setRowMapper(::mapSkjema)
         }
     }
 
     override fun last(ident: Ident, meldekortId: Long): Skjema? {
-        return dataSource.transaction { connection ->
-            connection.queryFirstOrNull(
-                "select * from arena_skjema where ident = ? and meldekort_id = ? order by tid_opprettet desc limit 1"
-            ) {
-                setParams {
-                    setString(1, ident.asString)
-                    setLong(2, meldekortId)
-                }
-                setRowMapper { row ->
-                    mapSkjema(row, connection)
-                }
+        return connection.queryFirstOrNull(
+            "select * from arena_skjema where ident = ? and meldekort_id = ? order by tid_opprettet desc limit 1"
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setLong(2, meldekortId)
             }
+            setRowMapper(::mapSkjema)
         }
     }
 
-    private fun mapSkjema(
-        row: Row,
-        connection: DBConnection
-    ) = Skjema(
-        tilstand = row.getEnum("tilstand"),
-        meldekortId = row.getLong("meldekort_id"),
-        ident = Ident(row.getString("ident")),
-        meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
-        payload = InnsendingPayload(
-            svarerDuSant = row.getBooleanOrNull("payload_svarer_du_sant"),
-            harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),
-            timerArbeidet = connection.mapTilTimerArbeidet(row.getLong("id")),
-            stemmerOpplysningene = row.getBooleanOrNull("payload_stemmer_opplysningene"),
+    private fun mapSkjema(row: Row): Skjema {
+        return Skjema(
+            tilstand = row.getEnum("tilstand"),
+            meldekortId = row.getLong("meldekort_id"),
+            ident = Ident(row.getString("ident")),
+            meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
+            payload = InnsendingPayload(
+                svarerDuSant = row.getBooleanOrNull("payload_svarer_du_sant"),
+                harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),
+                timerArbeidet = mapTilTimerArbeidet(row.getLong("id")),
+                stemmerOpplysningene = row.getBooleanOrNull("payload_stemmer_opplysningene"),
+            )
         )
-    )
+    }
 
-    private fun DBConnection.mapTilTimerArbeidet(skjemaId: Long): List<TimerArbeidet> {
-        return queryList("select * from arena_skjema_timer_arbeidet where skjema_id = ?") {
+    private fun mapTilTimerArbeidet(skjemaId: Long): List<TimerArbeidet> {
+        return connection.queryList("select * from arena_skjema_timer_arbeidet where skjema_id = ?") {
             setParams { setLong(1, skjemaId) }
             setRowMapper { row ->
                 TimerArbeidet(
@@ -65,24 +64,18 @@ class SkjemaRepositoryPostgres(private val dataSource: DataSource) : SkjemaRepos
     }
 
     override fun lagrSkjema(skjema: Skjema): SkjemaId {
-        return dataSource.transaction { connection ->
-            lagrSkjema(connection, skjema)
-        }
-    }
-
-    fun lagrSkjema(connection: DBConnection, skjema: Skjema): SkjemaId {
         val skjemaId = connection.executeReturnKey(
             """
-                    insert into arena_skjema (
-                        ident,
-                        tilstand,
-                        meldekort_id,
-                        meldeperiode,
-                        payload_svarer_du_sant,
-                        payload_har_du_jobbet,
-                        payload_stemmer_opplysningene
-                    ) values (?, ?, ?, ?::daterange, ?, ?, ?)
-                """.trimIndent()
+                insert into arena_skjema (
+                    ident,
+                    tilstand,
+                    meldekort_id,
+                    meldeperiode,
+                    payload_svarer_du_sant,
+                    payload_har_du_jobbet,
+                    payload_stemmer_opplysningene
+                ) values (?, ?, ?, ?::daterange, ?, ?, ?)
+            """.trimIndent()
         ) {
             setParams {
                 setString(1, skjema.ident.asString)
@@ -95,12 +88,12 @@ class SkjemaRepositoryPostgres(private val dataSource: DataSource) : SkjemaRepos
             }
         }
 
-        connection.lagreTimerArbeidet(skjemaId, skjema.payload.timerArbeidet)
+        lagreTimerArbeidet(skjemaId, skjema.payload.timerArbeidet)
         return SkjemaId(skjemaId)
     }
 
-    private fun DBConnection.lagreTimerArbeidet(skjemaId: Long, timerArbeidet: List<TimerArbeidet>) {
-        executeBatch(
+    private fun lagreTimerArbeidet(skjemaId: Long, timerArbeidet: List<TimerArbeidet>) {
+        connection.executeBatch(
             "insert into arena_skjema_timer_arbeidet (skjema_id, dato, timer_arbeidet) values (?, ?, ?)",
             timerArbeidet
         ) {

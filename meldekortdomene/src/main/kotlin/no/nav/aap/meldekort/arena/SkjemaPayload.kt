@@ -1,8 +1,12 @@
 package no.nav.aap.meldekort.arena
 
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.Periode
+import no.nav.aap.meldekort.journalføring.JournalføringService
+import no.nav.aap.motor.FlytJobbRepository
 import java.time.LocalDate
 
 data class InnsendingPayload(
@@ -28,12 +32,38 @@ data class TimerArbeidet(
     val dato: LocalDate,
 )
 
-class ArenaSkjemaFlate(
+class ArenaSkjemaFlate private constructor(
     private val meldekortService: MeldekortService,
     private val utfyllingService: UtfyllingService,
     private val skjemaService: SkjemaService,
     private val arenaClient: ArenaClient
 ) {
+    companion object {
+        fun konstruer(connection: DBConnection, arenaClient: ArenaClient): ArenaSkjemaFlate {
+            val repositoryProvider = RepositoryProvider(connection)
+            val meldekortService = MeldekortService(
+                arenaClient = arenaClient,
+                meldekortRepository = repositoryProvider.provide(MeldekortRepository::class)
+            )
+            val skjemaService = SkjemaService(
+                meldekortService = meldekortService,
+                skjemaRepository = repositoryProvider.provide(SkjemaRepository::class),
+                journalføringService = JournalføringService(FlytJobbRepository(connection))
+            )
+            
+            return ArenaSkjemaFlate(
+                meldekortService = meldekortService,
+                utfyllingService = UtfyllingService(
+                    utfyllingRepository = repositoryProvider.provide(UtfyllingRepository::class),
+                    meldekortService = meldekortService,
+                    skjemaService = skjemaService
+                ),
+                skjemaService = skjemaService,
+                arenaClient = arenaClient
+            )
+        }
+    }
+    
     fun korrigerMeldekort(innloggetBruker: InnloggetBruker, originalMeldekortId: Long, timerArbeidet: List<TimerArbeidet>) {
         skjemaService.sendInnKorrigering(innloggetBruker, originalMeldekortId, timerArbeidet)
     }

@@ -8,13 +8,15 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
+import javax.sql.DataSource
 
 fun NormalOpenAPIRoute.meldekortApi(
-    arenaSkjemaFlate: ArenaSkjemaFlate,
+    datasource: DataSource,
     arenaClient: ArenaClient,
 ) {
     route("/api/arena") {
@@ -23,21 +25,26 @@ fun NormalOpenAPIRoute.meldekortApi(
         )
         route("/skjema/{meldekortId}") {
             get<MeldekortIdParam, MeldekortResponse> { params ->
-                val nåværendeTilstand = arenaSkjemaFlate.hentEllerOpprettUtfylling(innloggetBruker(), params.meldekortId)
+                val nåværendeTilstand = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient)
+                        .hentEllerOpprettUtfylling(innloggetBruker(), params.meldekortId)
+
+                }
                 respond(MeldekortResponse(nåværendeTilstand))
             }
 
             route("/neste-steg").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 respond(
                     try {
-                        MeldekortResponse(
-                            arenaSkjemaFlate.gåTilNesteSteg(
+                        val response = datasource.transaction {
+                            ArenaSkjemaFlate.konstruer(it, arenaClient).gåTilNesteSteg(
                                 innloggetBruker = innloggetBruker(),
                                 meldekortId = params.meldekortId,
                                 fraSteg = meldekortRequest.nåværendeSteg,
                                 nyPayload = meldekortRequest.meldekort.tilDomene(),
                             )
-                        )
+                        }
+                        MeldekortResponse(response)
                     } catch (e: ArenaInnsendingFeiletException) {
                         MeldekortResponse(
                             skjema = e.skjema!!,
@@ -48,22 +55,27 @@ fun NormalOpenAPIRoute.meldekortApi(
             }
 
             route("/lagre").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
-                respond(
-                    MeldekortResponse(
-                        arenaSkjemaFlate.lagreSteg(
-                            ident = innloggetBruker().ident,
-                            meldekortId = params.meldekortId,
-                            nyPayload = meldekortRequest.meldekort.tilDomene(),
-                            settSteg = meldekortRequest.nåværendeSteg,
-                        )
+                val response = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).lagreSteg(
+                        ident = innloggetBruker().ident,
+                        meldekortId = params.meldekortId,
+                        nyPayload = meldekortRequest.meldekort.tilDomene(),
+                        settSteg = meldekortRequest.nåværendeSteg,
                     )
+                }
+
+                respond(
+                    MeldekortResponse(response)
                 )
             }
+
         }
 
         route("meldekort") {
             route("/neste").get<Unit, KommendeMeldekortDto> {
-                val kommendeMeldekort = arenaSkjemaFlate.kommendeMeldekort(innloggetBruker())
+                val kommendeMeldekort = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).kommendeMeldekort(innloggetBruker())
+                }
                 respond(
                     KommendeMeldekortDto(
                         antallUbesvarteMeldekort = kommendeMeldekort.size,
@@ -80,8 +92,8 @@ fun NormalOpenAPIRoute.meldekortApi(
             }
 
             route("/historisk").get<Unit, List<HistoriskMeldekortDto>> {
-                respond(
-                    arenaSkjemaFlate.historiskeMeldekort(
+                val response = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskeMeldekort(
                         innloggetBruker()
                     ).map {
                         HistoriskMeldekortDto(
@@ -90,24 +102,31 @@ fun NormalOpenAPIRoute.meldekortApi(
                             status = it.beregningStatus
                         )
                     }
-                )
+                }
+
+                respond(response)
             }
 
             route("/historisk/{meldekortId}").get<MeldekortIdParam, HistoriskMeldekortDetaljerDto> { param ->
+                val response = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskMeldekort(innloggetBruker(), param.meldekortId)
+                }
+
                 respond(
-                    HistoriskMeldekortDetaljerDto(
-                        arenaSkjemaFlate.historiskMeldekort(innloggetBruker(), param.meldekortId)
-                    )
+                    HistoriskMeldekortDetaljerDto(response)
                 )
             }
 
             route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { param, request ->
-                arenaSkjemaFlate.korrigerMeldekort(
-                    innloggetBruker(),
-                    param.meldekortId,
-                    request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
-                )
+                datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).korrigerMeldekort(
+                        innloggetBruker(),
+                        param.meldekortId,
+                        request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
+                    )
+                }
             }
+
         }
 
         route("/test/proxy/meldegrupper").get<Unit, Any> {

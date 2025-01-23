@@ -12,6 +12,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
@@ -20,17 +21,22 @@ import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.ArenaClient
 import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.arena.meldekortApi
+import no.nav.aap.meldekort.journalføring.motor.JournalførJobbUtfører
+import no.nav.aap.meldekort.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.motor.Motor
+import no.nav.aap.motor.retry.RetryService
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 class HttpServer
 
 fun startHttpServer(
     port: Int,
     prometheus: PrometheusMeterRegistry,
-    arenaSkjemaFlate: ArenaSkjemaFlate,
     arenaClient: ArenaClient,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
+    dataSource: DataSource
 ) {
     embeddedServer(Netty, configure = {
         connectionGroupSize = 8
@@ -52,6 +58,30 @@ fun startHttpServer(
             ),
             tokenxConfig = tokenxConfig,
         )
+
+        val motor = Motor(
+            dataSource = dataSource,
+            antallKammer = 4,
+            logInfoProvider = JournalføringLogInfoProvider,
+            jobber = listOf(JournalførJobbUtfører),
+            prometheus = prometheus,
+        )
+
+        dataSource.transaction { dbConnection ->
+            RetryService(dbConnection).enable()
+        }
+
+        monitor.subscribe(ApplicationStarted) {
+            motor.start()
+        }
+        monitor.subscribe(ApplicationStopped) { application ->
+            application.environment.log.info("Server har stoppet")
+            motor.stop()
+            // Release resources and unsubscribe from events
+            application.monitor.unsubscribe(ApplicationStarted) {}
+            application.monitor.unsubscribe(ApplicationStopped) {}
+        }
+
         install(StatusPages) {
             exception<Throwable> { call, cause ->
                 val logger = LoggerFactory.getLogger(HttpServer::class.java)
@@ -84,17 +114,17 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     meldekortApi(
-                        arenaSkjemaFlate = arenaSkjemaFlate,
                         arenaClient = arenaClient,
+                        datasource = dataSource
                     )
                 }
             }
-            actuator(prometheus)
+            actuator(prometheus, motor)
         }
     }.start(wait = true)
 }
 
-private fun Routing.actuator(prometheus: PrometheusMeterRegistry) {
+private fun Routing.actuator(prometheus: PrometheusMeterRegistry, motor: Motor) {
     route("/actuator") {
         get("/metrics") {
             call.respond(prometheus.scrape())
@@ -108,6 +138,15 @@ private fun Routing.actuator(prometheus: PrometheusMeterRegistry) {
         get("/ready") {
             val status = HttpStatusCode.OK
             call.respond(status, "Oppe!")
+        }
+
+        get("/ready") {
+            if (motor.kjører()) {
+                val status = HttpStatusCode.OK
+                call.respond(status, "Oppe!")
+            } else {
+                call.respond(HttpStatusCode.ServiceUnavailable, "Kjører ikke")
+            }
         }
     }
 }

@@ -1,5 +1,3 @@
-import org.slf4j.MDC
-
 plugins {
     id("behandlingsflyt.conventions")
 }

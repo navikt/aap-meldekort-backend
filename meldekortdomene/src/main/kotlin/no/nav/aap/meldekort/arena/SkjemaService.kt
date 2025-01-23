@@ -1,10 +1,12 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.journalføring.JournalføringService
 
 class SkjemaService(
     private val meldekortService: MeldekortService,
     private val skjemaRepository: SkjemaRepository,
+    private val journalføringService: JournalføringService
 ) {
     fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: Long): List<TimerArbeidet>? {
         return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.payload?.timerArbeidet
@@ -40,5 +42,7 @@ class SkjemaService(
         )
         meldekortService.sendInn(skjema, innloggetBruker)
         skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.SENDT_ARENA))
+
+        journalføringService.journalfør()
     }
 }

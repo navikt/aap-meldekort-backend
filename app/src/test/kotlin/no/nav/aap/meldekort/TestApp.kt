@@ -12,38 +12,19 @@ import no.nav.aap.meldekort.arena.SkjemaService
 import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.arena.UtfyllingService
 import no.nav.aap.meldekort.test.FakeServers
+import no.nav.aap.motor.Motor
 
 fun main() {
     FakeServers.start() // azurePort = 8081
 
     val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
-    val meldekortService = MeldekortService(
-        arenaClient = FakeArenaClient,
-        meldekortRepository = MeldekortRepositoryPostgres(dataSource)
-    )
-
-    val skjemaService = SkjemaService(
-        meldekortService = meldekortService,
-        skjemaRepository = SkjemaRepositoryPostgres(dataSource),
-    )
-    val utfyllingService = UtfyllingService(
-        utfyllingRepository = UtfyllingRepositoryPostgres(dataSource),
-        meldekortService = meldekortService,
-        skjemaService = skjemaService,
-    )
-
     startHttpServer(
         port = 8080,
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-        arenaSkjemaFlate = ArenaSkjemaFlate(
-            meldekortService = meldekortService,
-            utfyllingService = utfyllingService,
-            arenaClient = FakeArenaClient,
-            skjemaService = skjemaService,
-        ),
+        arenaClient = FakeArenaClient,
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),
-        arenaClient = FakeArenaClient,
+        dataSource = dataSource,
     )
 }

@@ -55,6 +55,8 @@ dependencies {
 
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.14.3")
     implementation("ch.qos.logback:logback-classic:1.5.16")
