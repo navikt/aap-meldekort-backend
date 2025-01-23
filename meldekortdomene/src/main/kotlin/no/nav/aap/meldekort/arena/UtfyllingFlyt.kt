@@ -32,11 +32,7 @@ data class Utfylling(
         check(meldekortId == skjema.meldekortId)
     }
 
-    constructor(
-        flyt: UtfyllingFlyt,
-        steg: Steg,
-        skjema: Skjema,
-    ) : this(
+    constructor(flyt: UtfyllingFlyt, steg: Steg, skjema: Skjema) : this(
         ident = skjema.ident,
         meldekortId = skjema.meldekortId,
         flyt = flyt,
@@ -53,7 +49,7 @@ data class Utfylling(
     }
 
     fun nesteSteg(innloggetBruker: InnloggetBruker): Utfylling {
-        require(steg in flyt.steg) { "steg ${steg} er ikke i flyt" }
+        require(steg in flyt.steg) { "steg $steg er ikke i flyt" }
         require(skjema.tilstand == UTKAST)
         return copy(
             steg = flyt.stegForNavn(steg.nesteSteg(this.skjema, innloggetBruker))
