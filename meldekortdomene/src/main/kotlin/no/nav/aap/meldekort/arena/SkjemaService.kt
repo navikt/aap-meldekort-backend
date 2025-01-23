@@ -7,6 +7,10 @@ class SkjemaService(
     private val arenaClient: ArenaClient,
     private val skjemaRepository: SkjemaRepository,
 ) {
+    fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: Long): List<TimerArbeidet>? {
+        return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.payload?.timerArbeidet
+    }
+
     fun sendInnKorrigering(
         innloggetBruker: InnloggetBruker,
         originalMeldekortId: Long,

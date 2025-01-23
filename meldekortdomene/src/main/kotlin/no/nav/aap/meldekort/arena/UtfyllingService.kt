@@ -48,9 +48,9 @@ class UtfyllingService(
         return utfylling
     }
 
-    fun lagre(skjema: Utfylling): Utfylling {
-        utfyllingRepository.lagrUtfylling(skjema)
-        return skjema
+    fun lagre(utfylling: Utfylling): Utfylling {
+        utfyllingRepository.lagrUtfylling(utfylling)
+        return utfylling
     }
 
     fun lagreOgNeste(

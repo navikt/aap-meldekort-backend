@@ -37,12 +37,14 @@ data class ArenaMeldekortdetaljer(
         val meldegruppe: String? = null
     )
 
-    fun timerArbeidet(fom: LocalDate): List<TimerArbeidet> {
+    fun timerArbeidet(fom: LocalDate): List<TimerArbeidet>? {
         val aktivitetsdager = MutableList(14) { index ->
             TimerArbeidet(null, fom.plusDays(index.toLong()))
         }
 
-        this.sporsmal?.meldekortDager?.forEach { dag ->
+        if (this.sporsmal?.meldekortDager == null) return null
+
+        this.sporsmal.meldekortDager.forEach { dag ->
             if (dag.arbeidetTimerSum != null && dag.arbeidetTimerSum > 0) {
                 aktivitetsdager[dag.dag - 1] = aktivitetsdager[dag.dag - 1].copy(timer = dag.arbeidetTimerSum)
             }

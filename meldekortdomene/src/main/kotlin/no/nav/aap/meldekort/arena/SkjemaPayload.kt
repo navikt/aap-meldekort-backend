@@ -49,12 +49,12 @@ class ArenaSkjemaFlate(
 
     fun historiskMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): HistoriskMeldekortDetaljer {
         val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).single { it.meldekortId == meldekortId }
+        val timerArbeidet = arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
+            .timerArbeidet(meldekort.periode.fom) ?: skjemaService.timerArbeidet(innloggetBruker, meldekortId)
         return HistoriskMeldekortDetaljer(
             meldekort = meldekort,
-            timerArbeidet = arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
-                .timerArbeidet(meldekort.periode.fom)
+            timerArbeidet = timerArbeidet
         )
-
     }
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
