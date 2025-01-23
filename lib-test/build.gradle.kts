@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation("io.micrometer:micrometer-core:1.14.2")
+    implementation("io.micrometer:micrometer-core:1.14.3")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")

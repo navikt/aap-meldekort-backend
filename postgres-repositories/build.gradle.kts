@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation("io.micrometer:micrometer-core:1.14.2")
+    implementation("io.micrometer:micrometer-core:1.14.3")
     implementation("ch.qos.logback:logback-classic:1.5.16")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
@@ -30,7 +30,7 @@ dependencies {
         }
     }
     testFixturesImplementation("org.testcontainers:postgresql:1.20.4")
-    testFixturesImplementation("io.micrometer:micrometer-core:1.14.2")
+    testFixturesImplementation("io.micrometer:micrometer-core:1.14.3")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
