@@ -80,7 +80,7 @@ data class MeldekortkontrollResponse(
         }
 
         if (!ok || feil.isNotEmpty()) {
-            throw ArenaInnsendingFeiletException(feil)
+            throw ArenaInnsendingFeiletException(kontrollStatus, feil)
         }
     }
 }
