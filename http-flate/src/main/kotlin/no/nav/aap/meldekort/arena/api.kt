@@ -122,6 +122,9 @@ fun NormalOpenAPIRoute.meldekortApi(
         route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
             respond(arenaClient.meldekortdetaljer(innloggetBruker(), params.meldekortId))
         }
+        route("/test/proxy/korrigerte-meldekort/{meldekortId}").get<MeldekortIdParam, Any> { params ->
+            respond(arenaClient.korrigertMeldekort(innloggetBruker(), params.meldekortId))
+        }
     }
 }
 
