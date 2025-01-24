@@ -20,7 +20,7 @@ enum class MeldekortType {
 /* NB: Oppgitt i prioritert rekkefølge! (????) */
 enum class MeldekortStatus {
     /** Bruker har opprettet en korrigering av original rapporteringsperiode */
-    KORRIGERT,
+    OVERSTYRT_AV_ANNET_MELDEKORT,
 
     /** Rapporteringsperioden er sendt til beregning. */
     INNSENDT,

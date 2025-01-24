@@ -93,6 +93,30 @@ class MeldekortService(
         return meldekortene
     }
 
+    fun nyttMeldekortForKorrigering(
+        innloggetBruker: InnloggetBruker,
+        originalMeldekortId: Long
+    ): HistoriskMeldekort {
+        val originaltMeldekort = historiskeMeldekort(innloggetBruker).single { it.meldekortId == originalMeldekortId }
+        check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }
+
+        val meldekortId = arenaClient.korrigertMeldekort(innloggetBruker, originalMeldekortId)
+
+        return HistoriskMeldekort(
+            meldekortId = meldekortId,
+            type = MeldekortType.KORRIGERING,
+            periode = originaltMeldekort.periode,
+            kanKorrigeres = false,
+            begrunnelseEndring = null,
+            mottattIArena = null,
+            originalMeldekortId = originalMeldekortId,
+            beregningStatus = INNSENDT,
+            bruttoBeløp = null,
+        ).also {
+            meldekortRepository.upsert(innloggetBruker.ident, it)
+        }
+    }
+
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
         // TODO: Håndtere at systemet krasjer mellom de forskjellige stegene.
         val meldekortdetaljer = arenaClient.meldekortdetaljer(innloggetBruker, skjema.meldekortId)

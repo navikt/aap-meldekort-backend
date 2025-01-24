@@ -5,7 +5,7 @@ import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.UBEHA
 import no.nav.aap.meldekort.arena.MeldekortStatus.FEILET
 import no.nav.aap.meldekort.arena.MeldekortStatus.FERDIG
 import no.nav.aap.meldekort.arena.MeldekortStatus.INNSENDT
-import no.nav.aap.meldekort.arena.MeldekortStatus.KORRIGERT
+import no.nav.aap.meldekort.arena.MeldekortStatus.OVERSTYRT_AV_ANNET_MELDEKORT
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 
@@ -76,7 +76,7 @@ data class ArenaMeldekort(
         IKKE(FERDIG),
 
         /** Et annet kort for samme periode har overstyrt dette kortet. */
-        OVERM(KORRIGERT),
+        OVERM(OVERSTYRT_AV_ANNET_MELDEKORT),
 
         /** Kortet er kontrollert etter for lav meldegruppe og er sendt til ny kontroll i Amelding. */
         NYKTR(INNSENDT),

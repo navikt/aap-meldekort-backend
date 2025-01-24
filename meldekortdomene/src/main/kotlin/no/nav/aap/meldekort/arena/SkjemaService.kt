@@ -4,7 +4,6 @@ import no.nav.aap.meldekort.InnloggetBruker
 
 class SkjemaService(
     private val meldekortService: MeldekortService,
-    private val arenaClient: ArenaClient,
     private val skjemaRepository: SkjemaRepository,
 ) {
     fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: Long): List<TimerArbeidet>? {
@@ -16,14 +15,13 @@ class SkjemaService(
         originalMeldekortId: Long,
         timerArbeidet: List<TimerArbeidet>
     ) {
-        val originaltMeldekort = meldekortService.historiskeMeldekort(innloggetBruker).single { it.meldekortId == originalMeldekortId }
-        check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }
+        val nyttMeldekort = meldekortService.nyttMeldekortForKorrigering(innloggetBruker, originalMeldekortId)
 
         val skjema = Skjema(
             tilstand = SkjemaTilstand.UTKAST,
-            meldekortId = arenaClient.korrigertMeldekort(innloggetBruker, originalMeldekortId),
+            meldekortId = nyttMeldekort.meldekortId,
             ident = innloggetBruker.ident,
-            meldeperiode = originaltMeldekort.periode,
+            meldeperiode = nyttMeldekort.periode,
             payload = InnsendingPayload(
                 svarerDuSant = true,
                 harDuJobbet = true,
@@ -34,6 +32,7 @@ class SkjemaService(
 
         sendInn(skjema, innloggetBruker)
     }
+
 
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
         skjemaRepository.lagrSkjema(
