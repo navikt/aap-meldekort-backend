@@ -7,6 +7,7 @@ enum class StegNavn {
     BEKREFT_SVARER_ÆRLIG,
     JOBBET_I_MELDEPERIODEN,
     TIMER_ARBEIDET,
+    STEMMER_OPPLYSNINGENE,
     KVITTERING,
 }
 
@@ -34,18 +35,26 @@ object JobbetIMeldeperiodenSteg : Steg {
 
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
         return when (skjema.payload.harDuJobbet) {
+            true -> TIMER_ARBEIDET
+            false -> STEMMER_OPPLYSNINGENE
             null -> error("kan ikke gå videre uten å ha svart")
-            else -> TIMER_ARBEIDET
         }
     }
 }
 
-class TimerArbeidetSteg(
-    private val skjemaService: SkjemaService,
-) : Steg {
+object TimerArbeidetSteg : Steg {
     override val navn: StegNavn
         get() = TIMER_ARBEIDET
 
+
+    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
+        return STEMMER_OPPLYSNINGENE
+    }
+}
+
+class StemmerOpplysningeneSteg(private val skjemaService: SkjemaService) : Steg {
+    override val navn: StegNavn
+        get() = STEMMER_OPPLYSNINGENE
 
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
         return when (skjema.payload.stemmerOpplysningene) {
@@ -53,6 +62,7 @@ class TimerArbeidetSteg(
                 skjemaService.sendInn(skjema, innloggetBruker)
                 KVITTERING
             }
+
             false -> KVITTERING
             null -> error("kan ikke gå videre uten å ha svart")
         }

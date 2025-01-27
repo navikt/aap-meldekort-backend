@@ -11,7 +11,8 @@ class UtfyllingService(
     private val flyt = UtfyllingFlyt(
         BekreftSvarerÆrligSteg,
         JobbetIMeldeperiodenSteg,
-        TimerArbeidetSteg(skjemaService),
+        TimerArbeidetSteg,
+        StemmerOpplysningeneSteg(skjemaService),
         KvitteringSteg,
     )
 
