@@ -54,7 +54,10 @@ data class ArenaMeldekortkontrollRequest(
                 arbeidet = requireNotNull(skjema.payload.harDuJobbet) {
                     "alle felter må være fylt ut for innsending, harDuJobbet er ikke fylt ut"
                 },
-                begrunnelse = null,
+                begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK)
+                    "Korrigering av arbeidstimer"
+                else
+                    null,
                 meldekortdager = meldekortdager
             )
         }
