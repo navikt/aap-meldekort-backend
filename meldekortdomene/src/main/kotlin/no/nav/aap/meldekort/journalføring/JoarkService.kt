@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort.journalføring
 
+import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.journalføring.JoarkClient.Journalposttype.INNGAAENDE
 import no.nav.aap.meldekort.journalføring.JoarkClient.Tema.AAP
@@ -11,20 +12,18 @@ import java.util.*
 
 class JoarkService(
     private val joarkClient: JoarkClient,
-    private val joarkRepository: JoarkRepository,
 ) {
     private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY")
-    private val dateFormat = dateFormatter
-    private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY HH:mm")
     private var locale: Locale? = Locale.of("nb", "NO") // Vi skal regne ukenummer iht norske regler
     private val woy = WeekFields.of(locale).weekOfWeekBasedYear()
+    private val BREVKODE = "NAV 00-10.02"
+    private val BREVKODE_KORRIGERT = "NAV 00-10.03"
 
     fun journalpostForArena(
         skjema: Skjema,
         vårReferanse: String,
         datoMottatt: LocalDate?,
         kanSendesFra: LocalDate,
-        base64json: String,
         korrigert: Boolean,
     ): JoarkClient.Journalpost {
         val tittel = lagTittel(skjema.meldeperiode, korrigert)
@@ -40,26 +39,24 @@ class JoarkService(
                 idType = JoarkClient.BrukerIdType.FNR,
             ),
             tema = AAP,
-            behandlingstema = null, // TODO: burde det være noe her?
             tittel = tittel,
             kanal = "NAV_NO",
             journalfoerendeEnhet = "9999",
             eksternReferanseId = vårReferanse,
             datoMottatt = (datoMottatt ?: LocalDate.now()).format(DateTimeFormatter.ISO_DATE),
             tilleggsopplysninger = listOf(
-                // Nøkkel - maksimum 20 tegn
                 JoarkClient.Tilleggsopplysning(
                     "meldekortId",
                     skjema.meldekortId.toString(),
                 ),
                 JoarkClient.Tilleggsopplysning(
                     "kortKanSendesFra",
-                    kanSendesFra.format(dateFormat)
+                    kanSendesFra.format(dateFormatter)
                 )
             ),
             sak = JoarkClient.Sak(
                 sakstype = JoarkClient.Sakstype.GENERELL_SAK,
-                // TODO:
+                // TODO - ønsker å journalføre som fagsak, men har ikke sakId:
                 // sakstype = JoarkClient.Sakstype.FAGSAK,
                 // fagsaksystem = JoarkClient.FagsaksSystem.AO01,
                 // fagsakId = sakId,
@@ -67,13 +64,12 @@ class JoarkService(
             dokumenter = listOf(
                 JoarkClient.Dokument(
                     tittel = tittel,
-                    brevkode = if (korrigert) "NAV 00-10.03" else "NAV 00-10.02",
+                    brevkode = if (korrigert) BREVKODE_KORRIGERT else BREVKODE,
                     dokumentvarianter = listOf(
-                        // TODO: HTML? PDF?
                         JoarkClient.DokumentVariant(
                             filtype = JoarkClient.Filetype.JSON,
                             variantformat = JoarkClient.Variantformat.ORIGINAL,
-                            fysiskDokument = base64json,
+                            fysiskDokument = DefaultJsonMapper.toJson(skjema.payload),
                         )
                     ),
                 )

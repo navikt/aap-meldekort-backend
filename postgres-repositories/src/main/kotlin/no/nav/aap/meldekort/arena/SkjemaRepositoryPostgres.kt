@@ -2,7 +2,6 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.Periode
@@ -42,6 +41,8 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
             meldekortId = row.getLong("meldekort_id"),
             ident = Ident(row.getString("ident")),
             meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
+            sendtInn = row.getLocalDateTimeOrNull("sendt_inn"),
+            referanse = row.getUUIDOrNull("referanse"),
             payload = InnsendingPayload(
                 svarerDuSant = row.getBooleanOrNull("payload_svarer_du_sant"),
                 harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),
@@ -71,10 +72,12 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                     tilstand,
                     meldekort_id,
                     meldeperiode,
+                    sendt_inn,
+                    referanse,
                     payload_svarer_du_sant,
                     payload_har_du_jobbet,
                     payload_stemmer_opplysningene
-                ) values (?, ?, ?, ?::daterange, ?, ?, ?)
+                ) values (?, ?, ?, ?::daterange, ?, ?, ?, ?, ?)
             """.trimIndent()
         ) {
             setParams {
@@ -82,9 +85,11 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                 setEnumName(2, skjema.tilstand)
                 setLong(3, skjema.meldekortId)
                 setPeriode(4, skjema.meldeperiode.let { dbPeriode(it.fom, it.tom) })
-                setBoolean(5, skjema.payload.svarerDuSant)
-                setBoolean(6, skjema.payload.harDuJobbet)
-                setBoolean(7, skjema.payload.stemmerOpplysningene)
+                setLocalDateTime(5, skjema.sendtInn)
+                setUUID(6, skjema.referanse)
+                setBoolean(7, skjema.payload.svarerDuSant)
+                setBoolean(8, skjema.payload.harDuJobbet)
+                setBoolean(9, skjema.payload.stemmerOpplysningene)
             }
         }
 

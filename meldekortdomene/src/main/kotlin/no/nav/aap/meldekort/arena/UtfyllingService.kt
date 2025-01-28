@@ -2,6 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
+import java.util.*
 
 class UtfyllingService(
     private val utfyllingRepository: UtfyllingRepository,
@@ -38,6 +39,8 @@ class UtfyllingService(
             meldeperiode = meldeperiode,
             ident = innloggetBruker.ident,
             tilstand = SkjemaTilstand.UTKAST,
+            sendtInn = null,
+            referanse = UUID.randomUUID()
         )
         val utfylling = Utfylling(
             skjema = skjema,

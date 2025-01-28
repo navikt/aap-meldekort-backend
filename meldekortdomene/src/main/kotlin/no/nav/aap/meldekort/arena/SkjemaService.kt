@@ -2,6 +2,8 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.journalføring.JournalføringService
+import java.time.LocalDateTime
+import java.util.*
 
 class SkjemaService(
     private val meldekortService: MeldekortService,
@@ -24,6 +26,8 @@ class SkjemaService(
             meldekortId = nyttMeldekort.meldekortId,
             ident = innloggetBruker.ident,
             meldeperiode = nyttMeldekort.periode,
+            sendtInn = LocalDateTime.now(),
+            referanse = UUID.randomUUID(),
             payload = InnsendingPayload(
                 svarerDuSant = true,
                 harDuJobbet = true,
@@ -43,6 +47,6 @@ class SkjemaService(
         meldekortService.sendInn(skjema, innloggetBruker)
         skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.SENDT_ARENA))
 
-        journalføringService.journalfør()
+        journalføringService.journalfør(innloggetBruker.ident, skjema.meldekortId)
     }
 }

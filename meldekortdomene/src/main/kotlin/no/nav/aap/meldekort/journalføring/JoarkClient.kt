@@ -1,9 +1,9 @@
 package no.nav.aap.meldekort.journalføring
 
-import no.nav.aap.meldekort.arena.ArenaMeldekortdetaljer
-import java.util.*
+import no.nav.aap.lookup.gateway.Gateway
 
-interface JoarkClient {
+
+interface JoarkClient: Gateway {
     // Noe a la POST /rest/journalpostapi/v1/journalpost
     // TODO: Test om 409 returnerer samme reponse.
     fun oppdater(journalpost: Journalpost, forsøkFerdigstill: Boolean): JournalpostResponse
@@ -23,31 +23,7 @@ interface JoarkClient {
         val tilleggsopplysninger: List<Tilleggsopplysning>? = null,
         val sak: Sak? = null,
         val dokumenter: List<Dokument>? = null
-    ) {
-        constructor(meldekortdetaljer: ArenaMeldekortdetaljer, fnr: String, navn: String): this(
-            journalposttype = Journalposttype.INNGAAENDE,
-            avsenderMottaker = AvsenderMottaker(
-                id = fnr,
-                idType = AvsenderIdType.FNR,
-                navn = navn,
-            ),
-            bruker = Bruker(
-                id = fnr,
-                idType = BrukerIdType.FNR,
-            ),
-            tema = Tema.AAP,
-            tittel = "Meldekort AAP", //TODO - fyll ut mer her
-            kanal = "NAV_NO",
-            journalfoerendeEnhet = "9999", //"Dersom  det ikke er noen Nav-enhet involvert (f.eks. ved automatisk journalføring), skal enhet være '9999'"
-            eksternReferanseId = UUID.randomUUID().toString(), //TODO - kanskje sette det til noe som har med meldekortet å gjøre?
-            datoMottatt = null, //TODO - Dersom datoMottatt er tom, settes verdien til dagens dato. Hva skjer hvis journalføring feilet tidligere?
-            tilleggsopplysninger = listOf(
-                Tilleggsopplysning("meldekortId", meldekortdetaljer.meldekortId.toString())
-            ),
-            sak = Sak(sakstype = Sakstype.GENERELL_SAK),
-            dokumenter = null //TODO - fyll ut
-        )
-    }
+    )
 
     data class AvsenderMottaker(
         val id: String,
@@ -94,7 +70,7 @@ interface JoarkClient {
     }
 
     // Se https://confluence.adeo.no/display/BOA/Tema
-    enum class Tema(val tittel : String) {
+    enum class Tema(val tittel: String) {
         AAP("Arbeidsavklaringspenger"),
     }
 

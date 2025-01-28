@@ -8,6 +8,9 @@ interface Meldekort {
     val periode: Periode
     val type: MeldekortType
     val kanKorrigeres: Boolean
+
+    val tidligsteInnsendingsdato: LocalDate
+        get() = periode.tom.minusDays(1)
 }
 
 enum class MeldekortType {
@@ -38,7 +41,6 @@ data class KommendeMeldekort(
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
 ) : Meldekort {
-    val tidligsteInnsendingsdato: LocalDate = periode.tom.minusDays(1)
     val kanSendes: Boolean
         get() = tidligsteInnsendingsdato <= LocalDate.now()
 }

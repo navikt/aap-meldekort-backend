@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
-val komponenterVersjon = "1.0.118"
+val komponenterVersjon = "1.0.120"
 
 plugins {
     id("behandlingsflyt.conventions")

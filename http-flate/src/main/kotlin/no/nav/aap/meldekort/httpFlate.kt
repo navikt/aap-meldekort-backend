@@ -19,9 +19,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxC
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.ArenaClient
-import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.arena.meldekortApi
-import no.nav.aap.meldekort.journalføring.motor.JournalførJobbUtfører
+import no.nav.aap.meldekort.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.meldekort.journalføring.motor.JournalføringLogInfoProvider
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.retry.RetryService
@@ -63,7 +62,7 @@ fun startHttpServer(
             dataSource = dataSource,
             antallKammer = 4,
             logInfoProvider = JournalføringLogInfoProvider,
-            jobber = listOf(JournalførJobbUtfører),
+            jobber = listOf(ArenaJournalføringJobbUtfører),
             prometheus = prometheus,
         )
 

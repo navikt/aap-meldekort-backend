@@ -3,11 +3,13 @@ package no.nav.aap.meldekort
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.lookup.repository.RepositoryRegistry
 import no.nav.aap.meldekort.arena.ArenaClientImpl
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
+import no.nav.aap.meldekort.joark.JoarkClientImpl
 import org.slf4j.LoggerFactory
 
 class App
@@ -27,6 +29,7 @@ fun main() {
     )
 
     registerRepositories()
+    registerGateways()
 
     startHttpServer(
         port = 8080,
@@ -44,4 +47,8 @@ private fun registerRepositories() {
         .register<SkjemaRepositoryPostgres>()
         .register<UtfyllingRepositoryPostgres>()
         .status()
+}
+
+private fun registerGateways() {
+    GatewayRegistry.register<JoarkClientImpl>().status()
 }
