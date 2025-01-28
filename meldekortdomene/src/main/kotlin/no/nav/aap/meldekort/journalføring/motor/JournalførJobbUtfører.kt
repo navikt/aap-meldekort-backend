@@ -29,6 +29,5 @@ class JournalførJobbUtfører: JobbUtfører {
         override fun type(): String {
             return "type"
         }
-
     }
 }
