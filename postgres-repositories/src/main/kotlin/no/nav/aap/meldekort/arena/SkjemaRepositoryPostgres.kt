@@ -43,7 +43,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
             ident = Ident(row.getString("ident")),
             meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
             sendtInn = row.getLocalDateTimeOrNull("sendt_inn"),
-            referanse = row.getUUIDOrNull("referanse"),
+            referanse = row.getUUID("referanse"),
             payload = InnsendingPayload(
                 svarerDuSant = row.getBooleanOrNull("payload_svarer_du_sant"),
                 harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),

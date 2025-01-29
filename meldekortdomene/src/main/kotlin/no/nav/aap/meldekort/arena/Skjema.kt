@@ -11,7 +11,7 @@ data class Skjema(
     val ident: Ident,
     val meldeperiode: Periode,
     val payload: InnsendingPayload,
-    val referanse: UUID?, //TODO - Fjern nullable etter migrering
+    val referanse: UUID,
     val sendtInn: LocalDateTime?,
 )
 
