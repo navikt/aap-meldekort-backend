@@ -113,7 +113,6 @@ class MeldekortService(
         check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }
 
         val meldekortId = arenaClient.korrigertMeldekort(innloggetBruker, originalMeldekortId)
-
         return HistoriskMeldekort(
             meldekortId = meldekortId,
             type = MeldekortType.KORRIGERING,
@@ -125,7 +124,7 @@ class MeldekortService(
             beregningStatus = INNSENDT,
             bruttoBeløp = null,
         ).also {
-            meldekortRepository.upsert(innloggetBruker.ident, it)
+            meldekortRepository.upsert(innloggetBruker.ident, listOf(it, originaltMeldekort.copy(kanKorrigeres = false)))
         }
     }
 

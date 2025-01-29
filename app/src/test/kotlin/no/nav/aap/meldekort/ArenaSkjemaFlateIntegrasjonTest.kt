@@ -9,11 +9,9 @@ import no.nav.aap.meldekort.arena.ArenaPerson
 import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
 import no.nav.aap.meldekort.arena.MeldekortType
 import no.nav.aap.meldekort.arena.TimerArbeidet
-import no.nav.aap.meldekort.test.FakeServers
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
@@ -24,7 +22,7 @@ class ArenaSkjemaFlateIntegrasjonTest {
     }
 
     @Test
-    fun foo() {
+    fun `korrigering dukker opp i liste med historiske meldekort`() {
         InitTestDatabase.dataSource.transaction { connection ->
             val arenaClient = FakeArenaClient()
 
@@ -90,6 +88,16 @@ class ArenaSkjemaFlateIntegrasjonTest {
 
             assertEquals(timerArbeidet, korrigering.single().timerArbeidet)
             assertNull(førstegangsRegistrering.single().timerArbeidet)
+
+
+            assertThrows<Exception> {
+                arenaSkjemaFlate.korrigerMeldekort(
+                    innloggetBruker,
+                    originalMeldekortId = originalMeldekortId,
+                    timerArbeidet = listOf(TimerArbeidet(11.0, meldeperiode.tom))
+                )
+            }
+
         }
     }
 }
