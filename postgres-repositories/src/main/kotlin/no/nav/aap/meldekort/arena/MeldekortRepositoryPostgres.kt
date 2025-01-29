@@ -38,8 +38,8 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
                         type = excluded.type,
                         tilstand = excluded.tilstand,
                         begrunnelse_endring = excluded.begrunnelse_endring,
-                        mottatt = excluded.mottatt,
-                        original_meldekort_id = excluded.original_meldekort_id,
+                        mottatt = coalesce(excluded.mottatt, arena_meldekort.mottatt),
+                        original_meldekort_id = coalesce(excluded.original_meldekort_id, arena_meldekort.original_meldekort_id),
                         beregning_status = excluded.beregning_status,
                         brutto_beløp = excluded.brutto_beløp
         """.trimIndent(),

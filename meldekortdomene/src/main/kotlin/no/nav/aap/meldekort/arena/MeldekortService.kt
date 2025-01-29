@@ -5,12 +5,15 @@ import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.SENDT
 import no.nav.aap.meldekort.arena.MeldekortStatus.INNSENDT
+import org.slf4j.LoggerFactory
 
 
 class MeldekortService(
     private val arenaClient: ArenaClient,
     private val meldekortRepository: MeldekortRepository,
 ) {
+    private val log = LoggerFactory.getLogger(this::class.java)!!
+
     fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
         val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return null
         return (kommendeMeldekort + historiskeMeldekort(innloggetBruker))
@@ -93,6 +96,7 @@ class MeldekortService(
                 if (meldekortFraArena == null) {
                     meldekortene.add(meldekortFraDb)
                 } else if (meldekortFraArena.erLengreIProsessen(meldekortFraDb)) {
+                    log.info("upserter ${meldekortFraArena.meldekortId} arena-status: ${meldekortFraArena.beregningStatus}, db-status: ${meldekortFraDb.beregningStatus }")
                     meldekortRepository.upsert(innloggetBruker.ident, meldekortFraArena)
                 } else {
                     meldekortene[meldekortIndex] = meldekortFraDb

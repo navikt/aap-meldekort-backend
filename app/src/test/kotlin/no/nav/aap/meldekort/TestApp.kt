@@ -4,15 +4,7 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
-import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
-import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
-import no.nav.aap.meldekort.arena.MeldekortService
-import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
-import no.nav.aap.meldekort.arena.SkjemaService
-import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
-import no.nav.aap.meldekort.arena.UtfyllingService
 import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.motor.Motor
 
 fun main() {
     FakeServers.start() // azurePort = 8081
