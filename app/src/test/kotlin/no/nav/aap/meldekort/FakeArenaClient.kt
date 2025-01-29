@@ -2,12 +2,16 @@ package no.nav.aap.meldekort
 
 import no.nav.aap.meldekort.arena.ArenaClient
 import no.nav.aap.meldekort.arena.ArenaMeldegruppe
+import no.nav.aap.meldekort.arena.ArenaMeldekort
 import no.nav.aap.meldekort.arena.ArenaMeldekortdetaljer
 import no.nav.aap.meldekort.arena.ArenaMeldekortkontrollRequest
 import no.nav.aap.meldekort.arena.ArenaPerson
-import no.nav.aap.meldekort.arena.MeldekortkontrollResponse
+import no.nav.aap.meldekort.arena.MeldekortkontrollResponse as MeldekortkontrollResponse
 
-object FakeArenaClient : ArenaClient {
+class FakeArenaClient : ArenaClient {
+    var historiskeMeldekort: ArenaPerson? = null
+    var korrigertMeldekort: ArenaMeldekort? = null
+
     override fun meldegrupper(innloggetBruker: InnloggetBruker): List<ArenaMeldegruppe> {
         return listOf()
     }
@@ -17,24 +21,49 @@ object FakeArenaClient : ArenaClient {
     }
 
     override fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): ArenaPerson {
-        TODO("Not yet implemented")
+        return historiskeMeldekort!!
     }
 
     override fun meldekortdetaljer(
-        innloggetBruker: InnloggetBruker,
-        meldekortId: Long
+        innloggetBruker: InnloggetBruker, meldekortId: Long
     ): ArenaMeldekortdetaljer {
-        TODO("Not yet implemented")
+        val meldekort = historiskeMeldekort?.arenaMeldekortListe?.find {
+            it.meldekortId == meldekortId
+        } ?: error("meldekort ikke funnet")
+
+
+        return ArenaMeldekortdetaljer(
+            id = "1",
+            personId = 1,
+            fodselsnr = innloggetBruker.ident.asString,
+            meldekortId = meldekortId,
+            meldeperiode = meldekort.meldeperiode,
+            meldegruppe = meldekort.hoyesteMeldegruppe,
+            arkivnokkel = "",
+            kortType = meldekort.kortType,
+            meldeDato = null,
+            lestDato = null,
+            sporsmal = null,
+            begrunnelse = null,
+        )
     }
 
     override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): Long {
-        return 0
+        val meldekort = requireNotNull(korrigertMeldekort)
+        historiskeMeldekort = historiskeMeldekort?.copy(
+            arenaMeldekortListe = historiskeMeldekort?.arenaMeldekortListe.orEmpty() + meldekort
+        )
+        return meldekort.meldekortId
     }
 
     override fun sendInn(
-        innloggetBruker: InnloggetBruker,
-        request: ArenaMeldekortkontrollRequest
+        innloggetBruker: InnloggetBruker, request: ArenaMeldekortkontrollRequest
     ): MeldekortkontrollResponse {
-        TODO("Not yet implemented")
+        return MeldekortkontrollResponse(
+            meldekortId = request.meldekortId,
+            kontrollStatus = "OK",
+            feilListe = emptyList(),
+            oppfolgingListe = emptyList(),
+        )
     }
 }

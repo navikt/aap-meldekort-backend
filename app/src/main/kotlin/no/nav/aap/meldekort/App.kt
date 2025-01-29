@@ -41,7 +41,7 @@ fun main() {
     )
 }
 
-private fun registerRepositories() {
+fun registerRepositories() {
     RepositoryRegistry
         .register<MeldekortRepositoryPostgres>()
         .register<SkjemaRepositoryPostgres>()

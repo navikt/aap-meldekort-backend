@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.journalføring.JournalføringService
 import no.nav.aap.motor.FlytJobbRepository
 
@@ -56,16 +57,17 @@ class ArenaSkjemaFlate private constructor(
         val timerArbeidet: List<TimerArbeidet>?
     )
 
-    fun historiskMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): HistoriskMeldekortDetaljer {
-        val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).single { it.meldekortId == meldekortId }
-        val timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, meldekortId) ?: arenaClient.meldekortdetaljer(
-            innloggetBruker,
-            meldekortId
-        ).timerArbeidet(meldekort.periode.fom)
-        return HistoriskMeldekortDetaljer(
-            meldekort = meldekort,
-            timerArbeidet = timerArbeidet
-        )
+    fun historiskeMeldekortDetaljer(innloggetBruker: InnloggetBruker, meldeperiode: Periode): List<HistoriskMeldekortDetaljer> {
+        val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).filter { it.periode ==  meldeperiode }
+
+        return meldekort.map {
+            HistoriskMeldekortDetaljer(
+                meldekort = it,
+                timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, it.meldekortId) ?: arenaClient.meldekortdetaljer(
+                    innloggetBruker, it.meldekortId
+                ).timerArbeidet(it.periode.fom)
+            )
+        }
     }
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {

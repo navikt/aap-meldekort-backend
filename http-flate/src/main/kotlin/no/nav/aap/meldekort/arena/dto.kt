@@ -18,7 +18,6 @@ data class NesteMeldekortDto(
 
 data class HistoriskMeldekortDto(
     val meldeperiode: PeriodeDto,
-    val meldekortId: Long,
     val status: MeldekortStatus,
 )
 

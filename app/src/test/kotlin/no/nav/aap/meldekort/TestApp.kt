@@ -14,7 +14,7 @@ fun main() {
     startHttpServer(
         port = 8080,
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-        arenaClient = FakeArenaClient,
+        arenaClient = FakeArenaClient(),
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),
         dataSource = dataSource,

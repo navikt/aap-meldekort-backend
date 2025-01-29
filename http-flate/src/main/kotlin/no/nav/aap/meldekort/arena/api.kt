@@ -15,6 +15,7 @@ import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.meldekort.Periode
 import javax.sql.DataSource
 
 fun NormalOpenAPIRoute.meldekortApi(
@@ -97,11 +98,10 @@ fun NormalOpenAPIRoute.meldekortApi(
                 val response = datasource.transaction {
                     ArenaSkjemaFlate.konstruer(it, arenaClient).historiskeMeldekort(
                         innloggetBruker()
-                    ).map {
+                    ).map { historiskMeldekort ->
                         HistoriskMeldekortDto(
-                            meldeperiode = PeriodeDto(it.periode),
-                            meldekortId = it.meldekortId,
-                            status = it.beregningStatus
+                            meldeperiode = PeriodeDto(historiskMeldekort.periode),
+                            status = historiskMeldekort.beregningStatus
                         )
                     }
                 }
@@ -109,14 +109,15 @@ fun NormalOpenAPIRoute.meldekortApi(
                 respond(response)
             }
 
-            route("/historisk/{meldekortId}").get<MeldekortIdParam, HistoriskMeldekortDetaljerDto> { param ->
-                val response = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskMeldekort(innloggetBruker(), param.meldekortId)
+            route("/historisk/meldeperiode").post<Unit, List<HistoriskMeldekortDetaljerDto>, PeriodeDto> { _, meldeperiode ->
+                val meldekortDetaljer = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskeMeldekortDetaljer(
+                        innloggetBruker(),
+                        meldeperiode.let { periode -> Periode(periode.fom, periode.tom) }
+                    )
                 }
 
-                respond(
-                    HistoriskMeldekortDetaljerDto(response)
-                )
+                respond(meldekortDetaljer.map(::HistoriskMeldekortDetaljerDto))
             }
 
             route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { param, request ->

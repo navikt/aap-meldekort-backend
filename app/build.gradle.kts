@@ -64,6 +64,8 @@ dependencies {
 
 
     testImplementation(testFixtures(project(":postgres-repositories")))
+    testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
+    testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
