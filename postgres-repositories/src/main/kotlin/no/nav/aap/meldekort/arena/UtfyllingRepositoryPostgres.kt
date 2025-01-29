@@ -3,6 +3,7 @@ package no.nav.aap.meldekort.arena
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.meldekort.Ident
+import java.time.LocalDateTime
 
 class UtfyllingRepositoryPostgres(private val connection: DBConnection) : UtfyllingRepository {
     companion object : Factory<UtfyllingRepositoryPostgres> {
@@ -43,8 +44,9 @@ class UtfyllingRepositoryPostgres(private val connection: DBConnection) : Utfyll
                         flyt,
                         meldekort_id,
                         steg,
-                        skjema_id
-                    ) values (?, ?, ?, ?, ?)
+                        skjema_id,
+                        tid_opprettet
+                    ) values (?, ?, ?, ?, ?, ?)
                 """.trimIndent()
         ) {
             setParams {
@@ -53,6 +55,7 @@ class UtfyllingRepositoryPostgres(private val connection: DBConnection) : Utfyll
                 setLong(3, utfylling.skjema.meldekortId)
                 setEnumName(4, utfylling.steg.navn)
                 setLong(5, skjemaId.asLong)
+                setLocalDateTime(6, LocalDateTime.now())
             }
         }
     }

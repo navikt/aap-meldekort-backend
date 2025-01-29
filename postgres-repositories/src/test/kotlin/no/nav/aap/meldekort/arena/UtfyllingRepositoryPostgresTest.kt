@@ -32,8 +32,8 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `lagre og hent skjema`() {
-        val ident = nextIdent()
-        val utfylling = InitTestDatabase.dataSource.transaction {
+        InitTestDatabase.dataSource.transaction {
+            val ident = nextIdent()
 
             val repo = UtfyllingRepositoryPostgres(it)
             val meldekortRepo = MeldekortRepositoryPostgres(it)
@@ -82,16 +82,14 @@ class UtfyllingRepositoryPostgresTest {
 
             assertEquals(utfylling, repo.last(ident, 0, flyt))
 
-            utfylling
-        }
-        InitTestDatabase.dataSource.transaction {
-            val repo = UtfyllingRepositoryPostgres(it)
             val endretSkjema =
                 utfylling.copy(skjema = utfylling.skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA))
+
+            Thread.sleep(2)
+
             repo.lagrUtfylling(endretSkjema)
 
             assertEquals(endretSkjema, repo.last(ident, 0, flyt))
-
         }
     }
 }

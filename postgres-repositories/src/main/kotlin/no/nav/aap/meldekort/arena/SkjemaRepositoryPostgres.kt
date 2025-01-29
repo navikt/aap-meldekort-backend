@@ -5,6 +5,7 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.Periode
+import java.time.LocalDateTime
 import no.nav.aap.komponenter.type.Periode as dbPeriode
 
 class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRepository {
@@ -48,7 +49,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                 harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),
                 timerArbeidet = mapTilTimerArbeidet(row.getLong("id")),
                 stemmerOpplysningene = row.getBooleanOrNull("payload_stemmer_opplysningene"),
-            )
+            ),
         )
     }
 
@@ -76,8 +77,9 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                     referanse,
                     payload_svarer_du_sant,
                     payload_har_du_jobbet,
-                    payload_stemmer_opplysningene
-                ) values (?, ?, ?, ?::daterange, ?, ?, ?, ?, ?)
+                    payload_stemmer_opplysningene,
+                    tid_opprettet
+                ) values (?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?)
             """.trimIndent()
         ) {
             setParams {
@@ -90,6 +92,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                 setBoolean(7, skjema.payload.svarerDuSant)
                 setBoolean(8, skjema.payload.harDuJobbet)
                 setBoolean(9, skjema.payload.stemmerOpplysningene)
+                setLocalDateTime(10, LocalDateTime.now())
             }
         }
 

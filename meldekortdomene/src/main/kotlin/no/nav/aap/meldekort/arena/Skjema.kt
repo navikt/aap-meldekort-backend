@@ -3,7 +3,7 @@ package no.nav.aap.meldekort.arena
 import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.Periode
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class Skjema(
     val tilstand: SkjemaTilstand,
@@ -11,8 +11,8 @@ data class Skjema(
     val ident: Ident,
     val meldeperiode: Periode,
     val payload: InnsendingPayload,
-    val referanse: UUID?, //TODO - Fjern etter migrering
-    val sendtInn: LocalDateTime?
+    val referanse: UUID?, //TODO - Fjern nullable etter migrering
+    val sendtInn: LocalDateTime?,
 )
 
 enum class SkjemaTilstand {

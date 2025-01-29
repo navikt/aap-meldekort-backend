@@ -41,9 +41,12 @@ class SkjemaService(
 
 
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
+        /*
+        TODO - ikke i samme transaksjon
         skjemaRepository.lagrSkjema(
             skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA)
         )
+         */
         meldekortService.sendInn(skjema, innloggetBruker)
         skjemaRepository.lagrSkjema(
             skjema.copy(
