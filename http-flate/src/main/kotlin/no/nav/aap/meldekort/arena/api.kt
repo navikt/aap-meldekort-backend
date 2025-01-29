@@ -10,6 +10,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
@@ -133,20 +134,22 @@ fun NormalOpenAPIRoute.meldekortApi(
 
         }
 
-        route("/test/proxy/meldegrupper").get<Unit, Any> {
-            respond(arenaClient.meldegrupper(innloggetBruker()))
-        }
-        route("/test/proxy/meldekort").get<Unit, Any> {
-            respond(arenaClient.person(innloggetBruker()) ?: "null")
-        }
-        route("/test/proxy/historiskemeldekort").get<Unit, Any> {
-            respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
-        }
-        route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-            respond(arenaClient.meldekortdetaljer(innloggetBruker(), params.meldekortId))
-        }
-        route("/test/proxy/korrigerte-meldekort/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-            respond(arenaClient.korrigertMeldekort(innloggetBruker(), params.meldekortId))
+        if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
+            route("/test/proxy/meldegrupper").get<Unit, Any> {
+                respond(arenaClient.meldegrupper(innloggetBruker()))
+            }
+            route("/test/proxy/meldekort").get<Unit, Any> {
+                respond(arenaClient.person(innloggetBruker()) ?: "null")
+            }
+            route("/test/proxy/historiskemeldekort").get<Unit, Any> {
+                respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
+            }
+            route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
+                respond(arenaClient.meldekortdetaljer(innloggetBruker(), params.meldekortId))
+            }
+            route("/test/proxy/korrigerte-meldekort/{meldekortId}").get<MeldekortIdParam, Any> { params ->
+                respond(arenaClient.korrigertMeldekort(innloggetBruker(), params.meldekortId))
+            }
         }
     }
 }
