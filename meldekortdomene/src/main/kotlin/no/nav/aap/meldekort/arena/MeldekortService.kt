@@ -44,7 +44,7 @@ class MeldekortService(
         return dbMeldekort.singleOrNull { it.meldekortId == meldekort.meldekortId } is HistoriskMeldekort
     }
 
-    fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
+    private fun historiskeMeldekortFraArena(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
         val råMeldekortFraArena =
             arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
@@ -52,7 +52,7 @@ class MeldekortService(
         fun detaljer(meldekortId: Long) = detaljerCache.computeIfAbsent(meldekortId) {
             arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
         }
-        val meldekortene = råMeldekortFraArena
+        return råMeldekortFraArena
             .filter { it.erForAap }
             .groupBy { it.fraDato }
             .flatMap { (_, meldekortene) ->
@@ -76,9 +76,17 @@ class MeldekortService(
                     )
                 }
             }
-            .toMutableList()
+    }
 
-        meldekortRepository.hentAlleHistoriskeMeldekort(innloggetBruker.ident)
+    fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
+        val meldekortFraArena = historiskeMeldekortFraArena(innloggetBruker)
+        val meldekortFraDatabasen = meldekortRepository.hentAlleHistoriskeMeldekort(innloggetBruker.ident)
+        val lagredeMeldekort = meldekortFraDatabasen.asSequence().map { it.meldekortId }.toSet()
+
+        meldekortRepository.upsert(innloggetBruker.ident, meldekortFraArena.filter { it.meldekortId !in lagredeMeldekort})
+
+        val meldekortene = meldekortFraArena.toMutableList()
+        meldekortFraDatabasen
             .forEach { meldekortFraDb ->
                 val meldekortIndex = meldekortene.indexOfFirst { it.meldekortId == meldekortFraDb.meldekortId }
                 val meldekortFraArena = meldekortene.getOrNull(meldekortIndex)
