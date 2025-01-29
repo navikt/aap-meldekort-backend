@@ -45,7 +45,12 @@ class SkjemaService(
             skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA)
         )
         meldekortService.sendInn(skjema, innloggetBruker)
-        skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.SENDT_ARENA))
+        skjemaRepository.lagrSkjema(
+            skjema.copy(
+                tilstand = SkjemaTilstand.SENDT_ARENA,
+                sendtInn = LocalDateTime.now(),
+            )
+        )
 
         journalføringService.journalfør(innloggetBruker.ident, skjema.meldekortId)
     }
