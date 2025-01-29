@@ -2,7 +2,7 @@ plugins {
     id("behandlingsflyt.conventions")
 }
 
-val komponenterVersjon = "1.0.120"
+val komponenterVersjon = "1.0.121"
 
 dependencies {
     implementation(project(":meldekortdomene"))
