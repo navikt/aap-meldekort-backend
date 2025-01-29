@@ -7,7 +7,9 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.respond
+import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
+import io.ktor.http.*
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
@@ -125,6 +127,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                         request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
                     )
                 }
+                respondWithStatus(HttpStatusCode.OK)
             }
 
         }
