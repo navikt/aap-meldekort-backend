@@ -54,7 +54,7 @@ class ArenaClientImpl(
     override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): ArenaMeldekortdetaljer {
         return requireNotNull(
             getMeldekortservice<MeldekortdetaljerDto>(
-                "/v2/meldekortdetaljer?meldekortId=$meldekortId",
+                "/v2/meldekortdetaljer?meldekortId=${meldekortId.asLong}",
                 innloggetBruker
             )
         )
@@ -62,7 +62,7 @@ class ArenaClientImpl(
     }
 
     override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId {
-        return requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=$meldekortId", innloggetBruker))
+        return requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=${meldekortId.asLong}", innloggetBruker))
     }
 
     override fun sendInn(
