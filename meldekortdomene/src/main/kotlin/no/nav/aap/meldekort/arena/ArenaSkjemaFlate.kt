@@ -57,23 +57,33 @@ class ArenaSkjemaFlate private constructor(
         val timerArbeidet: List<TimerArbeidet>?
     )
 
-    fun historiskeMeldekortDetaljer(innloggetBruker: InnloggetBruker, meldeperiode: Periode): List<HistoriskMeldekortDetaljer> {
-        val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).filter { it.periode ==  meldeperiode }
+    fun historiskeMeldekortDetaljer(
+        innloggetBruker: InnloggetBruker,
+        meldeperiode: Periode
+    ): List<HistoriskMeldekortDetaljer> {
+        val meldekort = meldekortService.historiskeMeldekort(innloggetBruker).filter { it.periode == meldeperiode }
 
-        return meldekort.map {
-            HistoriskMeldekortDetaljer(
-                meldekort = it,
-                timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, it.meldekortId) ?: arenaClient.meldekortdetaljer(
-                    innloggetBruker, it.meldekortId
-                ).timerArbeidet(it.periode.fom)
-            )
-        }
+        return meldekort
+            .map {
+                HistoriskMeldekortDetaljer(
+                    meldekort = it.copy(
+                        mottattIArena = it.mottattIArena ?: skjemaService.finnSkjema(innloggetBruker.ident, it.meldekortId)?.sendtInn?.toLocalDate(),
+                    ),
+                    timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, it.meldekortId)
+                        ?: arenaClient.meldekortdetaljer(innloggetBruker, it.meldekortId)
+                            .timerArbeidet(it.periode.fom)
+                )
+            }
+            .sortedByDescending { it.meldekort.periode }
     }
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
-        return meldekortService.historiskeMeldekort(innloggetBruker).groupBy { it.periode }.values.map {
-            it.maxBy { meldekort -> meldekort.beregningStatus.ordinal }
-        }
+        return meldekortService.historiskeMeldekort(innloggetBruker)
+            .groupBy { it.periode }
+            .values
+            .map {
+                it.maxBy { meldekort -> meldekort.beregningStatus.ordinal }
+            }
     }
 
     fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): Utfylling {

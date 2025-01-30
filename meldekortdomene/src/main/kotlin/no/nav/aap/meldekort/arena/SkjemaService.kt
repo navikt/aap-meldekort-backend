@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort.arena
 
+import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.journalføring.JournalføringService
 import java.time.LocalDateTime
@@ -10,6 +11,10 @@ class SkjemaService(
     private val skjemaRepository: SkjemaRepository,
     private val journalføringService: JournalføringService
 ) {
+    fun finnSkjema(ident: Ident, meldekortId: MeldekortId): Skjema? {
+        return skjemaRepository.last(ident, meldekortId)
+    }
+
     fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): List<TimerArbeidet>? {
         return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.payload?.timerArbeidet
     }
