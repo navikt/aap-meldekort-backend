@@ -22,7 +22,7 @@ class UtfyllingFlyt private constructor(
 
 data class Utfylling(
     val ident: Ident,
-    val meldekortId: Long,
+    val meldekortId: MeldekortId,
     val flyt: UtfyllingFlyt,
     val steg: Steg,
     val skjema: Skjema,

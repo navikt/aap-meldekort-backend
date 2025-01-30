@@ -32,7 +32,7 @@ data class HistoriskMeldekortDetaljerDto(
 ) {
     constructor(historiskMeldekortDetaljer: ArenaSkjemaFlate.HistoriskMeldekortDetaljer) : this(
         meldeperiode = PeriodeDto(historiskMeldekortDetaljer.meldekort.periode),
-        meldekortId = historiskMeldekortDetaljer.meldekort.meldekortId,
+        meldekortId = historiskMeldekortDetaljer.meldekort.meldekortId.asLong,
         status = historiskMeldekortDetaljer.meldekort.beregningStatus,
         bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
         innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
@@ -54,7 +54,7 @@ class MeldeperiodeDto(
     val kanEndres: Boolean,
 ) {
     constructor(meldekort: Meldekort) : this(
-        meldekortId = meldekort.meldekortId,
+        meldekortId = meldekort.meldekortId.asLong,
         periode = PeriodeDto(meldekort.periode),
         type = MeldeperiodeTypeDto.fraDomene(meldekort.type),
         klarForInnsending = meldekort is KommendeMeldekort && meldekort.kanSendes,

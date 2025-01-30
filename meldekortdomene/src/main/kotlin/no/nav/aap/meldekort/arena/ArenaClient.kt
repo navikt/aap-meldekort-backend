@@ -13,9 +13,9 @@ interface ArenaClient {
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker, antallMeldeperioder: Int): ArenaPerson
 
-    fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): ArenaMeldekortdetaljer
+    fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): ArenaMeldekortdetaljer
 
-    fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): Long
+    fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId
 
     fun sendInn(innloggetBruker: InnloggetBruker, request: ArenaMeldekortkontrollRequest): MeldekortkontrollResponse
 

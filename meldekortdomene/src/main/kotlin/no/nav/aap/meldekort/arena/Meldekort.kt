@@ -4,7 +4,7 @@ import no.nav.aap.meldekort.Periode
 import java.time.LocalDate
 
 interface Meldekort {
-    val meldekortId: Long
+    val meldekortId: MeldekortId
     val periode: Periode
     val type: MeldekortType
     val kanKorrigeres: Boolean
@@ -36,7 +36,7 @@ enum class MeldekortStatus {
 }
 
 data class KommendeMeldekort(
-    override val meldekortId: Long,
+    override val meldekortId: MeldekortId,
     override val type: MeldekortType,
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
@@ -46,13 +46,13 @@ data class KommendeMeldekort(
 }
 
 data class HistoriskMeldekort(
-    override val meldekortId: Long,
+    override val meldekortId: MeldekortId,
     override val type: MeldekortType,
     override val periode: Periode,
     override val kanKorrigeres: Boolean,
     val begrunnelseEndring: String?,
     val mottattIArena: LocalDate?,
-    val originalMeldekortId: Long?,
+    val originalMeldekortId: MeldekortId?,
     val beregningStatus: MeldekortStatus,
     val bruttoBeløp: Double?
 ) : Meldekort {

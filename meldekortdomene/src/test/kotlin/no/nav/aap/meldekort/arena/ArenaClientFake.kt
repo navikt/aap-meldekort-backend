@@ -56,11 +56,11 @@ open class ArenaClientFake(
         )
     }
 
-    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): ArenaMeldekortdetaljer {
+    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): ArenaMeldekortdetaljer {
         TODO("Not yet implemented")
     }
 
-    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): Long {
+    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId {
         TODO("Not yet implemented")
     }
 

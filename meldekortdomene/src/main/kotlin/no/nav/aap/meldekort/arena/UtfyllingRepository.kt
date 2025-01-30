@@ -4,6 +4,6 @@ import no.nav.aap.lookup.repository.Repository
 import no.nav.aap.meldekort.Ident
 
 interface UtfyllingRepository: Repository {
-    fun last(ident: Ident, meldekortId: Long, utfyllingFlyt: UtfyllingFlyt): Utfylling?
+    fun last(ident: Ident, meldekortId: MeldekortId, utfyllingFlyt: UtfyllingFlyt): Utfylling?
     fun lagrUtfylling(utfylling: Utfylling)
 }

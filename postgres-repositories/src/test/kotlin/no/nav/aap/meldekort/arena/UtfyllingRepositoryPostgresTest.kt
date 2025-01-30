@@ -23,7 +23,7 @@ class UtfyllingRepositoryPostgresTest {
             assertNull(
                 repo.last(
                     nextIdent(),
-                    0,
+                    MeldekortId(0),
                     UtfyllingFlyt()
                 )
             )
@@ -43,7 +43,7 @@ class UtfyllingRepositoryPostgresTest {
                 flyt = flyt,
                 skjema = Skjema(
                     tilstand = SkjemaTilstand.SENDT_ARENA,
-                    meldekortId = 0,
+                    meldekortId = MeldekortId(0),
                     ident = ident,
                     meldeperiode = Periode(
                         LocalDate.of(2021, 1, 1),
@@ -69,7 +69,7 @@ class UtfyllingRepositoryPostgresTest {
 
             meldekortRepo.upsert(
                 ident, KommendeMeldekort(
-                    meldekortId = 0,
+                    meldekortId = MeldekortId(0),
                     type = VANLIG,
                     periode = Periode(
                         LocalDate.of(2021, 1, 1),
@@ -80,7 +80,7 @@ class UtfyllingRepositoryPostgresTest {
             )
             repo.lagrUtfylling(utfylling)
 
-            assertEquals(utfylling, repo.last(ident, 0, flyt))
+            assertEquals(utfylling, repo.last(ident, MeldekortId(0), flyt))
 
             val endretSkjema =
                 utfylling.copy(skjema = utfylling.skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA))
@@ -89,7 +89,7 @@ class UtfyllingRepositoryPostgresTest {
 
             repo.lagrUtfylling(endretSkjema)
 
-            assertEquals(endretSkjema, repo.last(ident, 0, flyt))
+            assertEquals(endretSkjema, repo.last(ident, MeldekortId(0), flyt))
         }
     }
 }

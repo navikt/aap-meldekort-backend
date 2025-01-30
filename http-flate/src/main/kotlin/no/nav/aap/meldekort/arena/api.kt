@@ -31,7 +31,7 @@ fun NormalOpenAPIRoute.meldekortApi(
             get<MeldekortIdParam, MeldekortResponse> { params ->
                 val nåværendeTilstand = datasource.transaction {
                     ArenaSkjemaFlate.konstruer(it, arenaClient)
-                        .hentEllerOpprettUtfylling(innloggetBruker(), params.meldekortId)
+                        .hentEllerOpprettUtfylling(innloggetBruker(), MeldekortId(params.meldekortId))
 
                 }
                 respond(MeldekortResponse(nåværendeTilstand))
@@ -43,7 +43,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                         val response = datasource.transaction {
                             ArenaSkjemaFlate.konstruer(it, arenaClient).gåTilNesteSteg(
                                 innloggetBruker = innloggetBruker(),
-                                meldekortId = params.meldekortId,
+                                meldekortId = MeldekortId(params.meldekortId),
                                 fraSteg = meldekortRequest.nåværendeSteg,
                                 nyPayload = meldekortRequest.meldekort.tilDomene(),
                             )
@@ -62,7 +62,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                 val response = datasource.transaction {
                     ArenaSkjemaFlate.konstruer(it, arenaClient).lagreSteg(
                         ident = innloggetBruker().ident,
-                        meldekortId = params.meldekortId,
+                        meldekortId = MeldekortId(params.meldekortId),
                         nyPayload = meldekortRequest.meldekort.tilDomene(),
                         settSteg = meldekortRequest.nåværendeSteg,
                     )
@@ -86,7 +86,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                         nesteMeldekort = kommendeMeldekort.minByOrNull { it.periode }?.let {
                             NesteMeldekortDto(
                                 meldeperiode = PeriodeDto(it.periode),
-                                meldekortId = it.meldekortId,
+                                meldekortId = it.meldekortId.asLong,
                                 tidligsteInnsendingsDato = it.tidligsteInnsendingsdato,
                                 kanSendesInn = it.kanSendes
                             )
@@ -125,7 +125,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                 datasource.transaction {
                     ArenaSkjemaFlate.konstruer(it, arenaClient).korrigerMeldekort(
                         innloggetBruker(),
-                        param.meldekortId,
+                        MeldekortId(param.meldekortId),
                         request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
                     )
                 }
@@ -145,10 +145,10 @@ fun NormalOpenAPIRoute.meldekortApi(
                 respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
             }
             route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-                respond(arenaClient.meldekortdetaljer(innloggetBruker(), params.meldekortId))
+                respond(arenaClient.meldekortdetaljer(innloggetBruker(), MeldekortId(params.meldekortId)))
             }
             route("/test/proxy/korrigerte-meldekort/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-                respond(arenaClient.korrigertMeldekort(innloggetBruker(), params.meldekortId))
+                respond(arenaClient.korrigertMeldekort(innloggetBruker(), MeldekortId(params.meldekortId)))
             }
         }
     }

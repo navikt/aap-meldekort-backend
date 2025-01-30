@@ -4,6 +4,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldekort.Ident
+import no.nav.aap.meldekort.arena.MeldekortId
 import no.nav.aap.meldekort.arena.MeldekortRepository
 import no.nav.aap.meldekort.arena.MeldekortType
 import no.nav.aap.meldekort.arena.SkjemaRepository
@@ -67,10 +68,10 @@ class ArenaJournalføringJobbUtfører(
 
         private data class ArenaJournalføringJobbPayload(
             val ident: Ident,
-            val meldekortId: Long,
+            val meldekortId: MeldekortId,
         )
 
-        fun jobbInput(ident: Ident, meldekortId: Long): JobbInput {
+        fun jobbInput(ident: Ident, meldekortId: MeldekortId): JobbInput {
             return JobbInput(ArenaJournalføringJobbUtfører).medPayload(
                 ArenaJournalføringJobbPayload(ident, meldekortId)
             )

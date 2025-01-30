@@ -4,17 +4,17 @@ import no.nav.aap.meldekort.Ident
 
 /* TODO: Flytt ned i test-mappa når postgres-database er implementert. */
 class MeldekortRepositoryFake: MeldekortRepository {
-    private val store: MutableMap<Pair<Ident, Long>, Meldekort> = mutableMapOf()
+    private val store: MutableMap<Pair<Ident, MeldekortId>, Meldekort> = mutableMapOf()
 
     fun oppdater(ident: Ident, meldekort: Meldekort) {
         store[ident to meldekort.meldekortId] = meldekort
     }
 
-    override fun hent(ident: Ident, meldekortId: Long): Meldekort? {
+    override fun hent(ident: Ident, meldekortId: MeldekortId): Meldekort? {
         return store[ident to meldekortId]
     }
 
-    override fun hent(ident: Ident, meldekortId: List<Long>): List<Meldekort> {
+    override fun hent(ident: Ident, meldekortId: List<MeldekortId>): List<Meldekort> {
         return store.entries
             .asSequence()
             .filter { it.key.first == ident && it.key.second in meldekortId}

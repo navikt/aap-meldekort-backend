@@ -51,7 +51,7 @@ class ArenaClientImpl(
             .tilDomene()
     }
 
-    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: Long): ArenaMeldekortdetaljer {
+    override fun meldekortdetaljer(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): ArenaMeldekortdetaljer {
         return requireNotNull(
             getMeldekortservice<MeldekortdetaljerDto>(
                 "/v2/meldekortdetaljer?meldekortId=$meldekortId",
@@ -61,7 +61,7 @@ class ArenaClientImpl(
             .tilDomene()
     }
 
-    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): Long {
+    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId {
         return requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=$meldekortId", innloggetBruker))
     }
 
@@ -156,7 +156,7 @@ class ArenaClientImpl(
         val bruttoBelop: Double = 0.0
     ) {
         fun tilDomene() = ArenaMeldekort(
-            meldekortId = meldekortId,
+            meldekortId = MeldekortId(meldekortId),
             kortType = ArenaClient.KortType.getByCode(kortType),
             meldeperiode = meldeperiode,
             fraDato = fraDato,
@@ -187,7 +187,7 @@ class ArenaClientImpl(
             id = id,
             personId = personId,
             fodselsnr = fodselsnr,
-            meldekortId = meldekortId,
+            meldekortId = MeldekortId(meldekortId),
             meldeperiode = meldeperiode,
             meldegruppe = meldegruppe,
             arkivnokkel = arkivnokkel,
@@ -258,7 +258,7 @@ class ArenaClientImpl(
         val syk: Boolean = false,
     ) {
         constructor(domene: ArenaMeldekortkontrollRequest) : this(
-            meldekortId = domene.meldekortId,
+            meldekortId = domene.meldekortId.asLong,
             fnr = domene.fnr,
             personId = domene.personId,
             kortType = domene.kortType.code,

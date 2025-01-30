@@ -7,6 +7,7 @@ import no.nav.aap.meldekort.arena.ArenaMeldekort
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.UBEHA
 import no.nav.aap.meldekort.arena.ArenaPerson
 import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
+import no.nav.aap.meldekort.arena.MeldekortId
 import no.nav.aap.meldekort.arena.MeldekortType
 import no.nav.aap.meldekort.arena.TimerArbeidet
 import org.junit.jupiter.api.Assertions.assertNull
@@ -32,7 +33,7 @@ class ArenaSkjemaFlateIntegrasjonTest {
                 LocalDate.parse("2024-11-24")
             )
 
-            val originalMeldekortId = 1684229709L
+            val originalMeldekortId = MeldekortId(1684229709L)
             arenaClient.historiskeMeldekort = ArenaPerson(
                 personId = 4940857,
                 etternavn = "GRUNNSKOLE",
@@ -55,7 +56,7 @@ class ArenaSkjemaFlateIntegrasjonTest {
                 )
             )
             arenaClient.korrigertMeldekort = ArenaMeldekort(
-                meldekortId = 1687337285,
+                meldekortId = MeldekortId(1687337285),
                 kortType = ArenaClient.KortType.KORRIGERT_ELEKTRONISK,
                 meldeperiode = "202446",
                 fraDato = meldeperiode.fom,

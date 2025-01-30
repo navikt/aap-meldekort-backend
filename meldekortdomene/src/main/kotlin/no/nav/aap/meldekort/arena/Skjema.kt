@@ -7,7 +7,7 @@ import java.util.*
 
 data class Skjema(
     val tilstand: SkjemaTilstand,
-    val meldekortId: Long,
+    val meldekortId: MeldekortId,
     val ident: Ident,
     val meldeperiode: Periode,
     val payload: InnsendingPayload,

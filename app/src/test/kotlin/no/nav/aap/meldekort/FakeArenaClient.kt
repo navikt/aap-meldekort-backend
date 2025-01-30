@@ -6,6 +6,7 @@ import no.nav.aap.meldekort.arena.ArenaMeldekort
 import no.nav.aap.meldekort.arena.ArenaMeldekortdetaljer
 import no.nav.aap.meldekort.arena.ArenaMeldekortkontrollRequest
 import no.nav.aap.meldekort.arena.ArenaPerson
+import no.nav.aap.meldekort.arena.MeldekortId
 import no.nav.aap.meldekort.arena.MeldekortkontrollResponse as MeldekortkontrollResponse
 
 class FakeArenaClient : ArenaClient {
@@ -25,7 +26,7 @@ class FakeArenaClient : ArenaClient {
     }
 
     override fun meldekortdetaljer(
-        innloggetBruker: InnloggetBruker, meldekortId: Long
+        innloggetBruker: InnloggetBruker, meldekortId: MeldekortId
     ): ArenaMeldekortdetaljer {
         val meldekort = historiskeMeldekort?.arenaMeldekortListe?.find {
             it.meldekortId == meldekortId
@@ -48,7 +49,7 @@ class FakeArenaClient : ArenaClient {
         )
     }
 
-    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: Long): Long {
+    override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId {
         val meldekort = requireNotNull(korrigertMeldekort)
         historiskeMeldekort = historiskeMeldekort?.copy(
             arenaMeldekortListe = historiskeMeldekort?.arenaMeldekortListe.orEmpty() + meldekort
@@ -60,7 +61,7 @@ class FakeArenaClient : ArenaClient {
         innloggetBruker: InnloggetBruker, request: ArenaMeldekortkontrollRequest
     ): MeldekortkontrollResponse {
         return MeldekortkontrollResponse(
-            meldekortId = request.meldekortId,
+            meldekortId = request.meldekortId.asLong,
             kontrollStatus = "OK",
             feilListe = emptyList(),
             oppfolgingListe = emptyList(),

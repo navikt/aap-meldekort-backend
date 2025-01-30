@@ -10,13 +10,13 @@ class SkjemaService(
     private val skjemaRepository: SkjemaRepository,
     private val journalføringService: JournalføringService
 ) {
-    fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: Long): List<TimerArbeidet>? {
+    fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): List<TimerArbeidet>? {
         return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.payload?.timerArbeidet
     }
 
     fun sendInnKorrigering(
         innloggetBruker: InnloggetBruker,
-        originalMeldekortId: Long,
+        originalMeldekortId: MeldekortId,
         timerArbeidet: List<TimerArbeidet>
     ) {
         val nyttMeldekort = meldekortService.nyttMeldekortForKorrigering(innloggetBruker, originalMeldekortId)

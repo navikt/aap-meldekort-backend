@@ -51,8 +51,8 @@ class MeldekortService(
         val råMeldekortFraArena =
             arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
-        val detaljerCache = mutableMapOf<Long, ArenaMeldekortdetaljer>()
-        fun detaljer(meldekortId: Long) = detaljerCache.computeIfAbsent(meldekortId) {
+        val detaljerCache = mutableMapOf<MeldekortId, ArenaMeldekortdetaljer>()
+        fun detaljer(meldekortId: MeldekortId) = detaljerCache.computeIfAbsent(meldekortId) {
             arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
         }
         return råMeldekortFraArena
@@ -107,7 +107,7 @@ class MeldekortService(
 
     fun nyttMeldekortForKorrigering(
         innloggetBruker: InnloggetBruker,
-        originalMeldekortId: Long
+        originalMeldekortId: MeldekortId
     ): HistoriskMeldekort {
         val originaltMeldekort = historiskeMeldekort(innloggetBruker).single { it.meldekortId == originalMeldekortId }
         check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }

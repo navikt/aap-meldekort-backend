@@ -47,7 +47,7 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
         ) {
             setParams {
                 setString(1, ident.asString)
-                setLong(2, it.meldekortId)
+                setLong(2, it.meldekortId.asLong)
                 setBoolean(3, it.kanKorrigeres)
                 setPeriode(4, DbPeriode(it.periode.fom, it.periode.tom))
                 setEnumName(5, it.type)
@@ -65,7 +65,7 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
                         setEnumName(6, Tilstand.HISTORISK)
                         setString(7, it.begrunnelseEndring)
                         setLocalDate(8, it.mottattIArena)
-                        setLong(9, it.originalMeldekortId)
+                        setLong(9, it.originalMeldekortId?.asLong)
                         setEnumName(10, it.beregningStatus)
                         setDouble(11, it.bruttoBeløp)
                     }
@@ -74,11 +74,11 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
         }
     }
 
-    override fun hent(ident: Ident, meldekortId: Long): Meldekort? {
+    override fun hent(ident: Ident, meldekortId: MeldekortId): Meldekort? {
         return connection.queryFirstOrNull("select * from arena_meldekort where ident = ? and meldekort_id = ?") {
             setParams {
                 setString(1, ident.asString)
-                setLong(2, meldekortId)
+                setLong(2, meldekortId.asLong)
             }
             setRowMapper {
                 mapTilMeldekort(it)
@@ -87,11 +87,11 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
     }
 
 
-    override fun hent(ident: Ident, meldekortId: List<Long>): List<Meldekort> {
+    override fun hent(ident: Ident, meldekortId: List<MeldekortId>): List<Meldekort> {
         return connection.queryList("select * from arena_meldekort where ident = ? and meldekort_id = any(?::bigint[])") {
             setParams {
                 setString(1, ident.asString)
-                setLongArray(2, meldekortId)
+                setLongArray(2, meldekortId.map { it.asLong })
             }
             setRowMapper {
                 mapTilMeldekort(it)
@@ -102,7 +102,7 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
     private fun mapTilMeldekort(row: Row): Meldekort {
         return when (row.getEnum<Tilstand>("tilstand")) {
             Tilstand.KOMMENDE -> KommendeMeldekort(
-                meldekortId = row.getLong("meldekort_id"),
+                meldekortId = MeldekortId(row.getLong("meldekort_id")),
                 type = row.getEnum("type"),
                 periode = row.getPeriode("periode").let { dbPeriode -> Periode(dbPeriode.fom, dbPeriode.tom) },
                 kanKorrigeres = row.getBoolean("kan_korrigeres"),
@@ -114,13 +114,13 @@ class MeldekortRepositoryPostgres(private val connection: DBConnection) : Meldek
 
     private fun mapTilHistoriskeMeldekort(row: Row): HistoriskMeldekort {
         return HistoriskMeldekort(
-            meldekortId = row.getLong("meldekort_id"),
+            meldekortId = MeldekortId(row.getLong("meldekort_id")),
             type = row.getEnum("type"),
             periode = row.getPeriode("periode").let { dbPeriode -> Periode(dbPeriode.fom, dbPeriode.tom) },
             kanKorrigeres = row.getBoolean("kan_korrigeres"),
             begrunnelseEndring = row.getStringOrNull("begrunnelse_endring"),
             mottattIArena = row.getLocalDateOrNull("mottatt"),
-            originalMeldekortId = row.getLongOrNull("original_meldekort_id"),
+            originalMeldekortId = row.getLongOrNull("original_meldekort_id")?.let(::MeldekortId),
             beregningStatus = row.getEnum("beregning_status"),
             bruttoBeløp = row.getDoubleOrNull("brutto_beløp")
         )

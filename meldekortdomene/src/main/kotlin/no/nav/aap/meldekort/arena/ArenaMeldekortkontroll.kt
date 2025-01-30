@@ -4,7 +4,7 @@ import no.nav.aap.meldekort.arena.ArenaClient.KortType.KORRIGERT_ELEKTRONISK
 import java.time.LocalDate
 
 data class ArenaMeldekortkontrollRequest(
-    val meldekortId: Long,
+    val meldekortId: MeldekortId,
     val fnr: String,
     val personId: Long,
     val kortType: ArenaClient.KortType,

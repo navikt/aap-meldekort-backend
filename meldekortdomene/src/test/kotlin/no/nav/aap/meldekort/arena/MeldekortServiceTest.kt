@@ -52,7 +52,7 @@ class MeldekortServiceTest {
 
     val kommendeMeldekort = listOf(
         ArenaMeldekort(
-            meldekortId = 1684229691,
+            meldekortId = MeldekortId(1684229691),
             kortType = MANUELL_ARENA,
             meldeperiode = "202444",
             fraDato = LocalDate.parse("2024-10-28"),
@@ -64,7 +64,7 @@ class MeldekortServiceTest {
             bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
-            meldekortId = 1684229709,
+            meldekortId = MeldekortId(1684229709),
             kortType = MANUELL_ARENA,
             meldeperiode = "202446",
             fraDato = LocalDate.parse("2024-11-11"),
@@ -76,7 +76,7 @@ class MeldekortServiceTest {
             bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
-            meldekortId = 1684229717,
+            meldekortId = MeldekortId(1684229717),
             kortType = MANUELL_ARENA,
             meldeperiode = "202448",
             fraDato = LocalDate.parse("2024-11-25"),
@@ -88,7 +88,7 @@ class MeldekortServiceTest {
             bruttoBelop = 0.0,
         ),
         ArenaMeldekort(
-            meldekortId = 1684229725,
+            meldekortId = MeldekortId(1684229725),
             kortType = ELEKTRONISK,
             meldeperiode = "202450",
             fraDato = LocalDate.parse("2024-12-09"),

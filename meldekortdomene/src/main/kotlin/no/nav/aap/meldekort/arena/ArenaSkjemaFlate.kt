@@ -42,7 +42,7 @@ class ArenaSkjemaFlate private constructor(
 
     fun korrigerMeldekort(
         innloggetBruker: InnloggetBruker,
-        originalMeldekortId: Long,
+        originalMeldekortId: MeldekortId,
         timerArbeidet: List<TimerArbeidet>
     ) {
         skjemaService.sendInnKorrigering(innloggetBruker, originalMeldekortId, timerArbeidet)
@@ -76,13 +76,13 @@ class ArenaSkjemaFlate private constructor(
         }
     }
 
-    fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: Long): Utfylling {
+    fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): Utfylling {
         return utfyllingService.hentEllerStartUtfylling(meldekortId, innloggetBruker)
     }
 
     fun gåTilNesteSteg(
         innloggetBruker: InnloggetBruker,
-        meldekortId: Long,
+        meldekortId: MeldekortId,
         fraSteg: StegNavn,
         nyPayload: InnsendingPayload
     ): Utfylling {
@@ -106,7 +106,7 @@ class ArenaSkjemaFlate private constructor(
         }
     }
 
-    fun lagreSteg(ident: Ident, meldekortId: Long, nyPayload: InnsendingPayload, settSteg: StegNavn): Utfylling {
+    fun lagreSteg(ident: Ident, meldekortId: MeldekortId, nyPayload: InnsendingPayload, settSteg: StegNavn): Utfylling {
         val utfylling = utfyllingService.hentUtfylling(
             ident = ident,
             meldekortId = meldekortId,

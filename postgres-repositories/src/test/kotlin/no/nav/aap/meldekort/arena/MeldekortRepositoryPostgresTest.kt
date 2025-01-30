@@ -17,29 +17,29 @@ class MeldekortRepositoryPostgresTest {
             val repo = MeldekortRepositoryPostgres(it)
             val ident = nextIdent()
             val kommendeMeldekort = KommendeMeldekort(
-                meldekortId = 0,
+                meldekortId = MeldekortId(0),
                 type = VANLIG,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
             )
             val historiskMeldekort = HistoriskMeldekort(
-                meldekortId = 1,
+                meldekortId = MeldekortId(1),
                 type = KORRIGERING,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
                 begrunnelseEndring = "Kort",
                 mottattIArena = LocalDate.of(2020, 1, 1),
-                originalMeldekortId = 0,
+                originalMeldekortId = MeldekortId(0),
                 beregningStatus = MeldekortStatus.INNSENDT,
                 bruttoBeløp = 0.0
             )
             repo.upsert(ident, listOf(kommendeMeldekort, historiskMeldekort))
 
-            assertEquals(kommendeMeldekort, repo.hent(ident, 0))
-            assertEquals(historiskMeldekort, repo.hent(ident, 1))
+            assertEquals(kommendeMeldekort, repo.hent(ident, MeldekortId(0)))
+            assertEquals(historiskMeldekort, repo.hent(ident, MeldekortId(1)))
 
             val nyttMeldekort = HistoriskMeldekort(
-                meldekortId = 0,
+                meldekortId = MeldekortId(0),
                 type = VANLIG,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
@@ -51,7 +51,7 @@ class MeldekortRepositoryPostgresTest {
             )
 
             repo.upsert(ident, nyttMeldekort)
-            assertEquals(nyttMeldekort, repo.hent(ident, 0))
+            assertEquals(nyttMeldekort, repo.hent(ident, MeldekortId(0)))
         }
     }
 
@@ -61,24 +61,24 @@ class MeldekortRepositoryPostgresTest {
             val repo = MeldekortRepositoryPostgres(it)
             val ident = nextIdent()
             val kommendeMeldekort = KommendeMeldekort(
-                meldekortId = 0,
+                meldekortId = MeldekortId(0),
                 type = VANLIG,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
             )
             val historiskMeldekort = HistoriskMeldekort(
-                meldekortId = 1,
+                meldekortId = MeldekortId(1),
                 type = KORRIGERING,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
                 begrunnelseEndring = "Kort",
                 mottattIArena = LocalDate.of(2020, 1, 1),
-                originalMeldekortId = 0,
+                originalMeldekortId = MeldekortId(0),
                 beregningStatus = MeldekortStatus.INNSENDT,
                 bruttoBeløp = 0.0
             )
             val ikkeHentesUtMeldekort = KommendeMeldekort(
-                meldekortId = 2,
+                meldekortId = MeldekortId(2),
                 type = VANLIG,
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 14)),
                 kanKorrigeres = false,
@@ -86,7 +86,7 @@ class MeldekortRepositoryPostgresTest {
             repo.upsert(ident, listOf(kommendeMeldekort, historiskMeldekort, ikkeHentesUtMeldekort))
             repo.upsert(nextIdent(), kommendeMeldekort.copy(type = KORRIGERING))
 
-            val meldekort = repo.hent(ident, listOf(0, 1))
+            val meldekort = repo.hent(ident, listOf(MeldekortId(0), MeldekortId(1)))
 
             assertEquals(2, meldekort.size)
             assertEquals(setOf(kommendeMeldekort, historiskMeldekort), meldekort.toSet())

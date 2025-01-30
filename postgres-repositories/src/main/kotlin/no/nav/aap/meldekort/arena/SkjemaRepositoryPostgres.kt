@@ -24,13 +24,13 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
         }
     }
 
-    override fun last(ident: Ident, meldekortId: Long): Skjema? {
+    override fun last(ident: Ident, meldekortId: MeldekortId): Skjema? {
         return connection.queryFirstOrNull(
             "select * from arena_skjema where ident = ? and meldekort_id = ? order by tid_opprettet desc limit 1"
         ) {
             setParams {
                 setString(1, ident.asString)
-                setLong(2, meldekortId)
+                setLong(2, meldekortId.asLong)
             }
             setRowMapper(::mapSkjema)
         }
@@ -39,7 +39,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
     private fun mapSkjema(row: Row): Skjema {
         return Skjema(
             tilstand = row.getEnum("tilstand"),
-            meldekortId = row.getLong("meldekort_id"),
+            meldekortId = MeldekortId(row.getLong("meldekort_id")),
             ident = Ident(row.getString("ident")),
             meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
             sendtInn = row.getLocalDateTimeOrNull("sendt_inn"),
@@ -85,7 +85,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
             setParams {
                 setString(1, skjema.ident.asString)
                 setEnumName(2, skjema.tilstand)
-                setLong(3, skjema.meldekortId)
+                setLong(3, skjema.meldekortId.asLong)
                 setPeriode(4, skjema.meldeperiode.let { dbPeriode(it.fom, it.tom) })
                 setLocalDateTime(5, skjema.sendtInn)
                 setUUID(6, skjema.referanse)

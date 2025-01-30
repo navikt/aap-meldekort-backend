@@ -14,13 +14,13 @@ class UtfyllingRepositoryPostgres(private val connection: DBConnection) : Utfyll
 
     private val skjemaRepository = SkjemaRepositoryPostgres(connection)
 
-    override fun last(ident: Ident, meldekortId: Long, utfyllingFlyt: UtfyllingFlyt): Utfylling? {
+    override fun last(ident: Ident, meldekortId: MeldekortId, utfyllingFlyt: UtfyllingFlyt): Utfylling? {
         return connection.queryFirstOrNull(
             "select * from arena_utfylling where ident = ? and meldekort_id = ? order by tid_opprettet desc limit 1"
         ) {
             setParams {
                 setString(1, ident.asString)
-                setLong(2, meldekortId)
+                setLong(2, meldekortId.asLong)
             }
             setRowMapper { row ->
                 Utfylling(
@@ -28,7 +28,7 @@ class UtfyllingRepositoryPostgres(private val connection: DBConnection) : Utfyll
                     steg = utfyllingFlyt.stegForNavn(row.getEnum("steg")),
                     skjema = skjemaRepository.last(SkjemaId(row.getLong("skjema_id"))),
                     ident = Ident(row.getString("ident")),
-                    meldekortId = row.getLong("meldekort_id"),
+                    meldekortId = MeldekortId(row.getLong("meldekort_id")),
                 )
             }
         }
@@ -52,7 +52,7 @@ class UtfyllingRepositoryPostgres(private val connection: DBConnection) : Utfyll
             setParams {
                 setString(1, utfylling.ident.asString)
                 setString(2, utfylling.flyt.toString())
-                setLong(3, utfylling.skjema.meldekortId)
+                setLong(3, utfylling.skjema.meldekortId.asLong)
                 setEnumName(4, utfylling.steg.navn)
                 setLong(5, skjemaId.asLong)
                 setLocalDateTime(6, LocalDateTime.now())

@@ -17,17 +17,17 @@ class UtfyllingService(
         KvitteringSteg,
     )
 
-    fun hentUtfylling(ident: Ident, meldekortId: Long): Utfylling? {
+    fun hentUtfylling(ident: Ident, meldekortId: MeldekortId): Utfylling? {
         return utfyllingRepository.last(ident, meldekortId, flyt)
     }
 
-    fun hentEllerStartUtfylling(meldekortId: Long, innloggetBruker: InnloggetBruker): Utfylling {
+    fun hentEllerStartUtfylling(meldekortId: MeldekortId, innloggetBruker: InnloggetBruker): Utfylling {
         return hentUtfylling(innloggetBruker.ident, meldekortId) ?: opprettUtfylling(innloggetBruker, meldekortId)
     }
 
     private fun opprettUtfylling(
         innloggetBruker: InnloggetBruker,
-        meldekortId: Long
+        meldekortId: MeldekortId
     ): Utfylling {
         val meldeperiode = meldekortService.kommendeMeldekort(innloggetBruker)
             .orEmpty()

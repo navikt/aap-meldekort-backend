@@ -9,7 +9,7 @@ interface MeldekortRepository: Repository {
         upsert(ident, listOf(meldekort))
     }
 
-    fun hent(ident: Ident, meldekortId: Long): Meldekort?
-    fun hent(ident: Ident, meldekortId: List<Long>): List<Meldekort>
+    fun hent(ident: Ident, meldekortId: MeldekortId): Meldekort?
+    fun hent(ident: Ident, meldekortId: List<MeldekortId>): List<Meldekort>
     fun hentAlleHistoriskeMeldekort(ident: Ident): List<HistoriskMeldekort>
 }

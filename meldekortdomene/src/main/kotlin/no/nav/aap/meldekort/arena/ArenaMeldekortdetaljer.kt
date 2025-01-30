@@ -7,7 +7,7 @@ data class ArenaMeldekortdetaljer(
     val id: String,
     val personId: Long,
     val fodselsnr: String,
-    val meldekortId: Long,
+    val meldekortId: MeldekortId,
     val meldeperiode: String,
     val meldegruppe: String,
     val arkivnokkel: String,

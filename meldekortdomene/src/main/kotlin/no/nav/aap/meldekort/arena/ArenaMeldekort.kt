@@ -9,8 +9,10 @@ import no.nav.aap.meldekort.arena.MeldekortStatus.OVERSTYRT_AV_ANNET_MELDEKORT
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 
+data class MeldekortId(val asLong: Long)
+
 data class ArenaMeldekort(
-    val meldekortId: Long,
+    val meldekortId: MeldekortId,
 
     val kortType: ArenaClient.KortType,
     val meldeperiode: String,
