@@ -62,7 +62,7 @@ class ArenaClientImpl(
     }
 
     override fun korrigertMeldekort(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): MeldekortId {
-        return requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=${meldekortId.asLong}", innloggetBruker))
+        return MeldekortId(requireNotNull(getMeldekortservice("/v2/korrigertMeldekort?meldekortId=${meldekortId.asLong}", innloggetBruker)))
     }
 
     override fun sendInn(
