@@ -74,7 +74,7 @@ class ArenaSkjemaFlate private constructor(
                             .timerArbeidet(it.periode.fom)
                 )
             }
-            .sortedBy { it.meldekort.periode }
+            .sortedByDescending { it.meldekort.periode }
     }
 
     fun historiskeMeldekort(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
