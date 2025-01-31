@@ -28,7 +28,8 @@ data class HistoriskMeldekortDetaljerDto(
     val bruttoBeløp: Double?,
     val innsendtDato: LocalDate?,
     val kanEndres: Boolean,
-    val timerArbeidet: List<TimerArbeidetDto>?
+    val timerArbeidet: List<TimerArbeidetDto>?,
+    val type: MeldekortTypeDto,
 ) {
     constructor(historiskMeldekortDetaljer: ArenaSkjemaFlate.HistoriskMeldekortDetaljer) : this(
         meldeperiode = PeriodeDto(historiskMeldekortDetaljer.meldekort.periode),
@@ -37,7 +38,8 @@ data class HistoriskMeldekortDetaljerDto(
         bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
         innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
         kanEndres = historiskMeldekortDetaljer.meldekort.kanKorrigeres,
-        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(TimerArbeidetDto::fraDomene)
+        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(TimerArbeidetDto::fraDomene),
+        type = MeldekortTypeDto.fraDomene(historiskMeldekortDetaljer.meldekort.type),
     )
 }
 
@@ -45,43 +47,24 @@ data class MeldekortKorrigeringRequest(
     val timerArbeidet: List<TimerArbeidetDto>
 )
 
-@Suppress("unused")
-class MeldeperiodeDto(
-    val meldekortId: Long,
-    val periode: PeriodeDto,
-    val type: MeldeperiodeTypeDto,
-    val klarForInnsending: Boolean,
-    val kanEndres: Boolean,
-) {
-    constructor(meldekort: Meldekort) : this(
-        meldekortId = meldekort.meldekortId.asLong,
-        periode = PeriodeDto(meldekort.periode),
-        type = MeldeperiodeTypeDto.fraDomene(meldekort.type),
-        klarForInnsending = meldekort is KommendeMeldekort && meldekort.kanSendes,
-        kanEndres = meldekort.kanKorrigeres,
-    )
+enum class MeldekortTypeDto {
+    VANLIG,
+    ETTERREGISTRERING,
+    KORRIGERING,
+    UKJENT;
 
-    enum class MeldeperiodeTypeDto {
-        VANLIG,
-        ETTERREGISTRERING,
-        KORRIGERING,
-        UKJENT;
-
-        companion object {
-            fun fraDomene(type: MeldekortType): MeldeperiodeTypeDto {
-                return when (type) {
-                    MeldekortType.VANLIG -> VANLIG
-                    MeldekortType.ETTERREGISTRERING -> ETTERREGISTRERING
-                    MeldekortType.KORRIGERING -> KORRIGERING
-                    MeldekortType.UKJENT -> UKJENT
-                }
+    companion object {
+        fun fraDomene(type: MeldekortType): MeldekortTypeDto {
+            return when (type) {
+                MeldekortType.VANLIG -> VANLIG
+                MeldekortType.ETTERREGISTRERING -> ETTERREGISTRERING
+                MeldekortType.KORRIGERING -> KORRIGERING
+                MeldekortType.UKJENT -> UKJENT
             }
         }
     }
 }
 
-
-@Suppress("unused")
 class MeldekortSkjemaDto(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
