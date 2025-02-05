@@ -30,12 +30,12 @@ dependencies {
         }
     }
     testFixturesImplementation("org.testcontainers:postgresql:1.20.4")
-    testFixturesImplementation("io.micrometer:micrometer-core:1.14.3")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
+    testFixturesImplementation("io.micrometer:micrometer-core:1.14.3")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
 }
