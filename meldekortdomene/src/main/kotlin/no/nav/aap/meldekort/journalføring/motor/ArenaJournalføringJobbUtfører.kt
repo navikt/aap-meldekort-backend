@@ -26,10 +26,13 @@ class ArenaJournalføringJobbUtfører(
     override fun utfør(input: JobbInput) {
         log.info("nå utfører vi en jobb")
         val payload = input.payload<ArenaJournalføringJobbPayload>()
-        val skjema = requireNotNull(skjemaRepository.last(payload.ident, payload.meldekortId)) {
+        val ident = Ident(payload.ident)
+        val meldekortId = MeldekortId(payload.meldekortId)
+
+        val skjema = requireNotNull(skjemaRepository.last(ident, meldekortId)) {
             "prøver å journalføre meldekort som ikke er i skjema-tabell med meldekortId: ${payload.meldekortId}"
         }
-        val meldekort = requireNotNull(meldekortRepository.hent(payload.ident, payload.meldekortId)) {
+        val meldekort = requireNotNull(meldekortRepository.hent(ident, meldekortId)) {
             "prøver å journalføre meldekort som ikke er i meldekort-tabell med meldekortId: ${payload.meldekortId}"
         }
 
@@ -67,13 +70,13 @@ class ArenaJournalføringJobbUtfører(
         }
 
         private data class ArenaJournalføringJobbPayload(
-            val ident: Ident,
-            val meldekortId: MeldekortId,
+            val ident: String,
+            val meldekortId: Long,
         )
 
         fun jobbInput(ident: Ident, meldekortId: MeldekortId): JobbInput {
             return JobbInput(ArenaJournalføringJobbUtfører).medPayload(
-                ArenaJournalføringJobbPayload(ident, meldekortId)
+                ArenaJournalføringJobbPayload(ident.asString, meldekortId.asLong)
             )
         }
 
