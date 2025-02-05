@@ -23,6 +23,7 @@ import no.nav.aap.meldekort.arena.meldekortApi
 import no.nav.aap.meldekort.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.meldekort.journalføring.motor.JournalføringLogInfoProvider
 import no.nav.aap.motor.Motor
+import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
@@ -116,6 +117,7 @@ fun startHttpServer(
                         arenaClient = arenaClient,
                         datasource = dataSource
                     )
+                    motorApi(dataSource)
                 }
             }
             actuator(prometheus, motor)

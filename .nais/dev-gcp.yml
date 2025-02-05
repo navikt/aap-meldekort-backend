@@ -58,6 +58,7 @@ spec:
         inbound:
             rules:
                 - application: meldekort
+                - application: paw-patrol
                 - application: tokenx-token-generator
                   namespace: aura
         outbound:
