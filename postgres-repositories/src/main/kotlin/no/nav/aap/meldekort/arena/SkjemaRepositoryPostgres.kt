@@ -36,6 +36,20 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
         }
     }
 
+    override fun lastInnsendtSkjema(ident: Ident, meldekortId: MeldekortId): Skjema? {
+        return connection.queryFirstOrNull("""
+            select * from arena_skjema
+            where ident = ? and meldekort_id = ? and sendt_inn is not null
+            order by tid_opprettet desc limit 1
+        """) {
+            setParams {
+                setString(1, ident.asString)
+                setLong(2, meldekortId.asLong)
+            }
+            setRowMapper(::mapSkjema)
+        }
+    }
+
     private fun mapSkjema(row: Row): Skjema {
         return Skjema(
             tilstand = row.getEnum("tilstand"),

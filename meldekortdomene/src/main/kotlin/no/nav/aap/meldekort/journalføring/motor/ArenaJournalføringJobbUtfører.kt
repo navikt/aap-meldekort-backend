@@ -29,7 +29,7 @@ class ArenaJournalføringJobbUtfører(
         val ident = Ident(payload.ident)
         val meldekortId = MeldekortId(payload.meldekortId)
 
-        val skjema = requireNotNull(skjemaRepository.last(ident, meldekortId)) {
+        val skjema = requireNotNull(skjemaRepository.lastInnsendtSkjema(ident, meldekortId)) {
             "prøver å journalføre meldekort som ikke er i skjema-tabell med meldekortId: ${payload.meldekortId}"
         }
         val meldekort = requireNotNull(meldekortRepository.hent(ident, meldekortId)) {
