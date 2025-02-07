@@ -88,13 +88,13 @@ class JoarkService(
                         JoarkClient.DokumentVariant(
                             filtype = JoarkClient.Filetype.PDF,
                             variantformat = JoarkClient.Variantformat.ARKIV,
-                            fysiskDokument = fysiskDokument
+                            fysiskDokument = fysiskDokument.encodeToByteArray(),
 
                         ),
                         JoarkClient.DokumentVariant(
                             filtype = JoarkClient.Filetype.JSON,
                             variantformat = JoarkClient.Variantformat.ORIGINAL,
-                            fysiskDokument = DefaultJsonMapper.toJson(skjema.payload),
+                            fysiskDokument = DefaultJsonMapper.toJson(skjema.payload).encodeToByteArray(),
                         )
                     ),
                 )

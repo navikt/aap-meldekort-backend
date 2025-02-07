@@ -58,7 +58,7 @@ interface JoarkClient: Gateway {
     data class DokumentVariant(
         val filtype: Filetype,
         val variantformat: Variantformat,
-        val fysiskDokument: String,
+        val fysiskDokument: ByteArray,
         val filnavn: String? = null,
         val batchnavn: String? = null
     )
