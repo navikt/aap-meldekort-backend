@@ -19,6 +19,25 @@ class JoarkService(
     private val BREVKODE = "NAV 00-10.02"
     private val BREVKODE_KORRIGERT = "NAV 00-10.03"
 
+    // TODO: lag et dokument
+    private val fysiskDokument =
+        """
+        %PDF-1.0
+        1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+        2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+        3 0 obj<</Type/Page/Parent 2 0 R/Resources<<>>/MediaBox[0 0 9 9]>>endobj
+        xref
+        0 4
+        0000000000 65535 f
+        0000000009 00000 n
+        0000000052 00000 n
+        0000000101 00000 n
+        trailer<</Root 1 0 R/Size 4>>
+        startxref
+        174
+        %%EOF%
+        """.trimIndent()
+
     fun journalpostForArena(
         skjema: Skjema,
         vårReferanse: String,
@@ -66,6 +85,12 @@ class JoarkService(
                     tittel = tittel,
                     brevkode = if (korrigert) BREVKODE_KORRIGERT else BREVKODE,
                     dokumentvarianter = listOf(
+                        JoarkClient.DokumentVariant(
+                            filtype = JoarkClient.Filetype.PDF,
+                            variantformat = JoarkClient.Variantformat.ARKIV,
+                            fysiskDokument = fysiskDokument
+
+                        ),
                         JoarkClient.DokumentVariant(
                             filtype = JoarkClient.Filetype.JSON,
                             variantformat = JoarkClient.Variantformat.ORIGINAL,
