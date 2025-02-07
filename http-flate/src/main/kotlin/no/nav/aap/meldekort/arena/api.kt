@@ -46,7 +46,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                         nyPayload = meldekortRequest.meldekort.tilDomene(),
                     )
                 }
-                MeldekortResponse(response)
+                respond(MeldekortResponse(response))
             }
 
             route("/lagre").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
@@ -59,9 +59,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                     )
                 }
 
-                respond(
-                    MeldekortResponse(response)
-                )
+                respond(MeldekortResponse(response))
             }
 
         }
@@ -122,7 +120,6 @@ fun NormalOpenAPIRoute.meldekortApi(
                 }
                 respondWithStatus(HttpStatusCode.OK)
             }
-
         }
 
         if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
