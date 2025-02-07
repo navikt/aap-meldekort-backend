@@ -38,24 +38,15 @@ fun NormalOpenAPIRoute.meldekortApi(
             }
 
             route("/neste-steg").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
-                respond(
-                    try {
-                        val response = datasource.transaction {
-                            ArenaSkjemaFlate.konstruer(it, arenaClient).gåTilNesteSteg(
-                                innloggetBruker = innloggetBruker(),
-                                meldekortId = MeldekortId(params.meldekortId),
-                                fraSteg = meldekortRequest.nåværendeSteg,
-                                nyPayload = meldekortRequest.meldekort.tilDomene(),
-                            )
-                        }
-                        MeldekortResponse(response)
-                    } catch (e: ArenaInnsendingFeiletException) {
-                        MeldekortResponse(
-                            skjema = e.skjema!!,
-                            feil = InnsendingFeil(e.innsendingFeil)
-                        )
-                    }
-                )
+                val response = datasource.transaction {
+                    ArenaSkjemaFlate.konstruer(it, arenaClient).gåTilNesteSteg(
+                        innloggetBruker = innloggetBruker(),
+                        meldekortId = MeldekortId(params.meldekortId),
+                        fraSteg = meldekortRequest.nåværendeSteg,
+                        nyPayload = meldekortRequest.meldekort.tilDomene(),
+                    )
+                }
+                MeldekortResponse(response)
             }
 
             route("/lagre").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->

@@ -67,7 +67,10 @@ class ArenaSkjemaFlate private constructor(
             .map {
                 HistoriskMeldekortDetaljer(
                     meldekort = it.copy(
-                        mottattIArena = it.mottattIArena ?: skjemaService.finnSkjema(innloggetBruker.ident, it.meldekortId)?.sendtInn?.toLocalDate(),
+                        mottattIArena = it.mottattIArena ?: skjemaService.finnSkjema(
+                            innloggetBruker.ident,
+                            it.meldekortId
+                        )?.sendtInn?.toLocalDate(),
                     ),
                     timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, it.meldekortId)
                         ?: arenaClient.meldekortdetaljer(innloggetBruker, it.meldekortId)
@@ -86,8 +89,16 @@ class ArenaSkjemaFlate private constructor(
             }
     }
 
-    fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): Utfylling {
-        return utfyllingService.hentEllerStartUtfylling(meldekortId, innloggetBruker)
+    class UtfyllingResponse(
+        val utfylling: Utfylling,
+        val meldekort: Meldekort,
+        val feil: ArenaInnsendingFeiletException? = null,
+    )
+
+    fun hentEllerOpprettUtfylling(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): UtfyllingResponse {
+        val utfylling = utfyllingService.hentEllerStartUtfylling(meldekortId, innloggetBruker)
+        val meldekort = meldekortService.hentLokaltMeldekort(innloggetBruker.ident, meldekortId)!!
+        return UtfyllingResponse(utfylling, meldekort)
     }
 
     fun gåTilNesteSteg(
@@ -95,7 +106,7 @@ class ArenaSkjemaFlate private constructor(
         meldekortId: MeldekortId,
         fraSteg: StegNavn,
         nyPayload: InnsendingPayload
-    ): Utfylling {
+    ): UtfyllingResponse {
         val utfylling = utfyllingService.hentUtfylling(
             ident = innloggetBruker.ident,
             meldekortId = meldekortId,
@@ -104,19 +115,33 @@ class ArenaSkjemaFlate private constructor(
             ?.nyPayload(nyPayload)
             ?: throw Error() /* todo: 404 not found */
 
+        val meldekort = meldekortService.hentLokaltMeldekort(innloggetBruker.ident, meldekortId)!!
+
         utfylling.validerUtkast()
 
         try {
-            return utfyllingService.lagreOgNeste(
-                innloggetBruker = innloggetBruker,
-                utfylling = utfylling,
+            return UtfyllingResponse(
+                utfylling = utfyllingService.lagreOgNeste(
+                    innloggetBruker = innloggetBruker,
+                    utfylling = utfylling,
+                ),
+                meldekort = meldekort,
             )
         } catch (e: ArenaInnsendingFeiletException) {
-            throw e.copy(skjema = utfylling)
+            return UtfyllingResponse(
+                utfylling = utfylling,
+                meldekort = meldekort,
+                feil = e,
+            )
         }
     }
 
-    fun lagreSteg(ident: Ident, meldekortId: MeldekortId, nyPayload: InnsendingPayload, settSteg: StegNavn): Utfylling {
+    fun lagreSteg(
+        ident: Ident,
+        meldekortId: MeldekortId,
+        nyPayload: InnsendingPayload,
+        settSteg: StegNavn
+    ): UtfyllingResponse {
         val utfylling = utfyllingService.hentUtfylling(
             ident = ident,
             meldekortId = meldekortId,
@@ -126,6 +151,10 @@ class ArenaSkjemaFlate private constructor(
             ?: throw Error() /* todo: 404 not found */
 
         utfylling.validerUtkast()
-        return utfyllingService.lagre(utfylling)
+        val meldekort = meldekortService.hentLokaltMeldekort(ident, meldekortId)!!
+        return UtfyllingResponse(
+            utfylling = utfyllingService.lagre(utfylling),
+            meldekort = meldekort
+        )
     }
 }

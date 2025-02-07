@@ -136,12 +136,14 @@ data class MeldekortResponse(
     val steg: StegNavn,
     val periode: PeriodeDto,
     val meldekort: MeldekortSkjemaDto,
-    val feil: Feil?
+    val feil: Feil?,
+    val tidligsteInnsendingsDato: LocalDate,
 ) {
-    constructor(skjema: Utfylling, feil: Feil? = null) : this(
-        steg = skjema.steg.navn,
-        meldekort = MeldekortSkjemaDto(skjema.skjema.payload),
-        periode = PeriodeDto(skjema.skjema.meldeperiode),
-        feil = feil
+    constructor(utfyllingResponse: ArenaSkjemaFlate.UtfyllingResponse) : this(
+        steg = utfyllingResponse.utfylling.steg.navn,
+        meldekort = MeldekortSkjemaDto(utfyllingResponse.utfylling.skjema.payload),
+        periode = PeriodeDto(utfyllingResponse.utfylling.skjema.meldeperiode),
+        tidligsteInnsendingsDato = utfyllingResponse.meldekort.tidligsteInnsendingsdato,
+        feil = utfyllingResponse.feil?.let { InnsendingFeil(it.innsendingFeil) },
     )
 }

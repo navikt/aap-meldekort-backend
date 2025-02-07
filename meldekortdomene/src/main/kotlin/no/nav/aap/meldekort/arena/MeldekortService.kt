@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort.arena
 
+import no.nav.aap.meldekort.Ident
 import no.nav.aap.meldekort.InnloggetBruker
 import no.nav.aap.meldekort.Periode
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.OPPRE
@@ -13,6 +14,10 @@ class MeldekortService(
     private val meldekortRepository: MeldekortRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)!!
+
+    fun hentLokaltMeldekort(ident: Ident, meldekortId: MeldekortId): Meldekort? {
+        return meldekortRepository.hent(ident, meldekortId)
+    }
 
     fun alleMeldekort(innloggetBruker: InnloggetBruker): List<Meldekort>? {
         val kommendeMeldekort = kommendeMeldekort(innloggetBruker) ?: return null
@@ -135,7 +140,6 @@ class MeldekortService(
 
         val arenaMeldekortkontrollRequest = ArenaMeldekortkontrollRequest.konstruer(skjema, meldekortdetaljer)
         // TODO: Hvis det er korrigering, må vi opprette selve meldekortet her, før vi prøver å sende det inn.
-//        arenaClient.korrigertMeldekort()
 
         val meldekortkontrollResponse = arenaClient.sendInn(innloggetBruker, arenaMeldekortkontrollRequest)
         meldekortkontrollResponse.validerVellykket()
