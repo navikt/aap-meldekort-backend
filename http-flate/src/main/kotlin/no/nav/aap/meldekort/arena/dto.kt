@@ -101,9 +101,9 @@ class MeldekortSkjemaDto(
 data class DagerInfoDto(
     val dato: LocalDate,
     val timerArbeidet: Double?,
-    val harVærtPåtiltakKursEllerUtdanning: Boolean = false,
-    val harVærtPåFerie: Boolean = false,
-    val harVærtSyk: Boolean = false,
+    val harVærtPåtiltakKursEllerUtdanning: Boolean? = false,
+    val harVærtPåFerie: Boolean? = false,
+    val harVærtSyk: Boolean? = false,
 ) {
     companion object {
         fun fraDomene(timerArbeidet: TimerArbeidet): DagerInfoDto {
