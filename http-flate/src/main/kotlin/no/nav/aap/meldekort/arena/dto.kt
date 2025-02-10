@@ -28,7 +28,7 @@ data class HistoriskMeldekortDetaljerDto(
     val bruttoBeløp: Double?,
     val innsendtDato: LocalDate?,
     val kanEndres: Boolean,
-    val timerArbeidet: List<DagerInfoDto>?,
+    val dager: List<DagerInfoDto>?,
     val type: MeldekortTypeDto,
 ) {
     constructor(historiskMeldekortDetaljer: ArenaSkjemaFlate.HistoriskMeldekortDetaljer) : this(
@@ -38,7 +38,7 @@ data class HistoriskMeldekortDetaljerDto(
         bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
         innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
         kanEndres = historiskMeldekortDetaljer.meldekort.kanKorrigeres,
-        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(DagerInfoDto::fraDomene),
+        dager = historiskMeldekortDetaljer.timerArbeidet?.map(DagerInfoDto::fraDomene),
         type = MeldekortTypeDto.fraDomene(historiskMeldekortDetaljer.meldekort.type),
     )
 }
