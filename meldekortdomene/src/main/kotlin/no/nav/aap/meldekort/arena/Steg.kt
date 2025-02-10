@@ -5,8 +5,8 @@ import no.nav.aap.meldekort.arena.StegNavn.*
 
 enum class StegNavn {
     BEKREFT_SVARER_ÆRLIG,
-    JOBBET_I_MELDEPERIODEN,
-    TIMER_ARBEIDET,
+    SPØRSMÅL,
+    UTFYLLING,
     STEMMER_OPPLYSNINGENE,
     KVITTERING,
 }
@@ -22,7 +22,7 @@ object BekreftSvarerÆrligSteg : Steg {
 
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
         return when (skjema.payload.svarerDuSant) {
-            true -> JOBBET_I_MELDEPERIODEN
+            true -> SPØRSMÅL
             false -> KVITTERING
             null -> error("kan ikke gå videre uten å ha svart")
         }
@@ -31,12 +31,12 @@ object BekreftSvarerÆrligSteg : Steg {
 
 object JobbetIMeldeperiodenSteg : Steg {
     override val navn: StegNavn
-        get() = JOBBET_I_MELDEPERIODEN
+        get() = SPØRSMÅL
 
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
         return when (skjema.payload.harDuJobbet) {
-            true -> TIMER_ARBEIDET
-            false -> STEMMER_OPPLYSNINGENE
+         /* hvis minst en er sann */   true -> UTFYLLING
+        /* hvis alle er usanne */    false -> STEMMER_OPPLYSNINGENE
             null -> error("kan ikke gå videre uten å ha svart")
         }
     }
@@ -44,7 +44,7 @@ object JobbetIMeldeperiodenSteg : Steg {
 
 object TimerArbeidetSteg : Steg {
     override val navn: StegNavn
-        get() = TIMER_ARBEIDET
+        get() = UTFYLLING
 
 
     override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {

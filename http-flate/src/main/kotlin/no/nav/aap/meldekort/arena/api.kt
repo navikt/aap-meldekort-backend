@@ -115,7 +115,7 @@ fun NormalOpenAPIRoute.meldekortApi(
                     ArenaSkjemaFlate.konstruer(it, arenaClient).korrigerMeldekort(
                         innloggetBruker(),
                         MeldekortId(param.meldekortId),
-                        request.timerArbeidet.map(TimerArbeidetDto::tilDomene)
+                        request.dager.map(DagerInfoDto::tilDomene)
                     )
                 }
                 respondWithStatus(HttpStatusCode.OK)

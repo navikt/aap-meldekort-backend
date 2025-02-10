@@ -28,7 +28,7 @@ data class HistoriskMeldekortDetaljerDto(
     val bruttoBeløp: Double?,
     val innsendtDato: LocalDate?,
     val kanEndres: Boolean,
-    val timerArbeidet: List<TimerArbeidetDto>?,
+    val timerArbeidet: List<DagerInfoDto>?,
     val type: MeldekortTypeDto,
 ) {
     constructor(historiskMeldekortDetaljer: ArenaSkjemaFlate.HistoriskMeldekortDetaljer) : this(
@@ -38,13 +38,17 @@ data class HistoriskMeldekortDetaljerDto(
         bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
         innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
         kanEndres = historiskMeldekortDetaljer.meldekort.kanKorrigeres,
-        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(TimerArbeidetDto::fraDomene),
+        timerArbeidet = historiskMeldekortDetaljer.timerArbeidet?.map(DagerInfoDto::fraDomene),
         type = MeldekortTypeDto.fraDomene(historiskMeldekortDetaljer.meldekort.type),
     )
 }
 
 data class MeldekortKorrigeringRequest(
-    val timerArbeidet: List<TimerArbeidetDto>
+    val harDuJobbet: Boolean,
+    val harDuGjennomførtAvtaltAktivitetKursEllerUtdanning: Boolean,
+    val harDuVærtSyk: Boolean,
+    val harDuHattFerie: Boolean,
+    val dager: List<DagerInfoDto>
 )
 
 enum class MeldekortTypeDto {
@@ -68,13 +72,19 @@ enum class MeldekortTypeDto {
 class MeldekortSkjemaDto(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
-    val timerArbeidet: List<TimerArbeidetDto>,
+    val harDuGjennomførtAvtaltAktivitetKursEllerUtdanning: Boolean?,
+    val harDuVærtSyk: Boolean?,
+    val harDuHattFerie: Boolean?,
+    val dager: List<DagerInfoDto>,
     val stemmerOpplysningene: Boolean?
 ) {
     constructor(innsendingPayload: InnsendingPayload) : this(
         svarerDuSant = innsendingPayload.svarerDuSant,
         harDuJobbet = innsendingPayload.harDuJobbet,
-        timerArbeidet = innsendingPayload.timerArbeidet.map { TimerArbeidetDto.fraDomene(it) },
+        harDuGjennomførtAvtaltAktivitetKursEllerUtdanning = null,
+        harDuVærtSyk = null,
+        harDuHattFerie = null,
+        dager = innsendingPayload.timerArbeidet.map { DagerInfoDto.fraDomene(it) },
         stemmerOpplysningene = innsendingPayload.stemmerOpplysningene,
     )
 
@@ -82,20 +92,23 @@ class MeldekortSkjemaDto(
         return InnsendingPayload(
             svarerDuSant = svarerDuSant,
             harDuJobbet = harDuJobbet,
-            timerArbeidet = timerArbeidet.map { it.tilDomene() },
+            timerArbeidet = dager.map { it.tilDomene() },
             stemmerOpplysningene = stemmerOpplysningene
         )
     }
 }
 
-data class TimerArbeidetDto(
-    val timer: Double?,
+data class DagerInfoDto(
     val dato: LocalDate,
+    val timerArbeidet: Double?,
+    val harVærtPåtiltakKursEllerUtdanning: Boolean = false,
+    val harVærtPåFerie: Boolean = false,
+    val harVærtSyk: Boolean = false,
 ) {
     companion object {
-        fun fraDomene(timerArbeidet: TimerArbeidet): TimerArbeidetDto {
-            return TimerArbeidetDto(
-                timer = timerArbeidet.timer,
+        fun fraDomene(timerArbeidet: TimerArbeidet): DagerInfoDto {
+            return DagerInfoDto(
+                timerArbeidet = timerArbeidet.timer,
                 dato = timerArbeidet.dato
             )
         }
@@ -103,7 +116,7 @@ data class TimerArbeidetDto(
 
     fun tilDomene(): TimerArbeidet {
         return TimerArbeidet(
-            timer = timer,
+            timer = timerArbeidet,
             dato = dato
         )
     }
