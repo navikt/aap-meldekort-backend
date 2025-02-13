@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.journalføring
+package no.nav.aap.journalføring
 
 interface JoarkRepository {
     fun bestillJournalføring(journalpost: JoarkClient.Journalpost)

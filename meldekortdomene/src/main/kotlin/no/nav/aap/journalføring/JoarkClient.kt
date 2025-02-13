@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.journalføring
+package no.nav.aap.journalføring
 
 import no.nav.aap.lookup.gateway.Gateway
 

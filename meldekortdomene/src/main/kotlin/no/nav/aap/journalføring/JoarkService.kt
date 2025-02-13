@@ -1,9 +1,9 @@
-package no.nav.aap.meldekort.journalføring
+package no.nav.aap.journalføring
 
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.meldekort.Periode
-import no.nav.aap.meldekort.journalføring.JoarkClient.Journalposttype.INNGAAENDE
-import no.nav.aap.meldekort.journalføring.JoarkClient.Tema.AAP
+import no.nav.aap.Periode
+import no.nav.aap.journalføring.JoarkClient.Journalposttype.INNGAAENDE
+import no.nav.aap.journalføring.JoarkClient.Tema.AAP
 import no.nav.aap.meldekort.arena.Skjema
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -90,7 +90,7 @@ class JoarkService(
                             variantformat = JoarkClient.Variantformat.ARKIV,
                             fysiskDokument = fysiskDokument.encodeToByteArray(),
 
-                        ),
+                            ),
                         JoarkClient.DokumentVariant(
                             filtype = JoarkClient.Filetype.JSON,
                             variantformat = JoarkClient.Variantformat.ORIGINAL,

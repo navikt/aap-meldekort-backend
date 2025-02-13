@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Ident
+import no.nav.aap.Ident
 import java.util.concurrent.atomic.AtomicInteger
 
 

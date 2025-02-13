@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort
+package no.nav.aap
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -20,6 +20,17 @@ data class Periode(
 
     fun inneholder(dato: LocalDate): Boolean {
         return dato in fom..tom
+    }
+
+    enum class Klassifikasjon {
+        DAGEN_ER_FØR_PERIODEN, DAGER_ER_I_PERIODEN, DAGEN_ER_ETTER_PERIODEN
+    }
+    fun klassifiser(dag: LocalDate): Klassifikasjon {
+        return when {
+            dag < fom -> Klassifikasjon.DAGEN_ER_FØR_PERIODEN
+            tom < dag -> Klassifikasjon.DAGEN_ER_ETTER_PERIODEN
+            else -> Klassifikasjon.DAGER_ER_I_PERIODEN
+        }
     }
 
     override fun compareTo(other: Periode): Int {

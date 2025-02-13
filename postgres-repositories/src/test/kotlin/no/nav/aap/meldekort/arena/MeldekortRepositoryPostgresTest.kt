@@ -2,7 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Periode
 import no.nav.aap.meldekort.arena.MeldekortType.KORRIGERING
 import no.nav.aap.meldekort.arena.MeldekortType.VANLIG
 import org.junit.jupiter.api.Test

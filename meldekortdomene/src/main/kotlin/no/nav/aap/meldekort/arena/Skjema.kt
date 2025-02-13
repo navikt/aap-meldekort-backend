@@ -1,7 +1,7 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Ident
+import no.nav.aap.Periode
 import java.time.LocalDateTime
 import java.util.*
 

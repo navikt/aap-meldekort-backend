@@ -9,7 +9,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.meldekort.journalføring.JoarkClient
+import no.nav.aap.journalføring.JoarkClient
 import java.net.URI
 
 object JoarkClientImpl : JoarkClient {

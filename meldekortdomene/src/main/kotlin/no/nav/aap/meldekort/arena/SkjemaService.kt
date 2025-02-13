@@ -1,8 +1,8 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.journalføring.JournalføringService
+import no.nav.aap.Ident
+import no.nav.aap.InnloggetBruker
+import no.nav.aap.journalføring.JournalføringService
 import java.time.LocalDateTime
 import java.util.*
 

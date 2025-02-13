@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.journalføring
+package no.nav.aap.journalføring
 
 /* TODO: flytt til testmappe når integrasjon i dev er klar. */
 class JoarkClientFake: JoarkClient {

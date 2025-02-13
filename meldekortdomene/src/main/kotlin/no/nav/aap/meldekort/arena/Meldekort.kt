@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Periode
 import java.time.LocalDate
 
 interface Meldekort {

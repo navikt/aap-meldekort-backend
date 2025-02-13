@@ -1,16 +1,16 @@
-package no.nav.aap.meldekort.journalføring.motor
+package no.nav.aap.journalføring.motor
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
-import no.nav.aap.meldekort.Ident
+import no.nav.aap.Ident
 import no.nav.aap.meldekort.arena.MeldekortId
 import no.nav.aap.meldekort.arena.MeldekortRepository
 import no.nav.aap.meldekort.arena.MeldekortType
 import no.nav.aap.meldekort.arena.SkjemaRepository
 import no.nav.aap.meldekort.arena.SkjemaTilstand
-import no.nav.aap.meldekort.journalføring.JoarkClient
-import no.nav.aap.meldekort.journalføring.JoarkService
+import no.nav.aap.journalføring.JoarkClient
+import no.nav.aap.journalføring.JoarkService
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører

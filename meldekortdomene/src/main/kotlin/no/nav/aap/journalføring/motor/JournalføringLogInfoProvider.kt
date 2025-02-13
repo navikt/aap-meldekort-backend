@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.journalføring.motor
+package no.nav.aap.journalføring.motor
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.motor.JobbInput

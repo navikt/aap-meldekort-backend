@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort
 
+import no.nav.aap.InnloggetBruker
 import no.nav.aap.meldekort.arena.ArenaClient
 import no.nav.aap.meldekort.arena.ArenaMeldegruppe
 import no.nav.aap.meldekort.arena.ArenaMeldekort

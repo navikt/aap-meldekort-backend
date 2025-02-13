@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.InnloggetBruker
 import java.time.LocalDate
 
 open class ArenaClientFake(

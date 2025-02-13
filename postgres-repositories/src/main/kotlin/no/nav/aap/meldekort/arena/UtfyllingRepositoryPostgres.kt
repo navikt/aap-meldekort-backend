@@ -2,7 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.Factory
-import no.nav.aap.meldekort.Ident
+import no.nav.aap.Ident
 import java.time.LocalDateTime
 
 class UtfyllingRepositoryPostgres(private val connection: DBConnection) : UtfyllingRepository {

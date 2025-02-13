@@ -9,7 +9,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.OnBehalfOfTokenProvider
-import no.nav.aap.meldekort.InnloggetBruker
+import no.nav.aap.InnloggetBruker
 import org.slf4j.MDC
 import java.net.URI
 import java.time.LocalDate

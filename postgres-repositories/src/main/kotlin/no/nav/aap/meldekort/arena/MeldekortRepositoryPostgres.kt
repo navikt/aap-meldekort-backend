@@ -3,8 +3,8 @@ package no.nav.aap.meldekort.arena
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.lookup.repository.Factory
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Ident
+import no.nav.aap.Periode
 import no.nav.aap.komponenter.type.Periode as DbPeriode
 
 class MeldekortRepositoryPostgres(private val connection: DBConnection) : MeldekortRepository {

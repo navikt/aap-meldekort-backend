@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort
 
 import com.fasterxml.jackson.annotation.JsonValue
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
@@ -10,16 +10,19 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.Ident
+import no.nav.aap.InnloggetBruker
+import no.nav.aap.Periode
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.Periode
 import javax.sql.DataSource
+import no.nav.aap.meldekort.arena.ArenaClient
+import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
+import no.nav.aap.meldekort.arena.MeldekortId
 
-fun NormalOpenAPIRoute.meldekortApi(
+fun NormalOpenAPIRoute.arenaApi(
     datasource: DataSource,
     arenaClient: ArenaClient,
 ) {

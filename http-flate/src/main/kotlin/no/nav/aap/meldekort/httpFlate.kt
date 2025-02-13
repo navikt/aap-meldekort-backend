@@ -19,9 +19,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxC
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.meldekort.arena.ArenaClient
-import no.nav.aap.meldekort.arena.meldekortApi
-import no.nav.aap.meldekort.journalføring.motor.ArenaJournalføringJobbUtfører
-import no.nav.aap.meldekort.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
+import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
@@ -113,10 +112,12 @@ fun startHttpServer(
         routing {
             authenticate(TOKENX) {
                 apiRouting {
-                    meldekortApi(
+                    ansvarligSystemApi()
+                    arenaApi(
                         arenaClient = arenaClient,
                         datasource = dataSource
                     )
+                    kelvinApi()
                     motorApi(dataSource)
                 }
             }

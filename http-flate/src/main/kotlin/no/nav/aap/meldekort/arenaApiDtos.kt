@@ -1,8 +1,15 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.meldekort
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Periode
 import java.time.LocalDate
+import no.nav.aap.meldekort.arena.ArenaInnsendingFeiletException
+import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
+import no.nav.aap.meldekort.arena.InnsendingPayload
+import no.nav.aap.meldekort.arena.MeldekortStatus
+import no.nav.aap.meldekort.arena.MeldekortType
+import no.nav.aap.meldekort.arena.StegNavn
+import no.nav.aap.meldekort.arena.TimerArbeidet
 
 data class KommendeMeldekortDto(
     val antallUbesvarteMeldekort: Int,
@@ -42,7 +49,7 @@ data class HistoriskMeldekortDetaljerDto(
         bruttoBeløp = historiskMeldekortDetaljer.meldekort.bruttoBeløp,
         innsendtDato = historiskMeldekortDetaljer.meldekort.mottattIArena,
         kanEndres = historiskMeldekortDetaljer.meldekort.kanKorrigeres,
-        dager = historiskMeldekortDetaljer.timerArbeidet?.map(DagerInfoDto::fraDomene),
+        dager = historiskMeldekortDetaljer.timerArbeidet?.map(DagerInfoDto.Companion::fraDomene),
         type = MeldekortTypeDto.fraDomene(historiskMeldekortDetaljer.meldekort.type),
         harDuJobbet = false,
         harDuGjennomførtAvtaltAktivitetKursEllerUtdanning = false,

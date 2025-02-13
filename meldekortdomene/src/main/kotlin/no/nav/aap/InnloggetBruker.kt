@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort
+package no.nav.aap
 
 data class Ident(val asString: String)
 

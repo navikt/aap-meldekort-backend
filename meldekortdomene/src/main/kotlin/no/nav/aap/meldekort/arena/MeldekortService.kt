@@ -1,8 +1,8 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.Periode
+import no.nav.aap.Ident
+import no.nav.aap.InnloggetBruker
+import no.nav.aap.Periode
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.SENDT
 import no.nav.aap.meldekort.arena.MeldekortStatus.INNSENDT

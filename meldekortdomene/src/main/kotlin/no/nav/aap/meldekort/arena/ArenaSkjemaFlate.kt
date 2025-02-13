@@ -2,10 +2,10 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.RepositoryProvider
-import no.nav.aap.meldekort.Ident
-import no.nav.aap.meldekort.InnloggetBruker
-import no.nav.aap.meldekort.Periode
-import no.nav.aap.meldekort.journalføring.JournalføringService
+import no.nav.aap.Ident
+import no.nav.aap.InnloggetBruker
+import no.nav.aap.Periode
+import no.nav.aap.journalføring.JournalføringService
 import no.nav.aap.motor.FlytJobbRepository
 
 class ArenaSkjemaFlate private constructor(

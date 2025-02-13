@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.meldekort.Ident
+import no.nav.aap.Ident
 
 /* TODO: Flytt ned i test-mappa når postgres-database er implementert. */
 class MeldekortRepositoryFake: MeldekortRepository {

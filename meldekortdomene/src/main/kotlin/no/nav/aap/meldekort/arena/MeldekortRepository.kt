@@ -1,7 +1,7 @@
 package no.nav.aap.meldekort.arena
 
 import no.nav.aap.lookup.repository.Repository
-import no.nav.aap.meldekort.Ident
+import no.nav.aap.Ident
 
 interface MeldekortRepository: Repository {
     fun upsert(ident: Ident, meldekort: List<Meldekort>)

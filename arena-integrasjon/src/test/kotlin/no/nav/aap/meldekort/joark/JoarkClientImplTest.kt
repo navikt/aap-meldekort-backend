@@ -1,7 +1,7 @@
 package no.nav.aap.meldekort.joark
 
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.meldekort.journalføring.JoarkClient
+import no.nav.aap.journalføring.JoarkClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -11,7 +11,8 @@ class JoarkClientImplTest {
     fun `base64 encode av dokument`() {
         val journalpost = JoarkClient.Journalpost(
             journalposttype = JoarkClient.Journalposttype.INNGAAENDE,
-            dokumenter = listOf(JoarkClient.Dokument(
+            dokumenter = listOf(
+                JoarkClient.Dokument(
                 dokumentvarianter = listOf(
                     JoarkClient.DokumentVariant(
                         filtype = JoarkClient.Filetype.PDF,
