@@ -5,7 +5,7 @@ val komponenterVersjon = "1.0.135"
 
 plugins {
     id("behandlingsflyt.conventions")
-    id("io.ktor.plugin") version "3.0.3"
+    id("io.ktor.plugin") version "3.1.0"
 }
 
 application {
