@@ -13,18 +13,18 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 class UtfyllingRepositoryPostgresTest {
-    private val flyt = UtfyllingFlyt(BekreftSvarerÆrligSteg)
 
     @Test
     fun lastSkjema() {
         InitTestDatabase.dataSource.transaction {
             val repo = UtfyllingRepositoryPostgres(it)
+            val flyt = UtfyllingFlyt(repo, listOf(BekreftSvarerÆrligSteg))
 
             assertNull(
                 repo.last(
                     nextIdent(),
                     MeldekortId(0),
-                    UtfyllingFlyt()
+                    flyt,
                 )
             )
         }
@@ -36,6 +36,7 @@ class UtfyllingRepositoryPostgresTest {
             val ident = nextIdent()
 
             val repo = UtfyllingRepositoryPostgres(it)
+            val flyt = UtfyllingFlyt(repo, listOf(BekreftSvarerÆrligSteg))
             val meldekortRepo = MeldekortRepositoryPostgres(it)
 
             val utfylling = Utfylling(

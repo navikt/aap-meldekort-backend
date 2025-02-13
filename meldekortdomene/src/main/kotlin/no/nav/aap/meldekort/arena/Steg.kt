@@ -8,23 +8,19 @@ enum class StegNavn {
     SPØRSMÅL,
     UTFYLLING,
     STEMMER_OPPLYSNINGENE,
+    INNSENDING_VANLIG_MELDEKKORT,
     KVITTERING,
 }
 
-interface Steg {
-    val navn: StegNavn
-    fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn
-}
 
 object BekreftSvarerÆrligSteg : Steg {
     override val navn: StegNavn
         get() = BEKREFT_SVARER_ÆRLIG
 
-    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
         return when (skjema.payload.svarerDuSant) {
-            true -> SPØRSMÅL
-            false -> KVITTERING
-            null -> error("kan ikke gå videre uten å ha svart")
+            true -> Stegutfall.Fortsett(skjema)
+            else -> Stegutfall.Avklaringspunkt(skjema)
         }
     }
 }
@@ -33,12 +29,14 @@ object JobbetIMeldeperiodenSteg : Steg {
     override val navn: StegNavn
         get() = SPØRSMÅL
 
-    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
-        return when (skjema.payload.harDuJobbet) {
-         /* hvis minst en er sann */   true -> UTFYLLING
-        /* hvis alle er usanne */    false -> STEMMER_OPPLYSNINGENE
-            null -> error("kan ikke gå videre uten å ha svart")
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
+        val besvart = skjema.payload.run {
+            harDuJobbet != null /* TODO: resten av spørsmålene her */
         }
+        return if (besvart)
+            Stegutfall.Fortsett(skjema)
+        else
+            Stegutfall.Avklaringspunkt(skjema)
     }
 }
 
@@ -46,9 +44,15 @@ object TimerArbeidetSteg : Steg {
     override val navn: StegNavn
         get() = UTFYLLING
 
+    override fun skalKjøres(skjema: Skjema): Boolean {
+        return skjema.payload.run {
+            harDuJobbet == true /* TODO: reste av spørsmålene her */
+        }
+    }
 
-    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
-        return STEMMER_OPPLYSNINGENE
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
+        /* sjekk om nødvendlige feltene er fyllt inn */
+        return Stegutfall.Fortsett(skjema)
     }
 }
 
@@ -56,16 +60,25 @@ class StemmerOpplysningeneSteg(private val skjemaService: SkjemaService) : Steg 
     override val navn: StegNavn
         get() = STEMMER_OPPLYSNINGENE
 
-    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
         return when (skjema.payload.stemmerOpplysningene) {
-            true -> {
-                skjemaService.sendInn(skjema, innloggetBruker)
-                KVITTERING
-            }
-
-            false -> KVITTERING
-            null -> error("kan ikke gå videre uten å ha svart")
+            true -> Stegutfall.Fortsett(skjema)
+            else -> Stegutfall.Avklaringspunkt(skjema)
         }
+    }
+}
+
+class InnsendingVanligMeldekort(private val skjemaService: SkjemaService): Steg {
+    override val navn: StegNavn
+        get() = INNSENDING_VANLIG_MELDEKKORT
+
+    override fun erTekniskSteg(): Boolean {
+        return true
+    }
+
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
+        skjemaService.sendInn(skjema, innloggetBruker)
+        return Stegutfall.Fortsett(skjema)
     }
 }
 
@@ -73,7 +86,7 @@ object KvitteringSteg : Steg {
     override val navn: StegNavn
         get() = KVITTERING
 
-    override fun nesteSteg(skjema: Skjema, innloggetBruker: InnloggetBruker): StegNavn {
-        error("Kvittering er alltid siste steg")
+    override fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall {
+        return Stegutfall.Avklaringspunkt(skjema)
     }
 }

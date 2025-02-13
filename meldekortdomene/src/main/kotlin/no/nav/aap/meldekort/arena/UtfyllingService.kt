@@ -10,11 +10,14 @@ class UtfyllingService(
     skjemaService: SkjemaService,
 ) {
     private val flyt = UtfyllingFlyt(
-        BekreftSvarerÆrligSteg,
-        JobbetIMeldeperiodenSteg,
-        TimerArbeidetSteg,
-        StemmerOpplysningeneSteg(skjemaService),
-        KvitteringSteg,
+        utfyllingRepository,
+        listOf(
+            BekreftSvarerÆrligSteg,
+            JobbetIMeldeperiodenSteg,
+            TimerArbeidetSteg,
+            StemmerOpplysningeneSteg(skjemaService),
+            KvitteringSteg,
+        )
     )
 
     fun hentUtfylling(ident: Ident, meldekortId: MeldekortId): Utfylling? {
@@ -61,13 +64,8 @@ class UtfyllingService(
         innloggetBruker: InnloggetBruker,
         utfylling: Utfylling,
     ): Utfylling {
-        return try {
-            utfylling.nesteSteg(innloggetBruker).also {
-                utfyllingRepository.lagrUtfylling(it)
-            }
-        } catch (e: Exception) {
-            utfyllingRepository.lagrUtfylling(utfylling)
-            throw e
-        }
+        val utfall = utfylling.nesteSteg(innloggetBruker)
+        utfyllingRepository.lagrUtfylling(utfall.getOrDefault(utfylling))
+        return utfall.getOrThrow()
     }
 }
