@@ -1,7 +1,7 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaMeldegruppe
 import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.arena.ArenaMeldekortdetaljer
@@ -10,7 +10,7 @@ import no.nav.aap.arena.ArenaPerson
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortkontrollResponse
 
-class FakeArenaClient : ArenaClient {
+open class FakeArenaGateway : ArenaGateway {
     var historiskeMeldekort: ArenaPerson? = null
     var korrigertMeldekort: ArenaMeldekort? = null
 
@@ -69,3 +69,5 @@ class FakeArenaClient : ArenaClient {
         )
     }
 }
+
+object FakeArenaGatewaySingleton : FakeArenaGateway()

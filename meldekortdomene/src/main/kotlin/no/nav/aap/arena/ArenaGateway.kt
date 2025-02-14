@@ -5,8 +5,9 @@ import no.nav.aap.arena.MeldekortType.ETTERREGISTRERING
 import no.nav.aap.arena.MeldekortType.KORRIGERING
 import no.nav.aap.arena.MeldekortType.UKJENT
 import no.nav.aap.arena.MeldekortType.VANLIG
+import no.nav.aap.lookup.gateway.Gateway
 
-interface ArenaClient {
+interface ArenaGateway: Gateway {
     fun meldegrupper(innloggetBruker: InnloggetBruker): List<ArenaMeldegruppe>
 
     fun person(innloggetBruker: InnloggetBruker): ArenaPerson?

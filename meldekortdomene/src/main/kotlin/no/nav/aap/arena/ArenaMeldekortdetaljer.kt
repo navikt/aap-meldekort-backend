@@ -11,7 +11,7 @@ data class ArenaMeldekortdetaljer(
     val meldeperiode: String,
     val meldegruppe: String,
     val arkivnokkel: String,
-    val kortType: ArenaClient.KortType,
+    val kortType: ArenaGateway.KortType,
     val meldeDato: LocalDate? = null,
     val lestDato: LocalDate? = null,
     val sporsmal: Sporsmal? = null,

@@ -5,7 +5,7 @@ import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.UBEHA
 import no.nav.aap.arena.ArenaPerson
@@ -20,7 +20,7 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 
 
-class ArenaSkjemaFlateIntegrasjonTest {
+class ArenaSkjemaAnsvarligFlateIntegrasjonTest {
     init {
         registerRepositories()
     }
@@ -28,9 +28,9 @@ class ArenaSkjemaFlateIntegrasjonTest {
     @Test
     fun `korrigering dukker opp i liste med historiske meldekort`() {
         InitTestDatabase.dataSource.transaction { connection ->
-            val arenaClient = FakeArenaClient()
+            val arenaClient = FakeArenaGateway()
 
-            val arenaSkjemaFlate = ArenaSkjemaFlate.konstruer(connection, arenaClient = arenaClient)
+            val arenaSkjemaFlate = ArenaSkjemaFlate.konstruer(connection, arenaGateway = arenaClient)
             val meldeperiode = Periode(
                 LocalDate.parse("2024-11-11"),
                 LocalDate.parse("2024-11-24")
@@ -46,7 +46,7 @@ class ArenaSkjemaFlateIntegrasjonTest {
                 arenaMeldekortListe = listOf(
                     ArenaMeldekort(
                         meldekortId = originalMeldekortId,
-                        kortType = ArenaClient.KortType.MANUELL_ARENA,
+                        kortType = ArenaGateway.KortType.MANUELL_ARENA,
                         meldeperiode = "202446",
                         fraDato = meldeperiode.fom,
                         tilDato = meldeperiode.tom,
@@ -60,7 +60,7 @@ class ArenaSkjemaFlateIntegrasjonTest {
             )
             arenaClient.korrigertMeldekort = ArenaMeldekort(
                 meldekortId = MeldekortId(1687337285),
-                kortType = ArenaClient.KortType.KORRIGERT_ELEKTRONISK,
+                kortType = ArenaGateway.KortType.KORRIGERT_ELEKTRONISK,
                 meldeperiode = "202446",
                 fraDato = meldeperiode.fom,
                 tilDato = meldeperiode.tom,

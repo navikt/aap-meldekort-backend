@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 
 class MeldekortService(
-    private val arenaClient: ArenaClient,
+    private val arenaGateway: ArenaGateway,
     private val meldekortRepository: MeldekortRepository,
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)!!
@@ -26,7 +26,7 @@ class MeldekortService(
     }
 
     fun kommendeMeldekort(innloggetBruker: InnloggetBruker): List<KommendeMeldekort>? {
-        val arenaMeldekort = arenaClient.person(innloggetBruker)?.arenaMeldekortListe ?: return null
+        val arenaMeldekort = arenaGateway.person(innloggetBruker)?.arenaMeldekortListe ?: return null
         val dbMeldekort = meldekortRepository.hent(innloggetBruker.ident, arenaMeldekort.map { it.meldekortId })
 
         return arenaMeldekort
@@ -54,11 +54,11 @@ class MeldekortService(
 
     private fun historiskeMeldekortFraArena(innloggetBruker: InnloggetBruker): List<HistoriskMeldekort> {
         val råMeldekortFraArena =
-            arenaClient.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
+            arenaGateway.historiskeMeldekort(innloggetBruker, antallMeldeperioder = 5).arenaMeldekortListe
 
         val detaljerCache = mutableMapOf<MeldekortId, ArenaMeldekortdetaljer>()
         fun detaljer(meldekortId: MeldekortId) = detaljerCache.computeIfAbsent(meldekortId) {
-            arenaClient.meldekortdetaljer(innloggetBruker, meldekortId)
+            arenaGateway.meldekortdetaljer(innloggetBruker, meldekortId)
         }
         return råMeldekortFraArena
             .filter { it.erForAap }
@@ -117,7 +117,7 @@ class MeldekortService(
         val originaltMeldekort = historiskeMeldekort(innloggetBruker).single { it.meldekortId == originalMeldekortId }
         check(originaltMeldekort.kanKorrigeres) { "Korrigering er ikke tillatt på meldekort med id $originalMeldekortId" }
 
-        val meldekortId = arenaClient.korrigertMeldekort(innloggetBruker, originalMeldekortId)
+        val meldekortId = arenaGateway.korrigertMeldekort(innloggetBruker, originalMeldekortId)
         return HistoriskMeldekort(
             meldekortId = meldekortId,
             type = MeldekortType.KORRIGERING,
@@ -135,13 +135,13 @@ class MeldekortService(
 
     fun sendInn(skjema: Skjema, innloggetBruker: InnloggetBruker) {
         // TODO: Håndtere at systemet krasjer mellom de forskjellige stegene.
-        val meldekortdetaljer = arenaClient.meldekortdetaljer(innloggetBruker, skjema.meldekortId)
+        val meldekortdetaljer = arenaGateway.meldekortdetaljer(innloggetBruker, skjema.meldekortId)
         check(meldekortdetaljer.fodselsnr == innloggetBruker.ident.asString)
 
         val arenaMeldekortkontrollRequest = ArenaMeldekortkontrollRequest.konstruer(skjema, meldekortdetaljer)
         // TODO: Hvis det er korrigering, må vi opprette selve meldekortet her, før vi prøver å sende det inn.
 
-        val meldekortkontrollResponse = arenaClient.sendInn(innloggetBruker, arenaMeldekortkontrollRequest)
+        val meldekortkontrollResponse = arenaGateway.sendInn(innloggetBruker, arenaMeldekortkontrollRequest)
         meldekortkontrollResponse.validerVellykket()
 
         meldekortRepository.upsert(

@@ -1,13 +1,13 @@
 package no.nav.aap.arena
 
-import no.nav.aap.arena.ArenaClient.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.arena.ArenaGateway.KortType.KORRIGERT_ELEKTRONISK
 import java.time.LocalDate
 
 data class ArenaMeldekortkontrollRequest(
     val meldekortId: MeldekortId,
     val fnr: String,
     val personId: Long,
-    val kortType: ArenaClient.KortType,
+    val kortType: ArenaGateway.KortType,
     val meldedato: LocalDate,
     val periodeFra: LocalDate,
     val periodeTil: LocalDate,

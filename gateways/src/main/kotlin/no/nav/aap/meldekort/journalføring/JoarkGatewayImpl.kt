@@ -35,6 +35,5 @@ object JoarkGatewayImpl : JoarkClient {
         } catch (e: ConflictHttpResponseException) {
             DefaultJsonMapper.fromJson<JoarkClient.JournalpostResponse>(e.body!!)
         }
-
     }
 }

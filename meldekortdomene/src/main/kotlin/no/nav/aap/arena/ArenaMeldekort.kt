@@ -1,6 +1,6 @@
 package no.nav.aap.arena
 
-import no.nav.aap.arena.ArenaClient.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.arena.ArenaGateway.KortType.KORRIGERT_ELEKTRONISK
 import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.UBEHA
 import no.nav.aap.arena.MeldekortStatus.FEILET
 import no.nav.aap.arena.MeldekortStatus.FERDIG
@@ -14,7 +14,7 @@ data class MeldekortId(val asLong: Long)
 data class ArenaMeldekort(
     val meldekortId: MeldekortId,
 
-    val kortType: ArenaClient.KortType,
+    val kortType: ArenaGateway.KortType,
     val meldeperiode: String,
     val fraDato: LocalDate,
     val tilDato: LocalDate,

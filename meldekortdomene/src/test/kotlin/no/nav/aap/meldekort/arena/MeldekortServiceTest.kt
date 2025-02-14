@@ -2,8 +2,8 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaClient.KortType.ELEKTRONISK
-import no.nav.aap.arena.ArenaClient.KortType.MANUELL_ARENA
+import no.nav.aap.arena.ArenaGateway.KortType.ELEKTRONISK
+import no.nav.aap.arena.ArenaGateway.KortType.MANUELL_ARENA
 import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
@@ -25,7 +25,7 @@ class MeldekortServiceTest {
         historiskeMeldekort: List<ArenaMeldekort>?
     ): MeldekortService {
         return MeldekortService(
-            arenaClient = ArenaClientFake(
+            arenaGateway = ArenaGatewayFake(
                 kommendeMeldekort = kommendeMeldekort?.toMutableList(),
                 historiskeMeldekort = historiskeMeldekort?.toMutableList(),
             ),

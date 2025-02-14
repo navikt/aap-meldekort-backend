@@ -18,7 +18,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangExceptio
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
 import no.nav.aap.motor.Motor
@@ -32,7 +32,6 @@ class HttpServer
 fun startHttpServer(
     port: Int,
     prometheus: PrometheusMeterRegistry,
-    arenaClient: ArenaClient,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
     dataSource: DataSource
@@ -58,28 +57,7 @@ fun startHttpServer(
             tokenxConfig = tokenxConfig,
         )
 
-        val motor = Motor(
-            dataSource = dataSource,
-            antallKammer = 4,
-            logInfoProvider = JournalføringLogInfoProvider,
-            jobber = listOf(ArenaJournalføringJobbUtfører),
-            prometheus = prometheus,
-        )
-
-        dataSource.transaction { dbConnection ->
-            RetryService(dbConnection).enable()
-        }
-
-        monitor.subscribe(ApplicationStarted) {
-            motor.start()
-        }
-        monitor.subscribe(ApplicationStopped) { application ->
-            application.environment.log.info("Server har stoppet")
-            motor.stop()
-            // Release resources and unsubscribe from events
-            application.monitor.unsubscribe(ApplicationStarted) {}
-            application.monitor.unsubscribe(ApplicationStopped) {}
-        }
+        val motor = startMotor(dataSource, prometheus)
 
         install(StatusPages) {
             exception<Throwable> { call, cause ->
@@ -113,10 +91,7 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     ansvarligSystemApi()
-                    arenaApi(
-                        arenaClient = arenaClient,
-                        datasource = dataSource
-                    )
+                    arenaApi(dataSource)
                     kelvinApi()
                     motorApi(dataSource)
                 }
@@ -124,6 +99,35 @@ fun startHttpServer(
             actuator(prometheus, motor)
         }
     }.start(wait = true)
+}
+
+private fun Application.startMotor(
+    dataSource: DataSource,
+    prometheus: PrometheusMeterRegistry
+): Motor {
+    val motor = Motor(
+        dataSource = dataSource,
+        antallKammer = 4,
+        logInfoProvider = JournalføringLogInfoProvider,
+        jobber = listOf(ArenaJournalføringJobbUtfører),
+        prometheus = prometheus,
+    )
+
+    dataSource.transaction { dbConnection ->
+        RetryService(dbConnection).enable()
+    }
+
+    monitor.subscribe(ApplicationStarted) {
+        motor.start()
+    }
+    monitor.subscribe(ApplicationStopped) { application ->
+        application.environment.log.info("Server har stoppet")
+        motor.stop()
+        // Release resources and unsubscribe from events
+        application.monitor.unsubscribe(ApplicationStarted) {}
+        application.monitor.unsubscribe(ApplicationStopped) {}
+    }
+    return motor
 }
 
 private fun Routing.actuator(prometheus: PrometheusMeterRegistry, motor: Motor) {

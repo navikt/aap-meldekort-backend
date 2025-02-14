@@ -18,14 +18,15 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import javax.sql.DataSource
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaSkjemaFlate
 import no.nav.aap.arena.MeldekortId
+import no.nav.aap.lookup.gateway.GatewayProvider
 
 fun NormalOpenAPIRoute.arenaApi(
     datasource: DataSource,
-    arenaClient: ArenaClient,
 ) {
+    val arenaGateway = GatewayProvider.provide(ArenaGateway::class)
     route("/api/arena") {
         class MeldekortIdParam(
             @JsonValue @PathParam("meldekortId") val meldekortId: Long,
@@ -33,7 +34,7 @@ fun NormalOpenAPIRoute.arenaApi(
         route("/skjema/{meldekortId}") {
             get<MeldekortIdParam, MeldekortResponse> { params ->
                 val nåværendeTilstand = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient)
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway)
                         .hentEllerOpprettUtfylling(innloggetBruker(), MeldekortId(params.meldekortId))
 
                 }
@@ -42,7 +43,7 @@ fun NormalOpenAPIRoute.arenaApi(
 
             route("/neste-steg").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 val response = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).gåTilNesteSteg(
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).gåTilNesteSteg(
                         innloggetBruker = innloggetBruker(),
                         meldekortId = MeldekortId(params.meldekortId),
                         fraSteg = meldekortRequest.nåværendeSteg,
@@ -54,7 +55,7 @@ fun NormalOpenAPIRoute.arenaApi(
 
             route("/lagre").post<MeldekortIdParam, MeldekortResponse, MeldekortRequest> { params, meldekortRequest ->
                 val response = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).lagreSteg(
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).lagreSteg(
                         ident = innloggetBruker().ident,
                         meldekortId = MeldekortId(params.meldekortId),
                         nyPayload = meldekortRequest.meldekort.tilDomene(),
@@ -70,7 +71,7 @@ fun NormalOpenAPIRoute.arenaApi(
         route("meldekort") {
             route("/neste").get<Unit, KommendeMeldekortDto> {
                 val kommendeMeldekort = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).kommendeMeldekort(innloggetBruker())
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).kommendeMeldekort(innloggetBruker())
                 }
                 respond(
                     KommendeMeldekortDto(
@@ -89,7 +90,7 @@ fun NormalOpenAPIRoute.arenaApi(
 
             route("/historisk").get<Unit, List<HistoriskMeldekortDto>> {
                 val response = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskeMeldekort(
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).historiskeMeldekort(
                         innloggetBruker()
                     ).map { historiskMeldekort ->
                         HistoriskMeldekortDto(
@@ -104,7 +105,7 @@ fun NormalOpenAPIRoute.arenaApi(
 
             route("/historisk/meldeperiode").post<Unit, List<HistoriskMeldekortDetaljerDto>, PeriodeDto> { _, meldeperiode ->
                 val meldekortDetaljer = datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).historiskeMeldekortDetaljer(
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).historiskeMeldekortDetaljer(
                         innloggetBruker(),
                         meldeperiode.let { periode -> Periode(periode.fom, periode.tom) }
                     )
@@ -115,7 +116,7 @@ fun NormalOpenAPIRoute.arenaApi(
 
             route("{meldekortId}").post<MeldekortIdParam, Unit, MeldekortKorrigeringRequest> { param, request ->
                 datasource.transaction {
-                    ArenaSkjemaFlate.konstruer(it, arenaClient).korrigerMeldekort(
+                    ArenaSkjemaFlate.konstruer(it, arenaGateway).korrigerMeldekort(
                         innloggetBruker(),
                         MeldekortId(param.meldekortId),
                         request.dager.map(DagerInfoDto::tilDomene)
@@ -127,25 +128,25 @@ fun NormalOpenAPIRoute.arenaApi(
 
         if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
             route("/test/proxy/meldegrupper").get<Unit, Any> {
-                respond(arenaClient.meldegrupper(innloggetBruker()))
+                respond(arenaGateway.meldegrupper(innloggetBruker()))
             }
             route("/test/proxy/meldekort").get<Unit, Any> {
-                respond(arenaClient.person(innloggetBruker()) ?: "null")
+                respond(arenaGateway.person(innloggetBruker()) ?: "null")
             }
             route("/test/proxy/historiskemeldekort").get<Unit, Any> {
-                respond(arenaClient.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
+                respond(arenaGateway.historiskeMeldekort(innloggetBruker(), antallMeldeperioder = 5))
             }
             route("/test/proxy/meldekortdetaljer/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-                respond(arenaClient.meldekortdetaljer(innloggetBruker(), MeldekortId(params.meldekortId)))
+                respond(arenaGateway.meldekortdetaljer(innloggetBruker(), MeldekortId(params.meldekortId)))
             }
             route("/test/proxy/korrigerte-meldekort/{meldekortId}").get<MeldekortIdParam, Any> { params ->
-                respond(arenaClient.korrigertMeldekort(innloggetBruker(), MeldekortId(params.meldekortId)))
+                respond(arenaGateway.korrigertMeldekort(innloggetBruker(), MeldekortId(params.meldekortId)))
             }
         }
     }
 }
 
-private fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
+fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
     InnloggetBruker(
         ident = Ident(personBruker().pid),
         token = token().token(),

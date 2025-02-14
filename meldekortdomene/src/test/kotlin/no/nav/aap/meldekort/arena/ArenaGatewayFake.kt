@@ -2,7 +2,7 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.InnloggetBruker
 import java.time.LocalDate
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaMeldegruppe
 import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.arena.ArenaMeldekortdetaljer
@@ -11,10 +11,10 @@ import no.nav.aap.arena.ArenaPerson
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortkontrollResponse
 
-open class ArenaClientFake(
+open class ArenaGatewayFake(
     val kommendeMeldekort: MutableList<ArenaMeldekort>? = null,
     val historiskeMeldekort: MutableList<ArenaMeldekort>? = null,
-) : ArenaClient {
+) : ArenaGateway {
 
     override fun meldegrupper(innloggetBruker: InnloggetBruker): List<ArenaMeldegruppe> {
         return listOf(

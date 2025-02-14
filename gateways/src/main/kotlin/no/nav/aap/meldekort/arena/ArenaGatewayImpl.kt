@@ -14,7 +14,7 @@ import org.slf4j.MDC
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
-import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaMeldegruppe
 import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.arena.ArenaMeldekortdetaljer
@@ -22,13 +22,13 @@ import no.nav.aap.arena.ArenaMeldekortkontrollRequest
 import no.nav.aap.arena.ArenaPerson
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortkontrollResponse
+import no.nav.aap.komponenter.config.requiredConfigForKey
 
-class ArenaGatewayImpl(
-    private val meldekortserviceUrl: String,
-    meldekortserviceScope: String,
-    private val meldekortkontrollUrl: String,
-    meldekortkontrollScope: String,
-) : ArenaClient {
+object ArenaGatewayImpl : ArenaGateway {
+    private val meldekortserviceScope = requiredConfigForKey("meldekortservice.scope")
+    private val meldekortkontrollScope = requiredConfigForKey("meldekortkontroll.scope")
+    private val meldekortserviceUrl = requiredConfigForKey("meldekortservice.url")
+    private val meldekortkontrollUrl = requiredConfigForKey("meldekortkontroll.url")
 
     private val meldekortserviceClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = meldekortserviceScope),
@@ -165,7 +165,7 @@ class ArenaGatewayImpl(
     ) {
         fun tilDomene() = ArenaMeldekort(
             meldekortId = MeldekortId(meldekortId),
-            kortType = ArenaClient.KortType.getByCode(kortType),
+            kortType = ArenaGateway.KortType.getByCode(kortType),
             meldeperiode = meldeperiode,
             fraDato = fraDato,
             tilDato = tilDato,
@@ -199,7 +199,7 @@ class ArenaGatewayImpl(
             meldeperiode = meldeperiode,
             meldegruppe = meldegruppe,
             arkivnokkel = arkivnokkel,
-            kortType = ArenaClient.KortType.valueOf(kortType),
+            kortType = ArenaGateway.KortType.valueOf(kortType),
             meldeDato = meldeDato,
             lestDato = lestDato,
             sporsmal = sporsmal?.tilDomene(),

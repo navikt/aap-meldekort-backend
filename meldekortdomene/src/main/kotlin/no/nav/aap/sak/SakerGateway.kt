@@ -1,9 +1,8 @@
-package no.nav.aap.kelvin
+package no.nav.aap.sak
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.lookup.gateway.Gateway
-import no.nav.aap.sak.Saker
 
-interface KelvinGateway: Gateway {
+interface SakerGateway: Gateway {
     fun hentSaker(innloggetBruker: InnloggetBruker): Saker
 }

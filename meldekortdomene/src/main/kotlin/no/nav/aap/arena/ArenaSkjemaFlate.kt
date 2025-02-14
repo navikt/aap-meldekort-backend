@@ -12,13 +12,13 @@ class ArenaSkjemaFlate private constructor(
     private val meldekortService: MeldekortService,
     private val utfyllingService: UtfyllingService,
     private val skjemaService: SkjemaService,
-    private val arenaClient: ArenaClient
+    private val arenaGateway: ArenaGateway
 ) {
     companion object {
-        fun konstruer(connection: DBConnection, arenaClient: ArenaClient): ArenaSkjemaFlate {
+        fun konstruer(connection: DBConnection, arenaGateway: ArenaGateway): ArenaSkjemaFlate {
             val repositoryProvider = RepositoryProvider(connection)
             val meldekortService = MeldekortService(
-                arenaClient = arenaClient,
+                arenaGateway = arenaGateway,
                 meldekortRepository = repositoryProvider.provide(MeldekortRepository::class)
             )
             val skjemaService = SkjemaService(
@@ -35,7 +35,7 @@ class ArenaSkjemaFlate private constructor(
                     skjemaService = skjemaService
                 ),
                 skjemaService = skjemaService,
-                arenaClient = arenaClient
+                arenaGateway = arenaGateway
             )
         }
     }
@@ -73,7 +73,7 @@ class ArenaSkjemaFlate private constructor(
                         )?.sendtInn?.toLocalDate(),
                     ),
                     timerArbeidet = skjemaService.timerArbeidet(innloggetBruker, it.meldekortId)
-                        ?: arenaClient.meldekortdetaljer(innloggetBruker, it.meldekortId)
+                        ?: arenaGateway.meldekortdetaljer(innloggetBruker, it.meldekortId)
                             .timerArbeidet(it.periode.fom)
                 )
             }
