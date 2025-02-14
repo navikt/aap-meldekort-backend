@@ -11,7 +11,7 @@ import no.nav.aap.meldekort.saker.SakerGatewayImpl
 import no.nav.aap.meldekort.test.FakeServers
 
 fun main() {
-    FakeServers.start() // azurePort = 8081
+    FakeServers.start()
 
     GatewayRegistry
         .register<JoarkGatewayImpl>()

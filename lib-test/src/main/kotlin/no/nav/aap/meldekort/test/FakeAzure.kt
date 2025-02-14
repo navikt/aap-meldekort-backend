@@ -39,14 +39,22 @@ object FakeAzure : FakeServer {
             routing {
                 post("/token") {
                     val body = call.receiveText()
-                    val token = AzureTokenGen(
-                        issuer = "meldekort-backend",
-                        audience = "meldekort-backend"
-                    ).generate(body.contains("grant_type=client_credentials"))
+                    val token = TokenGen.generate(
+                        issuer = "fake-azure",
+                        audience = "meldekort-backend",
+                        listOfNotNull(
+                            "NAVident" to "Lokalsaksbehandler",
+                            "azp_name" to "azp",
+                            if (body.contains("grant_type=client_credentials"))
+                                "idtyp" to "app"
+                            else
+                                null
+                        )
+                    )
                     call.respond(TestToken(access_token = token))
                 }
                 get("/jwks") {
-                    call.respond(AZURE_JWKS)
+                    call.respond(LOCAL_JWKS)
                 }
             }
         }

@@ -13,8 +13,8 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
-internal class AzureTokenGen(private val issuer: String, private val audience: String) {
-    private val rsaKey: RSAKey = JWKSet.parse(AZURE_JWKS).getKeyByKeyId("localhost-signer") as RSAKey
+internal object TokenGen {
+    private val rsaKey: RSAKey = JWKSet.parse(LOCAL_JWKS).getKeyByKeyId("localhost-signer") as RSAKey
 
     private fun signed(claims: JWTClaimsSet): SignedJWT {
         val header = JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.keyID).type(JOSEObjectType.JWT).build()
@@ -24,19 +24,18 @@ internal class AzureTokenGen(private val issuer: String, private val audience: S
         return signedJWT
     }
 
-    private fun claims(isApp: Boolean): JWTClaimsSet {
+    private fun claimSet(issuer: String, audience: String, extra: List<Pair<String, String>>): JWTClaimsSet {
         val builder = JWTClaimsSet
             .Builder()
             .subject(UUID.randomUUID().toString())
             .issuer(issuer)
             .audience(audience)
             .expirationTime(LocalDateTime.now().plusHours(4).toDate())
-            .claim("NAVident", "Lokalsaksbehandler")
-            .claim("azp_name", "azp")
-
-        if (isApp) {
-            builder.claim("idtyp", "app")
-        }
+            .apply {
+                for ((name, value) in extra) {
+                    claim(name, value)
+                }
+            }
 
         return builder.build()
     }
@@ -45,13 +44,13 @@ internal class AzureTokenGen(private val issuer: String, private val audience: S
         return Date.from(this.atZone(ZoneId.systemDefault()).toInstant())
     }
 
-    fun generate(isApp: Boolean): String {
-        return signed(claims(isApp)).serialize()
+    fun generate(issuer: String, audience: String, claims: List<Pair<String, String>>): String {
+        return signed(claimSet(issuer, audience, claims)).serialize()
     }
 }
 
 @Language("JSON")
-internal const val AZURE_JWKS: String = """{
+internal const val LOCAL_JWKS: String = """{
   "keys": [
     {
       "kty": "RSA",

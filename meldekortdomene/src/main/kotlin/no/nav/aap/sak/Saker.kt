@@ -4,7 +4,7 @@ import no.nav.aap.meldeplikt.Medlem
 import java.time.LocalDate
 
 class Saker(
-    private val saker: List<Sak>,
+    val saker: List<Sak>,
 ) {
     /* Burde vi oppfordre medlemmet til å melde seg i dag? */
     fun burdeMeldeSeg(medlemmet: Medlem, idag: LocalDate): Boolean {
