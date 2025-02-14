@@ -14,6 +14,9 @@ import io.ktor.server.routing.routing
 import org.slf4j.LoggerFactory
 
 object FakeTokenX : FakeServer {
+
+    override val port = 8081 /* Så kan frontend hente token lokalt */
+
     val log = LoggerFactory.getLogger(this.javaClass)!!
 
     override fun setProperties(port: Int) {

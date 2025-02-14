@@ -12,11 +12,12 @@ private val logger = LoggerFactory.getLogger(FakesExtension::class.java)
 interface FakeServer {
     fun setProperties(port: Int)
     val module: Application.() -> Unit
+    val port: Int get() = 0
 }
 
 object FakeServers : AutoCloseable {
     private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv)
-        .map { it to embeddedServer(Netty, port = 0, module = it.module) }
+        .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
 
     private val started = AtomicBoolean(false)
 
