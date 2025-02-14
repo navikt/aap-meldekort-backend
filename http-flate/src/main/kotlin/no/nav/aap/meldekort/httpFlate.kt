@@ -21,6 +21,7 @@ import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
@@ -93,6 +94,10 @@ fun startHttpServer(
                     ansvarligSystemApi()
                     arenaApi(dataSource)
                     kelvinApi()
+                }
+            }
+            authenticate(AZURE) {
+                apiRouting {
                     motorApi(dataSource)
                 }
             }
