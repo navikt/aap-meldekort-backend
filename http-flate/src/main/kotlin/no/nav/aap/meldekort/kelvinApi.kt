@@ -32,6 +32,12 @@ enum class StegDto {
 }
 
 class FlytTilstandDto(
+    val meldeperiode: MeldeperiodeDto,
+    val steg: StegDto,
+    val skjema: SkjemaDto,
+)
+
+class NyFlytTilstandDto(
     val steg: StegDto,
     val skjema: SkjemaDto,
 )
@@ -39,9 +45,9 @@ class FlytTilstandDto(
 sealed interface FlytTilstandResponseDto {
     class Ok(
         val flytTilstand: FlytTilstandDto,
-    ): FlytTilstandResponseDto
+    ) : FlytTilstandResponseDto
 
-    class Feil: FlytTilstandResponseDto
+    class Feil : FlytTilstandResponseDto
 }
 
 class SkjemaDto(
@@ -58,26 +64,36 @@ fun NormalOpenAPIRoute.kelvinApi() {
     var flytTilstand: FlytTilstandDto? = null
 
     route("/api/") {
+        val m1 = MeldeperiodeDto(
+            meldeperiode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 14)),
+            fastsattDag = LocalDate.of(2025, 1, 1),
+            innsendingsvindu = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)),
+        )
+        val m2 = MeldeperiodeDto(
+            meldeperiode = m1.meldeperiode.run { PeriodeDto(fom.plusDays(14), tom.plusDays(14)) },
+            fastsattDag = m1.fastsattDag.plusDays(14),
+            innsendingsvindu = m1.innsendingsvindu.run { PeriodeDto(fom.plusDays(14), tom.plusDays(14)) },
+        )
         route("bruker-info").get<Unit, InfoDto> {
-            respond(InfoDto(
-                forrigeMeldeperiode = MeldeperiodeDto(
-                    meldeperiode = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 14)),
-                    fastsattDag = LocalDate.of(2025, 1, 1),
-                    innsendingsvindu = PeriodeDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)),
-                ),
-                nåværendeMeldeperiode = MeldeperiodeDto(
-                    meldeperiode = PeriodeDto(LocalDate.of(2025, 1, 1 + 14), LocalDate.of(2025, 1, 14 + 14)),
-                    fastsattDag = LocalDate.of(2025, 1, 1 + 14),
-                    innsendingsvindu = PeriodeDto(LocalDate.of(2025, 1, 1 + 14), LocalDate.of(2025, 1, 9 + 14)),
-                ),
-                nesteMeldeperiode = null,
-            ))
+            respond(
+                InfoDto(
+                    forrigeMeldeperiode = m1,
+                    nåværendeMeldeperiode = m2,
+                    nesteMeldeperiode = null,
+                )
+            )
         }
 
         route("utfylling") {
             route("tilstand") {
                 get<Unit, FlytTilstandDto> {
-                    respond(flytTilstand ?: FlytTilstandDto(StegDto.INTRODUKSJON, SkjemaDto(null, listOf())))
+                    respond(
+                        flytTilstand ?: FlytTilstandDto(
+                            m1,
+                            StegDto.INTRODUKSJON,
+                            SkjemaDto(null, listOf())
+                        )
+                    )
                 }
                 delete<Unit, Unit> {
                     flytTilstand = null
@@ -85,11 +101,12 @@ fun NormalOpenAPIRoute.kelvinApi() {
                 }
             }
 
-            route("lagre-neste").post<Unit, FlytTilstandResponseDto, FlytTilstandDto> { params, body ->
+            route("lagre-neste").post<Unit, FlytTilstandResponseDto, NyFlytTilstandDto> { params, body ->
                 if (flytTilstand == null) {
                     respond(FlytTilstandResponseDto.Feil())
                 } else {
                     flytTilstand = FlytTilstandDto(
+                        m1,
                         steg = StegDto.entries.dropWhile { it != body.steg }.getOrElse(1) { StegDto.KVITTERING },
                         skjema = body.skjema,
                     ).also {
@@ -98,11 +115,15 @@ fun NormalOpenAPIRoute.kelvinApi() {
                 }
             }
 
-            route("lagre").post<Unit, FlytTilstandResponseDto, FlytTilstandDto> { params, body ->
+            route("lagre").post<Unit, FlytTilstandResponseDto, NyFlytTilstandDto> { params, body ->
                 if (flytTilstand == null) {
                     respond(FlytTilstandResponseDto.Feil())
                 } else {
-                    flytTilstand = body.also {
+                    flytTilstand = FlytTilstandDto(
+                        m1,
+                        steg = body.steg,
+                        skjema = body.skjema,
+                    ).also {
                         respond(FlytTilstandResponseDto.Ok(it))
                     }
                 }
