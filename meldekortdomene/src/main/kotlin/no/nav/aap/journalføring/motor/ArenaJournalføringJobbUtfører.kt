@@ -4,11 +4,11 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.Ident
-import no.nav.aap.meldekort.arena.MeldekortId
-import no.nav.aap.meldekort.arena.MeldekortRepository
-import no.nav.aap.meldekort.arena.MeldekortType
-import no.nav.aap.meldekort.arena.SkjemaRepository
-import no.nav.aap.meldekort.arena.SkjemaTilstand
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortRepository
+import no.nav.aap.arena.MeldekortType
+import no.nav.aap.arena.SkjemaRepository
+import no.nav.aap.arena.SkjemaTilstand
 import no.nav.aap.journalføring.JoarkClient
 import no.nav.aap.journalføring.JoarkService
 import no.nav.aap.motor.Jobb

@@ -18,9 +18,9 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
 import javax.sql.DataSource
-import no.nav.aap.meldekort.arena.ArenaClient
-import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
-import no.nav.aap.meldekort.arena.MeldekortId
+import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaSkjemaFlate
+import no.nav.aap.arena.MeldekortId
 
 fun NormalOpenAPIRoute.arenaApi(
     datasource: DataSource,

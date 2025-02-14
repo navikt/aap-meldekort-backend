@@ -2,13 +2,17 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.meldekort.arena.ArenaClient.KortType.ELEKTRONISK
-import no.nav.aap.meldekort.arena.ArenaClient.KortType.MANUELL_ARENA
-import no.nav.aap.meldekort.arena.ArenaMeldekort.ArenaStatus.OPPRE
+import no.nav.aap.arena.ArenaClient.KortType.ELEKTRONISK
+import no.nav.aap.arena.ArenaClient.KortType.MANUELL_ARENA
+import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import no.nav.aap.arena.ArenaMeldekort
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortRepositoryFake
+import no.nav.aap.arena.MeldekortService
 
 class MeldekortServiceTest {
     val innloggetBruker = InnloggetBruker(

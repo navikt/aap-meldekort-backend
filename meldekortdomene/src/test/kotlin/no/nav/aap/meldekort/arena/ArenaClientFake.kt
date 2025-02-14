@@ -2,6 +2,14 @@ package no.nav.aap.meldekort.arena
 
 import no.nav.aap.InnloggetBruker
 import java.time.LocalDate
+import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaMeldegruppe
+import no.nav.aap.arena.ArenaMeldekort
+import no.nav.aap.arena.ArenaMeldekortdetaljer
+import no.nav.aap.arena.ArenaMeldekortkontrollRequest
+import no.nav.aap.arena.ArenaPerson
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortkontrollResponse
 
 open class ArenaClientFake(
     val kommendeMeldekort: MutableList<ArenaMeldekort>? = null,

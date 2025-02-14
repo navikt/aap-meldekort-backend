@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.Periode
 import no.nav.aap.journalføring.JoarkClient.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.JoarkClient.Tema.AAP
-import no.nav.aap.meldekort.arena.Skjema
+import no.nav.aap.arena.Skjema
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields

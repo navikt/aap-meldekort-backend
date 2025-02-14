@@ -50,8 +50,8 @@ fun getCheckedOutGitCommitHash(): String {
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":http-flate"))
-    implementation(project(":postgres-repositories"))
-    implementation(project(":arena-integrasjon"))
+    implementation(project(":repositories"))
+    implementation(project(":gateways"))
 
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
@@ -63,7 +63,7 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
 
-    testImplementation(testFixtures(project(":postgres-repositories")))
+    testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
 

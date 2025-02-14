@@ -1,14 +1,14 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.meldekort.arena.ArenaClient
-import no.nav.aap.meldekort.arena.ArenaMeldegruppe
-import no.nav.aap.meldekort.arena.ArenaMeldekort
-import no.nav.aap.meldekort.arena.ArenaMeldekortdetaljer
-import no.nav.aap.meldekort.arena.ArenaMeldekortkontrollRequest
-import no.nav.aap.meldekort.arena.ArenaPerson
-import no.nav.aap.meldekort.arena.MeldekortId
-import no.nav.aap.meldekort.arena.MeldekortkontrollResponse as MeldekortkontrollResponse
+import no.nav.aap.arena.ArenaClient
+import no.nav.aap.arena.ArenaMeldegruppe
+import no.nav.aap.arena.ArenaMeldekort
+import no.nav.aap.arena.ArenaMeldekortdetaljer
+import no.nav.aap.arena.ArenaMeldekortkontrollRequest
+import no.nav.aap.arena.ArenaPerson
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortkontrollResponse
 
 class FakeArenaClient : ArenaClient {
     var historiskeMeldekort: ArenaPerson? = null

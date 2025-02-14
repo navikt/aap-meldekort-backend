@@ -3,13 +3,13 @@ package no.nav.aap.meldekort
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.aap.Periode
 import java.time.LocalDate
-import no.nav.aap.meldekort.arena.ArenaInnsendingFeiletException
-import no.nav.aap.meldekort.arena.ArenaSkjemaFlate
-import no.nav.aap.meldekort.arena.InnsendingPayload
-import no.nav.aap.meldekort.arena.MeldekortStatus
-import no.nav.aap.meldekort.arena.MeldekortType
-import no.nav.aap.meldekort.arena.StegNavn
-import no.nav.aap.meldekort.arena.TimerArbeidet
+import no.nav.aap.arena.ArenaInnsendingFeiletException
+import no.nav.aap.arena.ArenaSkjemaFlate
+import no.nav.aap.arena.InnsendingPayload
+import no.nav.aap.arena.MeldekortStatus
+import no.nav.aap.arena.MeldekortType
+import no.nav.aap.arena.StegNavn
+import no.nav.aap.arena.TimerArbeidet
 
 data class KommendeMeldekortDto(
     val antallUbesvarteMeldekort: Int,

@@ -6,8 +6,8 @@ rootProject.name = "meldekort-backend"
 include(
     "app",
     "meldekortdomene",
-    "postgres-repositories",
+    "repositories",
     "http-flate",
-    "arena-integrasjon",
+    "gateways",
     "lib-test"
 )

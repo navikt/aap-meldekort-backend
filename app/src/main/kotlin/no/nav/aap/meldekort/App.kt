@@ -5,11 +5,11 @@ import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.lookup.repository.RepositoryRegistry
-import no.nav.aap.meldekort.arena.ArenaClientImpl
+import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
-import no.nav.aap.meldekort.joark.JoarkClientImpl
+import no.nav.aap.meldekort.journalføring.JoarkGatewayImpl
 import org.slf4j.LoggerFactory
 
 class App
@@ -21,7 +21,7 @@ fun main() {
 
     val dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus)
 
-    val arenaClient = ArenaClientImpl(
+    val arenaGateway = ArenaGatewayImpl(
         meldekortserviceScope = requiredConfigForKey("meldekortservice.scope"),
         meldekortkontrollScope = requiredConfigForKey("meldekortkontroll.scope"),
         meldekortserviceUrl = requiredConfigForKey("meldekortservice.url"),
@@ -36,7 +36,7 @@ fun main() {
         prometheus = prometheus,
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
-        arenaClient = arenaClient,
+        arenaClient = arenaGateway,
         dataSource = dataSource
     )
 }
@@ -50,5 +50,5 @@ fun registerRepositories() {
 }
 
 private fun registerGateways() {
-    GatewayRegistry.register<JoarkClientImpl>().status()
+    GatewayRegistry.register<JoarkGatewayImpl>().status()
 }

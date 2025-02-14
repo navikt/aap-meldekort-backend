@@ -10,8 +10,13 @@ import no.nav.aap.Periode
 
 data class Saksnummer(val asString: String)
 
+enum class Fagsystem {
+    ARENA, KELVIN,
+}
+
 class Sak(
-    val saksnummer: String,
+    val fagsystem: Fagsystem,
+    val saksnummer: Saksnummer?,
     val rettighetsperiode: Periode,
     val meldeperioder: List<Meldeperiode>,
     val fritakFraMeldeplikt: List<Periode>,
