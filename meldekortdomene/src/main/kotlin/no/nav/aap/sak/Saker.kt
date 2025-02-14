@@ -8,11 +8,11 @@ class Saker(
 ) {
     /* Burde vi oppfordre medlemmet til å melde seg i dag? */
     fun burdeMeldeSeg(medlemmet: Medlem, idag: LocalDate): Boolean {
-        val sak = finnRelevantSak(idag) ?: return false
+        val sak = finnSakForDagen(idag) ?: return false
         return sak.burdeMeldeSeg(medlemmet, idag)
     }
 
-    private fun finnRelevantSak(idag: LocalDate): Sak? {
+    fun finnSakForDagen(idag: LocalDate): Sak? {
         return saker.filter { idag in it.rettighetsperiode }
             .also {
                 check(it.size <= 1) {

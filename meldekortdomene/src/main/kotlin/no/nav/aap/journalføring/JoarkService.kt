@@ -75,7 +75,7 @@ class JoarkService(
             ),
             sak = JoarkClient.Sak(
                 sakstype = JoarkClient.Sakstype.GENERELL_SAK,
-                // TODO - ønsker å journalføre som fagsak, men har ikke sakId:
+                // TODO - hent ut fagsakId via SakerGateway
                 // sakstype = JoarkClient.Sakstype.FAGSAK,
                 // fagsaksystem = JoarkClient.FagsaksSystem.AO01,
                 // fagsakId = sakId,

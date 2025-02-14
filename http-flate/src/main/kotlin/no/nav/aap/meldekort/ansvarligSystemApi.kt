@@ -35,7 +35,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi() {
         /* Er det ATTF-meldegruppe i Arena? */
         respond(
             AnsvarligMeldekortløsningDto.fromFagsystem(
-                ansvarligFlate.aktivtFagsystem(innloggetBruker())
+                ansvarligFlate.routingForBruker(innloggetBruker())
             )
         )
     }
