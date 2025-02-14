@@ -3,7 +3,7 @@ package no.nav.aap.journalføring
 import no.nav.aap.lookup.gateway.Gateway
 
 
-interface JoarkClient: Gateway {
+interface DokarkivGateway: Gateway {
     // Noe a la POST /rest/journalpostapi/v1/journalpost
     // TODO: Test om 409 returnerer samme reponse.
     fun oppdater(journalpost: Journalpost, forsøkFerdigstill: Boolean): JournalpostResponse

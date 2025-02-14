@@ -9,8 +9,8 @@ import no.nav.aap.arena.MeldekortRepository
 import no.nav.aap.arena.MeldekortType
 import no.nav.aap.arena.SkjemaRepository
 import no.nav.aap.arena.SkjemaTilstand
-import no.nav.aap.journalføring.JoarkClient
-import no.nav.aap.journalføring.JoarkService
+import no.nav.aap.journalføring.DokarkivGateway
+import no.nav.aap.journalføring.DokarkivService
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 class ArenaJournalføringJobbUtfører(
     private val skjemaRepository: SkjemaRepository,
     private val meldekortRepository: MeldekortRepository,
-    private val joarkService: JoarkService
+    private val dokarkivService: DokarkivService
 ) : JobbUtfører {
     private val log = LoggerFactory.getLogger(ArenaJournalføringJobbUtfører::class.java)
 
@@ -36,7 +36,7 @@ class ArenaJournalføringJobbUtfører(
             "prøver å journalføre meldekort som ikke er i meldekort-tabell med meldekortId: ${payload.meldekortId}"
         }
 
-        val journalpost = joarkService.journalpostForArena(
+        val journalpost = dokarkivService.journalpostForArena(
             skjema = skjema,
             vårReferanse = skjema.referanse.toString(),
             datoMottatt = requireNotNull(skjema.sendtInn?.toLocalDate()) {
@@ -47,7 +47,7 @@ class ArenaJournalføringJobbUtfører(
         )
 
 
-        joarkService.journalfør(journalpost)
+        dokarkivService.journalfør(journalpost)
         skjemaRepository.lagrSkjema(skjema.copy(tilstand = SkjemaTilstand.JOURNALFØRT))
     }
 
@@ -58,14 +58,14 @@ class ArenaJournalføringJobbUtfører(
 
         override fun konstruer(connection: DBConnection): JobbUtfører {
             val repositoryProvider = RepositoryProvider(connection)
-            val joarkService = JoarkService(
-                joarkClient = GatewayProvider.provide(JoarkClient::class),
+            val dokarkivService = DokarkivService(
+                dokarkivGateway = GatewayProvider.provide(DokarkivGateway::class),
             )
 
             return ArenaJournalføringJobbUtfører(
                 skjemaRepository = repositoryProvider.provide(SkjemaRepository::class),
                 meldekortRepository = repositoryProvider.provide(MeldekortRepository::class),
-                joarkService = joarkService
+                dokarkivService = dokarkivService
             )
         }
 

@@ -1,22 +1,22 @@
-package no.nav.aap.meldekort.joark
+package no.nav.aap.meldekort.journalføring
 
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.journalføring.JoarkClient
+import no.nav.aap.journalføring.DokarkivGateway
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-class JoarkClientImplTest {
+class DokarkivGatewayImplTest {
     @Test
     fun `base64 encode av dokument`() {
-        val journalpost = JoarkClient.Journalpost(
-            journalposttype = JoarkClient.Journalposttype.INNGAAENDE,
+        val journalpost = DokarkivGateway.Journalpost(
+            journalposttype = DokarkivGateway.Journalposttype.INNGAAENDE,
             dokumenter = listOf(
-                JoarkClient.Dokument(
+                DokarkivGateway.Dokument(
                 dokumentvarianter = listOf(
-                    JoarkClient.DokumentVariant(
-                        filtype = JoarkClient.Filetype.PDF,
-                        variantformat = JoarkClient.Variantformat.ARKIV,
+                    DokarkivGateway.DokumentVariant(
+                        filtype = DokarkivGateway.Filetype.PDF,
+                        variantformat = DokarkivGateway.Variantformat.ARKIV,
                         fysiskDokument = "Hello world".encodeToByteArray()
                     )
                 )
@@ -44,7 +44,7 @@ class JoarkClientImplTest {
             }
         """.trimIndent()
 
-        val fysiskDokument = DefaultJsonMapper.fromJson<JoarkClient.Journalpost>(journalpost)
+        val fysiskDokument = DefaultJsonMapper.fromJson<DokarkivGateway.Journalpost>(journalpost)
             .dokumenter!![0].dokumentvarianter[0].fysiskDokument
             .decodeToString()
 

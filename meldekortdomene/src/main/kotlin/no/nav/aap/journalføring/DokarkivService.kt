@@ -2,16 +2,16 @@ package no.nav.aap.journalføring
 
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.Periode
-import no.nav.aap.journalføring.JoarkClient.Journalposttype.INNGAAENDE
-import no.nav.aap.journalføring.JoarkClient.Tema.AAP
+import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
+import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
 import no.nav.aap.arena.Skjema
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.*
 
-class JoarkService(
-    private val joarkClient: JoarkClient,
+class DokarkivService(
+    private val dokarkivGateway: DokarkivGateway,
 ) {
     private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY")
     private var locale: Locale? = Locale.of("nb", "NO") // Vi skal regne ukenummer iht norske regler
@@ -44,18 +44,18 @@ class JoarkService(
         datoMottatt: LocalDate?,
         kanSendesFra: LocalDate,
         korrigert: Boolean,
-    ): JoarkClient.Journalpost {
+    ): DokarkivGateway.Journalpost {
         val tittel = lagTittel(skjema.meldeperiode, korrigert)
 
-        return JoarkClient.Journalpost(
+        return DokarkivGateway.Journalpost(
             journalposttype = INNGAAENDE,
-            avsenderMottaker = JoarkClient.AvsenderMottaker(
+            avsenderMottaker = DokarkivGateway.AvsenderMottaker(
                 id = skjema.ident.asString,
-                idType = JoarkClient.AvsenderIdType.FNR,
+                idType = DokarkivGateway.AvsenderIdType.FNR,
             ),
-            bruker = JoarkClient.Bruker(
+            bruker = DokarkivGateway.Bruker(
                 id = skjema.ident.asString,
-                idType = JoarkClient.BrukerIdType.FNR,
+                idType = DokarkivGateway.BrukerIdType.FNR,
             ),
             tema = AAP,
             tittel = tittel,
@@ -64,36 +64,36 @@ class JoarkService(
             eksternReferanseId = vårReferanse,
             datoMottatt = (datoMottatt ?: LocalDate.now()).format(DateTimeFormatter.ISO_DATE),
             tilleggsopplysninger = listOf(
-                JoarkClient.Tilleggsopplysning(
+                DokarkivGateway.Tilleggsopplysning(
                     "meldekortId",
                     skjema.meldekortId.toString(),
                 ),
-                JoarkClient.Tilleggsopplysning(
+                DokarkivGateway.Tilleggsopplysning(
                     "kortKanSendesFra",
                     kanSendesFra.format(dateFormatter)
                 )
             ),
-            sak = JoarkClient.Sak(
-                sakstype = JoarkClient.Sakstype.GENERELL_SAK,
+            sak = DokarkivGateway.Sak(
+                sakstype = DokarkivGateway.Sakstype.GENERELL_SAK,
                 // TODO - hent ut fagsakId via SakerGateway
-                // sakstype = JoarkClient.Sakstype.FAGSAK,
-                // fagsaksystem = JoarkClient.FagsaksSystem.AO01,
+                // sakstype = FAGSAK,
+                // fagsaksystem = AO01,
                 // fagsakId = sakId,
             ),
             dokumenter = listOf(
-                JoarkClient.Dokument(
+                DokarkivGateway.Dokument(
                     tittel = tittel,
                     brevkode = if (korrigert) BREVKODE_KORRIGERT else BREVKODE,
                     dokumentvarianter = listOf(
-                        JoarkClient.DokumentVariant(
-                            filtype = JoarkClient.Filetype.PDF,
-                            variantformat = JoarkClient.Variantformat.ARKIV,
+                        DokarkivGateway.DokumentVariant(
+                            filtype = DokarkivGateway.Filetype.PDF,
+                            variantformat = DokarkivGateway.Variantformat.ARKIV,
                             fysiskDokument = fysiskDokument.encodeToByteArray(),
 
                             ),
-                        JoarkClient.DokumentVariant(
-                            filtype = JoarkClient.Filetype.JSON,
-                            variantformat = JoarkClient.Variantformat.ORIGINAL,
+                        DokarkivGateway.DokumentVariant(
+                            filtype = DokarkivGateway.Filetype.JSON,
+                            variantformat = DokarkivGateway.Variantformat.ORIGINAL,
                             fysiskDokument = DefaultJsonMapper.toJson(skjema.payload).encodeToByteArray(),
                         )
                     ),
@@ -112,8 +112,8 @@ class JoarkService(
         return "$meldekort for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av NAV"
     }
 
-    fun journalfør(journalpost: JoarkClient.Journalpost) {
-        val response = joarkClient.oppdater(journalpost, forsøkFerdigstill = true)
+    fun journalfør(journalpost: DokarkivGateway.Journalpost) {
+        val response = dokarkivGateway.oppdater(journalpost, forsøkFerdigstill = true)
         check(response.journalpostferdigstilt)
     }
 

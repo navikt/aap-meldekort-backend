@@ -8,7 +8,7 @@ import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
 import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
-import no.nav.aap.meldekort.journalføring.JoarkGatewayImpl
+import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.saker.SakerGatewayImpl
 import org.slf4j.LoggerFactory
 
@@ -43,7 +43,7 @@ fun registerRepositories() {
 
 private fun registerGateways() {
     GatewayRegistry
-        .register<JoarkGatewayImpl>()
+        .register<DokarkivGatewayImpl>()
         .register<SakerGatewayImpl>()
         .register<ArenaGatewayImpl>()
         .status()

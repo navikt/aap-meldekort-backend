@@ -90,9 +90,9 @@ spec:
           value: https://meldekortkontroll-api-q2.dev-fss-pub.nais.io
         - name: MELDEKORTKONTROLL_SCOPE
           value: dev-fss:meldekort:meldekortkontroll-api-q2
-        - name: JOARK_URL
+        - name: DOKARKIV_URL
           value: https://dokarkiv-q2.dev-fss-pub.nais.io
-        - name: JOARK_SCOPE
+        - name: DOKARKIV_SCOPE
           value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
         - name: AAP_API_INTERN_URL
           value: http://api-intern.aap/

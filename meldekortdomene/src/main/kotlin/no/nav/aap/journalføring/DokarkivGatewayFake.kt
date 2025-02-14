@@ -1,12 +1,12 @@
 package no.nav.aap.journalføring
 
 /* TODO: flytt til testmappe når integrasjon i dev er klar. */
-class JoarkClientFake: JoarkClient {
+class DokarkivGatewayFake: DokarkivGateway {
     override fun oppdater(
-        journalpost: JoarkClient.Journalpost,
+        journalpost: DokarkivGateway.Journalpost,
         forsøkFerdigstill: Boolean
-    ): JoarkClient.JournalpostResponse {
-        return JoarkClient.JournalpostResponse(
+    ): DokarkivGateway.JournalpostResponse {
+        return DokarkivGateway.JournalpostResponse(
             journalpostId = 0,
             melding = null,
             journalpostferdigstilt = !forsøkFerdigstill,

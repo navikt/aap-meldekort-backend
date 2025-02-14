@@ -9,31 +9,31 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.journalføring.JoarkClient
+import no.nav.aap.journalføring.DokarkivGateway
 import java.net.URI
 
-object JoarkGatewayImpl : JoarkClient {
-    private val joarkUrl = requiredConfigForKey("joark.url")
+object DokarkivGatewayImpl : DokarkivGateway {
+    private val baseUrl = requiredConfigForKey("dokarkiv.url")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(scope = requiredConfigForKey("joark.scope")),
+        ClientConfig(scope = requiredConfigForKey("dokarkiv.scope")),
         tokenProvider = ClientCredentialsTokenProvider
     )
 
     override fun oppdater(
-        journalpost: JoarkClient.Journalpost,
+        journalpost: DokarkivGateway.Journalpost,
         forsøkFerdigstill: Boolean
-    ): JoarkClient.JournalpostResponse {
+    ): DokarkivGateway.JournalpostResponse {
         return try {
-            httpClient.post<_, JoarkClient.JournalpostResponse>(
-                uri = URI("$joarkUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=$forsøkFerdigstill"),
+            httpClient.post<_, DokarkivGateway.JournalpostResponse>(
+                uri = URI("$baseUrl/rest/journalpostapi/v1/journalpost?forsoekFerdigstill=$forsøkFerdigstill"),
                 request = PostRequest(
                     body = journalpost,
                     additionalHeaders = listOf(Header("accept", "application/json")),
                 ),
             )!!
         } catch (e: ConflictHttpResponseException) {
-            DefaultJsonMapper.fromJson<JoarkClient.JournalpostResponse>(e.body!!)
+            DefaultJsonMapper.fromJson<DokarkivGateway.JournalpostResponse>(e.body!!)
         }
     }
 }
