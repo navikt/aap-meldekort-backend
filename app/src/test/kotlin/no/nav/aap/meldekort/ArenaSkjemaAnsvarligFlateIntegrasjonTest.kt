@@ -12,7 +12,7 @@ import no.nav.aap.arena.ArenaPerson
 import no.nav.aap.arena.ArenaSkjemaFlate
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortType
-import no.nav.aap.arena.TimerArbeidet
+import no.nav.aap.skjema.TimerArbeidet
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

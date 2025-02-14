@@ -1,7 +1,8 @@
-package no.nav.aap.arena
+package no.nav.aap.skjema
 
 import no.nav.aap.lookup.repository.Repository
 import no.nav.aap.Ident
+import no.nav.aap.arena.MeldekortId
 
 data class SkjemaId(val asLong: Long)
 

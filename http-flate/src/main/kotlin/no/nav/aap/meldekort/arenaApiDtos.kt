@@ -5,11 +5,11 @@ import no.nav.aap.Periode
 import java.time.LocalDate
 import no.nav.aap.arena.ArenaInnsendingFeiletException
 import no.nav.aap.arena.ArenaSkjemaFlate
-import no.nav.aap.arena.InnsendingPayload
+import no.nav.aap.skjema.Svar
 import no.nav.aap.arena.MeldekortStatus
 import no.nav.aap.arena.MeldekortType
-import no.nav.aap.arena.StegNavn
-import no.nav.aap.arena.TimerArbeidet
+import no.nav.aap.flyt.StegNavn
+import no.nav.aap.skjema.TimerArbeidet
 
 data class KommendeMeldekortDto(
     val antallUbesvarteMeldekort: Int,
@@ -93,18 +93,18 @@ class MeldekortSkjemaDto(
     val dager: List<DagerInfoDto>,
     val stemmerOpplysningene: Boolean?
 ) {
-    constructor(innsendingPayload: InnsendingPayload) : this(
-        svarerDuSant = innsendingPayload.svarerDuSant,
-        harDuJobbet = innsendingPayload.harDuJobbet,
+    constructor(svar: Svar) : this(
+        svarerDuSant = svar.svarerDuSant,
+        harDuJobbet = svar.harDuJobbet,
         harDuGjennomførtAvtaltAktivitetKursEllerUtdanning = null,
         harDuVærtSyk = null,
         harDuHattFerie = null,
-        dager = innsendingPayload.timerArbeidet.map { DagerInfoDto.fraDomene(it) },
-        stemmerOpplysningene = innsendingPayload.stemmerOpplysningene,
+        dager = svar.timerArbeidet.map { DagerInfoDto.fraDomene(it) },
+        stemmerOpplysningene = svar.stemmerOpplysningene,
     )
 
-    fun tilDomene(): InnsendingPayload {
-        return InnsendingPayload(
+    fun tilDomene(): Svar {
+        return Svar(
             svarerDuSant = svarerDuSant,
             harDuJobbet = harDuJobbet,
             timerArbeidet = dager.map { it.tilDomene() },
@@ -169,7 +169,7 @@ data class MeldekortResponse(
 ) {
     constructor(utfyllingResponse: ArenaSkjemaFlate.UtfyllingResponse) : this(
         steg = utfyllingResponse.utfylling.steg.navn,
-        meldekort = MeldekortSkjemaDto(utfyllingResponse.utfylling.skjema.payload),
+        meldekort = MeldekortSkjemaDto(utfyllingResponse.utfylling.skjema.svar),
         periode = PeriodeDto(utfyllingResponse.utfylling.skjema.meldeperiode),
         tidligsteInnsendingsDato = utfyllingResponse.meldekort.tidligsteInnsendingsdato,
         feil = utfyllingResponse.feil?.let { InnsendingFeil(it.innsendingFeil) },

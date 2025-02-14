@@ -6,6 +6,7 @@ import no.nav.aap.Periode
 import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.OPPRE
 import no.nav.aap.arena.ArenaMeldekort.ArenaStatus.SENDT
 import no.nav.aap.arena.MeldekortStatus.INNSENDT
+import no.nav.aap.skjema.Skjema
 import org.slf4j.LoggerFactory
 
 

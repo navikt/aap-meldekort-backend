@@ -1,6 +1,7 @@
-package no.nav.aap.arena
+package no.nav.aap.flyt
 
 import no.nav.aap.Ident
+import no.nav.aap.arena.MeldekortId
 
 /* TODO: Flytt til test-mappen når serveren ikke lenger bruker fake versjonen. */
 class UtfyllingRepositoryFake: UtfyllingRepository {

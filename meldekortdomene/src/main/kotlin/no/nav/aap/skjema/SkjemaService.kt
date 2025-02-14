@@ -1,10 +1,12 @@
-package no.nav.aap.arena
+package no.nav.aap.skjema
 
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.journalføring.JournalføringService
 import java.time.LocalDateTime
 import java.util.*
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortService
 
 class SkjemaService(
     private val meldekortService: MeldekortService,
@@ -16,7 +18,7 @@ class SkjemaService(
     }
 
     fun timerArbeidet(innloggetBruker: InnloggetBruker, meldekortId: MeldekortId): List<TimerArbeidet>? {
-        return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.payload?.timerArbeidet
+        return skjemaRepository.last(innloggetBruker.ident, meldekortId)?.svar?.timerArbeidet
     }
 
     fun sendInnKorrigering(
@@ -33,7 +35,7 @@ class SkjemaService(
             meldeperiode = nyttMeldekort.periode,
             sendtInn = LocalDateTime.now(),
             referanse = UUID.randomUUID(),
-            payload = InnsendingPayload(
+            svar = Svar(
                 svarerDuSant = true,
                 harDuJobbet = true,
                 timerArbeidet = timerArbeidet,

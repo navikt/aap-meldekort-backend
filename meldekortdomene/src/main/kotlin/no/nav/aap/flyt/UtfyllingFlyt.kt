@@ -1,26 +1,23 @@
-package no.nav.aap.arena
+package no.nav.aap.flyt
 
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.SkjemaTilstand.UTKAST
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.skjema.SkjemaTilstand.UTKAST
+import no.nav.aap.skjema.Svar
+import no.nav.aap.skjema.Skjema
 
 interface Steg {
     val navn: StegNavn
-    fun kjør(innloggetBruker: InnloggetBruker, skjema: Skjema): Stegutfall
 
-    fun skalKjøres(skjema: Skjema): Boolean {
+    fun erRelevant(skjema: Skjema): Boolean {
         return true
     }
 
-    fun erTekniskSteg(): Boolean {
-        return false
-    }
-}
+    fun oppfyllerFormkrav(skjema: Skjema): Boolean
 
-sealed interface Stegutfall {
-    class Feil(val feil: Exception): Stegutfall
-    class Fortsett(val skjema: Skjema): Stegutfall
-    class Avklaringspunkt(val skjema: Skjema): Stegutfall
+    fun nesteEffekt(innloggetBruker: InnloggetBruker, skjema: Skjema) {
+    }
 }
 
 class UtfyllingFlyt(
@@ -34,29 +31,27 @@ class UtfyllingFlyt(
             return Result.success(nyUtfylling)
         }
 
-        var skjema = utfylling.skjema
+        val skjema = utfylling.skjema
         val utførteSteg = mutableSetOf<StegNavn>()
 
         for (steg in stegene) {
-            if (!steg.skalKjøres(skjema)) {
+            if (!steg.erRelevant(skjema)) {
                 continue
             }
 
-            when (val utfall = steg.kjør(innloggetBruker, skjema)) {
-                is Stegutfall.Fortsett -> {
-                    skjema = utfall.skjema
-                }
-
-                is Stegutfall.Avklaringspunkt -> {
-                    return ferdig(utfall.skjema, steg.navn)
-                }
-
-                is Stegutfall.Feil -> {
-                    return Result.failure(utfall.feil)
-                }
+            if (!steg.oppfyllerFormkrav(skjema)) {
+                /* TODO: lag feil */
+                return TODO()
             }
 
-            if (utfylling.steg.navn in utførteSteg && !steg.erTekniskSteg()) {
+            try {
+                steg.nesteEffekt(innloggetBruker, skjema)
+            } catch (e: Exception) {
+                TODO()
+            }
+
+
+            if (utfylling.steg.navn in utførteSteg) {
                 return ferdig(skjema, steg.navn)
             }
 
@@ -97,8 +92,8 @@ data class Utfylling(
         skjema = skjema,
     )
 
-    fun nyPayload(payload: InnsendingPayload): Utfylling {
-        return copy(skjema = skjema.copy(payload = payload))
+    fun nyPayload(payload: Svar): Utfylling {
+        return copy(skjema = skjema.copy(svar = payload))
     }
 
     fun medSteg(steg: StegNavn): Utfylling {
@@ -111,9 +106,5 @@ data class Utfylling(
         return flyt.kjør(innloggetBruker, this)
     }
 
-    fun validerUtkast() {
-        check(skjema.tilstand == UTKAST)
-        // TODO: kast exception hvis validering feil?
-    }
 }
 

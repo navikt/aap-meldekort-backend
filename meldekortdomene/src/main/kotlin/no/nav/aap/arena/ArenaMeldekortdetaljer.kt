@@ -1,5 +1,6 @@
 package no.nav.aap.arena
 
+import no.nav.aap.skjema.TimerArbeidet
 import java.time.LocalDate
 import java.util.*
 

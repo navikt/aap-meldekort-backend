@@ -1,8 +1,14 @@
-package no.nav.aap.arena
+package no.nav.aap.flyt
 
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import java.util.*
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortService
+import no.nav.aap.skjema.Svar
+import no.nav.aap.skjema.Skjema
+import no.nav.aap.skjema.SkjemaService
+import no.nav.aap.skjema.SkjemaTilstand
 
 class UtfyllingService(
     private val utfyllingRepository: UtfyllingRepository,
@@ -38,7 +44,7 @@ class UtfyllingService(
             .periode
         val skjema = Skjema(
             meldekortId = meldekortId,
-            payload = InnsendingPayload.tomtSkjema(meldeperiode),
+            svar = Svar.tomtSkjema(meldeperiode),
             meldeperiode = meldeperiode,
             ident = innloggetBruker.ident,
             tilstand = SkjemaTilstand.UTKAST,

@@ -7,8 +7,8 @@ import no.nav.aap.Ident
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortRepository
 import no.nav.aap.arena.MeldekortType
-import no.nav.aap.arena.SkjemaRepository
-import no.nav.aap.arena.SkjemaTilstand
+import no.nav.aap.skjema.SkjemaRepository
+import no.nav.aap.skjema.SkjemaTilstand
 import no.nav.aap.journalføring.DokarkivGateway
 import no.nav.aap.journalføring.DokarkivService
 import no.nav.aap.motor.Jobb

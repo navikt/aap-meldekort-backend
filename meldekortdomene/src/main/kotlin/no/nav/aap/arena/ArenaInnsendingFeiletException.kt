@@ -1,5 +1,7 @@
 package no.nav.aap.arena
 
+import no.nav.aap.flyt.Utfylling
+
 data class ArenaInnsendingFeiletException(
     val kontrollStatus: String,
     val innsendingFeil: List<InnsendingFeil>,

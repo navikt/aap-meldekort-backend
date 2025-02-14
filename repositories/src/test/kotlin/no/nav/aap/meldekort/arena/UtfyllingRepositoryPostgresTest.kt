@@ -11,15 +11,15 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
-import no.nav.aap.arena.BekreftSvarerÆrligSteg
-import no.nav.aap.arena.InnsendingPayload
+import no.nav.aap.flyt.BekreftSvarerÆrligSteg
+import no.nav.aap.skjema.Svar
 import no.nav.aap.arena.KommendeMeldekort
 import no.nav.aap.arena.MeldekortId
-import no.nav.aap.arena.Skjema
-import no.nav.aap.arena.SkjemaTilstand
-import no.nav.aap.arena.TimerArbeidet
-import no.nav.aap.arena.Utfylling
-import no.nav.aap.arena.UtfyllingFlyt
+import no.nav.aap.skjema.Skjema
+import no.nav.aap.skjema.SkjemaTilstand
+import no.nav.aap.skjema.TimerArbeidet
+import no.nav.aap.flyt.Utfylling
+import no.nav.aap.flyt.UtfyllingFlyt
 
 class UtfyllingRepositoryPostgresTest {
 
@@ -61,7 +61,7 @@ class UtfyllingRepositoryPostgresTest {
                     ),
                     referanse = UUID.randomUUID(),
                     sendtInn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
-                    payload = InnsendingPayload(
+                    svar = Svar(
                         svarerDuSant = true,
                         harDuJobbet = false,
                         timerArbeidet = listOf(

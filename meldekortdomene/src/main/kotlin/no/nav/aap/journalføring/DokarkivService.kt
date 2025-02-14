@@ -4,7 +4,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.Periode
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
-import no.nav.aap.arena.Skjema
+import no.nav.aap.skjema.Skjema
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
@@ -94,7 +94,7 @@ class DokarkivService(
                         DokarkivGateway.DokumentVariant(
                             filtype = DokarkivGateway.Filetype.JSON,
                             variantformat = DokarkivGateway.Variantformat.ORIGINAL,
-                            fysiskDokument = DefaultJsonMapper.toJson(skjema.payload).encodeToByteArray(),
+                            fysiskDokument = DefaultJsonMapper.toJson(skjema.svar).encodeToByteArray(),
                         )
                     ),
                 )

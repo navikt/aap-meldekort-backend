@@ -1,6 +1,7 @@
 package no.nav.aap.arena
 
 import no.nav.aap.arena.ArenaGateway.KortType.KORRIGERT_ELEKTRONISK
+import no.nav.aap.skjema.Skjema
 import java.time.LocalDate
 
 data class ArenaMeldekortkontrollRequest(
@@ -34,10 +35,10 @@ data class ArenaMeldekortkontrollRequest(
             skjema: Skjema,
             meldekortdetaljer: ArenaMeldekortdetaljer
         ): ArenaMeldekortkontrollRequest {
-            val meldekortdager = skjema.payload.timerArbeidet.map { timerArbeidet ->
+            val meldekortdager = skjema.svar.timerArbeidet.map { timerArbeidet ->
                 MeldekortkontrollFravaer(
                     dato = timerArbeidet.dato,
-                    arbeidTimer = if (skjema.payload.harDuJobbet == true) timerArbeidet.timer ?: 0.0 else 0.0,
+                    arbeidTimer = if (skjema.svar.harDuJobbet == true) timerArbeidet.timer ?: 0.0 else 0.0,
                 )
             }
 
@@ -51,7 +52,7 @@ data class ArenaMeldekortkontrollRequest(
                 periodeFra = skjema.meldeperiode.fom,
                 periodeTil = skjema.meldeperiode.tom,
                 meldegruppe = meldekortdetaljer.meldegruppe,
-                arbeidet = requireNotNull(skjema.payload.harDuJobbet) {
+                arbeidet = requireNotNull(skjema.svar.harDuJobbet) {
                     "alle felter må være fylt ut for innsending, harDuJobbet er ikke fylt ut"
                 },
                 begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK)

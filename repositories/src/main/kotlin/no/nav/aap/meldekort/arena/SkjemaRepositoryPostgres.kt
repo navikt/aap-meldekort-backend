@@ -6,12 +6,12 @@ import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import java.time.LocalDateTime
-import no.nav.aap.arena.InnsendingPayload
+import no.nav.aap.skjema.Svar
 import no.nav.aap.arena.MeldekortId
-import no.nav.aap.arena.Skjema
-import no.nav.aap.arena.SkjemaId
-import no.nav.aap.arena.SkjemaRepository
-import no.nav.aap.arena.TimerArbeidet
+import no.nav.aap.skjema.Skjema
+import no.nav.aap.skjema.SkjemaId
+import no.nav.aap.skjema.SkjemaRepository
+import no.nav.aap.skjema.TimerArbeidet
 import no.nav.aap.komponenter.type.Periode as dbPeriode
 
 class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRepository {
@@ -64,7 +64,7 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
             meldeperiode = row.getPeriode("meldeperiode").let { Periode(it.fom, it.tom) },
             sendtInn = row.getLocalDateTimeOrNull("sendt_inn"),
             referanse = row.getUUID("referanse"),
-            payload = InnsendingPayload(
+            svar = Svar(
                 svarerDuSant = row.getBooleanOrNull("payload_svarer_du_sant"),
                 harDuJobbet = row.getBooleanOrNull("payload_har_du_jobbet"),
                 timerArbeidet = mapTilTimerArbeidet(row.getLong("id")),
@@ -109,14 +109,14 @@ class SkjemaRepositoryPostgres(private val connection: DBConnection) : SkjemaRep
                 setPeriode(4, skjema.meldeperiode.let { dbPeriode(it.fom, it.tom) })
                 setLocalDateTime(5, skjema.sendtInn)
                 setUUID(6, skjema.referanse)
-                setBoolean(7, skjema.payload.svarerDuSant)
-                setBoolean(8, skjema.payload.harDuJobbet)
-                setBoolean(9, skjema.payload.stemmerOpplysningene)
+                setBoolean(7, skjema.svar.svarerDuSant)
+                setBoolean(8, skjema.svar.harDuJobbet)
+                setBoolean(9, skjema.svar.stemmerOpplysningene)
                 setLocalDateTime(10, LocalDateTime.now())
             }
         }
 
-        lagreTimerArbeidet(skjemaId, skjema.payload.timerArbeidet)
+        lagreTimerArbeidet(skjemaId, skjema.svar.timerArbeidet)
         return SkjemaId(skjemaId)
     }
 

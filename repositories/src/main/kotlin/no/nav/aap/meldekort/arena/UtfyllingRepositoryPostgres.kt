@@ -5,10 +5,10 @@ import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.Ident
 import java.time.LocalDateTime
 import no.nav.aap.arena.MeldekortId
-import no.nav.aap.arena.SkjemaId
-import no.nav.aap.arena.Utfylling
-import no.nav.aap.arena.UtfyllingFlyt
-import no.nav.aap.arena.UtfyllingRepository
+import no.nav.aap.skjema.SkjemaId
+import no.nav.aap.flyt.Utfylling
+import no.nav.aap.flyt.UtfyllingFlyt
+import no.nav.aap.flyt.UtfyllingRepository
 
 class UtfyllingRepositoryPostgres(private val connection: DBConnection) : UtfyllingRepository {
     companion object : Factory<UtfyllingRepositoryPostgres> {

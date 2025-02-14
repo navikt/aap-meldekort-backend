@@ -5,6 +5,14 @@ import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
+import no.nav.aap.flyt.StegNavn
+import no.nav.aap.flyt.Utfylling
+import no.nav.aap.flyt.UtfyllingRepository
+import no.nav.aap.flyt.UtfyllingService
+import no.nav.aap.skjema.Svar
+import no.nav.aap.skjema.SkjemaRepository
+import no.nav.aap.skjema.SkjemaService
+import no.nav.aap.skjema.TimerArbeidet
 import no.nav.aap.journalføring.JournalføringService
 import no.nav.aap.motor.FlytJobbRepository
 
@@ -105,7 +113,7 @@ class ArenaSkjemaFlate private constructor(
         innloggetBruker: InnloggetBruker,
         meldekortId: MeldekortId,
         fraSteg: StegNavn,
-        nyPayload: InnsendingPayload
+        nyPayload: Svar
     ): UtfyllingResponse {
         val utfylling = utfyllingService.hentUtfylling(
             ident = innloggetBruker.ident,
@@ -116,8 +124,6 @@ class ArenaSkjemaFlate private constructor(
             ?: throw Error() /* todo: 404 not found */
 
         val meldekort = meldekortService.hentLokaltMeldekort(innloggetBruker.ident, meldekortId)!!
-
-        utfylling.validerUtkast()
 
         try {
             return UtfyllingResponse(
@@ -139,7 +145,7 @@ class ArenaSkjemaFlate private constructor(
     fun lagreSteg(
         ident: Ident,
         meldekortId: MeldekortId,
-        nyPayload: InnsendingPayload,
+        nyPayload: Svar,
         settSteg: StegNavn
     ): UtfyllingResponse {
         val utfylling = utfyllingService.hentUtfylling(
@@ -150,7 +156,6 @@ class ArenaSkjemaFlate private constructor(
             ?.nyPayload(nyPayload)
             ?: throw Error() /* todo: 404 not found */
 
-        utfylling.validerUtkast()
         val meldekort = meldekortService.hentLokaltMeldekort(ident, meldekortId)!!
         return UtfyllingResponse(
             utfylling = utfyllingService.lagre(utfylling),
