@@ -32,7 +32,6 @@ object SakerGatewayImpl : SakerGateway {
 
     /** Kontrakt? */
     class SakStatus(
-        // "Kelvin" eller ???
         val kilde: String,
         val periode: Periode,
         val sakId: String,
@@ -60,6 +59,7 @@ object SakerGatewayImpl : SakerGateway {
                 Sak(
                     fagsystem = when (it.kilde) {
                         "Kelvin" -> Fagsystem.KELVIN
+                        "ARENA" -> Fagsystem.ARENA
                         else -> error("ukjent fagsystem ${it.kilde}")
                     },
                     saksnummer = Saksnummer(it.sakId),
