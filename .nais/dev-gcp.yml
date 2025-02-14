@@ -69,6 +69,7 @@ spec:
                 - application: meldekortservice-q2
                   namespace: meldekort
                   cluster: dev-fss
+                - application: api-intern
             external:
                 - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
                 - host: meldekortservice-q2.dev-fss-pub.nais.io
@@ -93,3 +94,7 @@ spec:
           value: https://dokarkiv-q2.dev-fss-pub.nais.io
         - name: JOARK_SCOPE
           value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
+        - name: AAP_API_INTERN_URL
+          value: http://api-intern.aap/
+        - name: AAP_API_INTERN_SCOPE
+          value: api://dev-gcp.aap.api-intern/.default
