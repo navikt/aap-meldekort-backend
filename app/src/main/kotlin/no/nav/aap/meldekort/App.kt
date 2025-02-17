@@ -1,6 +1,7 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.behandlingsflyt.prometheus
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.lookup.repository.RepositoryRegistry
@@ -29,6 +30,7 @@ fun main() {
         prometheus = prometheus,
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
+        azureConfig = AzureConfig(),
         dataSource = dataSource
     )
 }

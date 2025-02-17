@@ -21,6 +21,7 @@ import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
@@ -35,6 +36,7 @@ fun startHttpServer(
     prometheus: PrometheusMeterRegistry,
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
+    azureConfig: AzureConfig,
     dataSource: DataSource
 ) {
     embeddedServer(Netty, configure = {
@@ -56,6 +58,7 @@ fun startHttpServer(
                             """.trimIndent(),
             ),
             tokenxConfig = tokenxConfig,
+            azureConfig = azureConfig,
         )
 
         val motor = startMotor(dataSource, prometheus)

@@ -3,6 +3,7 @@ package no.nav.aap.meldekort
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.behandlingsflyt.prometheus
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.arena.ArenaGatewayImpl
@@ -26,6 +27,7 @@ fun main() {
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         applikasjonsVersjon = "TestApp",
         tokenxConfig = TokenxConfig(),
+        azureConfig = AzureConfig(),
         dataSource = dataSource,
     )
 }
