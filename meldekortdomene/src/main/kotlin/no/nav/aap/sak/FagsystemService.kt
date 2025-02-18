@@ -16,6 +16,7 @@ enum class FagsystemNavn {
 }
 
 interface FagsystemService {
+    val sak: Sak
     val innsendingsflyt: UtfyllingFlyt
     val korrigeringsflyt: UtfyllingFlyt
 
@@ -51,7 +52,7 @@ interface FagsystemService {
 
 fun fagsystemServiceFactory(connection: DBConnection, sak: Sak): FagsystemService {
     return when (sak.fagsystemNavn) {
-        FagsystemNavn.ARENA -> ArenaService.konstruer(connection)
-        FagsystemNavn.KELVIN -> KelvinService.konstruer(connection)
+        FagsystemNavn.ARENA -> ArenaService.konstruer(connection, sak)
+        FagsystemNavn.KELVIN -> KelvinService.konstruer(connection, sak)
     }
 }

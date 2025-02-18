@@ -7,6 +7,7 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.sak.FagsystemService
+import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.ArenaKorrigeringFlyt
 import no.nav.aap.utfylling.ArenaVanligFlyt
 import no.nav.aap.utfylling.Svar
@@ -18,6 +19,7 @@ import java.time.LocalDate
 class ArenaService(
     private val meldekortService: MeldekortService,
     private val arenaGateway: ArenaGateway,
+    override val sak: Sak,
 ) : FagsystemService {
     override val innsendingsflyt = ArenaVanligFlyt(this)
     override val korrigeringsflyt = ArenaKorrigeringFlyt(this)
@@ -106,13 +108,14 @@ class ArenaService(
     }
 
     companion object {
-        fun konstruer(connection: DBConnection): ArenaService {
+        fun konstruer(connection: DBConnection, sak: Sak): ArenaService {
             return ArenaService(
                 meldekortService = MeldekortService(
                     arenaGateway = GatewayProvider.provide(),
                     meldekortRepository = RepositoryProvider(connection).provide(),
                 ),
                 arenaGateway = GatewayProvider.provide(),
+                sak = sak,
             )
         }
     }

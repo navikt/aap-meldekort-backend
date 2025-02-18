@@ -37,4 +37,9 @@ data class Periode(
         val compare = fom.compareTo(other.fom)
         return if (compare != 0) compare else tom.compareTo(other.tom)
     }
+
+    fun slidingWindow(size: Int, step: Int = 1, partialWindows: Boolean = false): List<Periode> {
+        /* ikke så effektivt ... */
+        return this.windowed(size, step, partialWindows).map { Periode(it.first(), it.last()) }
+    }
 }
