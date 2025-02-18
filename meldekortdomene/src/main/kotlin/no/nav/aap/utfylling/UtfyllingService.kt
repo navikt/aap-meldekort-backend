@@ -3,7 +3,10 @@ package no.nav.aap.utfylling
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
+import no.nav.aap.arena.ArenaService
+import no.nav.aap.arena.MeldekortService
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.SakerService
@@ -14,6 +17,7 @@ import java.time.LocalDate
 class UtfyllingService(
     private val utfyllingRepository: UtfyllingRepository,
     private val fagsystemService: FagsystemService,
+    private val utfyllingsflyter: Utfyllingsflyter,
 ) {
 
     fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling {
@@ -53,7 +57,7 @@ class UtfyllingService(
     }
 
     private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
-        val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode) ?: return null
+        val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode, utfyllingsflyter) ?: return null
 
         if (fagsystemService.utfyllingGyldig(utfylling)) {
             return utfylling
@@ -87,7 +91,7 @@ class UtfyllingService(
 
 
     fun hent(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
+        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
     }
 
     class UtfyllingResponse(
@@ -101,7 +105,7 @@ class UtfyllingService(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
             ?: TODO("kan skje hvis mellomlagring slettes")
 
         val utfylling = eksisterendeUtfylling.copy(
@@ -123,7 +127,7 @@ class UtfyllingService(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
             ?: TODO("kan skje hvis mellomlagring slettes")
 
         val utfylling = eksisterendeUtfylling.copy(
@@ -146,9 +150,21 @@ class UtfyllingService(
             val sak = SakerService.konstruer().finnSak(innloggetBruker, LocalDate.now())
                 ?: error("frontend skal ikke prøve å starte utfylling uten at sak eksisterer")
 
+            val repositoryProvider = RepositoryProvider(connection)
+
+            val arenaService = ArenaService(
+                meldekortService = MeldekortService(
+                    arenaGateway = GatewayProvider.provide(),
+                    meldekortRepository = repositoryProvider.provide(),
+                ),
+                arenaGateway = GatewayProvider.provide(),
+                sak = sak,
+            )
+
             return UtfyllingService(
-                utfyllingRepository = RepositoryProvider(connection).provide<UtfyllingRepository>(),
+                utfyllingRepository = repositoryProvider.provide(),
                 fagsystemService = fagsystemServiceFactory(connection, sak),
+                utfyllingsflyter = Utfyllingsflyter(arenaService)
             )
         }
     }

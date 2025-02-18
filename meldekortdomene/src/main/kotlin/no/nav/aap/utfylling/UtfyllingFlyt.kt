@@ -1,6 +1,8 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.arena.ArenaService
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.sak.Sak
 
 interface UtfyllingFlyt {
     val navn: UtfyllingFlytNavn
@@ -29,6 +31,12 @@ class Utfyllingsflyter(arenaService: ArenaService) {
             UtfyllingFlytNavn.AAP_FLYT -> aapFlyt
         }
     }
+
+    companion object {
+        fun konstruer(connection: DBConnection, sak: Sak): Utfyllingsflyter {
+            return Utfyllingsflyter(ArenaService.konstruer(connection, sak))
+        }
+    }
 }
 
 class ArenaVanligFlyt(
@@ -46,6 +54,14 @@ class ArenaVanligFlyt(
         BestillJournalføringSteg(),
         KvitteringSteg,
     )
+
+    override fun equals(other: Any?): Boolean {
+        return other is UtfyllingFlyt && this.navn == other.navn
+    }
+
+    override fun hashCode(): Int {
+        return navn.hashCode()
+    }
 }
 
 class ArenaKorrigeringFlyt(
@@ -63,6 +79,14 @@ class ArenaKorrigeringFlyt(
         BestillJournalføringSteg(),
         KvitteringSteg,
     )
+
+    override fun equals(other: Any?): Boolean {
+        return other is UtfyllingFlyt && this.navn == other.navn
+    }
+
+    override fun hashCode(): Int {
+        return navn.hashCode()
+    }
 }
 
 object AapFlyt : UtfyllingFlyt {
@@ -77,4 +101,12 @@ object AapFlyt : UtfyllingFlyt {
         BestillJournalføringSteg(),
         KvitteringSteg,
     )
+
+    override fun equals(other: Any?): Boolean {
+        return other is UtfyllingFlyt && this.navn == other.navn
+    }
+
+    override fun hashCode(): Int {
+        return navn.hashCode()
+    }
 }

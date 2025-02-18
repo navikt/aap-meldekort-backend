@@ -1,78 +1,101 @@
 package no.nav.aap.meldekort.arena
 
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
+import no.nav.aap.utfylling.UtfyllingStegNavn
+import no.nav.aap.utfylling.Utfyllingsflyter
+import no.nav.aap.komponenter.type.Periode as DbPeriode
 
-class UtfyllingRepositoryPostgres(private val connection: DBConnection) : UtfyllingRepository {
+class UtfyllingRepositoryPostgres(
+    private val connection: DBConnection
+) : UtfyllingRepository {
     companion object : Factory<UtfyllingRepositoryPostgres> {
         override fun konstruer(connection: DBConnection): UtfyllingRepositoryPostgres {
             return UtfyllingRepositoryPostgres(connection)
         }
     }
 
-    override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
-        return null
+    override fun lastÅpenUtfylling(ident: Ident, periode: Periode, utfyllingsflyter: Utfyllingsflyter): Utfylling? {
+        return connection.queryFirstOrNull("""
+            select * from utfylling
+            where ident = ? and periode = ?::daterange
+            order by sist_endret desc
+            limit 1
+        """) {
+            setParams {
+                setString(1, ident.asString)
+                setPeriode(2, DbPeriode(periode.fom, periode.tom))
+            }
+            setRowMapper { row ->
+                utfyllingRowMapper(row, utfyllingsflyter)
+            }
+        }
+            ?.takeUnless { it.erAvsluttet }
     }
 
-    override fun lastUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        return null
+    override fun lastUtfylling(
+        ident: Ident,
+        utfyllingReferanse: UtfyllingReferanse,
+        utfyllingsflyter: Utfyllingsflyter
+    ): Utfylling? {
+        return connection.queryFirstOrNull("""
+            select * from utfylling
+            where ident = ? and referanse = ?
+            order by sist_endret desc
+            limit 1
+        """) {
+            setParams {
+                setString(1, ident.asString)
+                setUUID(2, utfyllingReferanse.asUuid)
+            }
+            setRowMapper { row ->
+                utfyllingRowMapper(row, utfyllingsflyter)
+            }
+        }
     }
 
     override fun lagrUtfylling(utfylling: Utfylling) {
+        connection.execute(
+            """
+            insert into utfylling(ident, referanse, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar)
+            values (?, ?, ?::daterange, ?, ?, ?, ?, ?, ?::jsonb)
+        """
+        ) {
+            setParams {
+                setString(1, utfylling.ident.asString)
+                setUUID(2, utfylling.referanse.asUuid)
+                setPeriode(3, DbPeriode(utfylling.periode.fom, utfylling.periode.tom))
+                setInstant(4, utfylling.opprettet)
+                setInstant(5, utfylling.sistEndret)
+                setEnumName(6, utfylling.flyt.navn)
+                setEnumName(7, utfylling.aktivtSteg.navn)
+                setBoolean(8, utfylling.erAvsluttet)
+                setString(9, DefaultJsonMapper.toJson(utfylling.svar))
+            }
+        }
     }
 
-//    private val skjemaRepository = SkjemaRepositoryPostgres(connection)
-//
-//    override fun last(ident: Ident, meldekortId: MeldekortId, utfyllingFlytOrkestrator: UtfyllingFlytOrkestrator): Utfylling? {
-//        return connection.queryFirstOrNull(
-//            "select * from arena_utfylling where ident = ? and meldekort_id = ? order by tid_opprettet desc limit 1"
-//        ) {
-//            setParams {
-//                setString(1, ident.asString)
-//                setLong(2, meldekortId.asLong)
-//            }
-//            setRowMapper { row ->
-//                Utfylling(
-//                    flyt = utfyllingFlytOrkestrator,
-//                    aktivtSteg = utfyllingFlytOrkestrator.stegForNavn(row.getEnum("steg")),
-//                    skjema = skjemaRepository.last(SkjemaId(row.getLong("skjema_id"))),
-//                    ident = Ident(row.getString("ident")),
-//                    meldekortId = MeldekortId(row.getLong("meldekort_id")),
-//                )
-//            }
-//        }
-//    }
-//
-//    override fun lagrUtfylling(utfylling: Utfylling) {
-//        val skjemaId = skjemaRepository.lagrSkjema(utfylling.skjema)
-//
-//        connection.executeReturnKey(
-//            """
-//                    insert into arena_utfylling(
-//                        ident,
-//                        flyt,
-//                        meldekort_id,
-//                        steg,
-//                        skjema_id,
-//                        tid_opprettet
-//                    ) values (?, ?, ?, ?, ?, ?)
-//                """.trimIndent()
-//        ) {
-//            setParams {
-//                setString(1, utfylling.ident.asString)
-//                setString(2, utfylling.flyt.toString())
-//                setLong(3, utfylling.skjema.meldekortId.asLong)
-//                setEnumName(4, utfylling.aktivtSteg.navn)
-//                setLong(5, skjemaId.asLong)
-//                setLocalDateTime(6, LocalDateTime.now())
-//            }
-//        }
-//    }
+    private fun utfyllingRowMapper(row: Row, utfyllingsflyter: Utfyllingsflyter): Utfylling {
+        val flyt = row.getEnum<UtfyllingFlytNavn>("flyt").let { utfyllingsflyter.flytForNavn(it) }
+        return Utfylling(
+            ident = Ident(row.getString("ident")),
+            referanse = UtfyllingReferanse(row.getUUID("referanse")),
+            periode = row.getPeriode("periode").let { Periode(it.fom, it.tom) },
+            flyt = flyt,
+            aktivtSteg = row.getEnum<UtfyllingStegNavn>("aktivt_steg").let { flyt.stegForNavn(it) },
+            opprettet = row.getInstant("opprettet"),
+            sistEndret = row.getInstant("sist_endret"),
+            svar = DefaultJsonMapper.fromJson(row.getString("svar")),
+        )
+    }
 }
 
 

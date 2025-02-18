@@ -4,9 +4,12 @@ val tilgangVersjon = "0.0.72"
 
 plugins {
     id("behandlingsflyt.conventions")
+    id("java-test-fixtures")
 }
 
 dependencies {
+    implementation(project(":meldekortdomene"))
+    implementation(project(":repositories"))
     implementation("io.micrometer:micrometer-core:1.14.4")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
@@ -31,4 +34,5 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.1")
 
     implementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+    implementation("org.testcontainers:postgresql:1.20.4")
 }

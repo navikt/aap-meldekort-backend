@@ -5,7 +5,7 @@ import no.nav.aap.Periode
 import java.time.Instant
 import java.util.*
 
-class UtfyllingReferanse(val asUuid: UUID) {
+data class UtfyllingReferanse(val asUuid: UUID) {
     companion object {
         fun ny(): UtfyllingReferanse {
             return UtfyllingReferanse(UUID.randomUUID())

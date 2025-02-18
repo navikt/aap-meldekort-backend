@@ -1,106 +1,117 @@
 package no.nav.aap.meldekort.arena
 
-//import no.nav.aap.komponenter.dbconnect.transaction
-//import no.nav.aap.komponenter.dbtest.InitTestDatabase
-//import no.nav.aap.Periode
-//import no.nav.aap.arena.MeldekortType.VANLIG
-//import org.junit.jupiter.api.Assertions.assertEquals
-//import org.junit.jupiter.api.Assertions.assertNull
-//import org.junit.jupiter.api.Test
-//import java.time.LocalDate
-//import java.time.LocalDateTime
-//import java.time.temporal.ChronoUnit
-//import java.util.*
-//import no.nav.aap.utfylling.IntroduksjonSteg
-//import no.nav.aap.utfylling.Svar
-//import no.nav.aap.arena.KommendeMeldekort
-//import no.nav.aap.arena.MeldekortId
-//import no.nav.aap.meldekort.Skjema
-//import no.nav.aap.meldekort.SkjemaTilstand
-//import no.nav.aap.utfylling.TimerArbeidet
-//import no.nav.aap.utfylling.Utfylling
-//import no.nav.aap.utfylling.UtfyllingFlytOrkestrator
-//
-////
-////class UtfyllingRepositoryPostgresTest {
-////
-////    @Test
-////    fun lastUtfyllingSkjema() {
-////        InitTestDatabase.dataSource.transaction {
-////            val repo = UtfyllingRepositoryPostgres(it)
-////            val flyt = UtfyllingFlytOrkestrator(repo, listOf(IntroduksjonSteg))
-////
-////            assertNull(
-////                repo.last(
-////                    nextIdent(),
-////                    MeldekortId(0),
-////                    flyt,
-////                )
-////            )
-////        }
-////    }
-////
-////    @Test
-////    fun `lagre og hent skjema`() {
-////        InitTestDatabase.dataSource.transaction {
-////            val ident = nextIdent()
-////
-////            val repo = UtfyllingRepositoryPostgres(it)
-////            val flyt = UtfyllingFlytOrkestrator(repo, listOf(IntroduksjonSteg))
-////            val meldekortRepo = MeldekortRepositoryPostgres(it)
-////
-////            val utfylling = Utfylling(
-////                aktivtSteg = IntroduksjonSteg,
-////                flyt = flyt,
-////                skjema = Skjema(
-////                    tilstand = SkjemaTilstand.SENDT_ARENA,
-////                    meldekortId = MeldekortId(0),
-////                    ident = ident,
-////                    meldeperiode = Periode(
-////                        LocalDate.of(2021, 1, 1),
-////                        LocalDate.of(2022, 1, 1)
-////                    ),
-////                    referanse = UUID.randomUUID(),
-////                    sendtInn = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
-////                    svar = Svar(
-////                        svarerDuSant = true,
-////                        harDuJobbet = false,
-////                        timerArbeidet = listOf(
-////                            TimerArbeidet(timer = 7.0, dato = LocalDate.of(2020, 1, 14)),
-////                            TimerArbeidet(timer = 7.5, dato = LocalDate.of(2020, 1, 15)),
-////                            TimerArbeidet(timer = 0.0, dato = LocalDate.of(2020, 1, 16)),
-////                            TimerArbeidet(timer = 0.0, dato = LocalDate.of(2020, 1, 17)),
-////                            TimerArbeidet(timer = null, dato = LocalDate.of(2020, 1, 18)),
-////                        ),
-////                        stemmerOpplysningene = null
-////                    )
-////                )
-////            )
-////
-////
-////            meldekortRepo.upsert(
-////                ident, KommendeMeldekort(
-////                    meldekortId = MeldekortId(0),
-////                    type = VANLIG,
-////                    periode = Periode(
-////                        LocalDate.of(2021, 1, 1),
-////                        LocalDate.of(2022, 1, 1)
-////                    ),
-////                    kanKorrigeres = true
-////                )
-////            )
-////            repo.lagrUtfylling(utfylling)
-////
-////            assertEquals(utfylling, repo.last(ident, MeldekortId(0), flyt))
-////
-////            val endretSkjema =
-////                utfylling.copy(skjema = utfylling.skjema.copy(tilstand = SkjemaTilstand.FORSØKER_Å_SENDE_TIL_ARENA))
-////
-////            Thread.sleep(2)
-////
-////            repo.lagrUtfylling(endretSkjema)
-////
-////            assertEquals(endretSkjema, repo.last(ident, MeldekortId(0), flyt))
-////        }
-////    }
-////}
+import java.time.Instant
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import kotlin.test.assertNull
+import no.nav.aap.Ident
+import no.nav.aap.Periode
+import no.nav.aap.arena.ArenaService
+import no.nav.aap.arena.MeldekortService
+import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.sak.Sak
+import no.nav.aap.sak.Saksnummer
+import no.nav.aap.utfylling.Svar
+import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingReferanse
+import no.nav.aap.utfylling.Utfyllingsflyter
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
+class UtfyllingRepositoryPostgresTest {
+
+    private val sakKelvin = Sak(
+        fagsystemNavn = FagsystemNavn.KELVIN,
+        saksnummer = Saksnummer("111"),
+        rettighetsperiode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)),
+    )
+    val utfyllingsflyter = Utfyllingsflyter(
+        arenaService = ArenaService(
+            meldekortService = MeldekortService(
+                arenaGateway = ArenaGatewayFake(),
+                meldekortRepository = MeldekortRepositoryFake(),
+            ),
+            arenaGateway = ArenaGatewayFake(),
+            sak = sakKelvin,
+        )
+    )
+
+
+    @Test
+    fun `enkel read write`() {
+        InitTestDatabase.dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val flyt = utfyllingsflyter.flytForNavn(UtfyllingFlytNavn.AAP_FLYT)
+            val ident = Ident("0".repeat(11))
+            val opprettet = Instant.now().truncatedTo(ChronoUnit.MILLIS)
+            val referanse = UtfyllingReferanse.ny()
+
+            val utfyllingInn1 = Utfylling(
+                referanse = referanse,
+                ident = ident,
+                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 13)),
+                flyt = flyt,
+                aktivtSteg = flyt.steg.first(),
+                svar = Svar(
+                    svarerDuSant = null,
+                    harDuJobbet = true,
+                    timerArbeidet = listOf(
+                        TimerArbeidet(LocalDate.of(2020, 1, 1), null),
+                        TimerArbeidet(LocalDate.of(2020, 1, 2), 0.0),
+                        TimerArbeidet(LocalDate.of(2020, 1, 3), 7.0),
+                        TimerArbeidet(LocalDate.of(2020, 1, 4), 7.5),
+                    ),
+                    stemmerOpplysningene = false,
+                ),
+                opprettet = opprettet,
+                sistEndret = opprettet,
+            )
+
+            repo.lagrUtfylling(utfyllingInn1)
+
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+                assertEquals(utfyllingInn1, it)
+            }
+
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+                assertEquals(utfyllingInn1, it)
+            }
+
+            val utfyllingInn2 = utfyllingInn1.copy(
+                sistEndret = opprettet.plusMillis(100),
+                svar = utfyllingInn1.svar.copy(harDuJobbet = false)
+            )
+            repo.lagrUtfylling(utfyllingInn2)
+
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+                assertEquals(utfyllingInn2, it)
+            }
+
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+                assertEquals(utfyllingInn2, it)
+            }
+
+            val endeligUtfylling = utfyllingInn2.copy(
+                sistEndret = utfyllingInn2.sistEndret.plusMillis(300),
+                aktivtSteg = utfyllingInn2.flyt.steg.last(),
+            )
+            assertTrue(endeligUtfylling.erAvsluttet)
+            repo.lagrUtfylling(endeligUtfylling)
+
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+                assertNull(it)
+            }
+
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+                assertEquals(endeligUtfylling, it)
+            }
+        }
+    }
+}
