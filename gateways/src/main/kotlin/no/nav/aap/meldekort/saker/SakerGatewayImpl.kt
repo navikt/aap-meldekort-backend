@@ -10,7 +10,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
-import no.nav.aap.sak.Fagsystem
+import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.Saker
 import no.nav.aap.sak.Saksnummer
@@ -57,9 +57,9 @@ object SakerGatewayImpl : SakerGateway {
         )!!
             .map {
                 Sak(
-                    fagsystem = when (it.kilde) {
-                        "Kelvin" -> Fagsystem.KELVIN
-                        "ARENA" -> Fagsystem.ARENA
+                    fagsystemNavn = when (it.kilde) {
+                        "Kelvin" -> FagsystemNavn.KELVIN
+                        "ARENA" -> FagsystemNavn.ARENA
                         else -> error("ukjent fagsystem ${it.kilde}")
                     },
                     saksnummer = Saksnummer(it.sakId),
@@ -73,8 +73,6 @@ object SakerGatewayImpl : SakerGateway {
                                 log.info("tilOgMedDato blir ikke satt. vurder a eksponer nullable")
                             },
                     ),
-                    meldeperioder = listOf(),
-                    fritakFraMeldeplikt = listOf(),
                 )
             }
 

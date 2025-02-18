@@ -1,7 +1,6 @@
 package no.nav.aap.arena
 
 import no.nav.aap.arena.ArenaGateway.KortType.KORRIGERT_ELEKTRONISK
-import no.nav.aap.skjema.Skjema
 import java.time.LocalDate
 
 data class ArenaMeldekortkontrollRequest(
@@ -32,35 +31,36 @@ data class ArenaMeldekortkontrollRequest(
 
     companion object {
         fun konstruer(
-            skjema: Skjema,
+//            skjema: Skjema,
             meldekortdetaljer: ArenaMeldekortdetaljer
         ): ArenaMeldekortkontrollRequest {
-            val meldekortdager = skjema.svar.timerArbeidet.map { timerArbeidet ->
-                MeldekortkontrollFravaer(
-                    dato = timerArbeidet.dato,
-                    arbeidTimer = if (skjema.svar.harDuJobbet == true) timerArbeidet.timer ?: 0.0 else 0.0,
-                )
-            }
-
-            return ArenaMeldekortkontrollRequest(
-                meldekortId = skjema.meldekortId,
-                fnr = meldekortdetaljer.fodselsnr,
-                personId = meldekortdetaljer.personId,
-                kilde = AAP_KODE,
-                kortType = meldekortdetaljer.kortType,
-                meldedato = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
-                periodeFra = skjema.meldeperiode.fom,
-                periodeTil = skjema.meldeperiode.tom,
-                meldegruppe = meldekortdetaljer.meldegruppe,
-                arbeidet = requireNotNull(skjema.svar.harDuJobbet) {
-                    "alle felter må være fylt ut for innsending, harDuJobbet er ikke fylt ut"
-                },
-                begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK)
-                    "Korrigering av arbeidstimer"
-                else
-                    null,
-                meldekortdager = meldekortdager
-            )
+            TODO()
+//            val meldekortdager = skjema.svar.timerArbeidet.map { timerArbeidet ->
+//                MeldekortkontrollFravaer(
+//                    dato = timerArbeidet.dato,
+//                    arbeidTimer = if (skjema.svar.harDuJobbet == true) timerArbeidet.timer ?: 0.0 else 0.0,
+//                )
+//            }
+//
+//            return ArenaMeldekortkontrollRequest(
+//                meldekortId = skjema.meldekortId,
+//                fnr = meldekortdetaljer.fodselsnr,
+//                personId = meldekortdetaljer.personId,
+//                kilde = AAP_KODE,
+//                kortType = meldekortdetaljer.kortType,
+//                meldedato = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK && meldekortdetaljer.meldeDato != null) meldekortdetaljer.meldeDato else LocalDate.now(),
+//                periodeFra = skjema.meldeperiode.fom,
+//                periodeTil = skjema.meldeperiode.tom,
+//                meldegruppe = meldekortdetaljer.meldegruppe,
+//                arbeidet = requireNotNull(skjema.svar.harDuJobbet) {
+//                    "alle felter må være fylt ut for innsending, harDuJobbet er ikke fylt ut"
+//                },
+//                begrunnelse = if (meldekortdetaljer.kortType == KORRIGERT_ELEKTRONISK)
+//                    "Korrigering av arbeidstimer"
+//                else
+//                    null,
+//                meldekortdager = meldekortdager
+//            )
         }
     }
 }

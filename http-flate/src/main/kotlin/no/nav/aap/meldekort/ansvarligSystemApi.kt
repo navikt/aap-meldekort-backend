@@ -6,9 +6,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.AnsvarligFlate
 import no.nav.aap.komponenter.config.configForKey
-import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.sak.Fagsystem
-import no.nav.aap.sak.SakerGateway
+import no.nav.aap.sak.FagsystemNavn
 
 enum class AnsvarligMeldekortløsningDto {
     AAP,
@@ -16,23 +14,20 @@ enum class AnsvarligMeldekortløsningDto {
     ;
 
     companion object {
-        fun fromFagsystem(fagsystem: Fagsystem): AnsvarligMeldekortløsningDto {
-            return when (fagsystem) {
-                Fagsystem.ARENA -> FELLES
-                Fagsystem.KELVIN -> AAP
+        fun fromFagsystem(fagsystemNavn: FagsystemNavn): AnsvarligMeldekortløsningDto {
+            return when (fagsystemNavn) {
+                FagsystemNavn.ARENA ->
+                    if (configForKey("nais.cluster.name") in listOf(null, "local", "dev-gcp")) AAP else FELLES
+                FagsystemNavn.KELVIN ->
+                    AAP
             }
         }
     }
 }
 
 fun NormalOpenAPIRoute.ansvarligSystemApi() {
-    val ansvarligFlate = AnsvarligFlate(
-        sakerGateway = GatewayProvider.provide(SakerGateway::class)
-    )
-    route("/api/ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
-        /* Basert på: */
-        /* Finnes sak(er) i kelvin, og hvilke rettighetsperioder? */
-        /* Er det ATTF-meldegruppe i Arena? */
+    val ansvarligFlate = AnsvarligFlate.konstruer()
+    route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
         respond(
             AnsvarligMeldekortløsningDto.fromFagsystem(
                 ansvarligFlate.routingForBruker(innloggetBruker())
@@ -41,7 +36,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi() {
     }
 
     if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
-        route("/api/debug/saker").get<Unit, Any> {
+        route("/debug/saker").get<Unit, Any> {
             respond(ansvarligFlate.debugSaker(innloggetBruker()))
         }
     }

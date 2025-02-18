@@ -8,8 +8,8 @@ import kotlin.reflect.full.starProjectedType
 
 object GatewayProvider {
 
-    inline fun <reified T : Gateway> provide(type: KClass<T>): T {
-        val gatewayKlass = GatewayRegistry.fetch(type.starProjectedType)
+    inline fun <reified T : Gateway> provide(): T {
+        val gatewayKlass = GatewayRegistry.fetch(T::class.starProjectedType)
 
         return internalCreate(gatewayKlass)
     }

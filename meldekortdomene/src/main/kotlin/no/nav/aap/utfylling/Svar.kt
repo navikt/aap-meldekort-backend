@@ -1,4 +1,4 @@
-package no.nav.aap.skjema
+package no.nav.aap.utfylling
 
 import no.nav.aap.Periode
 import java.time.LocalDate
@@ -10,7 +10,7 @@ data class Svar(
     val stemmerOpplysningene: Boolean?,
 ) {
     companion object {
-        fun tomtSkjema(periode: Periode): Svar {
+        fun tomt(periode: Periode): Svar {
             return Svar(
                 svarerDuSant = null,
                 harDuJobbet = null,

@@ -2,6 +2,7 @@ package no.nav.aap.meldekort
 
 import com.papsign.ktor.openapigen.model.info.InfoModel
 import com.papsign.ktor.openapigen.route.apiRouting
+import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -12,15 +13,18 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.aap.Ident
+import no.nav.aap.InnloggetBruker
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
-import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
 import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.komponenter.httpklient.auth.personBruker
+import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.motor.Motor
@@ -94,9 +98,12 @@ fun startHttpServer(
         routing {
             authenticate(TOKENX) {
                 apiRouting {
-                    ansvarligSystemApi()
-                    arenaApi(dataSource)
-                    kelvinApi()
+                    route("api") {
+                        ansvarligSystemApi()
+                        arenaApi()
+                        meldeperioderApi(dataSource)
+                        utfyllingApi(dataSource)
+                    }
                 }
             }
             authenticate(AZURE) {
@@ -164,3 +171,9 @@ private fun Routing.actuator(prometheus: PrometheusMeterRegistry, motor: Motor) 
         }
     }
 }
+
+fun OpenAPIPipelineResponseContext<*>.innloggetBruker() =
+    InnloggetBruker(
+        ident = Ident(personBruker().pid),
+        token = token().token(),
+    )

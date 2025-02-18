@@ -7,7 +7,6 @@ import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.lookup.repository.RepositoryRegistry
 import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.arena.MeldekortRepositoryPostgres
-import no.nav.aap.meldekort.arena.SkjemaRepositoryPostgres
 import no.nav.aap.meldekort.arena.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.saker.SakerGatewayImpl
@@ -38,7 +37,7 @@ fun main() {
 fun registerRepositories() {
     RepositoryRegistry
         .register<MeldekortRepositoryPostgres>()
-        .register<SkjemaRepositoryPostgres>()
+//        .register<SkjemaRepositoryPostgres>()
         .register<UtfyllingRepositoryPostgres>()
         .status()
 }

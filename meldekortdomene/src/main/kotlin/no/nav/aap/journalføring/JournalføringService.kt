@@ -8,7 +8,7 @@ import no.nav.aap.motor.FlytJobbRepository
 class JournalføringService(
     private val flytJobbRepository: FlytJobbRepository
 ) {
-    fun journalfør(ident: Ident, meldekortId: MeldekortId) {
+    fun bestillJournalføring(ident: Ident, meldekortId: MeldekortId) {
         flytJobbRepository.leggTil(
             ArenaJournalføringJobbUtfører.jobbInput(
             ident, meldekortId
