@@ -22,11 +22,11 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
     route("meldeperiode") {
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
-                val meldeperioder = aktuelleMeldeperioder(innloggetBruker())
+                val ventendeOgNeste = aktuelleMeldeperioder(innloggetBruker())
 
                 KommendeMeldeperioderDto(
-                    antallUbesvarteMeldeperioder = 0,
-                    nesteMeldeperiode = null,
+                    antallUbesvarteMeldeperioder = ventendeOgNeste.ventende.size,
+                    nesteMeldeperiode = ventendeOgNeste.neste?.let { MeldeperiodeDto(it) },
                 )
             }
             respond(response)
@@ -35,7 +35,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
                 val meldeperioder = historiskeMeldeperioder(innloggetBruker())
-                listOf<HistoriskMeldeperiodeDto>()
+                meldeperioder.map { HistoriskMeldeperiodeDto(it) }
             }
             respond(response)
         }
@@ -43,21 +43,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
         route("detaljer").post<Unit, PeriodeDetaljerDto, PeriodeDto> { params, request ->
             val response = medFlate {
                 val detaljer = periodedetaljer(innloggetBruker(), Periode(request.fom, request.tom))
-
-                PeriodeDetaljerDto(
-                    periode = PeriodeDto(LocalDate.now(), LocalDate.now()),
-                    status = MeldeperiodeStatusDto.KELVIN,
-                    bruttoBeløp = null,
-                    innsendtDato = null,
-                    kanEndres = false,
-                    type = MeldekortTypeDto.KELVIN,
-                    svar = SvarDto(
-                        vilSvareRiktig = null,
-                        harDuJobbet = null,
-                        dager = emptyList(),
-                        stemmerOpplysningene = null,
-                    )
-                )
+                PeriodeDetaljerDto(detaljer)
             }
             respond(response)
         }

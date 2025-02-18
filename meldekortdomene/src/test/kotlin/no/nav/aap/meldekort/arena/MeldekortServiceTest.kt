@@ -11,7 +11,7 @@ package no.nav.aap.meldekort.arena
 //import java.time.LocalDate
 //import no.nav.aap.arena.ArenaMeldekort
 //import no.nav.aap.arena.MeldekortId
-//import no.nav.aap.arena.MeldekortRepositoryFake
+//import no.nav.aap.meldekort.arena.MeldekortRepositoryFake
 //import no.nav.aap.arena.MeldekortService
 //
 //class MeldekortServiceTest {

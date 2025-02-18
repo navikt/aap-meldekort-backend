@@ -1,33 +1,87 @@
 package no.nav.aap.arena
 
-import no.nav.aap.sak.FagsystemService
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
-import no.nav.aap.sak.Sak
+import no.nav.aap.sak.FagsystemService
 import no.nav.aap.utfylling.ArenaKorrigeringFlyt
 import no.nav.aap.utfylling.ArenaVanligFlyt
+import no.nav.aap.utfylling.Svar
+import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
-import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
-import no.nav.aap.utfylling.Utfyllingsflyter
+import java.time.LocalDate
 
-class ArenaService(): FagsystemService {
+class ArenaService(
+    private val meldekortService: MeldekortService,
+    private val arenaGateway: ArenaGateway,
+) : FagsystemService {
     override val innsendingsflyt = ArenaVanligFlyt(this)
     override val korrigeringsflyt = ArenaKorrigeringFlyt(this)
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
-        return FagsystemService.VentendeOgNeste(emptyList(), null)
+        val kommendeMeldekort = meldekortService.kommendeMeldekort(innloggetBruker)
+            .orEmpty()
+            .sortedBy { it.tidligsteInnsendingsdato }
+
+        val klareForInnsending = kommendeMeldekort.filter { it.kanSendes }
+
+        val neste = klareForInnsending.firstOrNull()
+            ?: kommendeMeldekort.firstOrNull { !it.kanSendes }
+        return FagsystemService.VentendeOgNeste(
+            ventende = klareForInnsending.map {
+                Meldeperiode(
+                    meldeperioden = it.periode,
+                    meldevindu = Periode(it.tidligsteInnsendingsdato, LocalDate.MAX), /* TODO */
+                )
+            },
+            neste = neste?.let {
+                Meldeperiode(
+                    meldeperioden = it.periode,
+                    meldevindu = Periode(it.tidligsteInnsendingsdato, LocalDate.MAX), /* TODO */
+                )
+            },
+        )
     }
 
     override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        return emptyList()
+        val historiskMeldekort = meldekortService.historiskeMeldekort(innloggetBruker)
+            .groupBy { it.periode }
+            .values
+            .map { it.maxBy { meldekort -> meldekort.beregningStatus.ordinal } }
+
+        return historiskMeldekort.map {
+            Meldeperiode(
+                meldeperioden = it.periode,
+                meldevindu = Periode(it.tidligsteInnsendingsdato, LocalDate.MAX),
+            )
+        }
     }
 
     override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): FagsystemService.PeriodeDetaljer {
-        return FagsystemService.PeriodeDetaljer(periode, svar = tomtSvar(periode))
+        val meldekort = meldekortService.gjeldeneHistoriskeMeldekort(innloggetBruker, periode)
+            ?: error("meldekortet burde ha blitt listet opp, så er forventet at det eksisterer")
+
+        /* TODO: finn timer arbeidet fra utfylling om det mangler. */
+        val timerArbeidet = arenaGateway.meldekortdetaljer(innloggetBruker, meldekort.meldekortId)
+            .timerArbeidet(meldekort.periode.fom)
+            ?.map { TimerArbeidet(it.dato, it.timer) }
+            ?: meldekort.periode.map { TimerArbeidet(it, null) }
+
+        return FagsystemService.PeriodeDetaljer(
+            periode = periode,
+            svar = Svar(
+                svarerDuSant = true, /* TODO */
+                harDuJobbet = true, /* TODO */
+                timerArbeidet = timerArbeidet,
+                stemmerOpplysningene = true, /* TODO */
+            )
+        )
     }
+
 
     override fun forberedVanligFlyt(
         innloggetBruker: InnloggetBruker,
@@ -53,7 +107,13 @@ class ArenaService(): FagsystemService {
 
     companion object {
         fun konstruer(connection: DBConnection): ArenaService {
-            return ArenaService()
+            return ArenaService(
+                meldekortService = MeldekortService(
+                    arenaGateway = GatewayProvider.provide(),
+                    meldekortRepository = RepositoryProvider(connection).provide(),
+                ),
+                arenaGateway = GatewayProvider.provide(),
+            )
         }
     }
 }

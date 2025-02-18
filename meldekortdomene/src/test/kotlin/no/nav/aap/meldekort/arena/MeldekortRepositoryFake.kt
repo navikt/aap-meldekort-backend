@@ -1,6 +1,10 @@
-package no.nav.aap.arena
+package no.nav.aap.meldekort.arena
 
 import no.nav.aap.Ident
+import no.nav.aap.arena.HistoriskMeldekort
+import no.nav.aap.arena.Meldekort
+import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortRepository
 
 /* TODO: Flytt ned i test-mappa når postgres-database er implementert. */
 class MeldekortRepositoryFake: MeldekortRepository {

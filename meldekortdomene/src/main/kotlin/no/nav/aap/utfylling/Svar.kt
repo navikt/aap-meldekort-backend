@@ -14,7 +14,7 @@ data class Svar(
             return Svar(
                 svarerDuSant = null,
                 harDuJobbet = null,
-                timerArbeidet = periode.map { TimerArbeidet(null, it) },
+                timerArbeidet = periode.map { TimerArbeidet(it, null) },
                 stemmerOpplysningene = null
             )
         }
@@ -22,7 +22,7 @@ data class Svar(
 }
 
 data class TimerArbeidet(
-    val timer: Double?,
     val dato: LocalDate,
+    val timer: Double?,
 )
 

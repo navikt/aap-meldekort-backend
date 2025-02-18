@@ -40,7 +40,7 @@ data class ArenaMeldekortdetaljer(
 
     fun timerArbeidet(fom: LocalDate): List<TimerArbeidet>? {
         val aktivitetsdager = MutableList(14) { index ->
-            TimerArbeidet(null, fom.plusDays(index.toLong()))
+            TimerArbeidet(fom.plusDays(index.toLong()), null)
         }
 
         if (this.sporsmal?.meldekortDager == null) return null
