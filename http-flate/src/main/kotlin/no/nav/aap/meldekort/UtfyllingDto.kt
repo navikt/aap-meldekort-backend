@@ -18,18 +18,13 @@ class StartUtfyllingResponse(
     val feil: String?,
 )
 
-class HentUtfyllingResponse(
-    val metadata: UtfyllingMetadataDto,
-    val tilstand: UtfyllingTilstandDto,
-)
-
 class EndreUtfyllingRequest(
     val nyTilstand: UtfyllingTilstandDto,
 )
 
-class EndreUtfyllingResponse(
+class UtfyllingResponseDto(
     val metadata: UtfyllingMetadataDto,
-    val utfyllingTilstand: UtfyllingTilstandDto,
+    val tilstand: UtfyllingTilstandDto,
     val feil: String?
 )
 

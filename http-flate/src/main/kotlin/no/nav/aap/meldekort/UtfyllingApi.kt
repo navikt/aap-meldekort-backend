@@ -61,7 +61,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         class Referanse(
             @PathParam("referanse") val referanse: UUID,
         )
-        get<Referanse, HentUtfyllingResponse> { params ->
+        get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val utfylling = medFlate {
                 hent(innloggetBruker(), utfyllingReferanse)
@@ -71,9 +71,10 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
 
             } else {
                 respond(
-                    HentUtfyllingResponse(
+                    UtfyllingResponseDto(
                         metadata = UtfyllingMetadataDto(utfylling),
                         tilstand = UtfyllingTilstandDto(utfylling),
+                        feil = null,
                     )
                 )
             }
@@ -86,7 +87,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             respondWithStatus(HttpStatusCode.OK)
         }
 
-        route("lagre-neste").post<Referanse, EndreUtfyllingResponse, EndreUtfyllingRequest> { params, body ->
+        route("lagre-neste").post<Referanse, UtfyllingResponseDto, EndreUtfyllingRequest> { params, body ->
             val response = medFlate {
                 nesteOgLagre(
                     innloggetBruker = innloggetBruker(),
@@ -96,15 +97,15 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 )
             }
             respond(
-                EndreUtfyllingResponse(
+                UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto(response.utfylling),
-                    utfyllingTilstand = UtfyllingTilstandDto(response.utfylling),
+                    tilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )
             )
         }
 
-        route("lagre").post<Referanse, EndreUtfyllingResponse, EndreUtfyllingRequest> { params, body ->
+        route("lagre").post<Referanse, UtfyllingResponseDto, EndreUtfyllingRequest> { params, body ->
             val response = medFlate {
                 lagre(
                     innloggetBruker = innloggetBruker(),
@@ -114,9 +115,9 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 )
             }
             respond(
-                EndreUtfyllingResponse(
+                UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto(response.utfylling),
-                    utfyllingTilstand = UtfyllingTilstandDto(response.utfylling),
+                    tilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )
             )
