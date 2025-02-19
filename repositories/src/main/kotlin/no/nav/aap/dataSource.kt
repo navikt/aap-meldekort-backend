@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort
+package no.nav.aap
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

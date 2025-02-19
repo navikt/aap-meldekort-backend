@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.arena
 
 //import no.nav.aap.komponenter.dbconnect.DBConnection
 //import no.nav.aap.komponenter.dbconnect.Row

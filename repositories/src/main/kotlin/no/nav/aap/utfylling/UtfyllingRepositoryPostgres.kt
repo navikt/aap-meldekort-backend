@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.utfylling
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
@@ -6,13 +6,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.lookup.repository.Factory
-import no.nav.aap.utfylling.Utfylling
-import no.nav.aap.utfylling.UtfyllingFlytNavn
-import no.nav.aap.utfylling.UtfyllingReferanse
-import no.nav.aap.utfylling.UtfyllingRepository
-import no.nav.aap.utfylling.UtfyllingStegNavn
-import no.nav.aap.utfylling.Utfyllingsflyter
-import no.nav.aap.komponenter.type.Periode as DbPeriode
+import no.nav.aap.sak.Fagsaknummer
 
 class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
@@ -32,7 +26,7 @@ class UtfyllingRepositoryPostgres(
         """) {
             setParams {
                 setString(1, ident.asString)
-                setPeriode(2, DbPeriode(periode.fom, periode.tom))
+                setPeriode(2, no.nav.aap.komponenter.type.Periode(periode.fom, periode.tom))
             }
             setRowMapper { row ->
                 utfyllingRowMapper(row, utfyllingsflyter)
@@ -65,20 +59,22 @@ class UtfyllingRepositoryPostgres(
     override fun lagrUtfylling(utfylling: Utfylling) {
         connection.execute(
             """
-            insert into utfylling(ident, referanse, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar)
-            values (?, ?, ?::daterange, ?, ?, ?, ?, ?, ?::jsonb)
+            insert into utfylling(ident, referanse, fagsystem, fagsaknummer, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar)
+            values (?, ?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?::jsonb)
         """
         ) {
             setParams {
                 setString(1, utfylling.ident.asString)
                 setUUID(2, utfylling.referanse.asUuid)
-                setPeriode(3, DbPeriode(utfylling.periode.fom, utfylling.periode.tom))
-                setInstant(4, utfylling.opprettet)
-                setInstant(5, utfylling.sistEndret)
-                setEnumName(6, utfylling.flyt.navn)
-                setEnumName(7, utfylling.aktivtSteg.navn)
-                setBoolean(8, utfylling.erAvsluttet)
-                setString(9, DefaultJsonMapper.toJson(utfylling.svar))
+                setEnumName(3, utfylling.fagsystem)
+                setString(4, utfylling.fagsaknummer.asString)
+                setPeriode(5, no.nav.aap.komponenter.type.Periode(utfylling.periode.fom, utfylling.periode.tom))
+                setInstant(6, utfylling.opprettet)
+                setInstant(7, utfylling.sistEndret)
+                setEnumName(8, utfylling.flyt.navn)
+                setEnumName(9, utfylling.aktivtSteg.navn)
+                setBoolean(10, utfylling.erAvsluttet)
+                setString(11, DefaultJsonMapper.toJson(utfylling.svar))
             }
         }
     }
@@ -88,6 +84,8 @@ class UtfyllingRepositoryPostgres(
         return Utfylling(
             ident = Ident(row.getString("ident")),
             referanse = UtfyllingReferanse(row.getUUID("referanse")),
+            fagsystem = row.getEnum("fagsystem"),
+            fagsaknummer = Fagsaknummer(row.getString("fagsaknummer")),
             periode = row.getPeriode("periode").let { Periode(it.fom, it.tom) },
             flyt = flyt,
             aktivtSteg = row.getEnum<UtfyllingStegNavn>("aktivt_steg").let { flyt.stegForNavn(it) },
@@ -97,5 +95,3 @@ class UtfyllingRepositoryPostgres(
         )
     }
 }
-
-

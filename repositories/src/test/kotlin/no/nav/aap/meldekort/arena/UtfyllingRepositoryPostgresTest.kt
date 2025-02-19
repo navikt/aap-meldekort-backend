@@ -3,16 +3,16 @@ package no.nav.aap.meldekort.arena
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import kotlin.test.assertNull
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.arena.ArenaService
 import no.nav.aap.arena.MeldekortService
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
-import no.nav.aap.sak.Saksnummer
+import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -28,7 +28,7 @@ class UtfyllingRepositoryPostgresTest {
 
     private val sakKelvin = Sak(
         fagsystemNavn = FagsystemNavn.KELVIN,
-        saksnummer = Saksnummer("111"),
+        fagsaknummer = Fagsaknummer("111"),
         rettighetsperiode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)),
     )
     val utfyllingsflyter = Utfyllingsflyter(
@@ -72,6 +72,8 @@ class UtfyllingRepositoryPostgresTest {
                 ),
                 opprettet = opprettet,
                 sistEndret = opprettet,
+                fagsystem = FagsystemNavn.KELVIN,
+                fagsaknummer = Fagsaknummer("sak1234"),
             )
 
             repo.lagrUtfylling(utfyllingInn1)

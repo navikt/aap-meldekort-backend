@@ -1,15 +1,10 @@
-package no.nav.aap.meldekort.arena
+package no.nav.aap.arena
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.arena.HistoriskMeldekort
-import no.nav.aap.arena.KommendeMeldekort
-import no.nav.aap.arena.Meldekort
-import no.nav.aap.arena.MeldekortId
-import no.nav.aap.arena.MeldekortRepository
 import no.nav.aap.komponenter.type.Periode as DbPeriode
 
 class MeldekortRepositoryPostgres(private val connection: DBConnection) : MeldekortRepository {

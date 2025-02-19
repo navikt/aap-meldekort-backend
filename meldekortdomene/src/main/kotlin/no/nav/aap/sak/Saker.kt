@@ -15,7 +15,7 @@ class Saker(
         return saker.filter { idag in it.rettighetsperiode }
             .also {
                 check(it.size <= 1) {
-                    "medlemmet har saker med overlappende rettighetsperioder: ${it.joinToString(", ") { it.saksnummer?.asString ?: "?" }}"
+                    "medlemmet har saker med overlappende rettighetsperioder: ${it.joinToString(", ") { it.fagsaknummer?.asString ?: "?" }}"
                 }
             }
             .singleOrNull()

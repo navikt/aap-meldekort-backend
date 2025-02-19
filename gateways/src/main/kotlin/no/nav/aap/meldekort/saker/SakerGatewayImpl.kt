@@ -13,7 +13,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.Client
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.Saker
-import no.nav.aap.sak.Saksnummer
+import no.nav.aap.sak.Fagsaknummer
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
@@ -62,7 +62,7 @@ object SakerGatewayImpl : SakerGateway {
                         "ARENA" -> FagsystemNavn.ARENA
                         else -> error("ukjent fagsystem ${it.kilde}")
                     },
-                    saksnummer = Saksnummer(it.sakId),
+                    fagsaknummer = Fagsaknummer(it.sakId),
                     rettighetsperiode = Periode(
                         fom = it.periode.fraOgMedDato?.let(LocalDate::parse)
                             ?: LocalDate.MIN.also {

@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 import no.nav.aap.arena.HistoriskMeldekort
 import no.nav.aap.arena.KommendeMeldekort
 import no.nav.aap.arena.MeldekortId
+import no.nav.aap.arena.MeldekortRepositoryPostgres
 import no.nav.aap.arena.MeldekortStatus
 
 class MeldekortRepositoryPostgresTest {

@@ -9,6 +9,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.sak.FagsystemService
+import no.nav.aap.sak.Sak
 import no.nav.aap.sak.SakerService
 import no.nav.aap.sak.fagsystemServiceFactory
 import java.time.Instant
@@ -35,6 +36,7 @@ class UtfyllingService(
             periode = periode,
             flyt = fagsystemService.innsendingsflyt,
             svar = fagsystemService.tomtSvar(periode),
+            sak = fagsystemService.sak,
         )
     }
 
@@ -53,6 +55,7 @@ class UtfyllingService(
             periode = periode,
             flyt = fagsystemService.korrigeringsflyt,
             svar = fagsystemService.hentHistoriskeSvar(innloggetBruker, periode),
+            sak = fagsystemService.sak,
         )
     }
 
@@ -73,11 +76,14 @@ class UtfyllingService(
         periode: Periode,
         flyt: UtfyllingFlyt,
         svar: Svar,
+        sak: Sak,
     ): Utfylling {
         val opprettet = Instant.now()
         val nyUtfylling = Utfylling(
             referanse = utfyllingReferanse,
             periode = periode,
+            fagsystem = sak.fagsystemNavn,
+            fagsaknummer = sak.fagsaknummer,
             ident = ident,
             flyt = flyt,
             aktivtSteg = flyt.steg.first(),

@@ -2,12 +2,12 @@ package no.nav.aap.sak
 
 import no.nav.aap.Periode
 
-data class Saksnummer(val asString: String)
+data class Fagsaknummer(val asString: String)
 
 
 class Sak(
     val fagsystemNavn: FagsystemNavn,
-    val saksnummer: Saksnummer?,
+    val fagsaknummer: Fagsaknummer,
     val rettighetsperiode: Periode,
 //    val meldeperioder: List<Meldeperiode>,
 //    val fritakFraMeldeplikt: List<Periode>,

@@ -4,6 +4,8 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
 import java.time.Duration
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.aap.DbConfig
+import no.nav.aap.createPostgresDataSource
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
