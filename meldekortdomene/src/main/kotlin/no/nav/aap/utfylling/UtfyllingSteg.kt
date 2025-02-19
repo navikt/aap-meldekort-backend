@@ -130,40 +130,6 @@ class ArenaKontrollKorrigeringSteg(
     }
 }
 
-class PersisterOpplysningerSteg: UtfyllingSteg {
-    override val navn = PERSISTER_OPPLYSNINGER
-    override val erTeknisk = true
-
-    override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        /* TODO */
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is UtfyllingSteg && this.navn == other.navn
-    }
-
-    override fun hashCode(): Int {
-        return navn.hashCode()
-    }
-}
-
-class BestillJournalføringSteg: UtfyllingSteg {
-    override val navn = BESTILL_JOURNALFØRING
-    override val erTeknisk = true
-
-    override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        /* TODO */
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is UtfyllingSteg && this.navn == other.navn
-    }
-
-    override fun hashCode(): Int {
-        return navn.hashCode()
-    }
-}
-
 object KvitteringSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
         get() = KVITTERING

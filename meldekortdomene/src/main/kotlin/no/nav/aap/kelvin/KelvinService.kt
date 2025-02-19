@@ -3,7 +3,9 @@ package no.nav.aap.kelvin
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.AapFlyt
@@ -12,9 +14,10 @@ import java.time.LocalDate
 
 class KelvinService(
     override val sak: Sak,
+    timerArbeidetRepository: TimerArbeidetRepository,
 ) : FagsystemService {
-    override val innsendingsflyt = AapFlyt
-    override val korrigeringsflyt = AapFlyt
+    override val innsendingsflyt = AapFlyt(timerArbeidetRepository)
+    override val korrigeringsflyt = AapFlyt(timerArbeidetRepository)
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
         /* TODO: behandlingsflyt bestemmer hva meldeperiodene er. */
@@ -63,7 +66,10 @@ class KelvinService(
 
     companion object {
         fun konstruer(connection: DBConnection, sak: Sak): KelvinService {
-            return KelvinService(sak)
+            return KelvinService(
+                sak = sak,
+                timerArbeidetRepository = RepositoryProvider(connection).provide(),
+            )
         }
     }
 }

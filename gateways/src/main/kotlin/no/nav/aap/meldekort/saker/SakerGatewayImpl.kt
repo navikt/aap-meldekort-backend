@@ -14,6 +14,7 @@ import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.Saker
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsakReferanse
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
@@ -57,12 +58,14 @@ object SakerGatewayImpl : SakerGateway {
         )!!
             .map {
                 Sak(
-                    fagsystemNavn = when (it.kilde) {
-                        "Kelvin" -> FagsystemNavn.KELVIN
-                        "ARENA" -> FagsystemNavn.ARENA
-                        else -> error("ukjent fagsystem ${it.kilde}")
-                    },
-                    fagsaknummer = Fagsaknummer(it.sakId),
+                    referanse = FagsakReferanse(
+                        system = when (it.kilde) {
+                            "Kelvin" -> FagsystemNavn.KELVIN
+                            "ARENA" -> FagsystemNavn.ARENA
+                            else -> error("ukjent fagsystem ${it.kilde}")
+                        },
+                        nummer = Fagsaknummer(it.sakId),
+                    ),
                     rettighetsperiode = Periode(
                         fom = it.periode.fraOgMedDato?.let(LocalDate::parse)
                             ?: LocalDate.MIN.also {

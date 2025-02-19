@@ -7,15 +7,11 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsakReferanse
 
 class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
 ) : UtfyllingRepository {
-    companion object : Factory<UtfyllingRepositoryPostgres> {
-        override fun konstruer(connection: DBConnection): UtfyllingRepositoryPostgres {
-            return UtfyllingRepositoryPostgres(connection)
-        }
-    }
 
     override fun lastÅpenUtfylling(ident: Ident, periode: Periode, utfyllingsflyter: Utfyllingsflyter): Utfylling? {
         return connection.queryFirstOrNull("""
@@ -66,8 +62,8 @@ class UtfyllingRepositoryPostgres(
             setParams {
                 setString(1, utfylling.ident.asString)
                 setUUID(2, utfylling.referanse.asUuid)
-                setEnumName(3, utfylling.fagsystem)
-                setString(4, utfylling.fagsaknummer.asString)
+                setEnumName(3, utfylling.fagsak.system)
+                setString(4, utfylling.fagsak.nummer.asString)
                 setPeriode(5, no.nav.aap.komponenter.type.Periode(utfylling.periode.fom, utfylling.periode.tom))
                 setInstant(6, utfylling.opprettet)
                 setInstant(7, utfylling.sistEndret)
@@ -84,8 +80,10 @@ class UtfyllingRepositoryPostgres(
         return Utfylling(
             ident = Ident(row.getString("ident")),
             referanse = UtfyllingReferanse(row.getUUID("referanse")),
-            fagsystem = row.getEnum("fagsystem"),
-            fagsaknummer = Fagsaknummer(row.getString("fagsaknummer")),
+            fagsak = FagsakReferanse(
+                system = row.getEnum("fagsystem"),
+                nummer = Fagsaknummer(row.getString("fagsaknummer")),
+            ),
             periode = row.getPeriode("periode").let { Periode(it.fom, it.tom) },
             flyt = flyt,
             aktivtSteg = row.getEnum<UtfyllingStegNavn>("aktivt_steg").let { flyt.stegForNavn(it) },
@@ -93,5 +91,11 @@ class UtfyllingRepositoryPostgres(
             sistEndret = row.getInstant("sist_endret"),
             svar = DefaultJsonMapper.fromJson(row.getString("svar")),
         )
+    }
+
+    companion object : Factory<UtfyllingRepositoryPostgres> {
+        override fun konstruer(connection: DBConnection): UtfyllingRepositoryPostgres {
+            return UtfyllingRepositoryPostgres(connection)
+        }
     }
 }

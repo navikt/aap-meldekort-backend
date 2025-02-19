@@ -13,7 +13,7 @@ class SakerService(
     }
 
     fun ansvarligFagsystem(innloggetBruker: InnloggetBruker, påDag: LocalDate): FagsystemNavn? {
-        return finnSak(innloggetBruker, påDag)?.fagsystemNavn
+        return finnSak(innloggetBruker, påDag)?.referanse?.system
     }
 
     companion object {

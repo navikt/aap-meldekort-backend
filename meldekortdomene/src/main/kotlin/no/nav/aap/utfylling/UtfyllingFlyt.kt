@@ -1,7 +1,11 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.arena.ArenaService
+import no.nav.aap.journalføring.BestillJournalføringSteg
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.opplysningsplikt.PersisterOpplysningerSteg
+import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.Sak
 
 interface UtfyllingFlyt {
@@ -19,10 +23,13 @@ enum class UtfyllingFlytNavn {
     AAP_FLYT,
 }
 
-class Utfyllingsflyter(arenaService: ArenaService) {
-    private val arenaVanligFlyt = ArenaVanligFlyt(arenaService)
-    private val arenaKorrigeringFlyt = ArenaKorrigeringFlyt(arenaService)
-    private val aapFlyt = AapFlyt
+class Utfyllingsflyter(
+    arenaService: ArenaService,
+    timerArbeidetRepository: TimerArbeidetRepository,
+) {
+    private val arenaVanligFlyt = ArenaVanligFlyt(arenaService, timerArbeidetRepository)
+    private val arenaKorrigeringFlyt = ArenaKorrigeringFlyt(arenaService, timerArbeidetRepository)
+    private val aapFlyt = AapFlyt(timerArbeidetRepository)
 
     fun flytForNavn(flytNavn: UtfyllingFlytNavn): UtfyllingFlyt {
         return when (flytNavn) {
@@ -34,13 +41,17 @@ class Utfyllingsflyter(arenaService: ArenaService) {
 
     companion object {
         fun konstruer(connection: DBConnection, sak: Sak): Utfyllingsflyter {
-            return Utfyllingsflyter(ArenaService.konstruer(connection, sak))
+            return Utfyllingsflyter(
+                arenaService = ArenaService.konstruer(connection, sak),
+                timerArbeidetRepository = RepositoryProvider(connection).provide(),
+            )
         }
     }
 }
 
 class ArenaVanligFlyt(
     arenaService: ArenaService,
+    timerArbeidetRepository: TimerArbeidetRepository,
 ) : UtfyllingFlyt {
     override val navn = UtfyllingFlytNavn.ARENA_VANLIG_FLYT
 
@@ -50,7 +61,7 @@ class ArenaVanligFlyt(
         TimerArbeidetSteg,
         StemmerOpplysningeneSteg,
         ArenaKontrollVanligSteg(arenaService),
-        PersisterOpplysningerSteg(),
+        PersisterOpplysningerSteg(timerArbeidetRepository),
         BestillJournalføringSteg(),
         KvitteringSteg,
     )
@@ -66,6 +77,7 @@ class ArenaVanligFlyt(
 
 class ArenaKorrigeringFlyt(
     arenaService: ArenaService,
+    timerArbeidetRepository: TimerArbeidetRepository,
 ) : UtfyllingFlyt {
     override val navn = UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT
 
@@ -75,7 +87,7 @@ class ArenaKorrigeringFlyt(
         TimerArbeidetSteg,
         StemmerOpplysningeneSteg,
         ArenaKontrollKorrigeringSteg(arenaService),
-        PersisterOpplysningerSteg(),
+        PersisterOpplysningerSteg(timerArbeidetRepository),
         BestillJournalføringSteg(),
         KvitteringSteg,
     )
@@ -89,7 +101,9 @@ class ArenaKorrigeringFlyt(
     }
 }
 
-object AapFlyt : UtfyllingFlyt {
+class AapFlyt(
+    timerArbeidetRepository: TimerArbeidetRepository,
+) : UtfyllingFlyt {
     override val navn = UtfyllingFlytNavn.AAP_FLYT
 
     override val steg = listOf(
@@ -97,7 +111,7 @@ object AapFlyt : UtfyllingFlyt {
         SpørsmålSteg,
         TimerArbeidetSteg,
         StemmerOpplysningeneSteg,
-        PersisterOpplysningerSteg(),
+        PersisterOpplysningerSteg(timerArbeidetRepository),
         BestillJournalføringSteg(),
         KvitteringSteg,
     )

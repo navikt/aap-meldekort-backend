@@ -2,8 +2,7 @@ package no.nav.aap.utfylling
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsakReferanse
 import java.time.Instant
 import java.util.*
 
@@ -17,8 +16,7 @@ data class UtfyllingReferanse(val asUuid: UUID) {
 
 data class Utfylling(
     val referanse: UtfyllingReferanse,
-    val fagsystem: FagsystemNavn,
-    val fagsaknummer: Fagsaknummer,
+    val fagsak: FagsakReferanse,
     val ident: Ident,
     val periode: Periode,
     val flyt: UtfyllingFlyt,

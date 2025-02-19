@@ -51,7 +51,7 @@ interface FagsystemService {
 }
 
 fun fagsystemServiceFactory(connection: DBConnection, sak: Sak): FagsystemService {
-    return when (sak.fagsystemNavn) {
+    return when (sak.referanse.system) {
         FagsystemNavn.ARENA -> ArenaService.konstruer(connection, sak)
         FagsystemNavn.KELVIN -> KelvinService.konstruer(connection, sak)
     }

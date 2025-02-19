@@ -4,10 +4,13 @@ import no.nav.aap.Periode
 
 data class Fagsaknummer(val asString: String)
 
+data class FagsakReferanse(
+    val system: FagsystemNavn,
+    val nummer: Fagsaknummer,
+)
 
 class Sak(
-    val fagsystemNavn: FagsystemNavn,
-    val fagsaknummer: Fagsaknummer,
+    val referanse: FagsakReferanse,
     val rettighetsperiode: Periode,
 //    val meldeperioder: List<Meldeperiode>,
 //    val fritakFraMeldeplikt: List<Periode>,

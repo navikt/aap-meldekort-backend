@@ -82,8 +82,7 @@ class UtfyllingService(
         val nyUtfylling = Utfylling(
             referanse = utfyllingReferanse,
             periode = periode,
-            fagsystem = sak.fagsystemNavn,
-            fagsaknummer = sak.fagsaknummer,
+            fagsak = sak.referanse,
             ident = ident,
             flyt = flyt,
             aktivtSteg = flyt.steg.first(),
@@ -165,12 +164,16 @@ class UtfyllingService(
                 ),
                 arenaGateway = GatewayProvider.provide(),
                 sak = sak,
+                timerArbeidetRepository = RepositoryProvider(connection).provide(),
             )
 
             return UtfyllingService(
                 utfyllingRepository = repositoryProvider.provide(),
                 fagsystemService = fagsystemServiceFactory(connection, sak),
-                utfyllingsflyter = Utfyllingsflyter(arenaService)
+                utfyllingsflyter = Utfyllingsflyter(
+                    arenaService = arenaService,
+                    timerArbeidetRepository = RepositoryProvider(connection).provide(),
+                )
             )
         }
     }

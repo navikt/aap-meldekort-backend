@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort
 
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.DbConfig
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -12,7 +13,9 @@ import no.nav.aap.createPostgresDataSource
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.saker.SakerGatewayImpl
+import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 class App
 
@@ -21,33 +24,36 @@ fun main() {
         LoggerFactory.getLogger(App::class.java).error("Uhåndtert feil.", e)
     }
 
-    val dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus)
-
-    registerRepositories()
-    registerGateways()
-
-    startHttpServer(
-        port = 8080,
-        prometheus = prometheus,
-        applikasjonsVersjon = ApplikasjonsVersjon.versjon,
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
-        dataSource = dataSource
+    main(
+        dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus),
+        prometheusMeterRegistry = prometheus,
+        applikasjonVersjon = ApplikasjonsVersjon.versjon
     )
 }
 
-fun registerRepositories() {
+fun main(
+    dataSource: DataSource,
+    prometheusMeterRegistry: PrometheusMeterRegistry,
+    applikasjonVersjon: String,
+) {
     RepositoryRegistry
         .register<MeldekortRepositoryPostgres>()
-//        .register<SkjemaRepositoryPostgres>()
         .register<UtfyllingRepositoryPostgres>()
+        .register<TimerArbeidetRepositoryPostgres>()
         .status()
-}
 
-private fun registerGateways() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<SakerGatewayImpl>()
         .register<ArenaGatewayImpl>()
         .status()
+
+    startHttpServer(
+        port = 8080,
+        prometheus = prometheusMeterRegistry,
+        applikasjonsVersjon = applikasjonVersjon,
+        tokenxConfig = TokenxConfig(),
+        azureConfig = AzureConfig(),
+        dataSource = dataSource
+    )
 }
