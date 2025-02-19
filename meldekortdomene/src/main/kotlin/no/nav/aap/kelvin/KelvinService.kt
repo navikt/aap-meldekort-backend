@@ -14,12 +14,15 @@ import java.time.LocalDate
 
 class KelvinService(
     override val sak: Sak,
-    timerArbeidetRepository: TimerArbeidetRepository,
+    private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : FagsystemService {
     override val innsendingsflyt = AapFlyt(timerArbeidetRepository)
     override val korrigeringsflyt = AapFlyt(timerArbeidetRepository)
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
+        val senesteInnsendingsdato = timerArbeidetRepository.hentSisteInnsendingsdato(innloggetBruker.ident, sak.referanse)
+            ?: LocalDate.MIN
+
         /* TODO: behandlingsflyt bestemmer hva meldeperiodene er. */
         val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(size = 14, step = 14, partialWindows = true)
             .map { Meldeperiode(
@@ -27,11 +30,15 @@ class KelvinService(
                 meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
             )}
 
-        /* TODO: mye å gjøre */
-        val tidligereMeldeperioder = perioder.filter { it.meldevindu.tom <= LocalDate.now() }
+        val meldeperioderUtenInnsending =
+            perioder.dropWhile { it.meldeperioden.tom <= senesteInnsendingsdato }
+        val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
+            .takeWhile { it.meldevindu.tom <= LocalDate.now() }
+
         return FagsystemService.VentendeOgNeste(
-            ventende = tidligereMeldeperioder,
-            neste = tidligereMeldeperioder.firstOrNull(),
+            ventende = meldeperioderUtenInnsendingSomKanSendesInn,
+            neste = meldeperioderUtenInnsendingSomKanSendesInn.firstOrNull()
+                ?: meldeperioderUtenInnsending.firstOrNull(),
         )
     }
 

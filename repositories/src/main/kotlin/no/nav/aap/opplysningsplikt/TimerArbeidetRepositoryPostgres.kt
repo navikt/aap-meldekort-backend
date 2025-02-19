@@ -8,7 +8,7 @@ import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.UtfyllingReferanse
-import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
+import java.time.LocalDate
 import no.nav.aap.komponenter.type.Periode as DBPeriode
 
 class TimerArbeidetRepositoryPostgres(
@@ -38,7 +38,25 @@ class TimerArbeidetRepositoryPostgres(
             }
         }
     }
-    
+
+    override fun hentSisteInnsendingsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
+        return connection.queryFirstOrNull("""
+            select dato from timer_arbeidet
+            where ident = ? and fagsak_system = ? and fagsak_nummer = ?
+            order by dato desc
+            limit 1
+        """) {
+            setParams {
+                setString(1, ident.asString)
+                setEnumName(2, fagsak.system)
+                setString(3, fagsak.nummer.asString)
+            }
+            setRowMapper { row ->
+                row.getLocalDate("dato")
+            }
+        }
+    }
+
     override fun hentTimerArbeidet(ident: Ident, sak: FagsakReferanse, periode: Periode): List<TimerArbeidet> {
         return connection.queryList("""
             select distinct on (dato) *
