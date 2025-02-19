@@ -1,5 +1,6 @@
 package no.nav.aap.meldekort
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -18,7 +19,7 @@ class StartUtfyllingResponse(
     val feil: String?,
 )
 
-class EndreUtfyllingRequest(
+class EndreUtfyllingRequest @JsonCreator constructor(
     val nyTilstand: UtfyllingTilstandDto,
 )
 
@@ -89,7 +90,7 @@ class SvarDto(
         )
     }
 
-    constructor(svar: Svar): this(
+    constructor(svar: Svar) : this(
         vilSvareRiktig = svar.svarerDuSant,
         harDuJobbet = svar.harDuJobbet,
         dager = svar.timerArbeidet.map { DagSvarDto(it) },
@@ -108,7 +109,7 @@ class DagSvarDto(
         )
     }
 
-    constructor(timerArbeidet: TimerArbeidet): this(
+    constructor(timerArbeidet: TimerArbeidet) : this(
         dato = timerArbeidet.dato,
         timerArbeidet = timerArbeidet.timer,
     )
