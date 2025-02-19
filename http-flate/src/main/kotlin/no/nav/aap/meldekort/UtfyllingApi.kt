@@ -97,6 +97,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             }
             respond(
                 EndreUtfyllingResponse(
+                    metadata = UtfyllingMetadataDto(response.utfylling),
                     utfyllingTilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )
@@ -114,6 +115,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             }
             respond(
                 EndreUtfyllingResponse(
+                    metadata = UtfyllingMetadataDto(response.utfylling),
                     utfyllingTilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )

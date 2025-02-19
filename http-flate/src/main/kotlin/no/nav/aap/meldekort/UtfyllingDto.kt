@@ -28,6 +28,7 @@ class EndreUtfyllingRequest(
 )
 
 class EndreUtfyllingResponse(
+    val metadata: UtfyllingMetadataDto,
     val utfyllingTilstand: UtfyllingTilstandDto,
     val feil: String?
 )
