@@ -91,7 +91,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 nesteOgLagre(
                     innloggetBruker = innloggetBruker(),
                     utfyllingReferanse = UtfyllingReferanse(params.referanse),
-                    aktivtSteg = body.nyTilstand.steg.tilDomene,
+                    aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )
             }
@@ -106,10 +106,10 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         route("lagre").post<Referanse, EndreUtfyllingResponse, EndreUtfyllingRequest> { params, body ->
             val response = medFlate {
                 lagre(
-                    innloggetBruker(),
-                    UtfyllingReferanse(params.referanse),
-                    body.nyTilstand.steg.tilDomene,
-                    body.nyTilstand.svar.tilDomene(),
+                    innloggetBruker = innloggetBruker(),
+                    utfyllingReferanse = UtfyllingReferanse(params.referanse),
+                    aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
+                    svar = body.nyTilstand.svar.tilDomene(),
                 )
             }
             respond(

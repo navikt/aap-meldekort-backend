@@ -33,11 +33,11 @@ class EndreUtfyllingResponse(
 )
 
 class UtfyllingTilstandDto(
-    val steg: StegDto,
+    val aktivtSteg: StegDto,
     val svar: SvarDto,
 ) {
     constructor(utfylling: Utfylling) : this(
-        steg = StegDto.fraDomene(utfylling.aktivtSteg.navn),
+        aktivtSteg = StegDto.fraDomene(utfylling.aktivtSteg.navn),
         svar = SvarDto(utfylling.svar)
     )
 }
