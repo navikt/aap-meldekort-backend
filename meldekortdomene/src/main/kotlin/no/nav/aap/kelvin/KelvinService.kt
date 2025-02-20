@@ -79,6 +79,9 @@ class KelvinService(
     }
 
     override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): FagsystemService.PeriodeDetaljer {
+        /* TODO: må håndtere at det ikke er registrert noen timer, og da returnere tomt for den
+         * dagen.
+         */
         val timerArbeidet = timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
             .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
         return FagsystemService.PeriodeDetaljer(
@@ -104,6 +107,21 @@ class KelvinService(
         periode: Periode,
         utfyllingReferanse: UtfyllingReferanse
     ) {
+    }
+
+    override fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar {
+        /* TODO: må håndtere at det ikke er registrert noen timer, og da returnere tomt for den
+         * dagen.
+         */
+        val timerArbeidet = timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+            .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+        return Svar(
+            svarerDuSant = null,
+            harDuJobbet = null,
+            timerArbeidet =
+                timerArbeidet,
+            stemmerOpplysningene = null,
+        )
     }
 
     companion object {

@@ -101,6 +101,10 @@ class ArenaService(
     ) {
     }
 
+    override fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar {
+        return Svar.tomt(periode)
+    }
+
     fun sendInnKorrigering(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
         /* TODO */
     }

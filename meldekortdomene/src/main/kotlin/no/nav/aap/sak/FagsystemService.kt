@@ -45,9 +45,7 @@ interface FagsystemService {
         return Svar.tomt(periode)
     }
 
-    fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar {
-        return Svar.tomt(periode)
-    }
+    fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar
 }
 
 fun fagsystemServiceFactory(connection: DBConnection, sak: Sak): FagsystemService {
