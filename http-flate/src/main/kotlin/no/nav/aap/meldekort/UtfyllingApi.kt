@@ -14,14 +14,20 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingService
+import org.slf4j.MDC
 import java.util.*
 import javax.sql.DataSource
 
 fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
-    fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: UtfyllingService.() -> T): T {
-        return dataSource.transaction { connection ->
-            UtfyllingService.konstruer(innloggetBruker(), connection).run {
-                body()
+    fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
+        utfyllingReferanse: UtfyllingReferanse? = null,
+        body: UtfyllingService.() -> T,
+    ): T {
+        return MDC.putCloseable("utfylling", utfyllingReferanse?.asUuid?.toString()).use {
+            dataSource.transaction { connection ->
+                UtfyllingService.konstruer(innloggetBruker(), connection).run {
+                    body()
+                }
             }
         }
     }
@@ -63,7 +69,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         )
         get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
-            val utfylling = medFlate {
+            val utfylling = medFlate(utfyllingReferanse) {
                 hent(innloggetBruker(), utfyllingReferanse)
             }
             if (utfylling == null) {
@@ -81,17 +87,19 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         }
 
         delete<Referanse, Unit> { params ->
-            medFlate {
-                slett(innloggetBruker(), UtfyllingReferanse(params.referanse))
+            val utfyllingReferanse = UtfyllingReferanse(params.referanse)
+            medFlate(utfyllingReferanse) {
+                slett(innloggetBruker(), utfyllingReferanse)
             }
             respondWithStatus(HttpStatusCode.OK)
         }
 
         route("lagre-neste").post<Referanse, UtfyllingResponseDto, EndreUtfyllingRequest> { params, body ->
-            val response = medFlate {
+            val utfyllingReferanse = UtfyllingReferanse(params.referanse)
+            val response = medFlate(utfyllingReferanse) {
                 nesteOgLagre(
                     innloggetBruker = innloggetBruker(),
-                    utfyllingReferanse = UtfyllingReferanse(params.referanse),
+                    utfyllingReferanse = utfyllingReferanse,
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )
@@ -106,10 +114,11 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         }
 
         route("lagre").post<Referanse, UtfyllingResponseDto, EndreUtfyllingRequest> { params, body ->
-            val response = medFlate {
+            val utfyllingReferanse = UtfyllingReferanse(params.referanse)
+            val response = medFlate(utfyllingReferanse) {
                 lagre(
                     innloggetBruker = innloggetBruker(),
-                    utfyllingReferanse = UtfyllingReferanse(params.referanse),
+                    utfyllingReferanse = utfyllingReferanse,
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )

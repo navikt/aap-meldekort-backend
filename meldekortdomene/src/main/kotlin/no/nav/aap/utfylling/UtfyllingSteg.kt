@@ -29,13 +29,15 @@ interface UtfyllingSteg {
 
     val erTeknisk: Boolean get() = false
 
+    fun erRelevant(utfylling: Utfylling): Boolean {
+        return true
+    }
+
+    /* Sjekk om formkrav oppfylles. Sjekkes også for ikke-relevante steg. */
     fun oppfyllerFormkrav(utfylling: Utfylling): Boolean {
         return true
     }
 
-    fun erRelevant(utfylling: Utfylling): Boolean {
-        return true
-    }
 
     /* Må være idempotent! */
     fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
@@ -73,13 +75,22 @@ object TimerArbeidetSteg : UtfyllingSteg {
 
     override fun oppfyllerFormkrav(utfylling: Utfylling): Boolean {
         val timerArbeidet = utfylling.svar.timerArbeidet
-        if (timerArbeidet.all { it.timer == null || it.timer == 0.0 }) {
+
+        if (timerArbeidet.any { it.dato !in utfylling.periode }) {
             return false
         }
-        return timerArbeidet.all {
+
+        val riktigFormat = timerArbeidet.all {
             val timer = it.timer ?: return@all true
             timer in 0.0..24.0 && (timer.toString().let { it.endsWith(".0") || it.endsWith(".5") })
         }
+        if (!riktigFormat) {
+            return false
+        }
+
+        val harRegistrertTimer = timerArbeidet.any { it.timer != null && it.timer > 0.0 }
+
+        return harRegistrertTimer || utfylling.svar.harDuJobbet == false
     }
 }
 
