@@ -39,7 +39,7 @@ class TimerArbeidetRepositoryPostgres(
         }
     }
 
-    override fun hentSisteInnsendingsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
+    override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
         return connection.queryFirstOrNull("""
             select dato from timer_arbeidet
             where ident = ? and fagsak_system = ? and fagsak_nummer = ?

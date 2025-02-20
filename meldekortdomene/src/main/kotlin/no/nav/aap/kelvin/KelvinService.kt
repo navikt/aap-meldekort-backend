@@ -9,6 +9,8 @@ import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.AapFlyt
+import no.nav.aap.utfylling.Svar
+import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.LocalDate
 
@@ -20,18 +22,25 @@ class KelvinService(
     override val korrigeringsflyt = AapFlyt(timerArbeidetRepository)
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
-        val senesteInnsendingsdato = timerArbeidetRepository.hentSisteInnsendingsdato(innloggetBruker.ident, sak.referanse)
-            ?: LocalDate.MIN
+        val senesteOpplysningsdato =
+            timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
+                ?: LocalDate.MIN
 
         /* TODO: behandlingsflyt bestemmer hva meldeperiodene er. */
-        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(size = 14, step = 14, partialWindows = true)
-            .map { Meldeperiode(
-                meldeperioden = it,
-                meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
-            )}
+        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(
+            size = 14,
+            step = 14,
+            partialWindows = true
+        )
+            .map {
+                Meldeperiode(
+                    meldeperioden = it,
+                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
+                )
+            }
 
         val meldeperioderUtenInnsending =
-            perioder.dropWhile { it.meldeperioden.tom <= senesteInnsendingsdato }
+            perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
             .takeWhile { it.meldevindu.tom <= LocalDate.now() }
 
@@ -43,18 +52,44 @@ class KelvinService(
     }
 
     override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(size = 14, step = 14, partialWindows = true)
-            .map { Meldeperiode(
-                meldeperioden = it,
-                meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
-            )}
+        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(
+            size = 14,
+            step = 14,
+            partialWindows = true
+        )
+            .map {
+                Meldeperiode(
+                    meldeperioden = it,
+                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
+                )
+            }
 
-        /* TODO: mye å gjøre */
-        return perioder.filter { it.meldevindu.tom <= LocalDate.now() }
+        val senesteOpplysningsdato =
+            timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
+                ?: LocalDate.MIN
+
+        /* Her ønsker vi å liste opp meldeperioder hvor:
+         * - medlemmet har gitt opplysninger
+         * - medlemmet har ikke gitt opplysninger, men er heller ikke pliktig til å gi opplysninger (fritak, f.eks.)
+         */
+
+        return perioder
+            .filter { it.meldeperioden.fom <= senesteOpplysningsdato }
+            .reversed()
     }
 
     override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): FagsystemService.PeriodeDetaljer {
-        return FagsystemService.PeriodeDetaljer(periode, tomtSvar(periode))
+        val timerArbeidet = timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+            .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+        return FagsystemService.PeriodeDetaljer(
+            periode = periode,
+            svar = Svar(
+                svarerDuSant = true, /* TODO */
+                harDuJobbet = true, /* TODO */
+                timerArbeidet = timerArbeidet,
+                stemmerOpplysningene = true, /* TODO */
+            )
+        )
     }
 
     override fun forberedVanligFlyt(

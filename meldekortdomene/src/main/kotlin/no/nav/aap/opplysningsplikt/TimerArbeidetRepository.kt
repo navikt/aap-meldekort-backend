@@ -19,5 +19,5 @@ interface TimerArbeidetRepository: Repository {
         opplysninger: List<TimerArbeidet>,
     )
 
-    fun hentSisteInnsendingsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate?
+    fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate?
 }
