@@ -51,7 +51,7 @@ object UtfyllingFlytOrkestrator {
         var forbiAktivt = false
 
         for (steg in utfylling.flyt.steg) {
-            if (forbiAktivt && !steg.erTeknisk) {
+            if (forbiAktivt && !steg.erTeknisk && steg.erRelevant(utfylling)) {
                 return steg
             }
             if (steg == utfylling.aktivtSteg) {
@@ -61,6 +61,7 @@ object UtfyllingFlytOrkestrator {
 
         return utfylling.flyt.steg.last().also {
             check(!it.erTeknisk)
+            check(it.erRelevant(utfylling))
         }
     }
 
