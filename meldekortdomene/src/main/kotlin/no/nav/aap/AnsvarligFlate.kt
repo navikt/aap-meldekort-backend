@@ -3,13 +3,13 @@ package no.nav.aap
 import no.nav.aap.lookup.gateway.GatewayProvider
 import java.time.LocalDate
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.SakerGateway
+import no.nav.aap.sak.AapGateway
 import no.nav.aap.sak.Saker
 import no.nav.aap.sak.SakerService
 
 class AnsvarligFlate(
     private val sakerService: SakerService,
-    private val sakerGateway: SakerGateway,
+    private val aapGateway: AapGateway,
 ) {
     fun routingForBruker(innloggetBruker: InnloggetBruker): FagsystemNavn {
         /* Er det ATTF-meldegruppe i Arena? */
@@ -24,15 +24,15 @@ class AnsvarligFlate(
     }
 
     fun debugSaker(innloggetBruker: InnloggetBruker): Saker {
-        return sakerGateway.hentSaker(innloggetBruker)
+        return aapGateway.hentSaker(innloggetBruker)
     }
 
     companion object {
         fun konstruer(): AnsvarligFlate {
-            val sakerGateway = GatewayProvider.provide<SakerGateway>()
+            val aapGateway = GatewayProvider.provide<AapGateway>()
             return AnsvarligFlate(
-                sakerService = SakerService(sakerGateway),
-                sakerGateway = sakerGateway,
+                sakerService = SakerService(aapGateway),
+                aapGateway = aapGateway,
             )
         }
     }

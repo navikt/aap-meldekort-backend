@@ -22,9 +22,14 @@ data class Periode(
         return dato in fom..tom
     }
 
+    fun overlapper(other: Periode): Boolean {
+        return this.fom <= other.tom && other.fom <= this.tom
+    }
+
     enum class Klassifikasjon {
         DAGEN_ER_FØR_PERIODEN, DAGER_ER_I_PERIODEN, DAGEN_ER_ETTER_PERIODEN
     }
+
     fun klassifiser(dag: LocalDate): Klassifikasjon {
         return when {
             dag < fom -> Klassifikasjon.DAGEN_ER_FØR_PERIODEN

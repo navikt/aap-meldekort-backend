@@ -12,7 +12,7 @@ import no.nav.aap.arena.MeldekortRepositoryPostgres
 import no.nav.aap.createPostgresDataSource
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
-import no.nav.aap.meldekort.saker.SakerGatewayImpl
+import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
@@ -44,7 +44,7 @@ fun main(
 
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
-        .register<SakerGatewayImpl>()
+        .register<AapGatewayImpl>()
         .register<ArenaGatewayImpl>()
         .status()
 

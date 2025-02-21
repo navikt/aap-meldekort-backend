@@ -5,10 +5,10 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import java.time.LocalDate
 
 class SakerService(
-    private val sakerGateway: SakerGateway,
+    private val aapGateway: AapGateway,
 ) {
     fun finnSak(innloggetBruker: InnloggetBruker, påDag: LocalDate): Sak? {
-        val saker = sakerGateway.hentSaker(innloggetBruker)
+        val saker = aapGateway.hentSaker(innloggetBruker)
         return saker.finnSakForDagen(påDag)
     }
 
@@ -18,7 +18,7 @@ class SakerService(
 
     companion object {
         fun konstruer(): SakerService {
-            return SakerService(GatewayProvider.provide<SakerGateway>())
+            return SakerService(GatewayProvider.provide<AapGateway>())
 
         }
     }

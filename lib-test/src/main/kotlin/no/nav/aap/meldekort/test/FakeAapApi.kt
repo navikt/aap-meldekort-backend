@@ -1,14 +1,21 @@
 package no.nav.aap.meldekort.test
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.http.*
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import no.nav.aap.Periode
+import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.sak.FagsakReferanse
+import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsystemNavn.ARENA
+import no.nav.aap.sak.FagsystemNavn.KELVIN
+import no.nav.aap.sak.Sak
 import java.time.LocalDate
 
 object FakeAapApi : FakeServer {
@@ -19,44 +26,67 @@ object FakeAapApi : FakeServer {
 
     override val module: Application.() -> Unit = {
         val idag = LocalDate.now()
-
-        val responser = mapOf(
-            "1".repeat(11) to """
-                        [
-                          {
-                            "sakId": "1015",
-                            "vedtakStatusKode": "REGIS",
-                            "periode": {
-                              "fraOgMedDato": "${idag.minusDays(100)}",
-                              "tilOgMedDato": "${idag.plusDays(20)}"
-                            },
-                            "kilde": "Kelvin"
-                          }
-                        ]
-                """,
-            "2".repeat(11) to """
-                [
-                  {
-                    "sakId": "13702335",
-                    "vedtakStatusKode": "IVERK",
-                    "periode": {
-                      "fraOgMedDato": "${idag.minusDays(100)}",
-                      "tilOgMedDato": "${idag.plusDays(20)}"
-                    },
-                    "kilde": "ARENA"
-                  }
-                ]
-                """,
-            "3".repeat(11) to "[]"
+        val saker = mapOf(
+            "1".repeat(11) to listOf(
+                Sak(
+                    referanse = FagsakReferanse(KELVIN, Fagsaknummer("1015")),
+                    rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
+                )
+            ),
+            "2".repeat(11) to listOf(
+                Sak(
+                    referanse = FagsakReferanse(ARENA, Fagsaknummer("")),
+                    rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
+                )
+            ),
         )
+
         install(ContentNegotiation) {
-            jackson()
+            val mapper = DefaultJsonMapper.objectMapper()
+            mapper.registerKotlinModule()
+            val converter = JacksonConverter(mapper, true)
+            register(ContentType.Application.Json, converter)
         }
         routing {
             post("/sakerByFnr") {
                 val fnr = call.receive<JsonNode>().at("/personidentifikatorer/0").asText()
-                println("fnr $fnr")
-                call.respond(responser.getOrDefault(fnr, emptyList<Any>()))
+                call.respond(saker.getOrDefault(fnr, emptyList()).map {
+                    mapOf(
+                        "sakId" to it.referanse.nummer.asString,
+                        "vedtakStatusKode" to "IVERK",
+                        "periode" to mapOf(
+                            "fraOgMedDato" to it.rettighetsperiode.fom,
+                            "tilOgMedDato" to it.rettighetsperiode.tom,
+                        ),
+                        "kilde" to when (it.referanse.system) {
+                            ARENA -> "ARENA"
+                            KELVIN -> "Kelvin"
+                        }
+                    )
+                })
+            }
+
+            post("/perioder/meldekort") {
+                class Request(
+                    val fraOgMedDato: LocalDate,
+                    val personidentifikator: String,
+                    val tilOgMedDato: LocalDate,
+                ) {
+                    val periode = Periode(fraOgMedDato, tilOgMedDato)
+                }
+
+                val request = call.receive<Request>()
+                val perioder = saker[request.personidentifikator]
+                    .orEmpty()
+                    .filter { it.rettighetsperiode.overlapper(request.periode) }
+                    .flatMap {
+                        Periode(it.rettighetsperiode.fom, it.rettighetsperiode.tom).slidingWindow(
+                            size = 14,
+                            step = 14,
+                            partialWindows = true
+                        )
+                    }
+                call.respond(perioder)
             }
         }
     }

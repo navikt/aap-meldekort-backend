@@ -2,7 +2,6 @@ package no.nav.aap.meldekort.saker
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.sak.SakerGateway
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
@@ -10,26 +9,28 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.sak.FagsakReferanse
+import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.Saker
-import no.nav.aap.sak.Fagsaknummer
-import no.nav.aap.sak.FagsakReferanse
+import no.nav.aap.sak.AapGateway
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
 
-object SakerGatewayImpl : SakerGateway {
+object AapGatewayImpl : AapGateway {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    private val kelvinUrl = requiredConfigForKey("aap.api.intern.url")
+    private val aapApiUrl = requiredConfigForKey("aap.api.intern.url")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = requiredConfigForKey("aap.api.intern.scope")),
         tokenProvider = ClientCredentialsTokenProvider
     )
 
-    private val sakerByFnrUrl = URI("$kelvinUrl/sakerByFnr")
+    private val sakerByFnrUrl = URI("$aapApiUrl/sakerByFnr")
+    private val perioderMeldekortUrl = URI("$aapApiUrl/perioder/meldekort")
 
     /** Kontrakt? */
     class SakStatus(
@@ -80,5 +81,22 @@ object SakerGatewayImpl : SakerGateway {
             }
 
         return Saker(saker)
+    }
+
+    override fun hentMeldeperioder(innloggetBruker: InnloggetBruker, periode: Periode): List<Periode> {
+        class KelvinPeriode(val fom: LocalDate, val tom: LocalDate)
+
+        return httpClient.post<_, List<KelvinPeriode>>(
+            uri = perioderMeldekortUrl,
+            request = PostRequest(
+                body = mapOf(
+                    "personidentifikator" to innloggetBruker.ident.asString,
+                    "fraOgMedDato" to periode.fom,
+                    "tilOgMedDato" to periode.tom,
+                ),
+                additionalHeaders = listOf(Header("accept", "application/json")),
+            ),
+        )!!
+            .map { Periode(it.fom, it.tom) }
     }
 }

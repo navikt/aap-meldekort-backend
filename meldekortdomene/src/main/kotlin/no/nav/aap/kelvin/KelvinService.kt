@@ -3,11 +3,13 @@ package no.nav.aap.kelvin
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
+import no.nav.aap.sak.AapGateway
 import no.nav.aap.utfylling.AapFlyt
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
@@ -16,28 +18,29 @@ import java.time.LocalDate
 
 class KelvinService(
     override val sak: Sak,
+    private val aapGateway: AapGateway,
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : FagsystemService {
     override val innsendingsflyt = AapFlyt(timerArbeidetRepository)
     override val korrigeringsflyt = AapFlyt(timerArbeidetRepository)
+
+    private fun hentMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
+        return aapGateway.hentMeldeperioder(innloggetBruker, sak.rettighetsperiode)
+            .map {
+                /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
+                Meldeperiode(
+                    meldeperioden = it,
+                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
+                )
+            }
+    }
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
                 ?: LocalDate.MIN
 
-        /* TODO: behandlingsflyt bestemmer hva meldeperiodene er. */
-        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(
-            size = 14,
-            step = 14,
-            partialWindows = true
-        )
-            .map {
-                Meldeperiode(
-                    meldeperioden = it,
-                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
-                )
-            }
+        val perioder = hentMeldeperioder(innloggetBruker)
 
         val meldeperioderUtenInnsending =
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
@@ -52,17 +55,7 @@ class KelvinService(
     }
 
     override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        val perioder = Periode(sak.rettighetsperiode.fom, LocalDate.now()).slidingWindow(
-            size = 14,
-            step = 14,
-            partialWindows = true
-        )
-            .map {
-                Meldeperiode(
-                    meldeperioden = it,
-                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
-                )
-            }
+        val perioder = hentMeldeperioder(innloggetBruker)
 
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
@@ -129,6 +122,7 @@ class KelvinService(
             return KelvinService(
                 sak = sak,
                 timerArbeidetRepository = RepositoryProvider(connection).provide(),
+                aapGateway = GatewayProvider.provide(),
             )
         }
     }
