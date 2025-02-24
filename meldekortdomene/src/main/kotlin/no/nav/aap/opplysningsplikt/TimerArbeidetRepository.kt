@@ -8,6 +8,7 @@ import java.time.LocalDate
 
 
 interface TimerArbeidetRepository: Repository {
+    /** @return registrerte opplysininger, sorted på dato (ascending) */
     fun hentTimerArbeidet(
         ident: Ident,
         sak: FagsakReferanse,

@@ -72,11 +72,7 @@ class KelvinService(
     }
 
     override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): FagsystemService.PeriodeDetaljer {
-        /* TODO: må håndtere at det ikke er registrert noen timer, og da returnere tomt for den
-         * dagen.
-         */
-        val timerArbeidet = timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
-            .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+        val timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode)
         return FagsystemService.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
@@ -103,18 +99,33 @@ class KelvinService(
     }
 
     override fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar {
-        /* TODO: må håndtere at det ikke er registrert noen timer, og da returnere tomt for den
-         * dagen.
-         */
-        val timerArbeidet = timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
-            .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
         return Svar(
             svarerDuSant = null,
             harDuJobbet = null,
-            timerArbeidet =
-                timerArbeidet,
+            timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode),
             stemmerOpplysningene = null,
         )
+    }
+
+    private fun registrerteTimerArbeidet(
+        innloggetBruker: InnloggetBruker,
+        periode: Periode
+    ): List<TimerArbeidet> {
+        val registrerteOpplysninger =
+            timerArbeidetRepository.hentTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+                .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+                .toMutableList()
+
+        val timerArbeidet = sequence {
+            for (dato in periode) {
+                if (registrerteOpplysninger.firstOrNull()?.dato == dato) {
+                    yield(registrerteOpplysninger.removeFirst())
+                } else {
+                    yield(TimerArbeidet(dato, null))
+                }
+            }
+        }
+        return timerArbeidet.toList()
     }
 
     companion object {
