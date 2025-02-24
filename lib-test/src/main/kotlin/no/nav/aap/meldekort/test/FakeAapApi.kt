@@ -53,7 +53,7 @@ object FakeAapApi : FakeServer {
                 call.respond(saker.getOrDefault(fnr, emptyList()).map {
                     mapOf(
                         "sakId" to it.referanse.nummer.asString,
-                        "vedtakStatusKode" to "IVERK",
+                        "statusKode" to "IVERK",
                         "periode" to mapOf(
                             "fraOgMedDato" to it.rettighetsperiode.fom,
                             "tilOgMedDato" to it.rettighetsperiode.tom,

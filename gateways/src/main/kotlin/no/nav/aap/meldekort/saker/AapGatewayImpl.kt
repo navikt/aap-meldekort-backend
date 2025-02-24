@@ -37,7 +37,7 @@ object AapGatewayImpl : AapGateway {
         val kilde: String,
         val periode: Periode,
         val sakId: String,
-        val vedtakStatusKode: VedtakStatusKode,
+        val statusKode: VedtakStatusKode,
     ) {
         class Periode(
             val fraOgMedDato: String?,
