@@ -61,7 +61,7 @@ object AapGatewayImpl : AapGateway {
                 Sak(
                     referanse = FagsakReferanse(
                         system = when (it.kilde) {
-                            "Kelvin" -> FagsystemNavn.KELVIN
+                            "KELVIN" -> FagsystemNavn.KELVIN
                             "ARENA" -> FagsystemNavn.ARENA
                             else -> error("ukjent fagsystem ${it.kilde}")
                         },

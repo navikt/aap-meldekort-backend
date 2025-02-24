@@ -60,7 +60,7 @@ object FakeAapApi : FakeServer {
                         ),
                         "kilde" to when (it.referanse.system) {
                             ARENA -> "ARENA"
-                            KELVIN -> "Kelvin"
+                            KELVIN -> "KELVIN"
                         }
                     )
                 })
