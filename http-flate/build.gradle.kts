@@ -3,7 +3,7 @@ plugins {
 }
 
 val komponenterVersjon = "1.0.151"
-val ktorVersion = "3.1.0"
+val ktorVersion = "3.1.1"
 
 dependencies {
     api("no.nav:ktor-openapi-generator:1.0.81")
