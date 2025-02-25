@@ -1,7 +1,7 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaService
+import no.nav.aap.arena.ArenaSakService
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
@@ -103,12 +103,12 @@ object StemmerOpplysningeneSteg: UtfyllingSteg {
 }
 
 class ArenaKontrollVanligSteg(
-    private val arenaService: ArenaService,
+    private val arenaSakService: ArenaSakService,
 ): UtfyllingSteg {
     override val navn = ARENAKONTROLL_VANLIG
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        arenaService.sendInnVanlig(innloggetBruker, utfylling)
+        arenaSakService.sendInnVanlig(innloggetBruker, utfylling)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -121,12 +121,12 @@ class ArenaKontrollVanligSteg(
 }
 
 class ArenaKontrollKorrigeringSteg(
-    private val arenaService: ArenaService,
+    private val arenaSakService: ArenaSakService,
 ): UtfyllingSteg {
     override val navn = ARENAKONTROLL_KORRIGERING
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        arenaService.sendInnKorrigering(innloggetBruker, utfylling)
+        arenaSakService.sendInnKorrigering(innloggetBruker, utfylling)
     }
 
     override fun equals(other: Any?): Boolean {

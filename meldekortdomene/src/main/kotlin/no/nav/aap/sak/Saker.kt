@@ -20,4 +20,8 @@ class Saker(
             }
             .singleOrNull()
     }
+
+    fun finnSak(fagsakReferanse: FagsakReferanse): Sak? {
+        return saker.firstOrNull { it.referanse == fagsakReferanse }
+    }
 }

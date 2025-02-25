@@ -24,7 +24,7 @@ class AnsvarligFlate(
     }
 
     fun debugSaker(innloggetBruker: InnloggetBruker): Saker {
-        return aapGateway.hentSaker(innloggetBruker)
+        return aapGateway.hentSaker(innloggetBruker.ident)
     }
 
     companion object {

@@ -9,13 +9,12 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
-import java.time.LocalDate
 import javax.sql.DataSource
 
 fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: MeldeperiodeFlate.() -> T): T {
         return dataSource.transaction {
-            MeldeperiodeFlate.konstruer(innloggetBruker(), it).body()
+            MeldeperiodeFlate.konstruer(innloggetBruker().ident, it).body()
         }
     }
 

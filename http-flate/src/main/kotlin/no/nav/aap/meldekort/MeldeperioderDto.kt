@@ -1,7 +1,7 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.meldeperiode.Meldeperiode
-import no.nav.aap.sak.FagsystemService
+import no.nav.aap.sak.SakService
 import java.time.LocalDate
 
 class MeldeperiodeDto(
@@ -55,7 +55,7 @@ data class PeriodeDetaljerDto(
     val type: MeldekortTypeDto,
     val svar: SvarDto,
 ) {
-    constructor(detaljer: FagsystemService.PeriodeDetaljer) : this(
+    constructor(detaljer: SakService.PeriodeDetaljer) : this(
         periode = PeriodeDto(detaljer.periode),
         status = MeldeperiodeStatusDto.KELVIN /* TODO */,
         bruttoBeløp = null /* TODO */,

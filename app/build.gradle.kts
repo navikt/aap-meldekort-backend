@@ -5,7 +5,7 @@ val komponenterVersjon = "1.0.159"
 val junitVersjon = "5.11.4"
 
 plugins {
-    id("behandlingsflyt.conventions")
+    id("meldekort.conventions")
     id("io.ktor.plugin") version "3.1.1"
 }
 

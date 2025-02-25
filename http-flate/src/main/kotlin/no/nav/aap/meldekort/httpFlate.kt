@@ -16,8 +16,7 @@ import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.journalføring.motor.ArenaJournalføringJobbUtfører
-import no.nav.aap.journalføring.motor.JournalføringLogInfoProvider
+import no.nav.aap.journalføring.JournalføringJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
@@ -124,8 +123,8 @@ private fun Application.startMotor(
     val motor = Motor(
         dataSource = dataSource,
         antallKammer = 4,
-        logInfoProvider = JournalføringLogInfoProvider,
-        jobber = listOf(ArenaJournalføringJobbUtfører),
+        logInfoProvider = JournalføringJobbUtfører.LogInfoProvider,
+        jobber = listOf(JournalføringJobbUtfører),
         prometheus = prometheus,
     )
 

@@ -7,25 +7,26 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
-import no.nav.aap.sak.FagsystemService
+import no.nav.aap.sak.SakService
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.AapGateway
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.LocalDate
 
-class KelvinService(
+class KelvinSakService(
     override val sak: Sak,
     private val aapGateway: AapGateway,
     private val timerArbeidetRepository: TimerArbeidetRepository,
-) : FagsystemService {
+) : SakService {
     override val innsendingsflyt = UtfyllingFlytNavn.AAP_FLYT
     override val korrigeringsflyt = UtfyllingFlytNavn.AAP_FLYT
 
     private fun hentMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        return aapGateway.hentMeldeperioder(innloggetBruker, sak.rettighetsperiode)
+        return aapGateway.hentMeldeperioder(innloggetBruker.ident, sak.rettighetsperiode)
             .map {
                 /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
                 Meldeperiode(
@@ -35,7 +36,7 @@ class KelvinService(
             }
     }
 
-    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
+    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): SakService.VentendeOgNeste {
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
                 ?: LocalDate.MIN
@@ -47,7 +48,7 @@ class KelvinService(
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
             .takeWhile { it.meldevindu.tom <= LocalDate.now() }
 
-        return FagsystemService.VentendeOgNeste(
+        return SakService.VentendeOgNeste(
             ventende = meldeperioderUtenInnsendingSomKanSendesInn,
             neste = meldeperioderUtenInnsendingSomKanSendesInn.firstOrNull()
                 ?: meldeperioderUtenInnsending.firstOrNull(),
@@ -71,9 +72,9 @@ class KelvinService(
             .reversed()
     }
 
-    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): FagsystemService.PeriodeDetaljer {
+    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): SakService.PeriodeDetaljer {
         val timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode)
-        return FagsystemService.PeriodeDetaljer(
+        return SakService.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
                 svarerDuSant = true, /* TODO */
@@ -107,6 +108,14 @@ class KelvinService(
         )
     }
 
+    override fun opplysningerForJournalpost(utfylling: Utfylling): SakService.OpplysningerForJournalpost {
+       return SakService.OpplysningerForJournalpost(
+           tittel = "Meldekort",
+           brevkode = "NAV 00-10.02" /* TODO: avklar brevkode */,
+           tilleggsopplysning = mapOf(),
+       )
+    }
+
     private fun registrerteTimerArbeidet(
         innloggetBruker: InnloggetBruker,
         periode: Periode
@@ -129,8 +138,8 @@ class KelvinService(
     }
 
     companion object {
-        fun konstruer(connection: DBConnection, sak: Sak): KelvinService {
-            return KelvinService(
+        fun konstruer(connection: DBConnection, sak: Sak): KelvinSakService {
+            return KelvinSakService(
                 sak = sak,
                 timerArbeidetRepository = RepositoryProvider(connection).provide(),
                 aapGateway = GatewayProvider.provide(),

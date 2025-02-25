@@ -2,15 +2,24 @@ package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.arena.ArenaGateway
-import no.nav.aap.arena.ArenaService
+import no.nav.aap.arena.ArenaSakService
 import no.nav.aap.arena.MeldekortService
 import no.nav.aap.journalføring.BestillJournalføringSteg
+import no.nav.aap.journalføring.JournalføringService
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.opplysningsplikt.PersisterOpplysningerSteg
 import no.nav.aap.sak.Sak
-import no.nav.aap.utfylling.UtfyllingStegNavn.*
+import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
+import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
+import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
+import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
+import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
+import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
+import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
+import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 import org.slf4j.LoggerFactory
 
 enum class UtfyllingFlytNavn(
@@ -54,7 +63,7 @@ enum class UtfyllingFlytNavn(
 }
 
 class UtfyllingFlyt(
-    val stegene: List<UtfyllingSteg>,
+    private val stegene: List<UtfyllingSteg>,
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -147,14 +156,13 @@ class UtfyllingFlyt(
         return Result.success(Unit)
     }
 
-
     companion object {
         fun konstruer(connection: DBConnection, sak: Sak, flytNavn: UtfyllingFlytNavn): UtfyllingFlyt {
             val repositoryProvider = RepositoryProvider(connection)
 
-            val arenaService = lazy {
+            val arenaSakService = lazy {
                 val arenaGateway = GatewayProvider.provide<ArenaGateway>()
-                ArenaService(
+                ArenaSakService(
                     meldekortService = MeldekortService(
                         arenaGateway = arenaGateway,
                         meldekortRepository = repositoryProvider.provide(),
@@ -171,10 +179,10 @@ class UtfyllingFlyt(
                         SPØRSMÅL -> SpørsmålSteg
                         UTFYLLING -> TimerArbeidetSteg
                         BEKREFT -> StemmerOpplysningeneSteg
-                        ARENAKONTROLL_VANLIG -> ArenaKontrollVanligSteg(arenaService.value)
-                        ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(arenaService.value)
+                        ARENAKONTROLL_VANLIG -> ArenaKontrollVanligSteg(arenaSakService.value)
+                        ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(arenaSakService.value)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
-                        BESTILL_JOURNALFØRING -> BestillJournalføringSteg()
+                        BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService.konstruer(connection))
                         KVITTERING -> KvitteringSteg
                     }
                 }

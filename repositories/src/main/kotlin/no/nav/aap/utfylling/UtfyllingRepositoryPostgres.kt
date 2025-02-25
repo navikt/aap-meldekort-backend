@@ -13,6 +13,11 @@ class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
 ) : UtfyllingRepository {
 
+    override fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
+        return lastUtfylling(ident, utfyllingReferanse)
+            ?.takeIf { it.erAvsluttet }
+    }
+
     override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
         return connection.queryFirstOrNull("""
             select * from utfylling

@@ -2,8 +2,8 @@ package no.nav.aap.sak
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.arena.ArenaService
-import no.nav.aap.kelvin.KelvinService
+import no.nav.aap.arena.ArenaSakService
+import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.utfylling.Svar
@@ -15,7 +15,7 @@ enum class FagsystemNavn {
     ARENA, KELVIN,
 }
 
-interface FagsystemService {
+interface SakService {
     val sak: Sak
     val innsendingsflyt: UtfyllingFlytNavn
     val korrigeringsflyt: UtfyllingFlytNavn
@@ -46,11 +46,18 @@ interface FagsystemService {
     }
 
     fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar
+
+    class OpplysningerForJournalpost(
+        val tittel: String,
+        val brevkode: String,
+        val tilleggsopplysning: Map<String, String>,
+    )
+    fun opplysningerForJournalpost(utfylling: Utfylling): OpplysningerForJournalpost
 }
 
-fun fagsystemServiceFactory(connection: DBConnection, sak: Sak): FagsystemService {
+fun sakServiceFactory(connection: DBConnection, sak: Sak): SakService {
     return when (sak.referanse.system) {
-        FagsystemNavn.ARENA -> ArenaService.konstruer(connection, sak)
-        FagsystemNavn.KELVIN -> KelvinService.konstruer(connection, sak)
+        FagsystemNavn.ARENA -> ArenaSakService.konstruer(connection, sak)
+        FagsystemNavn.KELVIN -> KelvinSakService.konstruer(connection, sak)
     }
 }

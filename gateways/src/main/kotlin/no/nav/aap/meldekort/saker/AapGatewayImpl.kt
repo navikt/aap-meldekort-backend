@@ -1,6 +1,6 @@
 package no.nav.aap.meldekort.saker
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
@@ -49,11 +49,11 @@ object AapGatewayImpl : AapGateway {
         }
     }
 
-    override fun hentSaker(innloggetBruker: InnloggetBruker): Saker {
+    override fun hentSaker(ident: Ident): Saker {
         val saker = httpClient.post<_, List<SakStatus>>(
             uri = sakerByFnrUrl,
             request = PostRequest(
-                body = mapOf("personidentifikatorer" to listOf(innloggetBruker.ident.asString)),
+                body = mapOf("personidentifikatorer" to listOf(ident.asString)),
                 additionalHeaders = listOf(Header("accept", "application/json")),
             ),
         )!!
@@ -83,14 +83,14 @@ object AapGatewayImpl : AapGateway {
         return Saker(saker)
     }
 
-    override fun hentMeldeperioder(innloggetBruker: InnloggetBruker, periode: Periode): List<Periode> {
+    override fun hentMeldeperioder(ident: Ident, periode: Periode): List<Periode> {
         class KelvinPeriode(val fom: LocalDate, val tom: LocalDate)
 
         return httpClient.post<_, List<KelvinPeriode>>(
             uri = perioderMeldekortUrl,
             request = PostRequest(
                 body = mapOf(
-                    "personidentifikator" to innloggetBruker.ident.asString,
+                    "personidentifikator" to ident.asString,
                     "fraOgMedDato" to periode.fom,
                     "tilOgMedDato" to periode.tom,
                 ),

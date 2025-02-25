@@ -1,0 +1,1 @@
+create unique index uidx_utfylling_avsluttet on utfylling(referanse) where avsluttet = true;

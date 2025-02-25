@@ -2,11 +2,12 @@ val komponenterVersjon = "1.0.159"
 val junitVersjon = "5.11.4"
 
 plugins {
-    id("behandlingsflyt.conventions")
+    id("meldekort.conventions")
 }
 
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.177")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation(kotlin("reflect"))

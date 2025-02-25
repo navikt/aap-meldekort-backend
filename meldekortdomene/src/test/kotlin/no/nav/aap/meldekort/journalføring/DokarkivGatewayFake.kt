@@ -1,4 +1,6 @@
-package no.nav.aap.journalføring
+package no.nav.aap.meldekort.journalføring
+
+import no.nav.aap.journalføring.DokarkivGateway
 
 /* TODO: flytt til testmappe når integrasjon i dev er klar. */
 class DokarkivGatewayFake: DokarkivGateway {

@@ -5,16 +5,16 @@ import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.RepositoryProvider
-import no.nav.aap.sak.FagsystemService
+import no.nav.aap.sak.SakService
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.SakerService
-import no.nav.aap.sak.fagsystemServiceFactory
+import no.nav.aap.sak.sakServiceFactory
 import java.time.Instant
 import java.time.LocalDate
 
 class UtfyllingService(
     private val utfyllingRepository: UtfyllingRepository,
-    private val fagsystemService: FagsystemService,
+    private val sakService: SakService,
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) {
 
@@ -25,15 +25,15 @@ class UtfyllingService(
         }
 
         val utfyllingReferanse = UtfyllingReferanse.ny()
-        fagsystemService.forberedVanligFlyt(innloggetBruker, periode, utfyllingReferanse)
+        sakService.forberedVanligFlyt(innloggetBruker, periode, utfyllingReferanse)
 
         return nyUtfylling(
             utfyllingReferanse = utfyllingReferanse,
             ident = innloggetBruker.ident,
             periode = periode,
-            flyt = fagsystemService.innsendingsflyt,
-            svar = fagsystemService.tomtSvar(periode),
-            sak = fagsystemService.sak,
+            flyt = sakService.innsendingsflyt,
+            svar = sakService.tomtSvar(periode),
+            sak = sakService.sak,
         )
     }
 
@@ -44,22 +44,22 @@ class UtfyllingService(
         }
 
         val utfyllingReferanse = UtfyllingReferanse.ny()
-        fagsystemService.forberedKorrigeringFlyt(innloggetBruker, periode, utfyllingReferanse)
+        sakService.forberedKorrigeringFlyt(innloggetBruker, periode, utfyllingReferanse)
 
         return nyUtfylling(
             utfyllingReferanse = utfyllingReferanse,
             ident = innloggetBruker.ident,
             periode = periode,
-            flyt = fagsystemService.korrigeringsflyt,
-            svar = fagsystemService.hentHistoriskeSvar(innloggetBruker, periode),
-            sak = fagsystemService.sak,
+            flyt = sakService.korrigeringsflyt,
+            svar = sakService.hentHistoriskeSvar(innloggetBruker, periode),
+            sak = sakService.sak,
         )
     }
 
     private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
         val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode) ?: return null
 
-        if (fagsystemService.utfyllingGyldig(utfylling)) {
+        if (sakService.utfyllingGyldig(utfylling)) {
             return utfylling
         }
 
@@ -156,8 +156,8 @@ class UtfyllingService(
 
             return UtfyllingService(
                 utfyllingRepository = repositoryProvider.provide(),
-                fagsystemService = fagsystemServiceFactory(connection, sak),
-                flytProvider = { UtfyllingFlyt.konstruer(connection, sak, it) }
+                sakService = sakServiceFactory(connection, sak),
+                flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(connection, sak, flytNavn) }
             )
         }
     }

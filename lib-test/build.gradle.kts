@@ -4,7 +4,7 @@ val tilgangVersjon = "0.0.72"
 val junitVersjon = "5.11.4"
 
 plugins {
-    id("behandlingsflyt.conventions")
+    id("meldekort.conventions")
     id("java-test-fixtures")
 }
 
