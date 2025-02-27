@@ -13,7 +13,7 @@ class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
 ) : UtfyllingRepository {
 
-    override fun lastÅpenUtfylling(ident: Ident, periode: Periode, utfyllingsflyter: Utfyllingsflyter): Utfylling? {
+    override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
         return connection.queryFirstOrNull("""
             select * from utfylling
             where ident = ? and periode = ?::daterange
@@ -25,7 +25,7 @@ class UtfyllingRepositoryPostgres(
                 setPeriode(2, no.nav.aap.komponenter.type.Periode(periode.fom, periode.tom))
             }
             setRowMapper { row ->
-                utfyllingRowMapper(row, utfyllingsflyter)
+                utfyllingRowMapper(row)
             }
         }
             ?.takeUnless { it.erAvsluttet }
@@ -34,7 +34,6 @@ class UtfyllingRepositoryPostgres(
     override fun lastUtfylling(
         ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
-        utfyllingsflyter: Utfyllingsflyter
     ): Utfylling? {
         return connection.queryFirstOrNull("""
             select * from utfylling
@@ -47,7 +46,7 @@ class UtfyllingRepositoryPostgres(
                 setUUID(2, utfyllingReferanse.asUuid)
             }
             setRowMapper { row ->
-                utfyllingRowMapper(row, utfyllingsflyter)
+                utfyllingRowMapper(row)
             }
         }
     }
@@ -67,16 +66,16 @@ class UtfyllingRepositoryPostgres(
                 setPeriode(5, no.nav.aap.komponenter.type.Periode(utfylling.periode.fom, utfylling.periode.tom))
                 setInstant(6, utfylling.opprettet)
                 setInstant(7, utfylling.sistEndret)
-                setEnumName(8, utfylling.flyt.navn)
-                setEnumName(9, utfylling.aktivtSteg.navn)
+                setEnumName(8, utfylling.flyt)
+                setEnumName(9, utfylling.aktivtSteg)
                 setBoolean(10, utfylling.erAvsluttet)
                 setString(11, DefaultJsonMapper.toJson(utfylling.svar))
             }
         }
     }
 
-    private fun utfyllingRowMapper(row: Row, utfyllingsflyter: Utfyllingsflyter): Utfylling {
-        val flyt = row.getEnum<UtfyllingFlytNavn>("flyt").let { utfyllingsflyter.flytForNavn(it) }
+    private fun utfyllingRowMapper(row: Row): Utfylling {
+        val flyt = row.getEnum<UtfyllingFlytNavn>("flyt")
         return Utfylling(
             ident = Ident(row.getString("ident")),
             referanse = UtfyllingReferanse(row.getUUID("referanse")),
@@ -86,7 +85,7 @@ class UtfyllingRepositoryPostgres(
             ),
             periode = row.getPeriode("periode").let { Periode(it.fom, it.tom) },
             flyt = flyt,
-            aktivtSteg = row.getEnum<UtfyllingStegNavn>("aktivt_steg").let { flyt.stegForNavn(it) },
+            aktivtSteg = row.getEnum<UtfyllingStegNavn>("aktivt_steg"),
             opprettet = row.getInstant("opprettet"),
             sistEndret = row.getInstant("sist_endret"),
             svar = DefaultJsonMapper.fromJson(row.getString("svar")),

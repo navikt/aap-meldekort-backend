@@ -8,7 +8,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
-import no.nav.aap.utfylling.UtfyllingFlyt
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 
 enum class FagsystemNavn {
@@ -17,8 +17,8 @@ enum class FagsystemNavn {
 
 interface FagsystemService {
     val sak: Sak
-    val innsendingsflyt: UtfyllingFlyt
-    val korrigeringsflyt: UtfyllingFlyt
+    val innsendingsflyt: UtfyllingFlytNavn
+    val korrigeringsflyt: UtfyllingFlytNavn
 
     class VentendeOgNeste(
         val ventende: List<Meldeperiode>,

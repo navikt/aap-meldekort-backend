@@ -7,7 +7,6 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
 
 class BestillJournalføringSteg: UtfyllingSteg {
     override val navn = BESTILL_JOURNALFØRING
-    override val erTeknisk = true
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
         /* TODO */

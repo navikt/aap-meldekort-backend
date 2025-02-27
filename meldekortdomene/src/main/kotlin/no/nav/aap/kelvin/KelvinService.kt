@@ -10,9 +10,9 @@ import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.AapGateway
-import no.nav.aap.utfylling.AapFlyt
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.LocalDate
 
@@ -21,8 +21,8 @@ class KelvinService(
     private val aapGateway: AapGateway,
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : FagsystemService {
-    override val innsendingsflyt = AapFlyt(timerArbeidetRepository)
-    override val korrigeringsflyt = AapFlyt(timerArbeidetRepository)
+    override val innsendingsflyt = UtfyllingFlytNavn.AAP_FLYT
+    override val korrigeringsflyt = UtfyllingFlytNavn.AAP_FLYT
 
     private fun hentMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
         return aapGateway.hentMeldeperioder(innloggetBruker, sak.rettighetsperiode)

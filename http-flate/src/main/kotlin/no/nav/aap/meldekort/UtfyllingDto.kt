@@ -34,7 +34,7 @@ class UtfyllingTilstandDto(
     val svar: SvarDto,
 ) {
     constructor(utfylling: Utfylling) : this(
-        aktivtSteg = StegDto.fraDomene(utfylling.aktivtSteg.navn),
+        aktivtSteg = StegDto.fraDomene(utfylling.aktivtSteg),
         svar = SvarDto(utfylling.svar)
     )
 }

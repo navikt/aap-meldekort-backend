@@ -9,7 +9,6 @@ class PersisterOpplysningerSteg(
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ): UtfyllingSteg {
     override val navn = PERSISTER_OPPLYSNINGER
-    override val erTeknisk = true
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
         timerArbeidetRepository.lagrTimerArbeidet(

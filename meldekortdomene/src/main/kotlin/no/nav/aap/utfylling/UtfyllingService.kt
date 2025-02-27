@@ -3,10 +3,7 @@ package no.nav.aap.utfylling
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.arena.ArenaService
-import no.nav.aap.arena.MeldekortService
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
@@ -18,7 +15,7 @@ import java.time.LocalDate
 class UtfyllingService(
     private val utfyllingRepository: UtfyllingRepository,
     private val fagsystemService: FagsystemService,
-    private val utfyllingsflyter: Utfyllingsflyter,
+    private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) {
 
     fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling {
@@ -60,7 +57,7 @@ class UtfyllingService(
     }
 
     private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
-        val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode, utfyllingsflyter) ?: return null
+        val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode) ?: return null
 
         if (fagsystemService.utfyllingGyldig(utfylling)) {
             return utfylling
@@ -74,7 +71,7 @@ class UtfyllingService(
         utfyllingReferanse: UtfyllingReferanse,
         ident: Ident,
         periode: Periode,
-        flyt: UtfyllingFlyt,
+        flyt: UtfyllingFlytNavn,
         svar: Svar,
         sak: Sak,
     ): Utfylling {
@@ -96,7 +93,7 @@ class UtfyllingService(
 
 
     fun hent(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
+        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
     }
 
     class UtfyllingResponse(
@@ -110,15 +107,15 @@ class UtfyllingService(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
             ?: TODO("kan skje hvis mellomlagring slettes")
 
         val utfylling = eksisterendeUtfylling.copy(
-            aktivtSteg = eksisterendeUtfylling.flyt.stegForNavn(aktivtSteg),
+            aktivtSteg = aktivtSteg,
             svar = svar,
             sistEndret = Instant.now(),
         )
-        val utfall = UtfyllingFlytOrkestrator.kjør(innloggetBruker, utfylling)
+        val utfall = flytProvider(utfylling.flyt).kjør(innloggetBruker, utfylling)
         utfyllingRepository.lagrUtfylling(utfall.utfylling)
         return UtfyllingResponse(
             utfylling = utfall.utfylling,
@@ -132,11 +129,11 @@ class UtfyllingService(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse, utfyllingsflyter)
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
             ?: TODO("kan skje hvis mellomlagring slettes")
 
         val utfylling = eksisterendeUtfylling.copy(
-            aktivtSteg = eksisterendeUtfylling.flyt.stegForNavn(aktivtSteg),
+            aktivtSteg = aktivtSteg,
             svar = svar,
             sistEndret = Instant.now(),
         )
@@ -157,23 +154,10 @@ class UtfyllingService(
 
             val repositoryProvider = RepositoryProvider(connection)
 
-            val arenaService = ArenaService(
-                meldekortService = MeldekortService(
-                    arenaGateway = GatewayProvider.provide(),
-                    meldekortRepository = repositoryProvider.provide(),
-                ),
-                arenaGateway = GatewayProvider.provide(),
-                sak = sak,
-                timerArbeidetRepository = RepositoryProvider(connection).provide(),
-            )
-
             return UtfyllingService(
                 utfyllingRepository = repositoryProvider.provide(),
                 fagsystemService = fagsystemServiceFactory(connection, sak),
-                utfyllingsflyter = Utfyllingsflyter(
-                    arenaService = arenaService,
-                    timerArbeidetRepository = RepositoryProvider(connection).provide(),
-                )
+                flytProvider = { UtfyllingFlyt.konstruer(connection, sak, it) }
             )
         }
     }

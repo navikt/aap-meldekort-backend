@@ -1,62 +1,33 @@
 package no.nav.aap.meldekort.utfylling
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.arena.ArenaService
-import no.nav.aap.arena.MeldekortService
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
-import no.nav.aap.meldekort.TimerArbeidetRepositoryFake
-import no.nav.aap.meldekort.arena.ArenaGatewayFake
-import no.nav.aap.meldekort.arena.MeldekortRepositoryFake
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
-import no.nav.aap.utfylling.Utfyllingsflyter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class UtfyllingRepositoryPostgresTest {
-
-    private val sakKelvin = Sak(
-        referanse = FagsakReferanse(
-            system = FagsystemNavn.KELVIN,
-            nummer = Fagsaknummer("111"),
-        ),
-        rettighetsperiode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1)),
-    )
-    val utfyllingsflyter = Utfyllingsflyter(
-        arenaService = ArenaService(
-            meldekortService = MeldekortService(
-                arenaGateway = ArenaGatewayFake(),
-                meldekortRepository = MeldekortRepositoryFake(),
-            ),
-            arenaGateway = ArenaGatewayFake(),
-            sak = sakKelvin,
-            timerArbeidetRepository = TimerArbeidetRepositoryFake(),
-        ),
-        timerArbeidetRepository = TimerArbeidetRepositoryFake(),
-    )
-
-
     @Test
     fun `enkel read write`() {
         InitTestDatabase.dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val flyt = utfyllingsflyter.flytForNavn(UtfyllingFlytNavn.AAP_FLYT)
+            val flyt = UtfyllingFlytNavn.AAP_FLYT
             val ident = Ident("0".repeat(11))
             val opprettet = Instant.now().truncatedTo(ChronoUnit.MILLIS)
             val referanse = UtfyllingReferanse.ny()
@@ -88,11 +59,11 @@ class UtfyllingRepositoryPostgresTest {
 
             repo.lagrUtfylling(utfyllingInn1)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertEquals(utfyllingInn1, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
                 assertEquals(utfyllingInn1, it)
             }
 
@@ -102,11 +73,11 @@ class UtfyllingRepositoryPostgresTest {
             )
             repo.lagrUtfylling(utfyllingInn2)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertEquals(utfyllingInn2, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
                 assertEquals(utfyllingInn2, it)
             }
 
@@ -117,11 +88,11 @@ class UtfyllingRepositoryPostgresTest {
             assertTrue(endeligUtfylling.erAvsluttet)
             repo.lagrUtfylling(endeligUtfylling)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode, utfyllingsflyter).also {
+            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertNull(it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse, utfyllingsflyter).also {
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
                 assertEquals(endeligUtfylling, it)
             }
         }

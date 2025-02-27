@@ -6,14 +6,12 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsystemService
 import no.nav.aap.sak.Sak
-import no.nav.aap.utfylling.ArenaKorrigeringFlyt
-import no.nav.aap.utfylling.ArenaVanligFlyt
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.LocalDate
 
@@ -21,10 +19,9 @@ class ArenaService(
     private val meldekortService: MeldekortService,
     private val arenaGateway: ArenaGateway,
     override val sak: Sak,
-    timerArbeidetRepository: TimerArbeidetRepository,
 ) : FagsystemService {
-    override val innsendingsflyt = ArenaVanligFlyt(this, timerArbeidetRepository)
-    override val korrigeringsflyt = ArenaKorrigeringFlyt(this, timerArbeidetRepository)
+    override val innsendingsflyt = UtfyllingFlytNavn.ARENA_VANLIG_FLYT
+    override val korrigeringsflyt = UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT
 
     override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): FagsystemService.VentendeOgNeste {
         val kommendeMeldekort = meldekortService.kommendeMeldekort(innloggetBruker)
@@ -122,7 +119,6 @@ class ArenaService(
                 ),
                 arenaGateway = GatewayProvider.provide(),
                 sak = sak,
-                timerArbeidetRepository = RepositoryProvider(connection).provide(),
             )
         }
     }

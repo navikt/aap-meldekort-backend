@@ -4,30 +4,29 @@ import no.nav.aap.InnloggetBruker
 import no.nav.aap.arena.ArenaService
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
+import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
-import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
-import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
-import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 
-enum class UtfyllingStegNavn {
+enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     INTRODUKSJON,
     SPØRSMÅL,
     UTFYLLING,
     BEKREFT,
-    ARENAKONTROLL_VANLIG,
-    ARENAKONTROLL_KORRIGERING,
-    PERSISTER_OPPLYSNINGER,
-    BESTILL_JOURNALFØRING,
+    ARENAKONTROLL_VANLIG(erTeknisk = true),
+    ARENAKONTROLL_KORRIGERING(erTeknisk = true),
+    PERSISTER_OPPLYSNINGER(erTeknisk = true),
+    BESTILL_JOURNALFØRING(erTeknisk = true),
     KVITTERING,
 }
 
 interface UtfyllingSteg {
     val navn: UtfyllingStegNavn
 
-    val erTeknisk: Boolean get() = false
+    val erTeknisk: Boolean
+        get() = navn.erTeknisk
 
     fun erRelevant(utfylling: Utfylling): Boolean {
         return true
@@ -107,7 +106,6 @@ class ArenaKontrollVanligSteg(
     private val arenaService: ArenaService,
 ): UtfyllingSteg {
     override val navn = ARENAKONTROLL_VANLIG
-    override val erTeknisk = true
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
         arenaService.sendInnVanlig(innloggetBruker, utfylling)
@@ -126,7 +124,6 @@ class ArenaKontrollKorrigeringSteg(
     private val arenaService: ArenaService,
 ): UtfyllingSteg {
     override val navn = ARENAKONTROLL_KORRIGERING
-    override val erTeknisk = true
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
         arenaService.sendInnKorrigering(innloggetBruker, utfylling)
