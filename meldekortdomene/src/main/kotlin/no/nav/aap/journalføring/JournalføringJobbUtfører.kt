@@ -74,16 +74,17 @@ class JournalføringJobbUtfører(
                 journalføringService = JournalføringService.konstruer(connection),
                 utfyllingRepository = repositoryProvider.provide(),
                 sakerService = SakerService.konstruer(),
-                sakServiceFactory = { sak -> sakServiceFactory(connection, sak)}
+                sakServiceFactory = { sak -> sakServiceFactory(connection, sak) }
             )
         }
     }
 
-    object LogInfoProvider: JobbLogInfoProvider {
+    object LogInfoProvider : JobbLogInfoProvider {
         override fun hentInformasjon(connection: DBConnection, jobbInput: JobbInput): LogInformasjon {
             return LogInformasjon(
                 listOf("utfylling", "fagsak_system", "fagsak_nummer")
-                    .associateWith { jobbInput.parameter(it) }
+                    .mapNotNull { name -> jobbInput.optionalParameter(name)?.let { value -> name to value } }
+                    .toMap()
             )
         }
     }
