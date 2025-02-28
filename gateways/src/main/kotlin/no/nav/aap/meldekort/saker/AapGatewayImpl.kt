@@ -79,16 +79,6 @@ object AapGatewayImpl : AapGateway {
                     ),
                 )
             }
-            .map {
-                /* TODO: anta at alle saker er kelvin til api-inter er oppdatert */
-                Sak(
-                    referanse = FagsakReferanse(
-                        nummer = it.referanse.nummer,
-                        system = FagsystemNavn.KELVIN,
-                    ),
-                    rettighetsperiode = it.rettighetsperiode,
-                )
-            }
 
         return Saker(saker)
     }
