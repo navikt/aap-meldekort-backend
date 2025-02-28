@@ -5,18 +5,15 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.ArbeidIPeriodeV0
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.MeldekortV0
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
-import no.nav.aap.journalføring.DokarkivGateway.Sakstype.FAGSAK
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakService
 import no.nav.aap.utfylling.Utfylling
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
@@ -49,24 +46,30 @@ class JournalføringService(
             }
         )
 
+        val fagsystemspesifikkeOpplysninger = sakService.opplysningerForJournalpost(utfylling)
         val journalpost = journalpost(
             ident = ident,
             utfylling = utfylling,
             fagsak = sakService.sak.referanse,
             meldekort = meldekort,
             pdf = dokgenGateway.genererPdf(ident, meldekort),
-            fagsystemspesifikkeOpplysninger = sakService.opplysningerForJournalpost(utfylling)
+            fagsystemspesifikkeOpplysninger = fagsystemspesifikkeOpplysninger
         )
 
-        val response = dokarkivGateway.oppdater(journalpost, forsøkFerdigstill = true)
-        check(response.journalpostferdigstilt)
+        val response = dokarkivGateway.oppdater(
+            journalpost,
+            forsøkFerdigstill = fagsystemspesifikkeOpplysninger.ferdigstill
+        )
+        if (fagsystemspesifikkeOpplysninger.ferdigstill) {
+            check(response.journalpostferdigstilt)
+        }
     }
 
     private fun journalpost(
         ident: Ident,
         fagsystemspesifikkeOpplysninger: SakService.OpplysningerForJournalpost,
         utfylling: Utfylling,
-        fagsak: FagsakReferanse,
+        fagsak: FagsakReferanse?,
         meldekort: Meldekort,
         pdf: ByteArray,
     ): DokarkivGateway.Journalpost {
@@ -83,7 +86,10 @@ class JournalføringService(
             tema = AAP,
             tittel = fagsystemspesifikkeOpplysninger.tittel,
             kanal = "NAV_NO",
-            journalfoerendeEnhet = "9999" /* 9999 = automatisk behandling */,
+            journalfoerendeEnhet = if (fagsystemspesifikkeOpplysninger.ferdigstill)
+                "9999" /* 9999 = automatisk behandling */
+            else
+                null,
             eksternReferanseId = utfylling.referanse.asUuid.toString(),
             datoMottatt = utfylling.sistEndret.atZone(ZoneId.of("Europe/Oslo"))
                 .toLocalDate()
@@ -92,14 +98,7 @@ class JournalføringService(
                 .tilleggsopplysning
                 .entries
                 .map { DokarkivGateway.Tilleggsopplysning(it.key, it.value) },
-            sak = DokarkivGateway.Sak(
-                sakstype = FAGSAK,
-                fagsaksystem = when (fagsak.system) {
-                    FagsystemNavn.ARENA -> DokarkivGateway.FagsaksSystem.AO01
-                    FagsystemNavn.KELVIN -> DokarkivGateway.FagsaksSystem.KELVIN
-                },
-                fagsakId = fagsak.nummer.asString,
-            ),
+            sak = fagsystemspesifikkeOpplysninger.journalførPåSak,
             dokumenter = listOf(
                 DokarkivGateway.Dokument(
                     tittel = fagsystemspesifikkeOpplysninger.tittel,

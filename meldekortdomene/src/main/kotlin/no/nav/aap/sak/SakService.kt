@@ -3,6 +3,7 @@ package no.nav.aap.sak
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.arena.ArenaSakService
+import no.nav.aap.journalføring.DokarkivGateway
 import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.meldeperiode.Meldeperiode
@@ -50,6 +51,8 @@ interface SakService {
     class OpplysningerForJournalpost(
         val tittel: String,
         val brevkode: String,
+        val journalførPåSak: DokarkivGateway.Sak?,
+        val ferdigstill: Boolean,
         val tilleggsopplysning: Map<String, String>,
     )
     fun opplysningerForJournalpost(utfylling: Utfylling): OpplysningerForJournalpost

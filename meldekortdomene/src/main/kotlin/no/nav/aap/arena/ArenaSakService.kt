@@ -2,12 +2,14 @@ package no.nav.aap.arena
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
+import no.nav.aap.journalføring.DokarkivGateway
+import no.nav.aap.journalføring.DokarkivGateway.Sakstype.FAGSAK
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
-import no.nav.aap.sak.SakService
 import no.nav.aap.sak.Sak
+import no.nav.aap.sak.SakService
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -118,12 +120,20 @@ class ArenaSakService(
 //                "kortKanSendesFra" to kanSendesFra.format(dateFormatter),
         )
 
+        val journalførPåSak = DokarkivGateway.Sak(
+            sakstype = FAGSAK,
+            fagsaksystem = DokarkivGateway.FagsaksSystem.AO01,
+            fagsakId = sak.referanse.nummer.asString,
+        )
+
         return when (utfylling.flyt) {
             UtfyllingFlytNavn.ARENA_VANLIG_FLYT ->
                 SakService.OpplysningerForJournalpost(
                     tittel = "Meldekort $tittelsuffix",
                     brevkode = "NAV 00-10.02",
                     tilleggsopplysning = tilleggsopplysning,
+                    ferdigstill = true,
+                    journalførPåSak = journalførPåSak,
                 )
 
             UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT ->
@@ -131,6 +141,8 @@ class ArenaSakService(
                     tittel = "Korrigert meldekort $tittelsuffix",
                     brevkode = "NAV 00-10.03",
                     tilleggsopplysning = tilleggsopplysning,
+                    ferdigstill = true,
+                    journalførPåSak = journalførPåSak,
                 )
 
             UtfyllingFlytNavn.AAP_FLYT ->

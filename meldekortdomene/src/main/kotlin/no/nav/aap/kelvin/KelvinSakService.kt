@@ -113,6 +113,10 @@ class KelvinSakService(
            tittel = "Meldekort",
            brevkode = "NAV 00-10.02" /* TODO: avklar brevkode */,
            tilleggsopplysning = mapOf(),
+
+           /* postmottak håndterer dette */
+           ferdigstill = false,
+           journalførPåSak = null,
        )
     }
 
