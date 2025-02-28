@@ -1,9 +1,10 @@
 package no.nav.aap.journalføring
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.aap.lookup.gateway.Gateway
 
 
-interface DokarkivGateway: Gateway {
+interface DokarkivGateway : Gateway {
     // Noe a la POST /rest/journalpostapi/v1/journalpost
     // TODO: Test om 409 returnerer samme reponse.
     fun oppdater(journalpost: Journalpost, forsøkFerdigstill: Boolean): JournalpostResponse
@@ -133,7 +134,7 @@ interface DokarkivGateway: Gateway {
         val dokumenter: List<DokumentInfo>
     )
 
-    data class DokumentInfo(
+    data class DokumentInfo @JsonCreator() constructor(
         val dokumentInfoId: Long, // Dokumentasjon sier at dette feltet er String. Men det ser ut at vi får numerisk ID her
     )
 }

@@ -3,6 +3,7 @@ package no.nav.aap.meldekort.test
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
@@ -23,17 +24,18 @@ object FakeDokarkiv: FakeServer {
         routing {
             val journalpostId = AtomicInteger(467010363)
             post("/rest/journalpostapi/v1/journalpost") {
-                call.respondText("""
-                    {
-                      "dokumenter": [
+                println("JOURNALPOST mottatt: ${call.receiveText()}")
+                call.respondText(
+                    """
                         {
-                          "dokumentInfoId": "123"
+                        "journalpostId": ${journalpostId.getAndIncrement()},
+                        "journalpostferdigstilt": true,
+                        "dokumenter": [{
+                            "dokumentInfoId": 4
+                        }]
                         }
-                      ],
-                      "journalpostId": "${journalpostId.getAndIncrement()}",
-                      "journalpostferdigstilt": true
-                    }
-                """)
+                    """.trimIndent()
+                )
             }
         }
     }
