@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
-val komponenterVersjon = "1.0.156"
+val komponenterVersjon = "1.0.159"
 val junitVersjon = "5.11.4"
 
 plugins {
