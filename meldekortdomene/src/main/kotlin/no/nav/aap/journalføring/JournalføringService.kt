@@ -86,7 +86,8 @@ class JournalføringService(
             journalfoerendeEnhet = "9999" /* 9999 = automatisk behandling */,
             eksternReferanseId = utfylling.referanse.asUuid.toString(),
             datoMottatt = utfylling.sistEndret.atZone(ZoneId.of("Europe/Oslo"))
-                .format(DateTimeFormatter.ISO_DATE),
+                .toLocalDate()
+                .toString(),
             tilleggsopplysninger = fagsystemspesifikkeOpplysninger
                 .tilleggsopplysning
                 .entries
