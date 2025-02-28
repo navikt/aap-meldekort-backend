@@ -33,6 +33,6 @@ dependencies {
 
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
 
-    implementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+    implementation("org.junit.jupiter:junit-jupiter-api:5.12.0")
     implementation("org.testcontainers:postgresql:1.20.5")
 }
