@@ -1,4 +1,5 @@
 val komponenterVersjon = "1.0.156"
+val junitVersjon = "5.11.4"
 
 plugins {
     id("behandlingsflyt.conventions")
@@ -22,8 +23,8 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql:42.7.5")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
     testImplementation("org.assertj:assertj-core:3.27.3")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {

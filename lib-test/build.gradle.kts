@@ -1,6 +1,7 @@
 val ktorVersion = "3.1.1"
 val komponenterVersjon = "1.0.156"
 val tilgangVersjon = "0.0.72"
+val junitVersjon = "5.11.4"
 
 plugins {
     id("behandlingsflyt.conventions")
@@ -33,6 +34,6 @@ dependencies {
 
     implementation("com.nimbusds:nimbus-jose-jwt:10.0.2")
 
-    implementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+    implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:postgresql:1.20.5")
 }

@@ -2,6 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.io.ByteArrayOutputStream
 
 val komponenterVersjon = "1.0.156"
+val junitVersjon = "5.11.4"
 
 plugins {
     id("behandlingsflyt.conventions")
@@ -47,6 +48,7 @@ fun getCheckedOutGitCommitHash(): String {
     return runCommand("git rev-parse --verify HEAD")
 }
 
+
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":http-flate"))
@@ -67,8 +69,8 @@ dependencies {
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
     testImplementation("org.assertj:assertj-core:3.27.3")
     constraints {
         implementation("org.apache.commons:commons-compress:1.27.1") {
