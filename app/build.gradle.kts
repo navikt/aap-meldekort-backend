@@ -59,7 +59,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.14.4")
-    implementation("ch.qos.logback:logback-classic:1.5.16")
+    implementation("ch.qos.logback:logback-classic:1.5.17")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
 
