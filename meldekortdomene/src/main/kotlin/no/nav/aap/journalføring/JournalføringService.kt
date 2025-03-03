@@ -18,7 +18,7 @@ import java.time.ZoneId
 class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
     private val flytJobbRepository: FlytJobbRepository,
-    private val dokgenGateway: DokgenGateway,
+    private val pdfgenGateway: PdfgenGateway,
 ) {
     fun bestillJournalføring(ident: Ident, utfylling: Utfylling) {
         flytJobbRepository.leggTil(
@@ -52,7 +52,11 @@ class JournalføringService(
             utfylling = utfylling,
             fagsak = sakService.sak.referanse,
             meldekort = meldekort,
-            pdf = dokgenGateway.genererPdf(ident, meldekort),
+            pdf = pdfgenGateway.genererPdf(
+                ident = ident,
+                mottatt = utfylling.sistEndret,
+                meldekort = meldekort
+            ),
             fagsystemspesifikkeOpplysninger = fagsystemspesifikkeOpplysninger
         )
 
@@ -124,7 +128,7 @@ class JournalføringService(
         fun konstruer(connection: DBConnection): JournalføringService {
             return JournalføringService(
                 dokarkivGateway = GatewayProvider.provide(),
-                dokgenGateway = GatewayProvider.provide(),
+                pdfgenGateway = GatewayProvider.provide(),
                 flytJobbRepository = FlytJobbRepository(connection),
             )
         }

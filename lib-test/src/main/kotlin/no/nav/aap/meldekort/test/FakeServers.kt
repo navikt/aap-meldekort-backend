@@ -16,7 +16,7 @@ interface FakeServer {
 }
 
 object FakeServers : AutoCloseable {
-    private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv)
+    private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
         .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
 
     private val started = AtomicBoolean(false)

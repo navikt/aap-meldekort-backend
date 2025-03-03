@@ -10,7 +10,7 @@ import no.nav.aap.lookup.repository.RepositoryRegistry
 import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.arena.MeldekortRepositoryPostgres
 import no.nav.aap.createPostgresDataSource
-import no.nav.aap.journalføring.FakeDokgenGateway
+import no.nav.aap.journalføring.FakePdfgenGateway
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
@@ -37,6 +37,19 @@ fun main(
     prometheusMeterRegistry: PrometheusMeterRegistry,
     applikasjonVersjon: String,
 ) {
+    setupRegistries()
+
+    startHttpServer(
+        port = 8080,
+        prometheus = prometheusMeterRegistry,
+        applikasjonsVersjon = applikasjonVersjon,
+        tokenxConfig = TokenxConfig(),
+        azureConfig = AzureConfig(),
+        dataSource = dataSource
+    )
+}
+
+fun setupRegistries() {
     RepositoryRegistry
         .register<MeldekortRepositoryPostgres>()
         .register<UtfyllingRepositoryPostgres>()
@@ -47,15 +60,6 @@ fun main(
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
         .register<ArenaGatewayImpl>()
-        .register<FakeDokgenGateway>()
+        .register<FakePdfgenGateway>()
         .status()
-
-    startHttpServer(
-        port = 8080,
-        prometheus = prometheusMeterRegistry,
-        applikasjonsVersjon = applikasjonVersjon,
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
-        dataSource = dataSource
-    )
 }

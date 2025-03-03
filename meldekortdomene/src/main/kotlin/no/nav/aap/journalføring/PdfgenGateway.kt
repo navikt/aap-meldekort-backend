@@ -4,14 +4,19 @@ import no.nav.aap.Ident
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.lookup.gateway.Factory
 import no.nav.aap.lookup.gateway.Gateway
+import java.time.Instant
 
-interface DokgenGateway: Gateway {
-    fun genererPdf(ident: Ident, meldekort: Meldekort): ByteArray
+interface PdfgenGateway: Gateway {
+    fun genererPdf(ident: Ident, mottatt: Instant, meldekort: Meldekort): ByteArray
 }
 
 // TODO: flytt ut til en test mappe
-class FakeDokgenGateway: DokgenGateway {
-    override fun genererPdf(ident: Ident, meldekort: Meldekort): ByteArray {
+class FakePdfgenGateway: PdfgenGateway {
+    override fun genererPdf(
+        ident: Ident,
+        mottatt: Instant,
+        meldekort: Meldekort,
+    ): ByteArray {
         return """
          %PDF-1.0
          1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
@@ -31,9 +36,9 @@ class FakeDokgenGateway: DokgenGateway {
             .toByteArray()
     }
 
-    companion object: Factory<FakeDokgenGateway> {
-        override fun konstruer(): FakeDokgenGateway {
-            return FakeDokgenGateway()
+    companion object: Factory<FakePdfgenGateway> {
+        override fun konstruer(): FakePdfgenGateway {
+            return FakePdfgenGateway()
         }
     }
 }
