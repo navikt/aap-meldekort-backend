@@ -83,10 +83,10 @@ class UtfyllingRepositoryPostgres(
         }
     }
 
-    override fun slettUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
+    override fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
         connection.execute(
             """
-        DELETE FROM utfylling WHERE ident = ? and referanse = ?
+        DELETE FROM utfylling WHERE ident = ? and referanse = ? AND NOT avsluttet
         """
         ) {
             setParams {

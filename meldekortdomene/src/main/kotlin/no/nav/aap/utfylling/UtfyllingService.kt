@@ -144,7 +144,9 @@ class UtfyllingService(
     }
 
     fun slett(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
-        utfyllingRepository.slettUtfylling(innloggetBruker.ident, utfyllingReferanse)
+        val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse) ?: return
+        require(!utfylling.erAvsluttet)
+        utfyllingRepository.slettUtkast(innloggetBruker.ident, utfyllingReferanse)
     }
 
     companion object {

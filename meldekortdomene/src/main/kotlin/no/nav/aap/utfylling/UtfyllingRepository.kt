@@ -9,5 +9,5 @@ interface UtfyllingRepository: Repository {
     fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun lastUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun lagrUtfylling(utfylling: Utfylling)
-    fun slettUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse)
+    fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse)
 }
