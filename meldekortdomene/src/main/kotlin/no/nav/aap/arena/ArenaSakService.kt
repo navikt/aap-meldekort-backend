@@ -88,6 +88,10 @@ class ArenaSakService(
         )
     }
 
+    /* TODO: implementer denne */
+    override fun totaltAntallTimerArbeidet(periodeDetaljer: SakService.PeriodeDetaljer): Double {
+        return 0.0
+    }
 
     override fun forberedVanligFlyt(
         innloggetBruker: InnloggetBruker,

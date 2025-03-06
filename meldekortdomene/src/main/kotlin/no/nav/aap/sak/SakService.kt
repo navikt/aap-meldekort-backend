@@ -35,6 +35,8 @@ interface SakService {
     )
     fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): PeriodeDetaljer
 
+    fun totaltAntallTimerArbeidet(periodeDetaljer: PeriodeDetaljer): Double
+
     fun forberedVanligFlyt(innloggetBruker: InnloggetBruker, periode: Periode, utfyllingReferanse: UtfyllingReferanse)
     fun forberedKorrigeringFlyt(innloggetBruker: InnloggetBruker, periode: Periode, utfyllingReferanse: UtfyllingReferanse)
 

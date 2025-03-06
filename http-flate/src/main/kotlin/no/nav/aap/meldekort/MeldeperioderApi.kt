@@ -34,7 +34,10 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
                 val meldeperioder = historiskeMeldeperioder(innloggetBruker())
-                meldeperioder.map { HistoriskMeldeperiodeDto(it) }
+                meldeperioder.map { HistoriskMeldeperiodeDto(
+                    meldeperiode = it,
+                    antallTimerArbeidetIPerioden = totaltAntallTimerIPerioden(innloggetBruker(), it.meldeperioden) ?: 0.0
+                ) }
             }
             respond(response)
         }

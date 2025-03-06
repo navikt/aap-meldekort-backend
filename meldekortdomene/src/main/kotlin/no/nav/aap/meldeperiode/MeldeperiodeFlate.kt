@@ -34,6 +34,14 @@ class MeldeperiodeFlate(
             )
     }
 
+    fun totaltAntallTimerIPerioden(innloggetBruker: InnloggetBruker, periode: Periode): Double? {
+        val detaljer = sakService?.detaljer(innloggetBruker, periode)
+        if(detaljer !== null) {
+            return sakService?.totaltAntallTimerArbeidet(detaljer)
+        }
+        return null
+    }
+
     companion object {
         fun konstruer(ident: Ident, connection: DBConnection): MeldeperiodeFlate {
             val fagsystemService = SakerService.konstruer().finnSak(ident, LocalDate.now())
