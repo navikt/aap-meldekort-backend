@@ -103,7 +103,14 @@ class UtfyllingFlyt(
      */
     private fun oppfyllerFormkrav(utfylling: Utfylling): UtfyllingStegNavn? {
         for (steg in stegene) {
-            if (!steg.oppfyllerFormkrav(utfylling)) {
+            val feilendeFormkrav = steg.formkrav
+                .filterNot { (_, formkravOppfylt) -> formkravOppfylt(utfylling) }
+            if (feilendeFormkrav.isNotEmpty()) {
+                log.info("formkrav {} feilet for steg {}",
+                    feilendeFormkrav.entries.joinToString { (navn, _) -> navn },
+                    steg.navn,
+                )
+
                 return steg.navn
             }
 
