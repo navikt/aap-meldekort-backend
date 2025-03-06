@@ -144,7 +144,8 @@ class UtfyllingService(
     }
 
     fun slett(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
-        TODO("Not yet implemented")
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
+            ?: TODO("kan skje hvis mellomlagring slettes")
     }
 
     companion object {
