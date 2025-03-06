@@ -20,10 +20,12 @@ class KommendeMeldeperioderDto(
 )
 
 class HistoriskMeldeperiodeDto(
+    val antallTimerArbeidetIPerioden: Double,
     val meldeperiode: PeriodeDto,
     val status: MeldeperiodeStatusDto,
 ) {
-    constructor(meldeperiode: Meldeperiode) : this(
+    constructor(meldeperiode: Meldeperiode, antallTimerArbeidetIPerioden: Double ) : this(
+        antallTimerArbeidetIPerioden = antallTimerArbeidetIPerioden,
         meldeperiode = PeriodeDto(meldeperiode.meldeperioden),
         status = MeldeperiodeStatusDto.KELVIN /* TODO */
     )

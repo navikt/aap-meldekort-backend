@@ -85,6 +85,10 @@ class KelvinSakService(
         )
     }
 
+    override fun totaltAntallTimerArbeidet(periodeDetaljer: SakService.PeriodeDetaljer): Double {
+        return periodeDetaljer.svar.timerArbeidet.sumOf { it.timer ?: 0.0 }
+    }
+
     override fun forberedVanligFlyt(
         innloggetBruker: InnloggetBruker,
         periode: Periode,
