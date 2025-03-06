@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import java.io.ByteArrayOutputStream
 
 val komponenterVersjon = "1.0.159"
 val junitVersjon = "5.12.0"
@@ -33,12 +32,11 @@ tasks {
 }
 
 fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split("\\s".toRegex())
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
+    val execResult = providers.exec {
+        commandLine(command.split("\\s".toRegex()))
+    }.standardOutput.asText
+
+    return execResult.get()
 }
 
 fun getCheckedOutGitCommitHash(): String {
