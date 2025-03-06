@@ -18,7 +18,15 @@ repositories {
             password = (project.findProperty("githubPassword")
                 ?: System.getenv("GITHUB_PASSWORD")
                 ?: System.getenv("GITHUB_TOKEN")
-                ?: error("")).toString()
+                ?: error("Fant ikke Github-token")).toString()
+        }
+    }
+}
+
+testing {
+    suites {
+        @Suppress("UnstableApiUsage") val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
         }
     }
 }
