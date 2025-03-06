@@ -19,12 +19,14 @@ class UtfyllingRepositoryPostgres(
     }
 
     override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
-        return connection.queryFirstOrNull("""
+        return connection.queryFirstOrNull(
+            """
             select * from utfylling
             where ident = ? and periode = ?::daterange
             order by sist_endret desc
             limit 1
-        """) {
+        """
+        ) {
             setParams {
                 setString(1, ident.asString)
                 setPeriode(2, no.nav.aap.komponenter.type.Periode(periode.fom, periode.tom))
@@ -40,12 +42,14 @@ class UtfyllingRepositoryPostgres(
         ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
     ): Utfylling? {
-        return connection.queryFirstOrNull("""
+        return connection.queryFirstOrNull(
+            """
             select * from utfylling
             where ident = ? and referanse = ?
             order by sist_endret desc
             limit 1
-        """) {
+        """
+        ) {
             setParams {
                 setString(1, ident.asString)
                 setUUID(2, utfyllingReferanse.asUuid)
@@ -75,6 +79,19 @@ class UtfyllingRepositoryPostgres(
                 setEnumName(9, utfylling.aktivtSteg)
                 setBoolean(10, utfylling.erAvsluttet)
                 setString(11, DefaultJsonMapper.toJson(utfylling.svar))
+            }
+        }
+    }
+
+    override fun slettUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
+        connection.execute(
+            """
+        DELETE FROM utfylling WHERE ident = ? and referanse = ?
+        """
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setUUID(2, utfyllingReferanse.asUuid)
             }
         }
     }
