@@ -6,6 +6,8 @@ import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 class StartUtfyllingRequest(
@@ -42,11 +44,33 @@ class UtfyllingTilstandDto(
 class UtfyllingMetadataDto(
     val referanse: UUID,
     val periode: PeriodeDto,
+
+    /** Hvis `null` skal det tolkes som at det kan sendes inn når som helst.
+     * Foreløpig er den alltid satt, siden logikken ikke er implementert skikkelig
+     * enda.
+     */
+    val tidligsteInnsendingstidspunkt: LocalDateTime?,
+
+    /** Hvis `null` skal det tolkes som at det ikke er en bestemt frist som i seg selv
+     * påvirker ytelsen.
+     * Foreløpig er den alltid satt, siden logikken ikke er implementert skikkelig
+     * enda.
+     */
+    val fristForInnsending: LocalDateTime?,
+    val kanSendesInn: Boolean,
 ) {
-    constructor(utfylling: Utfylling): this(
-        referanse = utfylling.referanse.asUuid,
-        periode = PeriodeDto(utfylling.periode),
-    )
+    companion object {
+        fun fraDomene(utfylling: Utfylling): UtfyllingMetadataDto {
+            val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
+            return UtfyllingMetadataDto(
+                referanse = utfylling.referanse.asUuid,
+                periode = PeriodeDto(utfylling.periode),
+                tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
+                fristForInnsending = utfylling.periode.tom.plusDays(9).atTime(23, 59),
+                kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo")),
+            )
+        }
+    }
 }
 
 enum class StegDto(val tilDomene: UtfyllingStegNavn) {

@@ -38,7 +38,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 startUtfylling(innloggetBruker(), Periode(body.fom, body.tom))
             }
             StartUtfyllingResponse(
-                metadata = UtfyllingMetadataDto(utfylling),
+                metadata = UtfyllingMetadataDto.fraDomene(utfylling),
                 tilstand = UtfyllingTilstandDto(utfylling),
                 feil = null
             )
@@ -53,7 +53,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 startKorrigering(innloggetBruker(), Periode(body.fom, body.tom))
             }
             StartUtfyllingResponse(
-                metadata = UtfyllingMetadataDto(utfylling),
+                metadata = UtfyllingMetadataDto.fraDomene(utfylling),
                 tilstand = UtfyllingTilstandDto(utfylling),
                 feil = null
             )
@@ -78,7 +78,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             } else {
                 respond(
                     UtfyllingResponseDto(
-                        metadata = UtfyllingMetadataDto(utfylling),
+                        metadata = UtfyllingMetadataDto.fraDomene(utfylling),
                         tilstand = UtfyllingTilstandDto(utfylling),
                         feil = null,
                     )
@@ -106,7 +106,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             }
             respond(
                 UtfyllingResponseDto(
-                    metadata = UtfyllingMetadataDto(response.utfylling),
+                    metadata = UtfyllingMetadataDto.fraDomene(response.utfylling),
                     tilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )
@@ -125,7 +125,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
             }
             respond(
                 UtfyllingResponseDto(
-                    metadata = UtfyllingMetadataDto(response.utfylling),
+                    metadata = UtfyllingMetadataDto.fraDomene(response.utfylling),
                     tilstand = UtfyllingTilstandDto(response.utfylling),
                     feil = response.feil?.toString() /* TODO */
                 )
