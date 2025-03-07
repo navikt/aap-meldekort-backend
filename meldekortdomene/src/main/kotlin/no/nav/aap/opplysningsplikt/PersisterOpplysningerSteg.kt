@@ -23,7 +23,7 @@ class PersisterOpplysningerSteg(
                 )
             }
         )
-        /* TODO */
+        /* TODO: lagre dato meldt seg separat, kan pr. i dag utledes av hvilke datoer man har gitt opplysninger om.  */
     }
 
     override fun equals(other: Any?): Boolean {

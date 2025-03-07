@@ -6,7 +6,6 @@ import no.nav.aap.arena.Meldekort
 import no.nav.aap.arena.MeldekortId
 import no.nav.aap.arena.MeldekortRepository
 
-/* TODO: Flytt ned i test-mappa når postgres-database er implementert. */
 class MeldekortRepositoryFake: MeldekortRepository {
     private val store: MutableMap<Pair<Ident, MeldekortId>, Meldekort> = mutableMapOf()
 

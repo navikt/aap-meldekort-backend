@@ -1,9 +1,5 @@
-package no.nav.aap.utfylling
+package no.nav.aap.meldekort
 
-import no.nav.aap.Ident
-import no.nav.aap.arena.MeldekortId
-
-/* TODO: Flytt til test-mappen når serveren ikke lenger bruker fake versjonen. */
 //class UtfyllingRepositoryFake: UtfyllingRepository {
 //    private val skjema: HashMap<Pair<Ident, MeldekortId>, Utfylling> = HashMap()
 //

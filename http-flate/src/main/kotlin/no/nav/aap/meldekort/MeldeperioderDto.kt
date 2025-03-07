@@ -27,7 +27,7 @@ class HistoriskMeldeperiodeDto(
     constructor(meldeperiode: Meldeperiode, antallTimerArbeidetIPerioden: Double ) : this(
         antallTimerArbeidetIPerioden = antallTimerArbeidetIPerioden,
         meldeperiode = PeriodeDto(meldeperiode.meldeperioden),
-        status = MeldeperiodeStatusDto.KELVIN /* TODO */
+        status = MeldeperiodeStatusDto.KELVIN /* TODO: arena */
     )
 }
 
@@ -59,11 +59,11 @@ data class PeriodeDetaljerDto(
 ) {
     constructor(detaljer: SakService.PeriodeDetaljer) : this(
         periode = PeriodeDto(detaljer.periode),
-        status = MeldeperiodeStatusDto.KELVIN /* TODO */,
-        bruttoBeløp = null /* TODO */,
+        status = MeldeperiodeStatusDto.KELVIN /* TODO: arena */,
+        bruttoBeløp = null /* TODO: arena */,
         innsendtDato = null /* TODO */,
-        kanEndres = false /* TODO */,
-        type = MeldekortTypeDto.KELVIN /* TODO */,
+        kanEndres = true /* TODO: arena */,
+        type = MeldekortTypeDto.KELVIN /* TODO: arena */,
         svar = SvarDto(detaljer.svar)
     )
 }

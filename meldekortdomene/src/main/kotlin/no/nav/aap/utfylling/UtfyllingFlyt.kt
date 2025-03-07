@@ -155,7 +155,6 @@ class UtfyllingFlyt(
 
             try {
                 steg.utførEffekt(innloggetBruker, utfylling)
-                /* TODO: ønsker nok mark savepoint her. eller? */
             } catch (e: Exception) {
                 return Result.failure(Exception("effekt for steg ${steg.navn} feilet", e))
             }
