@@ -104,10 +104,11 @@ class KelvinSakService(
     }
 
     override fun hentHistoriskeSvar(innloggetBruker: InnloggetBruker, periode: Periode): Svar {
+        val timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode)
         return Svar(
             svarerDuSant = null,
-            harDuJobbet = null,
-            timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode),
+            harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },
+            timerArbeidet = timerArbeidet,
             stemmerOpplysningene = null,
         )
     }
