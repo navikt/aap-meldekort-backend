@@ -23,8 +23,18 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
             val response = medFlate {
                 val ventendeOgNeste = aktuelleMeldeperioder(innloggetBruker())
 
+                val manglerOpplysninger = ventendeOgNeste.ventende
+                    .takeIf { it.isNotEmpty() }
+                    ?.let {
+                        PeriodeDto(
+                            fom = it.first().meldeperioden.fom,
+                            tom = it.last().meldeperioden.tom,
+                        )
+                    }
+
                 KommendeMeldeperioderDto(
                     antallUbesvarteMeldeperioder = ventendeOgNeste.ventende.size,
+                    manglerOpplysninger = manglerOpplysninger,
                     nesteMeldeperiode = ventendeOgNeste.neste?.let { MeldeperiodeDto(it) },
                 )
             }
@@ -34,10 +44,13 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource) {
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
                 val meldeperioder = historiskeMeldeperioder(innloggetBruker())
-                meldeperioder.map { HistoriskMeldeperiodeDto(
-                    meldeperiode = it,
-                    antallTimerArbeidetIPerioden = totaltAntallTimerIPerioden(innloggetBruker(), it.meldeperioden) ?: 0.0
-                ) }
+                meldeperioder.map {
+                    HistoriskMeldeperiodeDto(
+                        meldeperiode = it,
+                        antallTimerArbeidetIPerioden = totaltAntallTimerIPerioden(innloggetBruker(), it.meldeperioden)
+                            ?: 0.0
+                    )
+                }
             }
             respond(response)
         }

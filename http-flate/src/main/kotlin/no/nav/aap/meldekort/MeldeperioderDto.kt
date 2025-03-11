@@ -16,6 +16,7 @@ class MeldeperiodeDto(
 
 class KommendeMeldeperioderDto(
     val antallUbesvarteMeldeperioder: Int,
+    val manglerOpplysninger: PeriodeDto?,
     val nesteMeldeperiode: MeldeperiodeDto?,
 )
 
