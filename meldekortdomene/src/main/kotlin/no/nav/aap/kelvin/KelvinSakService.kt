@@ -23,7 +23,7 @@ class KelvinSakService(
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : SakService {
     override val innsendingsflyt = UtfyllingFlytNavn.AAP_FLYT
-    override val korrigeringsflyt = UtfyllingFlytNavn.AAP_FLYT
+    override val korrigeringsflyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
 
     private fun hentMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
         return aapGateway.hentMeldeperioder(innloggetBruker.ident, sak.rettighetsperiode)

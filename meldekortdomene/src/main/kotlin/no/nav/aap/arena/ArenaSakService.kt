@@ -149,7 +149,7 @@ class ArenaSakService(
                     journalførPåSak = journalførPåSak,
                 )
 
-            UtfyllingFlytNavn.AAP_FLYT ->
+            UtfyllingFlytNavn.AAP_FLYT, UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
                 error("arena service kan ikke utlede journalpost-opplysninger for utfylling ${utfylling.referanse} med fagsak ${utfylling.fagsak}")
         }
     }

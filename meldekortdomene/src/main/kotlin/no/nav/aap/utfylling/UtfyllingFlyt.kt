@@ -60,6 +60,16 @@ enum class UtfyllingFlytNavn(
             KVITTERING,
         )
     ),
+    AAP_KORRIGERING_FLYT(
+        listOf(
+            SPØRSMÅL,
+            UTFYLLING,
+            BEKREFT,
+            PERSISTER_OPPLYSNINGER,
+            BESTILL_JOURNALFØRING,
+            KVITTERING,
+        )
+    ),
 }
 
 class UtfyllingFlyt(
