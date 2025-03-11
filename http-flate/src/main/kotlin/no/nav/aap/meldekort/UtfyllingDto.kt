@@ -44,6 +44,7 @@ class UtfyllingTilstandDto(
 class UtfyllingMetadataDto(
     val referanse: UUID,
     val periode: PeriodeDto,
+    val antallUbesvarteMeldeperioder: Int,
 
     /** Hvis `null` skal det tolkes som at det kan sendes inn når som helst.
      * Foreløpig er den alltid satt, siden logikken ikke er implementert skikkelig
@@ -60,14 +61,19 @@ class UtfyllingMetadataDto(
     val kanSendesInn: Boolean,
 ) {
     companion object {
-        fun fraDomene(utfylling: Utfylling): UtfyllingMetadataDto {
+        fun fraDomene(utfylling: Utfylling, antallUbesvarteMeldeperioder: Int): UtfyllingMetadataDto {
+            /* TODO: denne logikken burde flyttes ut av dto-koden. */
             val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
+            val fristForInnsending = utfylling.periode.tom.plusDays(9).atTime(23, 59)
+            val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
+
             return UtfyllingMetadataDto(
                 referanse = utfylling.referanse.asUuid,
                 periode = PeriodeDto(utfylling.periode),
                 tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
-                fristForInnsending = utfylling.periode.tom.plusDays(9).atTime(23, 59),
-                kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo")),
+                fristForInnsending = fristForInnsending,
+                kanSendesInn = kanSendesInn,
+                antallUbesvarteMeldeperioder = antallUbesvarteMeldeperioder,
             )
         }
     }
