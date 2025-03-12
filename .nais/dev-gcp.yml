@@ -100,7 +100,5 @@ spec:
         - name: AAP_API_INTERN_SCOPE
           value: api://dev-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
-          value: https://pdfgen-meldekort.aap/
-        - name: PDFGEN_URL_SCOPE
-          value: api://dev-gcp.aap.pdfgen-meldekort/.default
-          
+          value: http://pdfgen-meldekort.aap
+
