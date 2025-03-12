@@ -60,7 +60,7 @@ spec:
                 - application: meldekort
                 - application: paw-patrol
                 - application: tokenx-token-generator
-                  namespace: aura
+                  namespace: nais
         outbound:
             rules:
                 - application: meldekortkontroll-api-q2
