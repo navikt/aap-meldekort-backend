@@ -11,7 +11,6 @@ fun main() {
     FakeServers.start()
 
     setupRegistries()
-    GatewayRegistry.register<PdfgenGatewayImpl>()
 
     main(
         dataSource = createTestcontainerPostgresDataSource(prometheus),

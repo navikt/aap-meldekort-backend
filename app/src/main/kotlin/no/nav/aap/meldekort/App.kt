@@ -13,6 +13,7 @@ import no.nav.aap.createPostgresDataSource
 import no.nav.aap.journalføring.FakePdfgenGateway
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import org.slf4j.LoggerFactory
@@ -60,6 +61,6 @@ fun setupRegistries() {
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
         .register<ArenaGatewayImpl>()
-        .register<FakePdfgenGateway>()
+        .register<PdfgenGatewayImpl>()
         .status()
 }

@@ -10,7 +10,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
+import java.time.ZoneId
 
 object PdfgenGatewayImpl : PdfgenGateway {
     private val baseUrl = requiredConfigForKey("pdfgen.url")
@@ -26,8 +28,15 @@ object PdfgenGatewayImpl : PdfgenGateway {
         mottatt: Instant,
         meldekort: no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
     ): ByteArray {
-        val pdf = httpClient.get<ByteArray>(
-            uri, GetRequest(
+        val pdf = httpClient.post(
+            uri, PostRequest(
+                body = mapOf(
+                    "ident" to ident.asString,
+                    "navn" to "" /* TODO: pdl? token? */,
+                    "sendtInnDato" to mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate(),
+                    "sendtInnUtc" to mottatt,
+                    "meldekort" to meldekort,
+                ),
                 additionalHeaders = listOf(
                     Header("accept", "application/pdf"),
                     Header("content-type", "application/json")

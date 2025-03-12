@@ -17,7 +17,7 @@ object FakePdfgen : FakeServer {
             jackson()
         }
         routing {
-            get("/api/v1/genpdf/meldekort-backend/meldekort") {
+            post("/api/v1/genpdf/meldekort-backend/meldekort") {
                 call.respondBytes(
                     """
                      %PDF-1.0
