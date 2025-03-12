@@ -70,6 +70,7 @@ spec:
                   namespace: meldekort
                   cluster: dev-fss
                 - application: api-intern
+                - application: pdfgen-meldekort
             external:
                 - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
                 - host: meldekortservice-q2.dev-fss-pub.nais.io
@@ -98,3 +99,8 @@ spec:
           value: http://api-intern.aap/
         - name: AAP_API_INTERN_SCOPE
           value: api://dev-gcp.aap.api-intern/.default
+        - name: PDFGEN_URL
+          value: https://pdfgen-meldekort.aap/
+        - name: PDFGEN_URL_SCOPE
+          value: api://dev-gcp.aap.pdfgen-meldekort/.default
+          
