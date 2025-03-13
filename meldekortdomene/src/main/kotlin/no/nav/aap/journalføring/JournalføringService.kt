@@ -55,7 +55,7 @@ class JournalføringService(
             pdf = pdfgenGateway.genererPdf(
                 ident = ident,
                 mottatt = utfylling.sistEndret,
-                meldekort = meldekort
+                meldekort = meldekort,
                 utfylling = utfylling
             ),
             fagsystemspesifikkeOpplysninger = fagsystemspesifikkeOpplysninger
