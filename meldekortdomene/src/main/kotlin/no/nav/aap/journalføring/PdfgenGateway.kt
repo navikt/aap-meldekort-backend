@@ -4,10 +4,11 @@ import no.nav.aap.Ident
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.lookup.gateway.Factory
 import no.nav.aap.lookup.gateway.Gateway
+import no.nav.aap.utfylling.Utfylling
 import java.time.Instant
 
 interface PdfgenGateway: Gateway {
-    fun genererPdf(ident: Ident, mottatt: Instant, meldekort: Meldekort): ByteArray
+    fun genererPdf(ident: Ident, mottatt: Instant, meldekort: Meldekort, utfylling: Utfylling): ByteArray
 }
 
 // TODO: flytt ut til en test mappe
@@ -16,6 +17,7 @@ class FakePdfgenGateway: PdfgenGateway {
         ident: Ident,
         mottatt: Instant,
         meldekort: Meldekort,
+        utfylling: Utfylling
     ): ByteArray {
         return """
          %PDF-1.0

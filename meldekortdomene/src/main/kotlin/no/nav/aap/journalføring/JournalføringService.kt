@@ -56,6 +56,7 @@ class JournalføringService(
                 ident = ident,
                 mottatt = utfylling.sistEndret,
                 meldekort = meldekort
+                utfylling = utfylling
             ),
             fagsystemspesifikkeOpplysninger = fagsystemspesifikkeOpplysninger
         )
