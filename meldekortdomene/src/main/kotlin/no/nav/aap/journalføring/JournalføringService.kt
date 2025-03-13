@@ -95,9 +95,7 @@ class JournalføringService(
             else
                 null,
             eksternReferanseId = utfylling.referanse.asUuid.toString(),
-            datoMottatt = utfylling.sistEndret.atZone(ZoneId.of("Europe/Oslo"))
-                .toLocalDate()
-                .toString(),
+            datoMottatt = utfylling.sistEndret.toString(),
             tilleggsopplysninger = fagsystemspesifikkeOpplysninger
                 .tilleggsopplysning
                 .entries
