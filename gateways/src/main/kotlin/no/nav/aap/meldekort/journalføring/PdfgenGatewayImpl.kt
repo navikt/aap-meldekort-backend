@@ -17,7 +17,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
-import java.util.*
+import java.util.Locale
 
 object PdfgenGatewayImpl : PdfgenGateway {
     private val baseUrl = requiredConfigForKey("pdfgen.url")
