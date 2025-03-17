@@ -38,7 +38,6 @@ object PdfgenGatewayImpl : PdfgenGateway {
             uri, PostRequest(
                 body = mapOf(
                     "ident" to ident.asString,
-                    "navn" to "Test Testesen" /* TODO: pdl? token? */,
                     "sendtInnDato" to formaterDatoForFrontend(mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate()),
                     "meldekortid" to utfylling.referanse.asUuid.toString(),
                     "sammenlagtArbeidIPerioden" to formaterTimer(utfylling.svar.timerArbeidet.sumOf {
