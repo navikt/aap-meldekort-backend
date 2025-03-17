@@ -12,7 +12,12 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.utfylling.Utfylling
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.time.temporal.WeekFields
+import java.util.*
 
 object PdfgenGatewayImpl : PdfgenGateway {
     private val baseUrl = requiredConfigForKey("pdfgen.url")
@@ -34,32 +39,37 @@ object PdfgenGatewayImpl : PdfgenGateway {
                 body = mapOf(
                     "ident" to ident.asString,
                     "navn" to "Test Testesen" /* TODO: pdl? token? */,
-                    "sendtInnDato" to mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate(),
-                    "sendtInnUtc" to mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate(),
-                    "sammenlagtArbeidIPerioden" to utfylling.svar.timerArbeidet.sumOf { it.timer ?: 0.0 },
+                    "sendtInnDato" to formaterDatoForFrontend(mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate()),
+                    "meldekortid" to utfylling.referanse.asUuid.toString(),
+                    "sammenlagtArbeidIPerioden" to formaterTimer(utfylling.svar.timerArbeidet.sumOf {
+                        it.timer ?: 0.0
+                    }),
                     "harGittRiktigeOpplysninger" to utfylling.svar.svarerDuSant,
                     "meldeperiode" to mapOf(
-                        "fraOgMedDato" to meldekort.fom().toString(),
-                        "tilOgMedDato" to meldekort.tom().toString()
+                        "fraOgMedDato" to formaterDatoForFrontend(meldekort.fom()),
+                        "tilOgMedDato" to formaterDatoForFrontend(meldekort.tom()),
+                        "uker" to hentUkeNummerForPerioen(meldekort.fom(), meldekort.tom()),
                     ),
                     "innsendingsvindu" to mapOf(
-                        "fraOgMedDato" to utfylling.periode.tom.plusDays(1),
-                        "tilOgMedDato" to utfylling.periode.tom.plusDays(8)
+                        "fraOgMedDato" to formaterDatoForFrontend(utfylling.periode.tom.plusDays(1)),
+                        "tilOgMedDato" to formaterDatoForFrontend(utfylling.periode.tom.plusDays(8))
                     ),
                     "meldekort" to mapOf(
                         "harDuArbeidet" to utfylling.svar.harDuJobbet,
                         "timerArbeidPerUkeIPerioden" to utfylling.svar.timerArbeidet
+                            .filter { it.timer != null }
                             .groupBy { it.dato.with(DayOfWeek.MONDAY) }
                             .map { (mandag, dager) ->
                                 val sisteDagIDenneUken = dager.maxOfOrNull { it.dato } ?: mandag.plusDays(6)
 
                                 mapOf(
-                                    "fraOgMedDato" to mandag,
-                                    "tilOgMedDato" to sisteDagIDenneUken,
+                                    "fraOgMedDato" to formaterDatoForFrontend(mandag),
+                                    "tilOgMedDato" to formaterDatoForFrontend(sisteDagIDenneUken),
+                                    "ukenummer" to hentUkeNummerForDato(mandag),
                                     "dager" to dager.map { dag ->
                                         mapOf(
-                                            "dag" to dag.dato.toString(),
-                                            "timerArbeid" to (dag.timer ?: 0.0)
+                                            "dag" to hentDagNavn(dag.dato),
+                                            "timerArbeid" to formaterTimer(dag.timer)
                                         )
                                     }
                                 )
@@ -81,5 +91,43 @@ object PdfgenGatewayImpl : PdfgenGateway {
             "Body fra dokgen mangler PDF-magic number '%PDF'. Html/json-feilmelding?"
         }
         return pdf
+    }
+}
+
+fun formaterDatoForFrontend(date: LocalDate?): String {
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.forLanguageTag("no-NO"))
+    return date?.format(formatter) ?: ""
+}
+
+fun hentDagNavn(date: LocalDate): String {
+    val dag = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("no-NO"))
+    return dag.replaceFirstChar { it.uppercaseChar() }
+}
+
+fun formaterTimer(number: Double?): String {
+    return when {
+        number == null -> ""
+        number % 1.0 == 0.0 -> number.toInt().toString()
+        else -> number.toString()
+    }
+}
+
+fun hentUkeNummerForDato(dato: LocalDate): String {
+    val ukeFelter = WeekFields.of(Locale.forLanguageTag("no-NO"))
+    return dato.get(ukeFelter.weekOfWeekBasedYear()).toString()
+}
+
+fun hentUkeNummerForPerioen(from: LocalDate?, to: LocalDate?): String {
+    val ukeFelter = WeekFields.of(Locale.forLanguageTag("no-NO"))
+    val uker = generateSequence(from) { it.plusDays(1) }
+        .takeWhile { it <= to }
+        .map { it.get(ukeFelter.weekOfWeekBasedYear()) }
+        .distinct()
+        .toList()
+
+    return when (uker.size) {
+        1 -> "Uke ${uker.first()}"
+        2 -> "Uke ${uker.joinToString(" og ")}"
+        else -> "Uke ${uker.dropLast(1).joinToString(", ")} og ${uker.last()}"
     }
 }
