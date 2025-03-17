@@ -9,5 +9,6 @@ include(
     "repositories",
     "http-flate",
     "gateways",
-    "lib-test"
+    "lib-test",
+    "kontrakt",
 )

@@ -109,6 +109,7 @@ fun startHttpServer(
             authenticate(AZURE) {
                 apiRouting {
                     motorApi(dataSource)
+                    behandlingsflytApi()
                 }
             }
             actuator(prometheus, motor)
