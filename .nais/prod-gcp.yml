@@ -66,6 +66,14 @@ spec:
                   - name: meldekort-backend
                     envVarPrefix: DB
     env:
+        - name: MELDEKORTSERVICE_URL
+          value: https://meldekortservice.prod-fss-pub.nais.io/meldekortservice/api
+        - name: MELDEKORTSERVICE_SCOPE
+          value: prod-fss:meldekort:meldekortservice
+        - name: MELDEKORTKONTROLL_URL
+          value: https://meldekortkontroll-api.prod-fss-pub.nais.io
+        - name: MELDEKORTKONTROLL_SCOPE
+          value: prod-fss:meldekort:meldekortkontroll-api
         - name: DOKARKIV_URL
           value: https://dokarkiv.prod-fss-pub.nais.io
         - name: DOKARKIV_SCOPE
