@@ -2,6 +2,7 @@ plugins {
     id("meldekort.conventions")
 }
 
+val tilgangVersjon = "1.0.23"
 val komponenterVersjon = "1.0.176"
 val ktorVersion = "3.1.1"
 
@@ -10,6 +11,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":kontrakt"))
 
+    api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")

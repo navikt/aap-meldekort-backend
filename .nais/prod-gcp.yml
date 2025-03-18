@@ -51,6 +51,7 @@ spec:
         inbound:
             rules:
                 - application: meldekort
+                - application: behandlingsflyt
                 - application: paw-patrol
         outbound:
             rules:
@@ -84,3 +85,5 @@ spec:
           value: api://prod-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
           value: http://pdfgen-meldekort.aap
+#        - name: BEHANDLINGSFLYT_AZP
+#          value: ????? # TODO: fyll inn når behandlingsflyt er deployet til prod

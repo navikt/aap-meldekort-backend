@@ -58,6 +58,7 @@ spec:
         inbound:
             rules:
                 - application: meldekort
+                - application: behandlingsflyt
                 - application: paw-patrol
                 - application: tokenx-token-generator
                   namespace: nais
@@ -101,4 +102,6 @@ spec:
           value: api://dev-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
           value: http://pdfgen-meldekort.aap
+        - name: BEHANDLINGSFLYT_AZP
+          value: 5b4656d2-e8f0-4df1-9e10-269133df697f
 
