@@ -37,16 +37,11 @@ object AapGatewayImpl : AapGateway {
         val kilde: String,
         val periode: Periode,
         val sakId: String,
-        val statusKode: VedtakStatusKode,
     ) {
         class Periode(
             val fraOgMedDato: String?,
             val tilOgMedDato: String?,
         )
-
-        enum class VedtakStatusKode {
-            AVSLU, FORDE, GODKJ, INNST, IVERK, KONT, MOTAT, OPPRE, REGIS, UKJENT
-        }
     }
 
     override fun hentSaker(ident: Ident): Saker {
