@@ -10,7 +10,7 @@ import no.nav.aap.lookup.repository.RepositoryRegistry
 import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.arena.MeldekortRepositoryPostgres
 import no.nav.aap.createPostgresDataSource
-import no.nav.aap.journalføring.FakePdfgenGateway
+import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
@@ -55,6 +55,7 @@ fun setupRegistries() {
         .register<MeldekortRepositoryPostgres>()
         .register<UtfyllingRepositoryPostgres>()
         .register<TimerArbeidetRepositoryPostgres>()
+        .register<KelvinSakRepositoryPostgres>()
         .status()
 
     GatewayRegistry
