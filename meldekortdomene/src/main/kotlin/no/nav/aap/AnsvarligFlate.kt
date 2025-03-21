@@ -1,6 +1,8 @@
 package no.nav.aap
 
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.lookup.repository.RepositoryProvider
 import java.time.LocalDate
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.AapGateway
@@ -28,10 +30,10 @@ class AnsvarligFlate(
     }
 
     companion object {
-        fun konstruer(): AnsvarligFlate {
+        fun konstruer(connection: DBConnection): AnsvarligFlate {
             val aapGateway = GatewayProvider.provide<AapGateway>()
             return AnsvarligFlate(
-                sakerService = SakerService(aapGateway),
+                sakerService = SakerService(aapGateway, RepositoryProvider(connection).provide()),
                 aapGateway = aapGateway,
             )
         }

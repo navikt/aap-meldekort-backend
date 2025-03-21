@@ -155,7 +155,7 @@ class UtfyllingService(
 
     companion object {
         fun konstruer(innloggetBruker: InnloggetBruker, connection: DBConnection): UtfyllingService {
-            val sak = SakerService.konstruer().finnSak(innloggetBruker, LocalDate.now())
+            val sak = SakerService.konstruer(connection).finnSak(innloggetBruker, LocalDate.now())
                 ?: error("frontend skal ikke prøve å starte utfylling uten at sak eksisterer")
 
             val repositoryProvider = RepositoryProvider(connection)

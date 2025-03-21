@@ -99,7 +99,7 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     route("api") {
-                        ansvarligSystemApi()
+                        ansvarligSystemApi(dataSource)
                         arenaApi()
                         meldeperioderApi(dataSource)
                         utfyllingApi(dataSource)

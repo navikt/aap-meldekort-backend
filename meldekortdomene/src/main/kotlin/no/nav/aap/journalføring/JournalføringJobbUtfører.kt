@@ -73,7 +73,7 @@ class JournalføringJobbUtfører(
             return JournalføringJobbUtfører(
                 journalføringService = JournalføringService.konstruer(connection),
                 utfyllingRepository = repositoryProvider.provide(),
-                sakerService = SakerService.konstruer(),
+                sakerService = SakerService.konstruer(connection),
                 sakServiceFactory = { sak -> sakServiceFactory(connection, sak) }
             )
         }

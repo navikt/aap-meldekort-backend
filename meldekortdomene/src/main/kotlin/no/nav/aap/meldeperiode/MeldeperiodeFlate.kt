@@ -44,7 +44,7 @@ class MeldeperiodeFlate(
 
     companion object {
         fun konstruer(ident: Ident, connection: DBConnection): MeldeperiodeFlate {
-            val fagsystemService = SakerService.konstruer().finnSak(ident, LocalDate.now())
+            val fagsystemService = SakerService.konstruer(connection).finnSak(ident, LocalDate.now())
                 ?.let { sak -> sakServiceFactory(connection, sak) }
             return MeldeperiodeFlate(fagsystemService)
         }

@@ -5,7 +5,9 @@ import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsystemNavn
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,24 +30,48 @@ class KelvinSakRepositoryPostgresTest {
         InitTestDatabase.dataSource.transaction { connection ->
             val repo = KelvinSakRepositoryPostgres(connection)
 
-            repo.upsertMeldeperioder(sak1, listOf(fnr1), listOf())
-            repo.upsertMeldeperioder(sak2, listOf(fnr3), listOf(periode1, periode2))
+            repo.upsertSak(sak1, periode4, listOf(fnr1), listOf())
+            repo.upsertSak(sak2, periode4, listOf(fnr3), listOf(periode1, periode2))
 
-            assertEquals(listOf(), repo.hentMeldeperioder(fnr1))
-            assertEquals(listOf(), repo.hentMeldeperioder(fnr2))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3))
+            assertEquals(listOf(), repo.hentMeldeperioder(fnr1, sak1))
+            assertEquals(listOf(), repo.hentMeldeperioder(fnr2, sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
+            repo.hentSak(fnr1, periode4.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
+                assertEquals(periode4, it?.rettighetsperiode)
+            }
+            repo.hentSak(fnr3, periode4.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak2), it?.referanse)
+                assertEquals(periode4, it?.rettighetsperiode)
+            }
 
-            repo.upsertMeldeperioder(sak1, listOf(fnr1, fnr2), listOf(periode1, periode3))
+            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode1, periode3))
 
-            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr1))
-            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr2))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3))
+            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr1, sak1))
+            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr2, sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
 
-            repo.upsertMeldeperioder(sak1, listOf(fnr1, fnr2), listOf(periode2, periode3))
-            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr1))
-            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr2))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3))
+            repo.hentSak(fnr1, periode2.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
+                assertEquals(periode2, it?.rettighetsperiode)
+            }
+            repo.hentSak(fnr3, periode4.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak2), it?.referanse)
+                assertEquals(periode4, it?.rettighetsperiode)
+            }
 
+            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode2, periode3))
+            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr1, sak1))
+            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr2, sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
+            repo.hentSak(fnr1, periode2.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
+                assertEquals(periode2, it?.rettighetsperiode)
+            }
+            repo.hentSak(fnr3, periode4.fom).also {
+                assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak2), it?.referanse)
+                assertEquals(periode4, it?.rettighetsperiode)
+            }
         }
     }
 }

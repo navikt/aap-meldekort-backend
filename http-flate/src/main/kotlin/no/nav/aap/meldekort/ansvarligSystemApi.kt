@@ -6,7 +6,9 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.AnsvarligFlate
 import no.nav.aap.komponenter.config.configForKey
+import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.sak.FagsystemNavn
+import javax.sql.DataSource
 
 enum class AnsvarligMeldekortløsningDto {
     AAP,
@@ -25,19 +27,23 @@ enum class AnsvarligMeldekortløsningDto {
     }
 }
 
-fun NormalOpenAPIRoute.ansvarligSystemApi() {
-    val ansvarligFlate = AnsvarligFlate.konstruer()
+fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource) {
     route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
-        respond(
+        val response = dataSource.transaction { connection ->
+            val ansvarligFlate = AnsvarligFlate.konstruer(connection)
             AnsvarligMeldekortløsningDto.fromFagsystem(
                 ansvarligFlate.routingForBruker(innloggetBruker())
             )
-        )
+        }
+        respond(response)
     }
 
     if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
-        route("/debug/saker").get<Unit, Any> {
-            respond(ansvarligFlate.debugSaker(innloggetBruker()))
+        dataSource.transaction { connection ->
+            val ansvarligFlate = AnsvarligFlate.konstruer(connection)
+            route("/debug/saker").get<Unit, Any> {
+                respond(ansvarligFlate.debugSaker(innloggetBruker()))
+            }
         }
     }
 }

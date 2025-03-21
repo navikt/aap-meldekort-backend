@@ -27,9 +27,10 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource) {
     ) { _, body ->
         dataSource.transaction { connection ->
             RepositoryProvider(connection).provide<KelvinSakRepository>()
-                .upsertMeldeperioder(
+                .upsertSak(
                     saksnummer = Fagsaknummer(body.saksnummer),
                     identer = body.identer.map { Ident(it) },
+                    sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
                 )
         }
