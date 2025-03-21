@@ -7,4 +7,12 @@ public class MeldeperioderV0(
     public val saksnummer: String,
     public val sakenGjelderFor: Periode,
     public val meldeperioder: List<Periode>,
+
+    /* Når medlemmet skal melde seg. */
+    public val meldeplikt: List<Periode> = emptyList(),
+
+    /* Hvilke perioder vi åpner for at medlemmet
+     * gir oss opplysninger gjennom meldekortet.
+     */
+    public val opplysningsbehov: List<Periode> = emptyList(),
 )
