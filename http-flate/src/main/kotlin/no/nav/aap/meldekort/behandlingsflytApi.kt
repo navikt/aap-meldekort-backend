@@ -4,6 +4,7 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.config.configForKey
@@ -21,12 +22,16 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource) {
     val authorizedAzps = listOfNotNull(configForKey("BEHANDLINGSFLYT_AZP")?.let(UUID::fromString))
 
     route("/api/behandlingsflyt/sak/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
-        routeConfig = AuthorizationMachineToMachineConfig( authorizedAzps = authorizedAzps,  ),
+        routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
         auditLogConfig = null,
     ) { _, body ->
         dataSource.transaction { connection ->
             RepositoryProvider(connection).provide<KelvinSakRepository>()
-                .upsertMeldeperioder(Fagsaknummer(body.saksnummer), body.meldeperioder.map { Periode(it.fom, it.tom) })
+                .upsertMeldeperioder(
+                    saksnummer = Fagsaknummer(body.saksnummer),
+                    identer = body.identer.map { Ident(it) },
+                    meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                )
         }
         respondWithStatus(HttpStatusCode.OK)
     }
