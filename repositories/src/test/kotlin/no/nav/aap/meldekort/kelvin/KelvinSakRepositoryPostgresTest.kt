@@ -30,11 +30,13 @@ class KelvinSakRepositoryPostgresTest {
         InitTestDatabase.dataSource.transaction { connection ->
             val repo = KelvinSakRepositoryPostgres(connection)
 
-            repo.upsertSak(sak1, periode4, listOf(fnr1), listOf())
-            repo.upsertSak(sak2, periode4, listOf(fnr3), listOf(periode1, periode2))
+            repo.upsertSak(sak1, periode4, listOf(fnr1), listOf(), listOf(periode3), listOf(periode4))
+            repo.upsertSak(sak2, periode4, listOf(fnr3), listOf(periode1, periode2), listOf(), listOf())
 
             assertEquals(listOf(), repo.hentMeldeperioder(fnr1, sak1))
             assertEquals(listOf(), repo.hentMeldeperioder(fnr2, sak1))
+            assertEquals(listOf(periode3), repo.hentMeldeplikt(fnr1, sak1))
+            assertEquals(listOf(periode4), repo.hentOpplysningsbehov(fnr1, sak1))
             assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
             repo.hentSak(fnr1, periode4.fom).also {
                 assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
@@ -45,7 +47,7 @@ class KelvinSakRepositoryPostgresTest {
                 assertEquals(periode4, it?.rettighetsperiode)
             }
 
-            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode1, periode3))
+            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode1, periode3), listOf(), listOf())
 
             assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr1, sak1))
             assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr2, sak1))
@@ -60,7 +62,7 @@ class KelvinSakRepositoryPostgresTest {
                 assertEquals(periode4, it?.rettighetsperiode)
             }
 
-            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode2, periode3))
+            repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode2, periode3), listOf(), listOf())
             assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr1, sak1))
             assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr2, sak1))
             assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))

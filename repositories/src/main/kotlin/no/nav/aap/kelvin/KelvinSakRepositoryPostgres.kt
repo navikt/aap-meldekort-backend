@@ -15,7 +15,9 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         saksnummer: Fagsaknummer,
         sakenGjelderFor: Periode,
         identer: List<Ident>,
-        meldeperioder: List<Periode>
+        meldeperioder: List<Periode>,
+        fastsattePerioder: List<Periode>,
+        opplysningsbehov: List<Periode>
     ) {
         val sakId = connection.queryFirst<Long>(
             """
@@ -107,6 +109,60 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 setPeriode(2, no.nav.aap.komponenter.type.Periode(it.fom, it.tom))
             }
         }
+
+        connection.execute(
+            """
+            delete from kelvin_fastsatt_periode
+            where sak_id = ? and periode <> all (?::daterange[])
+            """
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriodeArray(2, fastsattePerioder.map { no.nav.aap.komponenter.type.Periode(it.fom, it.tom) })
+            }
+        }
+
+        connection.executeBatch(
+            """
+                insert into kelvin_fastsatt_periode (sak_id, periode)
+                values (?, ?::daterange)
+                on conflict (sak_id, periode) do update set
+                oppdatert = current_timestamp(3)
+            """,
+            fastsattePerioder
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriode(2, no.nav.aap.komponenter.type.Periode(it.fom, it.tom))
+            }
+        }
+
+        connection.execute(
+            """
+            delete from kelvin_opplysningsbehov
+            where sak_id = ? and periode <> all (?::daterange[])
+            """
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriodeArray(2, opplysningsbehov.map { no.nav.aap.komponenter.type.Periode(it.fom, it.tom) })
+            }
+        }
+
+        connection.executeBatch(
+            """
+                insert into kelvin_opplysningsbehov (sak_id, periode)
+                values (?, ?::daterange)
+                on conflict (sak_id, periode) do update set
+                oppdatert = current_timestamp(3)
+            """,
+            opplysningsbehov
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriode(2, no.nav.aap.komponenter.type.Periode(it.fom, it.tom))
+            }
+        }
     }
 
     override fun hentMeldeperioder(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
@@ -118,6 +174,48 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
             where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
             order by kelvin_meldeperiode.periode
+        """
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setString(2, saksnummer.asString)
+            }
+            setRowMapper {
+                it.getPeriode("periode").let { Periode(it.fom, it.tom) }
+            }
+        }
+    }
+
+    override fun hentMeldeplikt(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
+        return connection.queryList(
+            """
+            select kelvin_fastsatt_periode.periode from kelvin_fastsatt_periode
+            join kelvin_sak on kelvin_fastsatt_periode.sak_id = kelvin_sak.id
+            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
+            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
+            where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
+            order by kelvin_fastsatt_periode.periode
+        """
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setString(2, saksnummer.asString)
+            }
+            setRowMapper {
+                it.getPeriode("periode").let { Periode(it.fom, it.tom) }
+            }
+        }
+    }
+
+    override fun hentOpplysningsbehov(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
+        return connection.queryList(
+            """
+            select kelvin_opplysningsbehov.periode from kelvin_opplysningsbehov
+            join kelvin_sak on kelvin_opplysningsbehov.sak_id = kelvin_sak.id
+            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
+            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
+            where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
+            order by kelvin_opplysningsbehov.periode
         """
         ) {
             setParams {

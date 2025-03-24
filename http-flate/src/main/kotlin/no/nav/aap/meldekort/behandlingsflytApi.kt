@@ -32,6 +32,8 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource) {
                     identer = body.identer.map { Ident(it) },
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                    opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
+                    meldeplikt = body.meldeperioder.map { Periode(it.fom, it.tom) },
                 )
         }
         respondWithStatus(HttpStatusCode.OK)

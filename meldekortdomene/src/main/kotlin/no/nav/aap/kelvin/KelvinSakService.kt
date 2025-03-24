@@ -31,7 +31,7 @@ class KelvinSakService(
                 /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
                 Meldeperiode(
                     meldeperioden = it,
-                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
+                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(7)),
                 )
             }
     }
