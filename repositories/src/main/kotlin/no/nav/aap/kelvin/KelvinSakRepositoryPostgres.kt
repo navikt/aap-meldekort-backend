@@ -16,7 +16,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         sakenGjelderFor: Periode,
         identer: List<Ident>,
         meldeperioder: List<Periode>,
-        fastsattePerioder: List<Periode>,
+        meldeplikt: List<Periode>,
         opplysningsbehov: List<Periode>
     ) {
         val sakId = connection.queryFirst<Long>(
@@ -118,7 +118,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         ) {
             setParams {
                 setLong(1, sakId)
-                setPeriodeArray(2, fastsattePerioder.map { no.nav.aap.komponenter.type.Periode(it.fom, it.tom) })
+                setPeriodeArray(2, meldeplikt.map { no.nav.aap.komponenter.type.Periode(it.fom, it.tom) })
             }
         }
 
@@ -129,7 +129,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 on conflict (sak_id, periode) do update set
                 oppdatert = current_timestamp(3)
             """,
-            fastsattePerioder
+            meldeplikt
         ) {
             setParams {
                 setLong(1, sakId)

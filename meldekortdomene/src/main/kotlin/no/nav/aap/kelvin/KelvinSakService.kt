@@ -19,19 +19,23 @@ import java.time.LocalDate
 
 class KelvinSakService(
     override val sak: Sak,
-    private val aapGateway: AapGateway,
+    private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : SakService {
     override val innsendingsflyt = UtfyllingFlytNavn.AAP_FLYT
     override val korrigeringsflyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
 
     private fun hentMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode> {
-        return aapGateway.hentMeldeperioder(innloggetBruker.ident, sak.rettighetsperiode)
-            .map {
+        val opplysningsbehov = kelvinSakRepository.hentOpplysningsbehov(innloggetBruker.ident, sak.referanse.nummer)
+        val meldeperioder = kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.referanse.nummer)
+
+        return meldeperioder
+            .mapNotNull {
                 /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
+                val periode = Periode.snitt(listOf(it) + opplysningsbehov) ?: return@mapNotNull null
                 Meldeperiode(
-                    meldeperioden = it,
-                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(7)),
+                    meldeperioden = periode,
+                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
                 )
             }
     }
@@ -148,10 +152,11 @@ class KelvinSakService(
 
     companion object {
         fun konstruer(connection: DBConnection, sak: Sak): KelvinSakService {
+            val repositoryProvider = RepositoryProvider(connection)
             return KelvinSakService(
                 sak = sak,
-                timerArbeidetRepository = RepositoryProvider(connection).provide(),
-                aapGateway = GatewayProvider.provide(),
+                timerArbeidetRepository = repositoryProvider.provide(),
+                kelvinSakRepository = repositoryProvider.provide(),
             )
         }
     }

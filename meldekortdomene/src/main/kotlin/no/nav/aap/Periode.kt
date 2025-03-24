@@ -47,4 +47,16 @@ data class Periode(
         /* ikke så effektivt ... */
         return this.windowed(size, step, partialWindows).map { Periode(it.first(), it.last()) }
     }
+
+    companion object {
+        fun snitt(perioder: List<Periode>): Periode? {
+            val fom = perioder.maxOfOrNull { it.fom }
+            val tom = perioder.minOfOrNull { it.tom }
+            return if (fom != null && tom != null && fom <= tom) {
+                Periode(fom, tom)
+            } else {
+                null
+            }
+        }
+    }
 }
