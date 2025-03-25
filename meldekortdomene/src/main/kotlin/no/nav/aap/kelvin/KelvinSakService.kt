@@ -30,12 +30,21 @@ class KelvinSakService(
         val meldeperioder = kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.referanse.nummer)
 
         return meldeperioder
-            .mapNotNull {
-                /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
-                val periode = Periode.snitt(listOf(it) + opplysningsbehov) ?: return@mapNotNull null
+            .mapNotNull { meldeperiode ->
+                val periode = meldeperiode
+                    .dropWhile { dag -> opplysningsbehov.none { periode -> dag in periode } }
+                    .dropLastWhile { dag -> opplysningsbehov.none { periode -> dag in periode }}
+                    .let { periode ->
+                        if (periode.isEmpty())
+                            null
+                        else
+                            Periode(periode.first(), periode.last())
+                    }
+                    ?: return@mapNotNull null
                 Meldeperiode(
                     meldeperioden = periode,
-                    meldevindu = Periode(it.tom.plusDays(1), it.tom.plusDays(8)),
+                    /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
+                    meldevindu = Periode(meldeperiode.tom.plusDays(1), meldeperiode.tom.plusDays(8)),
                 )
             }
     }
