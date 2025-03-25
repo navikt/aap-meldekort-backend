@@ -30,6 +30,7 @@ import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
+import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -125,7 +126,7 @@ private fun Application.startMotor(
         dataSource = dataSource,
         antallKammer = 4,
         logInfoProvider = JournalføringJobbUtfører.LogInfoProvider,
-        jobber = listOf(JournalføringJobbUtfører),
+        jobber = listOf(JournalføringJobbUtfører, SlettGamleUtfyllingJobbUtfører),
         prometheus = prometheus,
     )
 

@@ -3,6 +3,7 @@ package no.nav.aap.utfylling
 import no.nav.aap.lookup.repository.Repository
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import java.time.LocalDate
 
 interface UtfyllingRepository: Repository {
     fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling?
@@ -10,4 +11,5 @@ interface UtfyllingRepository: Repository {
     fun lastUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun lagrUtfylling(utfylling: Utfylling)
     fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse)
+    fun slettGamleUtkast(slettTilOgMed: LocalDate)
 }

@@ -8,6 +8,7 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsakReferanse
+import java.time.LocalDate
 
 class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
@@ -92,6 +93,17 @@ class UtfyllingRepositoryPostgres(
             setParams {
                 setString(1, ident.asString)
                 setUUID(2, utfyllingReferanse.asUuid)
+            }
+        }
+    }
+
+    override fun slettGamleUtkast(slettTilOgMed: LocalDate) {
+        connection.execute("""
+            delete from utfylling
+            where opprettet::date <= ? and avsluttet = false
+        """.trimIndent()) {
+            setParams {
+                setLocalDate(1, slettTilOgMed)
             }
         }
     }

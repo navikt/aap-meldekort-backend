@@ -17,9 +17,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+
+private val ident = Ident("1111")
 
 class UtfyllingRepositoryPostgresTest {
     @Test
@@ -97,4 +101,76 @@ class UtfyllingRepositoryPostgresTest {
             }
         }
     }
+
+    @Test
+    fun `slett gamle utkast`() {
+        InitTestDatabase.dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val ref = repo.ny(LocalDate.of(2020, 1, 1))
+            repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
+
+            assertNull(repo.lastAvsluttetUtfylling(ident, ref))
+        }
+    }
+
+    @Test
+    fun `slett enda eldre utkast`() {
+        InitTestDatabase.dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val ref = repo.ny(LocalDate.of(2019, 1, 1))
+            repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
+
+            assertNull(repo.lastAvsluttetUtfylling(ident, ref))
+        }
+    }
+
+    @Test
+    fun `ikke slett gamle innsendte`() {
+        InitTestDatabase.dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val utfylling = repo.ny(LocalDate.of(2019, 1, 1)).let {
+                repo.lastUtfylling(ident, it)!!
+            }
+
+            repo.lagrUtfylling(utfylling.copy(
+                aktivtSteg = utfylling.flyt.steg.last(),
+            ))
+            repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
+
+            assertNotNull(repo.lastAvsluttetUtfylling(ident, utfylling.referanse))
+        }
+    }
+
+    @Test
+    fun `ikke slett nyere `() {
+        InitTestDatabase.dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val ref = repo.ny(LocalDate.of(2020, 1, 2))
+            repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
+
+            assertNotNull(repo.lastAvsluttetUtfylling(ident, ref))
+        }
+    }
+}
+
+private fun UtfyllingRepositoryPostgres.ny(opprettet: LocalDate): UtfyllingReferanse {
+    val utfylingReferanse = UtfyllingReferanse.ny()
+    val periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
+    this.lagrUtfylling(Utfylling(
+        referanse = utfylingReferanse,
+        fagsak = FagsakReferanse(FagsystemNavn.KELVIN, Fagsaknummer("111")),
+        ident = ident,
+        periode = periode,
+        flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
+        aktivtSteg = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT.steg.first(),
+        svar = Svar.tomt(periode),
+        opprettet = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
+        sistEndret = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
+    ))
+
+    return utfylingReferanse
 }
