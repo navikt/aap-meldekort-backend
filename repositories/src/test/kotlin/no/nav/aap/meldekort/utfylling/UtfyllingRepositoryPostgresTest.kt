@@ -149,7 +149,7 @@ class UtfyllingRepositoryPostgresTest {
         InitTestDatabase.dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val ref = repo.ny(LocalDate.of(2020, 1, 2))
+            val ref = repo.ny(LocalDate.of(2020, 1, 3))
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
             assertNotNull(repo.lastUtfylling(ident, ref))
