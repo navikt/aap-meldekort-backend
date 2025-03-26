@@ -110,7 +110,7 @@ class UtfyllingRepositoryPostgresTest {
             val ref = repo.ny(LocalDate.of(2020, 1, 1))
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
-            assertNull(repo.lastAvsluttetUtfylling(ident, ref))
+            assertNull(repo.lastUtfylling(ident, ref))
         }
     }
 
@@ -122,7 +122,7 @@ class UtfyllingRepositoryPostgresTest {
             val ref = repo.ny(LocalDate.of(2019, 1, 1))
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
-            assertNull(repo.lastAvsluttetUtfylling(ident, ref))
+            assertNull(repo.lastUtfylling(ident, ref))
         }
     }
 
@@ -140,19 +140,19 @@ class UtfyllingRepositoryPostgresTest {
             ))
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
-            assertNotNull(repo.lastAvsluttetUtfylling(ident, utfylling.referanse))
+            assertNotNull(repo.lastUtfylling(ident, utfylling.referanse))
         }
     }
 
     @Test
-    fun `ikke slett nyere `() {
+    fun `ikke slett nyere`() {
         InitTestDatabase.dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(LocalDate.of(2020, 1, 2))
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
-            assertNotNull(repo.lastAvsluttetUtfylling(ident, ref))
+            assertNotNull(repo.lastUtfylling(ident, ref))
         }
     }
 }

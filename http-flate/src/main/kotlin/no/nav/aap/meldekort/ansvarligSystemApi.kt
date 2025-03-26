@@ -32,7 +32,17 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource) {
         val response = dataSource.transaction { connection ->
             val ansvarligFlate = AnsvarligFlate.konstruer(connection)
             AnsvarligMeldekortløsningDto.fromFagsystem(
-                ansvarligFlate.routingForBruker(innloggetBruker())
+                ansvarligFlate.routingForBrukerHosOss(innloggetBruker())
+            )
+        }
+        respond(response)
+    }
+
+    route("ansvarlig-system-felles").get<Unit, AnsvarligMeldekortløsningDto> {
+        val response = dataSource.transaction { connection ->
+            val ansvarligFlate = AnsvarligFlate.konstruer(connection)
+            AnsvarligMeldekortløsningDto.fromFagsystem(
+                ansvarligFlate.routingForBrukerHosFelles(innloggetBruker())
             )
         }
         respond(response)

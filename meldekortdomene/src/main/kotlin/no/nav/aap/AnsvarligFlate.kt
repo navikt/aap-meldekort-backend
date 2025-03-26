@@ -13,7 +13,19 @@ class AnsvarligFlate(
     private val sakerService: SakerService,
     private val aapGateway: AapGateway,
 ) {
-    fun routingForBruker(innloggetBruker: InnloggetBruker): FagsystemNavn {
+    fun routingForBrukerHosOss(innloggetBruker: InnloggetBruker): FagsystemNavn {
+        /* Er det ATTF-meldegruppe i Arena? */
+        /* TODO: mer logikk hvis det ikke er en åpen sak på dagens dato, men det:
+         * 1. nylig har vært en sak,
+         * 2. kommer en sak (er dette et mulig scenario?),
+         * 3. både 1 og 2.
+         */
+
+        val fagsystem = sakerService.ansvarligFagsystem(innloggetBruker, LocalDate.now())
+        return fagsystem ?: FagsystemNavn.KELVIN
+    }
+
+    fun routingForBrukerHosFelles(innloggetBruker: InnloggetBruker): FagsystemNavn {
         /* Er det ATTF-meldegruppe i Arena? */
         /* TODO: mer logikk hvis det ikke er en åpen sak på dagens dato, men det:
          * 1. nylig har vært en sak,
