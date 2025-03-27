@@ -85,5 +85,5 @@ spec:
           value: api://prod-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
           value: http://pdfgen-meldekort.aap
-#        - name: BEHANDLINGSFLYT_AZP
-#          value: ????? # TODO: fyll inn når behandlingsflyt er deployet til prod
+        - name: BEHANDLINGSFLYT_AZP
+          value: ead3bfb6-d403-43b3-bb45-dc184ce314b7
