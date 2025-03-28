@@ -7,7 +7,7 @@ val komponenterVersjon = "1.0.190"
 val ktorVersion = "3.1.2"
 
 dependencies {
-    api("no.nav:ktor-openapi-generator:1.0.98")
+    api("no.nav:ktor-openapi-generator:1.0.99")
     implementation(project(":meldekortdomene"))
     implementation(project(":kontrakt"))
 
