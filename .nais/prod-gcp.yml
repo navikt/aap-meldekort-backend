@@ -53,7 +53,7 @@ spec:
                 - application: meldekort
                 - application: behandlingsflyt
                 - application: paw-patrol
-                - application: meldekort-api
+                - application: meldekort-frontend
                   namespace: meldekort
         outbound:
             rules:

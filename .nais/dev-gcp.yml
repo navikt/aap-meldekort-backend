@@ -62,9 +62,9 @@ spec:
                 - application: paw-patrol
                 - application: tokenx-token-generator
                   namespace: nais
-                - application: meldekort-api-q1
+                - application: meldekort-frontend-q1
                   namespace: meldekort
-                - application: meldekort-api-q2
+                - application: meldekort-frontend-q2
                   namespace: meldekort
         outbound:
             rules:
