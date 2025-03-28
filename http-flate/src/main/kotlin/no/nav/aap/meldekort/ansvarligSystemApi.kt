@@ -18,10 +18,8 @@ enum class AnsvarligMeldekortløsningDto {
     companion object {
         fun fromFagsystem(fagsystemNavn: FagsystemNavn): AnsvarligMeldekortløsningDto {
             return when (fagsystemNavn) {
-                FagsystemNavn.ARENA ->
-                    if (configForKey("nais.cluster.name") in listOf(null, "local", "dev-gcp")) AAP else FELLES
-                FagsystemNavn.KELVIN ->
-                    AAP
+                FagsystemNavn.ARENA -> FELLES
+                FagsystemNavn.KELVIN -> AAP
             }
         }
     }
