@@ -14,27 +14,13 @@ class AnsvarligFlate(
     private val aapGateway: AapGateway,
 ) {
     fun routingForBrukerHosOss(innloggetBruker: InnloggetBruker): FagsystemNavn {
-        /* Er det ATTF-meldegruppe i Arena? */
-        /* TODO: mer logikk hvis det ikke er en åpen sak på dagens dato, men det:
-         * 1. nylig har vært en sak,
-         * 2. kommer en sak (er dette et mulig scenario?),
-         * 3. både 1 og 2.
-         */
-
         val fagsystem = sakerService.ansvarligFagsystem(innloggetBruker, LocalDate.now())
         return fagsystem ?: FagsystemNavn.KELVIN
     }
 
     fun routingForBrukerHosFelles(innloggetBruker: InnloggetBruker): FagsystemNavn {
-        /* Er det ATTF-meldegruppe i Arena? */
-        /* TODO: mer logikk hvis det ikke er en åpen sak på dagens dato, men det:
-         * 1. nylig har vært en sak,
-         * 2. kommer en sak (er dette et mulig scenario?),
-         * 3. både 1 og 2.
-         */
-
-        val fagsystem = sakerService.ansvarligFagsystem(innloggetBruker, LocalDate.now())
-        return fagsystem ?: FagsystemNavn.ARENA
+        val kelvinSak = sakerService.finnKelvinSak(innloggetBruker, LocalDate.now())
+        return if (kelvinSak == null) FagsystemNavn.ARENA else FagsystemNavn.KELVIN
     }
 
     fun debugSaker(innloggetBruker: InnloggetBruker): Saker {
