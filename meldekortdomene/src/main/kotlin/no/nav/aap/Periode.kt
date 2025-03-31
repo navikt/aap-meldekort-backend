@@ -8,7 +8,7 @@ data class Periode(
     val tom: LocalDate,
 ) : Iterable<LocalDate>, Comparable<Periode> {
     init {
-        require(fom <= tom)
+        require(fom <= tom) { "Tom er før fom: $fom, $tom" }
     }
 
     val antallDager: Int
