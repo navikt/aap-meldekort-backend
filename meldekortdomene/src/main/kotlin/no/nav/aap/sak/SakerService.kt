@@ -31,15 +31,6 @@ class SakerService(
         return saker.finnSak(fagsakReferanse)
     }
 
-    fun ansvarligFagsystem(innloggetBruker: InnloggetBruker, påDag: LocalDate): FagsystemNavn? {
-        return finnSak(innloggetBruker, påDag)?.referanse?.system
-    }
-
-    fun finnKelvinSak(innloggetBruker: InnloggetBruker, påDag: LocalDate): Sak? {
-        return kelvinSakRepository.hentSak(innloggetBruker.ident, påDag)
-    }
-
-
     companion object {
         fun konstruer(connection: DBConnection): SakerService {
             return SakerService(
