@@ -19,7 +19,7 @@ enum class AnsvarligMeldekortløsningDto {
     ;
 }
 
-fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource) {
+fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource, dagensDato: LocalDate? = null) {
     route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val sakerService = SakerService(
@@ -27,7 +27,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource) {
                 kelvinSakRepository = RepositoryProvider(connection).provide(),
             )
 
-            val sak = sakerService.finnSak(innloggetBruker().ident, LocalDate.now())
+            val sak = sakerService.finnSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
             when (sak?.referanse?.system) {
                 FagsystemNavn.ARENA -> AnsvarligMeldekortløsningDto.FELLES
                 null, FagsystemNavn.KELVIN -> AnsvarligMeldekortløsningDto.AAP
@@ -39,7 +39,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource) {
     route("ansvarlig-system-felles").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val kelvinSakRepository = RepositoryProvider(connection).provide<KelvinSakRepository>()
-            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, LocalDate.now())
+            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
             if (kelvinSak == null)
                 AnsvarligMeldekortløsningDto.FELLES
             else

@@ -15,10 +15,11 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingService
 import org.slf4j.MDC
+import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
+fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDate?) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
         utfyllingReferanse: UtfyllingReferanse? = null,
         body: UtfyllingService.() -> T,
@@ -39,7 +40,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 StartUtfyllingResponse(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
+                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling),
                     feil = null
@@ -57,7 +58,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 StartUtfyllingResponse(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
+                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling),
                     feil = null
@@ -70,7 +71,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
     }
 
     route("utfylling/{referanse}") {
-        class Referanse(
+        data class Referanse(
             @PathParam("referanse") val referanse: UUID,
         )
         get<Referanse, UtfyllingResponseDto> { params ->
@@ -83,7 +84,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                     UtfyllingResponseDto(
                         metadata = UtfyllingMetadataDto.fraDomene(
                             utfylling = utfylling,
-                            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
+                            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
                         ),
                         tilstand = UtfyllingTilstandDto(utfylling),
                         feil = null,
@@ -115,7 +116,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
+                        antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling.utfylling),
                     feil = utfylling.feil?.toString() /* TODO */
@@ -136,7 +137,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                 UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
+                        antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling.utfylling),
                     feil = utfylling.feil?.toString() /* TODO */

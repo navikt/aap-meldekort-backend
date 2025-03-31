@@ -32,6 +32,7 @@ import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import javax.sql.DataSource
 
 class HttpServer
@@ -42,9 +43,11 @@ fun startHttpServer(
     applikasjonsVersjon: String,
     tokenxConfig: TokenxConfig,
     azureConfig: AzureConfig,
-    dataSource: DataSource
-) {
-    embeddedServer(Netty, configure = {
+    dataSource: DataSource,
+    wait: Boolean = true,
+    dagensDato: LocalDate? = null,
+): EmbeddedServer<*, *> {
+    return embeddedServer(Netty, configure = {
         connectionGroupSize = 8
         workerGroupSize = 8
         callGroupSize = 16
@@ -100,10 +103,10 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     route("api") {
-                        ansvarligSystemApi(dataSource)
+                        ansvarligSystemApi(dataSource, dagensDato = dagensDato)
                         arenaApi()
-                        meldeperioderApi(dataSource)
-                        utfyllingApi(dataSource)
+                        meldeperioderApi(dataSource, dagensDato = dagensDato)
+                        utfyllingApi(dataSource, dagensDato = dagensDato)
                     }
                 }
             }
@@ -115,7 +118,7 @@ fun startHttpServer(
             }
             actuator(prometheus, motor)
         }
-    }.start(wait = true)
+    }.start(wait = wait)
 }
 
 private fun Application.startMotor(

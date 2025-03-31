@@ -7,7 +7,6 @@ include(
     "app",
     "meldekortdomene",
     "repositories",
-    "http-flate",
     "gateways",
     "lib-test",
     "kontrakt",

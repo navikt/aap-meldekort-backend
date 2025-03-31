@@ -1,6 +1,5 @@
 package no.nav.aap.meldekort
 
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.DbConfig
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -17,7 +16,6 @@ import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import org.slf4j.LoggerFactory
-import javax.sql.DataSource
 
 class App
 
@@ -26,27 +24,15 @@ fun main() {
         LoggerFactory.getLogger(App::class.java).error("Uhåndtert feil.", e)
     }
 
-    main(
-        dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus),
-        prometheusMeterRegistry = prometheus,
-        applikasjonVersjon = ApplikasjonsVersjon.versjon
-    )
-}
-
-fun main(
-    dataSource: DataSource,
-    prometheusMeterRegistry: PrometheusMeterRegistry,
-    applikasjonVersjon: String,
-) {
     setupRegistries()
 
     startHttpServer(
         port = 8080,
-        prometheus = prometheusMeterRegistry,
-        applikasjonsVersjon = applikasjonVersjon,
+        prometheus = prometheus,
+        applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
         azureConfig = AzureConfig(),
-        dataSource = dataSource
+        dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus),
     )
 }
 

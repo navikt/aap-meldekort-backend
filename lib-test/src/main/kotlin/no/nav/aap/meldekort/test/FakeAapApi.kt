@@ -9,6 +9,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.sak.FagsakReferanse
@@ -24,23 +25,15 @@ object FakeAapApi : FakeServer {
         System.setProperty("aap.api.intern.scope", "api://local:aap:api-intern/.default")
     }
 
-    override val module: Application.() -> Unit = {
-        val idag = LocalDate.now()
-        val saker = mapOf(
-            "1".repeat(11) to listOf(
-                Sak(
-                    referanse = FagsakReferanse(KELVIN, Fagsaknummer("1015")),
-                    rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
-                )
-            ),
-            "2".repeat(11) to listOf(
-                Sak(
-                    referanse = FagsakReferanse(ARENA, Fagsaknummer("")),
-                    rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
-                )
-            ),
-        )
+    private val saker = mutableMapOf<String, List<Sak>>()
 
+    fun upsert(ident: Ident, sak: Sak) {
+        saker[ident.asString] = saker.get(ident.asString).orEmpty()
+            .filter { it.referanse != sak.referanse }
+            .let { it + listOf(sak) }
+    }
+
+    override val module: Application.() -> Unit = {
         install(ContentNegotiation) {
             val mapper = DefaultJsonMapper.objectMapper()
             mapper.registerKotlinModule()
@@ -63,6 +56,8 @@ object FakeAapApi : FakeServer {
                             KELVIN -> "KELVIN"
                         }
                     )
+                }.also {
+                    log.info("sakerByFnr returnerer ${it.size} saker")
                 })
             }
 

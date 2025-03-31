@@ -13,8 +13,8 @@ import java.time.LocalDate
 class MeldeperiodeFlate(
     private val sakService: SakService?,
 ) {
-    fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): SakService.VentendeOgNeste {
-        return sakService?.ventendeOgNesteMeldeperioder(innloggetBruker)
+    fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): SakService.VentendeOgNeste {
+        return sakService?.ventendeOgNesteMeldeperioder(innloggetBruker, dagensDato)
             ?: SakService.VentendeOgNeste(
                 ventende = listOf(),
                 neste = null,
@@ -36,7 +36,7 @@ class MeldeperiodeFlate(
 
     fun totaltAntallTimerIPerioden(innloggetBruker: InnloggetBruker, periode: Periode): Double? {
         val detaljer = sakService?.detaljer(innloggetBruker, periode)
-        if(detaljer !== null) {
+        if (detaljer !== null) {
             return sakService?.totaltAntallTimerArbeidet(detaljer)
         }
         return null

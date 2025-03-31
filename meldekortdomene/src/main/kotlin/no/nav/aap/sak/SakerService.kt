@@ -18,7 +18,7 @@ class SakerService(
 
     fun finnSak(ident: Ident, påDag: LocalDate): Sak? {
         val kelvinSak = kelvinSakRepository.hentSak(ident, påDag)
-        if (kelvinSak != null) {
+        if (kelvinSak != null && påDag in kelvinSak.rettighetsperiode) {
             return kelvinSak
         }
 

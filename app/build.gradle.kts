@@ -2,6 +2,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val komponenterVersjon = "1.0.193"
 val junitVersjon = "5.12.1"
+val tilgangVersjon = "1.0.29"
+val ktorVersion = "3.1.2"
 
 plugins {
     id("meldekort.conventions")
@@ -49,19 +51,25 @@ fun getCheckedOutGitCommitHash(): String {
 
 dependencies {
     implementation(project(":meldekortdomene"))
-    implementation(project(":http-flate"))
     implementation(project(":repositories"))
     implementation(project(":gateways"))
+    implementation(project(":kontrakt"))
 
+    compileOnly("io.ktor:ktor-http-jvm:$ktorVersion")
+    implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+    api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.14.5")
     implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 
+    api("no.nav:ktor-openapi-generator:1.0.98")
 
     testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")

@@ -3,13 +3,11 @@ package no.nav.aap.kelvin
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.SakService
 import no.nav.aap.sak.Sak
-import no.nav.aap.sak.AapGateway
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -29,11 +27,15 @@ class KelvinSakService(
         val opplysningsbehov = kelvinSakRepository.hentOpplysningsbehov(innloggetBruker.ident, sak.referanse.nummer)
         val meldeperioder = kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.referanse.nummer)
 
+        fun harOpplysningsbehov(dag: LocalDate): Boolean {
+            return opplysningsbehov.any { periode -> dag in periode }
+        }
+
         return meldeperioder
             .mapNotNull { meldeperiode ->
-                val periode = meldeperiode
-                    .dropWhile { dag -> opplysningsbehov.none { periode -> dag in periode } }
-                    .dropLastWhile { dag -> opplysningsbehov.none { periode -> dag in periode }}
+                val opplysningsperiode = meldeperiode
+                    .dropWhile { dag -> !harOpplysningsbehov(dag) }
+                    .dropLastWhile { dag -> !harOpplysningsbehov(dag) }
                     .let { periode ->
                         if (periode.isEmpty())
                             null
@@ -42,14 +44,14 @@ class KelvinSakService(
                     }
                     ?: return@mapNotNull null
                 Meldeperiode(
-                    meldeperioden = periode,
+                    meldeperioden = opplysningsperiode,
                     /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
                     meldevindu = Periode(meldeperiode.tom.plusDays(1), meldeperiode.tom.plusDays(8)),
                 )
             }
     }
 
-    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): SakService.VentendeOgNeste {
+    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): SakService.VentendeOgNeste {
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
                 ?: LocalDate.MIN
@@ -59,7 +61,7 @@ class KelvinSakService(
         val meldeperioderUtenInnsending =
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
-            .takeWhile { it.meldevindu.tom <= LocalDate.now() }
+            .takeWhile { it.meldevindu.tom <= (dagensDato ?: LocalDate.now()) }
 
         return SakService.VentendeOgNeste(
             ventende = meldeperioderUtenInnsendingSomKanSendesInn,

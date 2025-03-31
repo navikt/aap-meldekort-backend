@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 object FakeTokenX : FakeServer {
 
-    override val port = 8081 /* Så kan frontend hente token lokalt */
+    override var port = 8081 /* Så kan frontend hente token lokalt */
 
     val log = LoggerFactory.getLogger(this.javaClass)!!
 
@@ -58,7 +58,7 @@ object FakeTokenX : FakeServer {
         }
     }
 
-    private fun issueToken(fnr: String): String {
+    fun issueToken(fnr: String): String {
         return TokenGen.generate(
             issuer = "fake-tokendings",
             audience = "meldekort-backend",

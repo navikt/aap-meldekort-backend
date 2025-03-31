@@ -15,7 +15,7 @@ fun NormalOpenAPIRoute.arenaApi() {
     if (configForKey("nais.cluster.name") in listOf("dev-gcp", "local")) {
         val arenaGateway = GatewayProvider.provide<ArenaGateway>()
         route("/debug/arena-proxy") {
-            class MeldekortIdParam(
+            data class MeldekortIdParam(
                 @JsonValue @PathParam("meldekortId") val meldekortId: Long,
             )
             route("meldegrupper").get<Unit, Any> {

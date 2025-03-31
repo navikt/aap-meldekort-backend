@@ -18,7 +18,7 @@ data class Periode(
         return fom.datesUntil(tom.plusDays(1)).iterator()
     }
 
-    fun inneholder(dato: LocalDate): Boolean {
+    operator fun contains(dato: LocalDate): Boolean {
         return dato in fom..tom
     }
 

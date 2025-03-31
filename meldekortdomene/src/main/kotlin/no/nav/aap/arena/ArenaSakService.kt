@@ -28,7 +28,7 @@ class ArenaSakService(
     override val innsendingsflyt = UtfyllingFlytNavn.ARENA_VANLIG_FLYT
     override val korrigeringsflyt = UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT
 
-    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): SakService.VentendeOgNeste {
+    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): SakService.VentendeOgNeste {
         val kommendeMeldekort = meldekortService.kommendeMeldekort(innloggetBruker)
             .orEmpty()
             .sortedBy { it.tidligsteInnsendingsdato }

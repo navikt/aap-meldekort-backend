@@ -52,7 +52,7 @@ object FakeServers : AutoCloseable {
     }
 }
 
-private fun EmbeddedServer<*, *>.port(): Int {
+fun EmbeddedServer<*, *>.port(): Int {
     return runBlocking {
         this@port.engine.resolvedConnectors()
     }.first { it.type == ConnectorType.HTTP }
