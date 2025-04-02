@@ -26,7 +26,6 @@ import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import org.junit.jupiter.api.AfterAll
@@ -81,7 +80,7 @@ private val idag = 6 januar 2025
 class KelvinIntegrasjonsPåFastsattDagTest {
     @Test
     fun `ikke vedtak, på dagen`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         val meldeperiode1 = Periode(6 januar 2025, 19 januar 2025)
         val meldevindu1 = Periode(20 januar 2025, 27 januar 2025)
         kelvinSak(fnr, rettighetsperiode = Periode(idag, idag.plusWeeks(52)))
@@ -95,7 +94,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
     @Test
     fun `ikke vedtak, en uke etter søknad`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         kelvinSak(fnr, rettighetsperiode = Periode(idag.minusWeeks(1), idag.plusWeeks(51)))
         val meldeperiode1 = Periode(30 desember 2024, 12 januar 2025)
         val meldevindu1 = Periode(13 januar 2025, 20 januar 2025)
@@ -109,7 +108,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
     @Test
     fun `ikke vedtak, tre uker etter søknad`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         kelvinSak(fnr, rettighetsperiode = Periode(16 desember 2024, idag.plusWeeks(51)))
         val meldeperiode1 = Periode(16 desember 2024, 29 desember 2024)
         val meldevindu1 = Periode(30 desember 2024, 6 januar 2025)
@@ -123,7 +122,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
     @Test
     fun `med vedtak, tre uker etter søknad`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         kelvinSak(fnr,
             rettighetsperiode = Periode(16 desember 2024, idag.plusWeeks(49)),
             opplysningsbehov = listOf(Periode(16 desember 2024, idag.plusWeeks(49)))
@@ -140,7 +139,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
     @Test
     fun `med vedtak, en uke etter søknad med opplysningsbehov i dag`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         kelvinSak(fnr,
             rettighetsperiode = Periode(16 desember 2024, idag.plusWeeks(51)),
             opplysningsbehov = listOf(Periode(16 desember 2024, idag.plusWeeks(51)))
@@ -248,13 +247,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
             FakeServers.close()
         }
 
-        private val fnrs = generateSequence(11223312345L) { it + 1 }
-            .map { Ident(it.toString()) }
-            .iterator()
 
-        private val saksnummerGenerator = generateSequence(1111L) { it + 1 }
-            .map { Fagsaknummer(it.toString()) }
-            .iterator()
     }
 }
 

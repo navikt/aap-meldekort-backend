@@ -38,14 +38,14 @@ class AnsvarligSystemIntegrasjonsTest {
 
     @Test
     fun `ansvarlig system, ingen sak i kelvin`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
         assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     @Test
     fun `ansvarlig system, sak kun i kelvin`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         kelvinSak(fnr)
         assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
         assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
@@ -53,7 +53,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
     @Test
     fun `ansvarlig system, sak kun i arena`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
         arenaSak(fnr)
 
         assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
@@ -62,7 +62,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
     @Test
     fun `ansvarlig system, saker både i kelvin og arena, nyeste sak i kelvin`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
 
         arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
         kelvinSak(fnr)
@@ -73,7 +73,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
     @Test
     fun `ansvarlig system, saker både i kelvin og arena, nyeste sak i arena`() {
-        val fnr = fnrs.next()
+        val fnr = fødselsnummerGenerator.next()
 
         arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(1), idag.plusMonths(1)))
         kelvinSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
@@ -182,13 +182,5 @@ class AnsvarligSystemIntegrasjonsTest {
             embeddedServer.stop(0L, 0L)
             FakeServers.close()
         }
-
-        private val fnrs = generateSequence(11223312345L) { it + 1 }
-            .map { Ident(it.toString()) }
-            .iterator()
-
-        private val saksnummerGenerator = generateSequence(1111L) { it + 1 }
-            .map { Fagsaknummer(it.toString()) }
-            .iterator()
     }
 }
