@@ -11,7 +11,6 @@ import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
-import java.time.LocalDate
 
 enum class FagsystemNavn {
     ARENA, KELVIN,
@@ -26,7 +25,7 @@ interface SakService {
         val ventende: List<Meldeperiode>,
         val neste: Meldeperiode?,
     )
-    fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): VentendeOgNeste
+    fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): VentendeOgNeste
 
     fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode>
 

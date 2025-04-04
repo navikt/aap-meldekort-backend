@@ -18,8 +18,8 @@ class UtfyllingService(
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) {
 
-    fun antallMeldeperioderUtenOpplysninger(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): Int {
-        return sakService.ventendeOgNesteMeldeperioder(innloggetBruker, dagensDato).ventende.size
+    fun antallMeldeperioderUtenOpplysninger(innloggetBruker: InnloggetBruker): Int {
+        return sakService.ventendeOgNesteMeldeperioder(innloggetBruker).ventende.size
     }
 
     fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling {

@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDate?) {
+fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
         utfyllingReferanse: UtfyllingReferanse? = null,
         body: UtfyllingService.() -> T,
@@ -40,7 +40,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDat
                 StartUtfyllingResponse(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
+                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling),
                     feil = null
@@ -58,7 +58,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDat
                 StartUtfyllingResponse(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
+                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling),
                     feil = null
@@ -84,7 +84,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDat
                     UtfyllingResponseDto(
                         metadata = UtfyllingMetadataDto.fraDomene(
                             utfylling = utfylling,
-                            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
+                            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
                         ),
                         tilstand = UtfyllingTilstandDto(utfylling),
                         feil = null,
@@ -116,7 +116,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDat
                 UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
+                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling.utfylling),
                     feil = utfylling.feil?.toString() /* TODO */
@@ -137,7 +137,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, dagensDato: LocalDat
                 UtfyllingResponseDto(
                     metadata = UtfyllingMetadataDto.fraDomene(
                         utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker(), dagensDato)
+                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
                     ),
                     tilstand = UtfyllingTilstandDto(utfylling.utfylling),
                     feil = utfylling.feil?.toString() /* TODO */

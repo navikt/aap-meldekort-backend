@@ -51,7 +51,7 @@ class KelvinSakService(
             }
     }
 
-    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker, dagensDato: LocalDate?): SakService.VentendeOgNeste {
+    override fun ventendeOgNesteMeldeperioder(innloggetBruker: InnloggetBruker): SakService.VentendeOgNeste {
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
                 ?: LocalDate.MIN
@@ -61,7 +61,7 @@ class KelvinSakService(
         val meldeperioderUtenInnsending =
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
-            .takeWhile { it.meldevindu.tom <= (dagensDato ?: LocalDate.now()) }
+            .takeWhile { it.meldevindu.tom <= LocalDate.now() }
 
         return SakService.VentendeOgNeste(
             ventende = meldeperioderUtenInnsendingSomKanSendesInn,

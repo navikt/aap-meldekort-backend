@@ -9,20 +9,21 @@ import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
-import java.time.LocalDate
+import no.nav.aap.meldeperiode.MeldeperiodeFlateFactory
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource, dagensDato: LocalDate? = null) {
+fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource, meldeperiodeFlateFactory: MeldeperiodeFlateFactory) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: MeldeperiodeFlate.() -> T): T {
-        return dataSource.transaction {
-            MeldeperiodeFlate.konstruer(innloggetBruker().ident, it).body()
+        return dataSource.transaction { connection ->
+            val meldeperiodeFlate = meldeperiodeFlateFactory.flateForBruker(innloggetBruker(), connection)
+            meldeperiodeFlate.body()
         }
     }
 
     route("meldeperiode") {
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
-                val kommendeMeldeperioder = aktuelleMeldeperioder(innloggetBruker(), dagensDato = dagensDato)
+                val kommendeMeldeperioder = aktuelleMeldeperioder(innloggetBruker())
                 KommendeMeldeperioderDto.fraDomene(kommendeMeldeperioder)
             }
             respond(response)
