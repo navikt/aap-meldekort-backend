@@ -2,8 +2,7 @@ package no.nav.aap.meldeperiode
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.sak.SakService
-import java.time.LocalDate
+import no.nav.aap.utfylling.Svar
 
 interface MeldeperiodeFlate {
     class KommendeMeldeperioder(
@@ -19,5 +18,9 @@ interface MeldeperiodeFlate {
     )
     fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<HistoriskMeldeperiode>
 
-    fun periodedetaljer(innloggetBruker: InnloggetBruker, periode: Periode): SakService.PeriodeDetaljer
+    class PeriodeDetaljer(
+        val periode: Periode,
+        val svar: Svar,
+    )
+    fun periodedetaljer(innloggetBruker: InnloggetBruker, periode: Periode): PeriodeDetaljer
 }

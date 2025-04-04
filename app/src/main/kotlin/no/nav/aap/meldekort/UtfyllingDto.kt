@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,7 +20,27 @@ class StartUtfyllingResponse(
     val metadata: UtfyllingMetadataDto?,
     val tilstand: UtfyllingTilstandDto?,
     val feil: String?,
-)
+) {
+    companion object {
+        fun fraDomene(domene: UtfyllingFlate.StartUtfyllingResponse): StartUtfyllingResponse {
+            val utfylling = domene.utfylling
+            val metadata = domene.metadata
+            if (utfylling == null || metadata == null) {
+                return StartUtfyllingResponse(
+                    metadata = null,
+                    tilstand = null,
+                    feil = domene.feil ?: "ukjent feil",
+                )
+            }
+
+            return StartUtfyllingResponse(
+                metadata = UtfyllingMetadataDto.fraDomene(utfylling, metadata),
+                tilstand = UtfyllingTilstandDto(utfylling),
+                feil = domene.feil,
+            )
+        }
+    }
+}
 
 class EndreUtfyllingRequest @JsonCreator constructor(
     val nyTilstand: UtfyllingTilstandDto,
@@ -29,7 +50,17 @@ class UtfyllingResponseDto(
     val metadata: UtfyllingMetadataDto,
     val tilstand: UtfyllingTilstandDto,
     val feil: String?
-)
+) {
+    companion object {
+        fun fraDomene(domene: UtfyllingFlate.UtfyllingResponse): UtfyllingResponseDto {
+            return UtfyllingResponseDto(
+                metadata = UtfyllingMetadataDto.fraDomene(domene.utfylling, domene.metadata),
+                tilstand = UtfyllingTilstandDto(domene.utfylling),
+                feil = domene.feil,
+            )
+        }
+    }
+}
 
 class UtfyllingTilstandDto(
     val aktivtSteg: StegDto,
@@ -61,21 +92,17 @@ class UtfyllingMetadataDto(
     val kanSendesInn: Boolean,
 ) {
     companion object {
-        fun fraDomene(utfylling: Utfylling, antallUbesvarteMeldeperioder: Int): UtfyllingMetadataDto {
-            /* TODO: denne logikken burde flyttes ut av dto-koden. */
-            val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
-            val fristForInnsending = utfylling.periode.tom.plusDays(9).atTime(23, 59)
-            val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
-
+        fun fraDomene(utfylling: Utfylling, metadata: UtfyllingFlate.Metadata): UtfyllingMetadataDto {
             return UtfyllingMetadataDto(
                 referanse = utfylling.referanse.asUuid,
                 periode = PeriodeDto(utfylling.periode),
-                tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
-                fristForInnsending = fristForInnsending,
-                kanSendesInn = kanSendesInn,
-                antallUbesvarteMeldeperioder = antallUbesvarteMeldeperioder,
+                tidligsteInnsendingstidspunkt = metadata.tidligsteInnsendingstidspunkt,
+                fristForInnsending = metadata.fristForInnsending,
+                kanSendesInn = metadata.kanSendesInn,
+                antallUbesvarteMeldeperioder = metadata.antallUbesvarteMeldeperioder,
             )
         }
+
     }
 }
 

@@ -46,9 +46,9 @@ class ArenaMeldeperiodeFlate(
             }
     }
 
-    override fun periodedetaljer(innloggetBruker: InnloggetBruker, periode: Periode): SakService.PeriodeDetaljer {
+    override fun periodedetaljer(innloggetBruker: InnloggetBruker, periode: Periode): MeldeperiodeFlate.PeriodeDetaljer {
         return sakService?.detaljer(innloggetBruker, periode)
-            ?: SakService.PeriodeDetaljer(
+            ?: MeldeperiodeFlate.PeriodeDetaljer(
                 periode = periode,
                 svar = Svar.tomt(periode),
             )

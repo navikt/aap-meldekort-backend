@@ -32,6 +32,7 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
+import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -107,7 +108,7 @@ fun startHttpServer(
                         ansvarligSystemApi(dataSource)
                         arenaApi()
                         meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl())
-                        utfyllingApi(dataSource)
+                        utfyllingApi(dataSource, UtfyllingFlateFactoryImpl())
                     }
                 }
             }

@@ -12,57 +12,43 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.utfylling.UtfyllingFlate
+import no.nav.aap.utfylling.UtfyllingFlateFactory
 import no.nav.aap.utfylling.UtfyllingReferanse
-import no.nav.aap.utfylling.UtfyllingService
 import org.slf4j.MDC
-import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
+fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, utfyllingFlateFactory: UtfyllingFlateFactory) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
         utfyllingReferanse: UtfyllingReferanse? = null,
-        body: UtfyllingService.() -> T,
+        body: UtfyllingFlate.() -> T,
     ): T {
         return MDC.putCloseable("utfylling", utfyllingReferanse?.asUuid?.toString()).use {
             dataSource.transaction { connection ->
-                UtfyllingService.konstruer(innloggetBruker(), connection).run {
-                    body()
-                }
+                val flate = utfyllingFlateFactory.flateForBruker(innloggetBruker(), connection)
+                flate.body()
             }
         }
     }
 
-    route("start-innsending").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { params, body ->
+    route("start-innsending").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { _, body ->
         val response = try {
             medFlate {
-                val utfylling = startUtfylling(innloggetBruker(), Periode(body.fom, body.tom))
-                StartUtfyllingResponse(
-                    metadata = UtfyllingMetadataDto.fraDomene(
-                        utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
-                    ),
-                    tilstand = UtfyllingTilstandDto(utfylling),
-                    feil = null
-                )
+                val resultat = startUtfylling(innloggetBruker(), Periode(body.fom, body.tom))
+                StartUtfyllingResponse.fraDomene(resultat)
             }
         } catch (exception: Exception) {
             StartUtfyllingResponse(null, null, exception.javaClass.canonicalName) /* TODO */
         }
         respond(response)
     }
-    route("start-korrigering").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { params, body ->
+
+    route("start-korrigering").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { _, body ->
         val response = try {
             medFlate {
-                val utfylling = startKorrigering(innloggetBruker(), Periode(body.fom, body.tom))
-                StartUtfyllingResponse(
-                    metadata = UtfyllingMetadataDto.fraDomene(
-                        utfylling = utfylling,
-                        antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
-                    ),
-                    tilstand = UtfyllingTilstandDto(utfylling),
-                    feil = null
-                )
+                val resultat = startKorrigering(innloggetBruker(), Periode(body.fom, body.tom))
+                StartUtfyllingResponse.fraDomene(resultat)
             }
         } catch (exception: Exception) {
             StartUtfyllingResponse(null, null, exception.javaClass.canonicalName) /* TODO */
@@ -77,29 +63,23 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
         get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val response = medFlate(utfyllingReferanse) {
-                val utfylling = hent(innloggetBruker(), utfyllingReferanse)
+                val utfylling = hentUtfylling(innloggetBruker(), utfyllingReferanse)
                 if (utfylling == null) {
                     return@medFlate null
                 } else {
-                    UtfyllingResponseDto(
-                        metadata = UtfyllingMetadataDto.fraDomene(
-                            utfylling = utfylling,
-                            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker())
-                        ),
-                        tilstand = UtfyllingTilstandDto(utfylling),
-                        feil = null,
-                    )
+                    UtfyllingResponseDto.fraDomene(utfylling)
                 }
             }
             if (response == null)
                 respondWithStatus(HttpStatusCode.NotFound)
-            else respond(response)
+            else
+                respond(response)
         }
 
         delete<Referanse, Unit> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             medFlate(utfyllingReferanse) {
-                slett(innloggetBruker(), utfyllingReferanse)
+                slettUtfylling(innloggetBruker(), utfyllingReferanse)
             }
             respondWithStatus(HttpStatusCode.OK)
         }
@@ -113,14 +93,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )
-                UtfyllingResponseDto(
-                    metadata = UtfyllingMetadataDto.fraDomene(
-                        utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
-                    ),
-                    tilstand = UtfyllingTilstandDto(utfylling.utfylling),
-                    feil = utfylling.feil?.toString() /* TODO */
-                )
+                UtfyllingResponseDto.fraDomene(utfylling)
             }
             respond(response)
         }
@@ -134,14 +107,7 @@ fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource) {
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )
-                UtfyllingResponseDto(
-                    metadata = UtfyllingMetadataDto.fraDomene(
-                        utfylling.utfylling,
-                        antallMeldeperioderUtenOpplysninger(innloggetBruker())
-                    ),
-                    tilstand = UtfyllingTilstandDto(utfylling.utfylling),
-                    feil = utfylling.feil?.toString() /* TODO */
-                )
+                UtfyllingResponseDto.fraDomene(utfylling)
             }
             respond(response)
         }

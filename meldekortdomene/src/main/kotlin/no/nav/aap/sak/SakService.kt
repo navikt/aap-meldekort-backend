@@ -7,6 +7,7 @@ import no.nav.aap.journalføring.DokarkivGateway
 import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
@@ -29,13 +30,9 @@ interface SakService {
 
     fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<Meldeperiode>
 
-    class PeriodeDetaljer(
-        val periode: Periode,
-        val svar: Svar,
-    )
-    fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): PeriodeDetaljer
+    fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): MeldeperiodeFlate.PeriodeDetaljer
 
-    fun totaltAntallTimerArbeidet(periodeDetaljer: PeriodeDetaljer): Double
+    fun totaltAntallTimerArbeidet(periodeDetaljer: MeldeperiodeFlate.PeriodeDetaljer): Double
 
     fun forberedVanligFlyt(innloggetBruker: InnloggetBruker, periode: Periode, utfyllingReferanse: UtfyllingReferanse)
     fun forberedKorrigeringFlyt(innloggetBruker: InnloggetBruker, periode: Periode, utfyllingReferanse: UtfyllingReferanse)

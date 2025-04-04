@@ -5,6 +5,7 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.SakService
 import no.nav.aap.sak.Sak
@@ -87,9 +88,9 @@ class KelvinSakService(
             .reversed()
     }
 
-    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): SakService.PeriodeDetaljer {
+    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): MeldeperiodeFlate.PeriodeDetaljer {
         val timerArbeidet = registrerteTimerArbeidet(innloggetBruker, periode)
-        return SakService.PeriodeDetaljer(
+        return MeldeperiodeFlate.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
                 svarerDuSant = true, /* TODO */
@@ -100,7 +101,7 @@ class KelvinSakService(
         )
     }
 
-    override fun totaltAntallTimerArbeidet(periodeDetaljer: SakService.PeriodeDetaljer): Double {
+    override fun totaltAntallTimerArbeidet(periodeDetaljer: MeldeperiodeFlate.PeriodeDetaljer): Double {
         return periodeDetaljer.svar.timerArbeidet.sumOf { it.timer ?: 0.0 }
     }
 

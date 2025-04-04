@@ -8,6 +8,7 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.SakService
 import no.nav.aap.utfylling.Svar
@@ -67,7 +68,7 @@ class ArenaSakService(
         }
     }
 
-    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): SakService.PeriodeDetaljer {
+    override fun detaljer(innloggetBruker: InnloggetBruker, periode: Periode): MeldeperiodeFlate.PeriodeDetaljer {
         val meldekort = meldekortService.gjeldeneHistoriskeMeldekort(innloggetBruker, periode)
             ?: error("meldekortet burde ha blitt listet opp, så er forventet at det eksisterer")
 
@@ -77,7 +78,7 @@ class ArenaSakService(
             ?.map { TimerArbeidet(it.dato, it.timer) }
             ?: meldekort.periode.map { TimerArbeidet(it, null) }
 
-        return SakService.PeriodeDetaljer(
+        return MeldeperiodeFlate.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
                 svarerDuSant = true, /* TODO */
@@ -89,7 +90,7 @@ class ArenaSakService(
     }
 
     /* TODO: implementer denne */
-    override fun totaltAntallTimerArbeidet(periodeDetaljer: SakService.PeriodeDetaljer): Double {
+    override fun totaltAntallTimerArbeidet(periodeDetaljer: MeldeperiodeFlate.PeriodeDetaljer): Double {
         return 0.0
     }
 
