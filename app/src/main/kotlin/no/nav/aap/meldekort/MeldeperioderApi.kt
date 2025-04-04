@@ -22,41 +22,23 @@ fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource, dagensDato: Loca
     route("meldeperiode") {
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
-                val ventendeOgNeste = aktuelleMeldeperioder(innloggetBruker(), dagensDato = dagensDato)
-
-                val manglerOpplysninger = ventendeOgNeste.ventende
-                    .takeIf { it.isNotEmpty() }
-                    ?.let {
-                        PeriodeDto(
-                            fom = it.first().meldeperioden.fom,
-                            tom = it.last().meldeperioden.tom,
-                        )
-                    }
-
-                KommendeMeldeperioderDto(
-                    antallUbesvarteMeldeperioder = ventendeOgNeste.ventende.size,
-                    manglerOpplysninger = manglerOpplysninger,
-                    nesteMeldeperiode = ventendeOgNeste.neste?.let { MeldeperiodeDto(it) },
-                )
+                val kommendeMeldeperioder = aktuelleMeldeperioder(innloggetBruker(), dagensDato = dagensDato)
+                KommendeMeldeperioderDto.fraDomene(kommendeMeldeperioder)
             }
             respond(response)
         }
 
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
-                val meldeperioder = historiskeMeldeperioder(innloggetBruker())
-                meldeperioder.map {
-                    HistoriskMeldeperiodeDto(
-                        meldeperiode = it,
-                        antallTimerArbeidetIPerioden = totaltAntallTimerIPerioden(innloggetBruker(), it.meldeperioden)
-                            ?: 0.0
-                    )
+                val historiskeMeldeperioder = historiskeMeldeperioder(innloggetBruker())
+                historiskeMeldeperioder.map {
+                    HistoriskMeldeperiodeDto.fraDomene(it)
                 }
             }
             respond(response)
         }
 
-        route("detaljer").post<Unit, PeriodeDetaljerDto, PeriodeDto> { params, request ->
+        route("detaljer").post<Unit, PeriodeDetaljerDto, PeriodeDto> { _, request ->
             val response = medFlate {
                 val detaljer = periodedetaljer(innloggetBruker(), Periode(request.fom, request.tom))
                 PeriodeDetaljerDto(detaljer)

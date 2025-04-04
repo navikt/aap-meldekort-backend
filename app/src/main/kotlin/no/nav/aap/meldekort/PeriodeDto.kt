@@ -8,4 +8,13 @@ class PeriodeDto(
     val tom: LocalDate,
 ) {
     constructor(periode: Periode) : this(periode.fom, periode.tom)
+
+    companion object {
+        fun ellerNull(periode: Periode?): PeriodeDto? {
+            if (periode == null) {
+                return periode
+            }
+            return PeriodeDto(periode.fom, periode.tom)
+        }
+    }
 }

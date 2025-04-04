@@ -1,6 +1,7 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.sak.SakService
 import java.time.LocalDate
 
@@ -12,24 +13,52 @@ class MeldeperiodeDto(
         meldeperiode = PeriodeDto(meldeperiode.meldeperioden),
         innsendingsvindu = PeriodeDto(meldeperiode.meldevindu),
     )
+
+    companion object {
+        fun ellerNull(domene: Meldeperiode?): MeldeperiodeDto? {
+            if (domene == null) {
+                return null
+            }
+
+            return MeldeperiodeDto(
+                meldeperiode = PeriodeDto(domene.meldeperioden),
+                innsendingsvindu = PeriodeDto(domene.meldevindu),
+            )
+        }
+    }
 }
 
 class KommendeMeldeperioderDto(
     val antallUbesvarteMeldeperioder: Int,
     val manglerOpplysninger: PeriodeDto?,
     val nesteMeldeperiode: MeldeperiodeDto?,
-)
+) {
+    companion object {
+        fun fraDomene(domene: MeldeperiodeFlate.KommendeMeldeperioder): KommendeMeldeperioderDto {
+            return KommendeMeldeperioderDto(
+                antallUbesvarteMeldeperioder = domene.antallUbesvarteMeldeperioder,
+                manglerOpplysninger = PeriodeDto.ellerNull(domene.manglerOpplysninger),
+                nesteMeldeperiode = MeldeperiodeDto.ellerNull(domene.nesteMeldeperiode),
+            )
+
+        }
+    }
+}
 
 class HistoriskMeldeperiodeDto(
     val antallTimerArbeidetIPerioden: Double,
     val meldeperiode: PeriodeDto,
     val status: MeldeperiodeStatusDto,
 ) {
-    constructor(meldeperiode: Meldeperiode, antallTimerArbeidetIPerioden: Double ) : this(
-        antallTimerArbeidetIPerioden = antallTimerArbeidetIPerioden,
-        meldeperiode = PeriodeDto(meldeperiode.meldeperioden),
-        status = MeldeperiodeStatusDto.KELVIN /* TODO: arena */
-    )
+    companion object {
+        fun fraDomene(domene: MeldeperiodeFlate.HistoriskMeldeperiode): HistoriskMeldeperiodeDto {
+            return HistoriskMeldeperiodeDto(
+                antallTimerArbeidetIPerioden = domene.totaltAntallTimerIPerioden,
+                meldeperiode = PeriodeDto(domene.meldeperiode.meldeperioden),
+                status = MeldeperiodeStatusDto.KELVIN, /* TODO: arena */
+            )
+        }
+    }
 }
 
 enum class MeldeperiodeStatusDto {
