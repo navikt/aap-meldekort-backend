@@ -6,8 +6,8 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.MeldekortV0
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.sak.FagsystemNavn
@@ -23,6 +23,12 @@ class JournalføringService(
     private val flytJobbRepository: FlytJobbRepository,
     private val pdfgenGateway: PdfgenGateway,
 ) {
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+        gatewayProvider.provide(),
+        repositoryProvider.provide(),
+        gatewayProvider.provide(),
+    )
+
     fun bestillJournalføring(ident: Ident, utfylling: Utfylling) {
         flytJobbRepository.leggTil(
             JournalføringJobbUtfører.jobbInput(
@@ -169,13 +175,5 @@ class JournalføringService(
     companion object {
         private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY")
         private val uke = WeekFields.of(Locale.of("nb", "NO")).weekOfWeekBasedYear()
-
-        fun konstruer(connection: DBConnection): JournalføringService {
-            return JournalføringService(
-                dokarkivGateway = GatewayProvider.provide(),
-                pdfgenGateway = GatewayProvider.provide(),
-                flytJobbRepository = FlytJobbRepository(connection),
-            )
-        }
     }
 }

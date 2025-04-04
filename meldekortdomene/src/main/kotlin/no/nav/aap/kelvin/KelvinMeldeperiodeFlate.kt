@@ -3,8 +3,8 @@ package no.nav.aap.kelvin
 import java.time.LocalDate
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.utfylling.Svar
@@ -14,6 +14,12 @@ class KelvinMeldeperiodeFlate(
     private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
 ) : MeldeperiodeFlate {
+
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+        sakService = KelvinSakService(repositoryProvider, gatewayProvider),
+        kelvinSakRepository = repositoryProvider.provide(),
+        timerArbeidetRepository = repositoryProvider.provide(),
+    )
 
     override fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): MeldeperiodeFlate.KommendeMeldeperioder {
         val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now())
@@ -92,17 +98,5 @@ class KelvinMeldeperiodeFlate(
                 stemmerOpplysningene = true, /* TODO */
             )
         )
-    }
-
-
-    companion object {
-        fun konstruer(connection: DBConnection): KelvinMeldeperiodeFlate {
-            val repositoryProvider = RepositoryProvider(connection)
-            return KelvinMeldeperiodeFlate(
-                sakService = KelvinSakService.konstruer(connection),
-                kelvinSakRepository = repositoryProvider.provide(),
-                timerArbeidetRepository = repositoryProvider.provide(),
-            )
-        }
     }
 }

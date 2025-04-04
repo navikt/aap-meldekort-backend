@@ -2,8 +2,8 @@ package no.nav.aap.kelvin
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsakReferanse
@@ -14,6 +14,11 @@ class KelvinSakService(
     private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
 )  {
+
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+        timerArbeidetRepository = repositoryProvider.provide(),
+        kelvinSakRepository = repositoryProvider.provide(),
+    )
 
     fun hentMeldeperioder(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
         val opplysningsbehov = kelvinSakRepository.hentOpplysningsbehov(ident, sak.nummer)
@@ -79,15 +84,5 @@ class KelvinSakService(
             }
         }
         return timerArbeidet.toList()
-    }
-
-    companion object {
-        fun konstruer(connection: DBConnection): KelvinSakService {
-            val repositoryProvider = RepositoryProvider(connection)
-            return KelvinSakService(
-                timerArbeidetRepository = repositoryProvider.provide(),
-                kelvinSakRepository = repositoryProvider.provide(),
-            )
-        }
     }
 }

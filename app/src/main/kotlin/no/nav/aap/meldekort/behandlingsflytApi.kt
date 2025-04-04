@@ -9,7 +9,7 @@ import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
@@ -18,7 +18,7 @@ import java.util.*
 import javax.sql.DataSource
 
 
-fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource) {
+fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry) {
     val authorizedAzps = listOfNotNull(configForKey("BEHANDLINGSFLYT_AZP")?.let(UUID::fromString))
 
     route("/api/behandlingsflyt/sak/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
@@ -26,7 +26,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource) {
         auditLogConfig = null,
     ) { _, body ->
         dataSource.transaction { connection ->
-            RepositoryProvider(connection).provide<KelvinSakRepository>()
+            repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
                 .upsertSak(
                     saksnummer = Fagsaknummer(body.saksnummer),
                     identer = body.identer.map { Ident(it) },

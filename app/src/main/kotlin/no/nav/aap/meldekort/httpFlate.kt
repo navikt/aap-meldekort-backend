@@ -24,6 +24,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
@@ -34,7 +35,6 @@ import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import javax.sql.DataSource
 
 class HttpServer
@@ -47,7 +47,7 @@ fun startHttpServer(
     azureConfig: AzureConfig,
     dataSource: DataSource,
     wait: Boolean = true,
-    dagensDato: LocalDate? = null,
+    repositoryRegistry: RepositoryRegistry,
 ): EmbeddedServer<*, *> {
     return embeddedServer(Netty, configure = {
         connectionGroupSize = 8
@@ -71,7 +71,7 @@ fun startHttpServer(
             azureConfig = azureConfig,
         )
 
-        val motor = startMotor(dataSource, prometheus)
+        val motor = startMotor(dataSource, repositoryRegistry, prometheus)
 
         install(StatusPages) {
             exception<Throwable> { call, cause ->
@@ -105,17 +105,17 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     route("api") {
-                        ansvarligSystemApi(dataSource)
+                        ansvarligSystemApi(dataSource, repositoryRegistry)
                         arenaApi()
-                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl())
-                        utfyllingApi(dataSource, UtfyllingFlateFactoryImpl())
+                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(), repositoryRegistry)
+                        utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(), repositoryRegistry)
                     }
                 }
             }
             authenticate(AZURE) {
                 apiRouting {
                     motorApi(dataSource)
-                    behandlingsflytApi(dataSource)
+                    behandlingsflytApi(dataSource, repositoryRegistry)
                 }
             }
             actuator(prometheus, motor)
@@ -125,13 +125,17 @@ fun startHttpServer(
 
 private fun Application.startMotor(
     dataSource: DataSource,
+    repositoryRegistry: RepositoryRegistry,
     prometheus: PrometheusMeterRegistry
 ): Motor {
     val motor = Motor(
         dataSource = dataSource,
         antallKammer = 4,
         logInfoProvider = JournalføringJobbUtfører.LogInfoProvider,
-        jobber = listOf(JournalføringJobbUtfører, SlettGamleUtfyllingJobbUtfører),
+        jobber = listOf(
+            JournalføringJobbUtfører.jobbKonstruktør(repositoryRegistry),
+            SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry),
+        ),
         prometheus = prometheus,
     )
 

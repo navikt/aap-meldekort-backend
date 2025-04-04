@@ -12,6 +12,8 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.repository.RepositoryRegistry
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingFlateFactory
 import no.nav.aap.utfylling.UtfyllingReferanse
@@ -19,14 +21,23 @@ import org.slf4j.MDC
 import java.util.*
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.utfyllingApi(dataSource: DataSource, utfyllingFlateFactory: UtfyllingFlateFactory) {
+fun NormalOpenAPIRoute.utfyllingApi(
+    dataSource: DataSource,
+    utfyllingFlateFactory: UtfyllingFlateFactory,
+    repositoryRegistry: RepositoryRegistry,
+) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
         utfyllingReferanse: UtfyllingReferanse? = null,
         body: UtfyllingFlate.() -> T,
     ): T {
         return MDC.putCloseable("utfylling", utfyllingReferanse?.asUuid?.toString()).use {
             dataSource.transaction { connection ->
-                val flate = utfyllingFlateFactory.flateForBruker(innloggetBruker(), connection)
+                val flate = utfyllingFlateFactory.flateForBruker(
+                    innloggetBruker(),
+                    repositoryProvider = repositoryRegistry.provider(connection),
+                    gatewayProvider = GatewayProvider,
+                    connection = connection,
+                )
                 flate.body()
             }
         }

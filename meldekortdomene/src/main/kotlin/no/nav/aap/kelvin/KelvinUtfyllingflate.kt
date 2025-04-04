@@ -4,9 +4,9 @@ import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
-import no.nav.aap.sak.SakerService
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
@@ -16,7 +16,6 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -27,12 +26,24 @@ class KelvinUtfyllingFlate(
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) : UtfyllingFlate {
 
-    override fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): UtfyllingFlate.StartUtfyllingResponse {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: return UtfyllingFlate.StartUtfyllingResponse(
-            metadata = null,
-            utfylling = null,
-            feil = "finner ikke sak",
-        )
+    constructor(connection: DBConnection, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
+        utfyllingRepository = repositoryProvider.provide(),
+        kelvinSakRepository = repositoryProvider.provide(),
+        sakService = KelvinSakService(repositoryProvider, gatewayProvider),
+        flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(repositoryProvider, gatewayProvider, flytNavn) }
+    )
+
+
+    override fun startUtfylling(
+        innloggetBruker: InnloggetBruker,
+        periode: Periode
+    ): UtfyllingFlate.StartUtfyllingResponse {
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom)
+            ?: return UtfyllingFlate.StartUtfyllingResponse(
+                metadata = null,
+                utfylling = null,
+                feil = "finner ikke sak",
+            )
 
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
@@ -54,12 +65,16 @@ class KelvinUtfyllingFlate(
         )
     }
 
-    override fun startKorrigering(innloggetBruker: InnloggetBruker, periode: Periode): UtfyllingFlate.StartUtfyllingResponse {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: return UtfyllingFlate.StartUtfyllingResponse(
-            metadata = null,
-            utfylling = null,
-            feil = "finner ikke sak",
-        )
+    override fun startKorrigering(
+        innloggetBruker: InnloggetBruker,
+        periode: Periode
+    ): UtfyllingFlate.StartUtfyllingResponse {
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom)
+            ?: return UtfyllingFlate.StartUtfyllingResponse(
+                metadata = null,
+                utfylling = null,
+                feil = "finner ikke sak",
+            )
 
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
@@ -95,7 +110,10 @@ class KelvinUtfyllingFlate(
         return UtfyllingFlate.Metadata(
             referanse = utfylling.referanse,
             periode = utfylling.periode,
-            antallUbesvarteMeldeperioder = sakService.antallUbesvarteMeldeperioder(innloggetBruker.ident, utfylling.fagsak),
+            antallUbesvarteMeldeperioder = sakService.antallUbesvarteMeldeperioder(
+                innloggetBruker.ident,
+                utfylling.fagsak
+            ),
             tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
@@ -133,7 +151,10 @@ class KelvinUtfyllingFlate(
         return nyUtfylling
     }
 
-    override fun hentUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse): UtfyllingFlate.UtfyllingResponse? {
+    override fun hentUtfylling(
+        innloggetBruker: InnloggetBruker,
+        utfyllingReferanse: UtfyllingReferanse
+    ): UtfyllingFlate.UtfyllingResponse? {
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
             ?: return null
 
@@ -195,24 +216,5 @@ class KelvinUtfyllingFlate(
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse) ?: return
         require(!utfylling.erAvsluttet)
         utfyllingRepository.slettUtkast(innloggetBruker.ident, utfyllingReferanse)
-    }
-
-    companion object {
-        fun konstruer(innloggetBruker: InnloggetBruker, connection: DBConnection): UtfyllingFlate {
-            val sak = SakerService.konstruer(connection).finnSak(innloggetBruker, LocalDate.now())
-                ?: error("frontend skal ikke prøve å starte utfylling uten at sak eksisterer")
-
-            val repositoryProvider = RepositoryProvider(connection)
-
-            return KelvinUtfyllingFlate(
-                utfyllingRepository = repositoryProvider.provide(),
-                kelvinSakRepository = repositoryProvider.provide(),
-                sakService = KelvinSakService(
-                    kelvinSakRepository = repositoryProvider.provide(),
-                    timerArbeidetRepository = repositoryProvider.provide(),
-                ),
-                flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(connection, sak, flytNavn) }
-            )
-        }
     }
 }

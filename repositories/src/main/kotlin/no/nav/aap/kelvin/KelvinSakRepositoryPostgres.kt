@@ -3,7 +3,7 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.Factory
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
@@ -256,7 +256,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
-    companion object : Factory<KelvinSakRepository> {
+    companion object : RepositoryFactory<KelvinSakRepository> {
         override fun konstruer(connection: DBConnection): KelvinSakRepository {
             return KelvinSakRepositoryPostgres(connection)
         }

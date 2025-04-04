@@ -1,16 +1,12 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaGateway
 import no.nav.aap.arena.ArenaSakService
-import no.nav.aap.arena.MeldekortService
 import no.nav.aap.journalføring.BestillJournalføringSteg
 import no.nav.aap.journalføring.JournalføringService
-import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.opplysningsplikt.PersisterOpplysningerSteg
-import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
@@ -173,21 +169,11 @@ class UtfyllingFlyt(
     }
 
     companion object {
-        fun konstruer(connection: DBConnection, sak: Sak, flytNavn: UtfyllingFlytNavn): UtfyllingFlyt {
-            val repositoryProvider = RepositoryProvider(connection)
-
-            val arenaSakService = lazy {
-//                val arenaGateway = GatewayProvider.provide<ArenaGateway>()
-                ArenaSakService(
-//                    meldekortService = MeldekortService(
-//                        arenaGateway = arenaGateway,
-//                        meldekortRepository = repositoryProvider.provide(),
-//                    ),
-//                    arenaGateway = arenaGateway,
-//                    sak = sak,
-                )
-            }
-
+        fun konstruer(
+            repositoryProvider: RepositoryProvider,
+            gatewayProvider: GatewayProvider,
+            flytNavn: UtfyllingFlytNavn
+        ): UtfyllingFlyt {
             return UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
                     when (it) {
@@ -195,10 +181,10 @@ class UtfyllingFlyt(
                         SPØRSMÅL -> SpørsmålSteg
                         UTFYLLING -> TimerArbeidetSteg
                         BEKREFT -> StemmerOpplysningeneSteg
-                        ARENAKONTROLL_VANLIG -> ArenaKontrollVanligSteg(arenaSakService.value)
-                        ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(arenaSakService.value)
+                        ARENAKONTROLL_VANLIG -> ArenaKontrollVanligSteg(ArenaSakService())
+                        ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(ArenaSakService())
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
-                        BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService.konstruer(connection))
+                        BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))
                         KVITTERING -> KvitteringSteg
                     }
                 }

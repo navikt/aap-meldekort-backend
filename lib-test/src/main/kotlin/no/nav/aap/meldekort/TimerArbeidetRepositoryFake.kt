@@ -7,7 +7,7 @@ import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsakReferanse
 import java.time.LocalDate
 
-class TimerArbeidetRepositoryFake: TimerArbeidetRepository   {
+class TimerArbeidetRepositoryFake: TimerArbeidetRepository {
     override fun hentTimerArbeidet(ident: Ident, sak: FagsakReferanse, periode: Periode): List<TimerArbeidet> {
         return listOf()
     }

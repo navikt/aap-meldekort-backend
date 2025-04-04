@@ -3,15 +3,19 @@ package no.nav.aap.sak
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.kelvin.KelvinSakRepository
-import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.lookup.repository.RepositoryProvider
 import java.time.LocalDate
 
 class SakerService(
     private val aapGateway: AapGateway,
     private val kelvinSakRepository: KelvinSakRepository,
 ) {
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+        aapGateway = gatewayProvider.provide(),
+        kelvinSakRepository = repositoryProvider.provide(),
+    )
+
     fun finnSak(innloggetBruker: InnloggetBruker, påDag: LocalDate): Sak? {
         return finnSak(innloggetBruker.ident, påDag)
     }
@@ -29,14 +33,5 @@ class SakerService(
     fun finnSak(ident: Ident, fagsakReferanse: FagsakReferanse): Sak? {
         val saker = aapGateway.hentSaker(ident)
         return saker.finnSak(fagsakReferanse)
-    }
-
-    companion object {
-        fun konstruer(connection: DBConnection): SakerService {
-            return SakerService(
-                GatewayProvider.provide<AapGateway>(),
-                RepositoryProvider(connection).provide(),
-            )
-        }
     }
 }

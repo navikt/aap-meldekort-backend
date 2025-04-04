@@ -5,7 +5,7 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
-import no.nav.aap.lookup.repository.Factory
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsakReferanse
 import java.time.LocalDate
@@ -126,7 +126,7 @@ class UtfyllingRepositoryPostgres(
         )
     }
 
-    companion object : Factory<UtfyllingRepositoryPostgres> {
+    companion object : RepositoryFactory<UtfyllingRepositoryPostgres> {
         override fun konstruer(connection: DBConnection): UtfyllingRepositoryPostgres {
             return UtfyllingRepositoryPostgres(connection)
         }

@@ -1,13 +1,14 @@
 package no.nav.aap.arena
 
-import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.utfylling.Svar
 
 class ArenaMeldeperiodeFlate() : MeldeperiodeFlate {
+    constructor(repositoryProvider: RepositoryProvider): this()
+
     override fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): MeldeperiodeFlate.KommendeMeldeperioder {
         return MeldeperiodeFlate.KommendeMeldeperioder(
             antallUbesvarteMeldeperioder = 0,
@@ -65,11 +66,5 @@ class ArenaMeldeperiodeFlate() : MeldeperiodeFlate {
 //            return sakService?.totaltAntallTimerArbeidet(detaljer)
 //        }
 //        return null
-    }
-
-    companion object {
-        fun konstruer(connection: DBConnection): ArenaMeldeperiodeFlate {
-            return ArenaMeldeperiodeFlate()
-        }
     }
 }

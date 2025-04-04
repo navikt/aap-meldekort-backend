@@ -2,7 +2,9 @@ package no.nav.aap.journalføring
 
 import no.nav.aap.Ident
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.lookup.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.komponenter.repository.RepositoryRegistry
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
@@ -21,6 +23,13 @@ class JournalføringJobbUtfører(
     private val utfyllingRepository: UtfyllingRepository,
     private val sakerService: SakerService,
 ) : JobbUtfører {
+
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+        journalføringService = JournalføringService(repositoryProvider, gatewayProvider),
+        utfyllingRepository = repositoryProvider.provide(),
+        sakerService = SakerService(repositoryProvider, gatewayProvider),
+    )
+
     override fun utfør(input: JobbInput) {
         val ident = Ident(input.parameter("ident"))
         val utfyllingReferanse = UtfyllingReferanse(UUID.fromString(input.parameter("utfylling")))
@@ -38,39 +47,48 @@ class JournalføringJobbUtfører(
         )
     }
 
-    companion object : Jobb {
+    companion object {
+        private val jobbInfo  = object: Jobb {
+            override fun navn(): String {
+                return "JournalføringJobbUtfører"
+            }
+
+            override fun type(): String {
+                return "meldekort.journalføring"
+            }
+
+            override fun beskrivelse(): String {
+                return "Journalfør ferdig utfylt meldekort"
+            }
+
+            override fun konstruer(connection: DBConnection): JobbUtfører {
+                error("kun for å lage nye jobber")
+            }
+        }
+
+
+
+        fun jobbKonstruktør(repositoryRegistry: RepositoryRegistry) = object : Jobb by jobbInfo {
+            override fun konstruer(connection: DBConnection): JobbUtfører {
+                return JournalføringJobbUtfører(
+                    repositoryRegistry.provider(connection),
+                    GatewayProvider,
+                )
+            }
+        }
+
+
         fun jobbInput(
             ident: Ident,
             utfylling: UtfyllingReferanse,
             fagsak: FagsakReferanse,
         ): JobbInput {
-            return JobbInput(JournalføringJobbUtfører).apply {
+            return JobbInput(jobbInfo).apply {
                 medParameter("ident", ident.asString)
                 medParameter("utfylling", utfylling.asUuid.toString())
                 medParameter("fagsak_system", fagsak.system.toString())
                 medParameter("fagsak_nummer", fagsak.nummer.asString)
             }
-        }
-
-        override fun navn(): String {
-            return "JournalføringJobbUtfører"
-        }
-
-        override fun type(): String {
-            return "meldekort.journalføring"
-        }
-
-        override fun beskrivelse(): String {
-            return "Journalfør ferdig utfylt meldekort"
-        }
-
-        override fun konstruer(connection: DBConnection): JobbUtfører {
-            val repositoryProvider = RepositoryProvider(connection)
-            return JournalføringJobbUtfører(
-                journalføringService = JournalføringService.konstruer(connection),
-                utfyllingRepository = repositoryProvider.provide(),
-                sakerService = SakerService.konstruer(connection),
-            )
         }
     }
 

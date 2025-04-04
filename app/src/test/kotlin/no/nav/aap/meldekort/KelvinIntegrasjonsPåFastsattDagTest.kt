@@ -25,6 +25,7 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
+import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
@@ -232,7 +233,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     azureConfig = AzureConfig(),
                     dataSource = dataSource,
                     wait = false,
-                    dagensDato = idag,
+                    repositoryRegistry = postgresRepositoryRegistry,
                 )
             }
 

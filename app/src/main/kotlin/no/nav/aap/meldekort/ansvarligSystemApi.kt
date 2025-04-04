@@ -6,8 +6,8 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
 import java.time.LocalDate
@@ -19,12 +19,16 @@ enum class AnsvarligMeldekortløsningDto {
     ;
 }
 
-fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource, dagensDato: LocalDate? = null) {
+fun NormalOpenAPIRoute.ansvarligSystemApi(
+    dataSource: DataSource,
+    repositoryRegistry: RepositoryRegistry,
+    dagensDato: LocalDate? = null,
+) {
     route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val sakerService = SakerService(
                 aapGateway = GatewayProvider.provide(),
-                kelvinSakRepository = RepositoryProvider(connection).provide(),
+                kelvinSakRepository = repositoryRegistry.provider(connection).provide(),
             )
 
             val sak = sakerService.finnSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
@@ -38,7 +42,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(dataSource: DataSource, dagensDato: Lo
 
     route("ansvarlig-system-felles").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
-            val kelvinSakRepository = RepositoryProvider(connection).provide<KelvinSakRepository>()
+            val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
             val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
             if (kelvinSak == null)
                 AnsvarligMeldekortløsningDto.FELLES

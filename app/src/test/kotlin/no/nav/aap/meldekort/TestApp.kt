@@ -11,6 +11,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
+import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
@@ -72,5 +73,6 @@ fun main() {
         tokenxConfig = TokenxConfig(),
         azureConfig = AzureConfig(),
         dataSource = dataSource,
+        repositoryRegistry = postgresRepositoryRegistry,
     )
 }

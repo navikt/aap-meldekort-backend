@@ -8,14 +8,24 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.repository.RepositoryRegistry
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.meldeperiode.MeldeperiodeFlateFactory
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.meldeperioderApi(dataSource: DataSource, meldeperiodeFlateFactory: MeldeperiodeFlateFactory) {
+fun NormalOpenAPIRoute.meldeperioderApi(
+    dataSource: DataSource,
+    meldeperiodeFlateFactory: MeldeperiodeFlateFactory,
+    repositoryRegistry: RepositoryRegistry,
+) {
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: MeldeperiodeFlate.() -> T): T {
         return dataSource.transaction { connection ->
-            val meldeperiodeFlate = meldeperiodeFlateFactory.flateForBruker(innloggetBruker(), connection)
+            val meldeperiodeFlate = meldeperiodeFlateFactory.flateForBruker(
+                innloggetBruker = innloggetBruker(),
+                repositoryProvider = repositoryRegistry.provider(connection),
+                gatewayProvider = GatewayProvider
+            )
             meldeperiodeFlate.body()
         }
     }

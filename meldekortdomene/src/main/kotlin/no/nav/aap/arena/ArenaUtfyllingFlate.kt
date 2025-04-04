@@ -2,13 +2,16 @@ package no.nav.aap.arena
 
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.komponenter.dbconnect.DBConnection
+import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingStegNavn
 
-class ArenaUtfyllingFlate: UtfyllingFlate {
+class ArenaUtfyllingFlate(): UtfyllingFlate {
+
+    constructor(repositoryProvider: RepositoryProvider): this()
+
     override fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): UtfyllingFlate.StartUtfyllingResponse {
         return UtfyllingFlate.StartUtfyllingResponse(
             metadata = null,
@@ -49,11 +52,5 @@ class ArenaUtfyllingFlate: UtfyllingFlate {
 
     override fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
         error("utfylling av arena-meldekoert er ikke støttet")
-    }
-
-    companion object {
-        fun konstruer(innloggetBruker: InnloggetBruker, connection: DBConnection): UtfyllingFlate {
-            return ArenaUtfyllingFlate()
-        }
     }
 }

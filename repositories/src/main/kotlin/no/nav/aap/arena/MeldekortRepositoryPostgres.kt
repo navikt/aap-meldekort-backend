@@ -2,13 +2,13 @@ package no.nav.aap.arena
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
-import no.nav.aap.lookup.repository.Factory
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.komponenter.type.Periode as DbPeriode
 
 class MeldekortRepositoryPostgres(private val connection: DBConnection) : MeldekortRepository {
-    companion object : Factory<MeldekortRepositoryPostgres> {
+    companion object : RepositoryFactory<MeldekortRepositoryPostgres> {
         override fun konstruer(connection: DBConnection): MeldekortRepositoryPostgres {
             return MeldekortRepositoryPostgres(connection)
         }

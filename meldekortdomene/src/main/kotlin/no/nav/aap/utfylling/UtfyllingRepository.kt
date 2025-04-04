@@ -1,8 +1,8 @@
 package no.nav.aap.utfylling
 
-import no.nav.aap.lookup.repository.Repository
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.repository.Repository
 import java.time.LocalDate
 
 interface UtfyllingRepository: Repository {

@@ -1,4 +1,4 @@
-val komponenterVersjon = "1.0.193"
+val komponenterVersjon = "1.0.200"
 val junitVersjon = "5.12.1"
 
 plugins {
@@ -15,6 +15,7 @@ dependencies {
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbmigrering:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
 

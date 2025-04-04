@@ -4,7 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
-import no.nav.aap.lookup.repository.Factory
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.UtfyllingReferanse
@@ -87,7 +87,7 @@ class TimerArbeidetRepositoryPostgres(
         )
     }
 
-    companion object : Factory<TimerArbeidetRepositoryPostgres> {
+    companion object : RepositoryFactory<TimerArbeidetRepositoryPostgres> {
         override fun konstruer(connection: DBConnection): TimerArbeidetRepositoryPostgres {
             return TimerArbeidetRepositoryPostgres(connection)
         }

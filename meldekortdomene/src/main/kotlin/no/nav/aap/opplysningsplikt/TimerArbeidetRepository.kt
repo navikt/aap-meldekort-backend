@@ -2,9 +2,8 @@ package no.nav.aap.opplysningsplikt
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.lookup.repository.Repository
+import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.LocalDate
 
 
