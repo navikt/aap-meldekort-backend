@@ -11,10 +11,7 @@ import no.nav.aap.motor.mdc.LogInformasjon
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Sak
-import no.nav.aap.sak.SakService
 import no.nav.aap.sak.SakerService
-import no.nav.aap.sak.sakServiceFactory
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import java.util.*
@@ -23,7 +20,6 @@ class JournalføringJobbUtfører(
     private val journalføringService: JournalføringService,
     private val utfyllingRepository: UtfyllingRepository,
     private val sakerService: SakerService,
-    private val sakServiceFactory: (Sak) -> SakService,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         val ident = Ident(input.parameter("ident"))
@@ -38,7 +34,7 @@ class JournalføringJobbUtfører(
         journalføringService.journalfør(
             ident = ident,
             utfylling = utfyllingRepository.lastAvsluttetUtfylling(ident, utfyllingReferanse)!!,
-            sakService = sakServiceFactory(sak),
+            sak = sak,
         )
     }
 
@@ -74,7 +70,6 @@ class JournalføringJobbUtfører(
                 journalføringService = JournalføringService.konstruer(connection),
                 utfyllingRepository = repositoryProvider.provide(),
                 sakerService = SakerService.konstruer(connection),
-                sakServiceFactory = { sak -> sakServiceFactory(connection, sak) }
             )
         }
     }

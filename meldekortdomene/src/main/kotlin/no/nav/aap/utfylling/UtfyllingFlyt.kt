@@ -177,14 +177,14 @@ class UtfyllingFlyt(
             val repositoryProvider = RepositoryProvider(connection)
 
             val arenaSakService = lazy {
-                val arenaGateway = GatewayProvider.provide<ArenaGateway>()
+//                val arenaGateway = GatewayProvider.provide<ArenaGateway>()
                 ArenaSakService(
-                    meldekortService = MeldekortService(
-                        arenaGateway = arenaGateway,
-                        meldekortRepository = repositoryProvider.provide(),
-                    ),
-                    arenaGateway = arenaGateway,
-                    sak = sak,
+//                    meldekortService = MeldekortService(
+//                        arenaGateway = arenaGateway,
+//                        meldekortRepository = repositoryProvider.provide(),
+//                    ),
+//                    arenaGateway = arenaGateway,
+//                    sak = sak,
                 )
             }
 

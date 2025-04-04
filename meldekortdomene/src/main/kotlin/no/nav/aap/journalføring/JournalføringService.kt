@@ -10,10 +10,13 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
-import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.sak.SakService
+import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.Utfylling
-import java.time.ZoneId
+import no.nav.aap.utfylling.UtfyllingFlytNavn
+import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
+import java.util.*
 
 class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
@@ -33,7 +36,7 @@ class JournalføringService(
     fun journalfør(
         ident: Ident,
         utfylling: Utfylling,
-        sakService: SakService,
+        sak: Sak,
     ) {
         val meldekort = MeldekortV0(
             harDuArbeidet = utfylling.svar.harDuJobbet!!,
@@ -46,11 +49,9 @@ class JournalføringService(
             }
         )
 
-        val fagsystemspesifikkeOpplysninger = sakService.opplysningerForJournalpost(utfylling)
         val journalpost = journalpost(
             ident = ident,
             utfylling = utfylling,
-            fagsak = sakService.sak.referanse,
             meldekort = meldekort,
             pdf = pdfgenGateway.genererPdf(
                 ident = ident,
@@ -58,26 +59,45 @@ class JournalføringService(
                 meldekort = meldekort,
                 utfylling = utfylling
             ),
-            fagsystemspesifikkeOpplysninger = fagsystemspesifikkeOpplysninger
+            sak = sak,
         )
+
+        val forsøkFerdigstill = when (sak.referanse.system) {
+            FagsystemNavn.ARENA -> true
+            FagsystemNavn.KELVIN -> false
+        }
 
         val response = dokarkivGateway.oppdater(
             journalpost,
-            forsøkFerdigstill = fagsystemspesifikkeOpplysninger.ferdigstill
+            forsøkFerdigstill = forsøkFerdigstill
         )
-        if (fagsystemspesifikkeOpplysninger.ferdigstill) {
+        if (forsøkFerdigstill) {
             check(response.journalpostferdigstilt)
         }
     }
 
     private fun journalpost(
         ident: Ident,
-        fagsystemspesifikkeOpplysninger: SakService.OpplysningerForJournalpost,
         utfylling: Utfylling,
-        fagsak: FagsakReferanse?,
         meldekort: Meldekort,
         pdf: ByteArray,
+        sak: Sak,
     ): DokarkivGateway.Journalpost {
+        val uke1 = utfylling.periode.fom.get(uke)
+        val uke2 = utfylling.periode.tom.get(uke)
+        val fra = utfylling.periode.fom.format(dateFormatter)
+        val til = utfylling.periode.tom.format(dateFormatter)
+        val tittelsuffix = "for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av NAV"
+        val tittel = when (utfylling.flyt) {
+            UtfyllingFlytNavn.ARENA_VANLIG_FLYT,
+            UtfyllingFlytNavn.AAP_FLYT ->
+                "Meldekort $tittelsuffix"
+
+            UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT,
+            UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
+                "Korrigert meldekort $tittelsuffix"
+        }
+
         return DokarkivGateway.Journalpost(
             journalposttype = INNGAAENDE,
             avsenderMottaker = DokarkivGateway.AvsenderMottaker(
@@ -89,23 +109,46 @@ class JournalføringService(
                 idType = DokarkivGateway.BrukerIdType.FNR,
             ),
             tema = AAP,
-            tittel = fagsystemspesifikkeOpplysninger.tittel,
+            tittel = tittel,
             kanal = "NAV_NO",
-            journalfoerendeEnhet = if (fagsystemspesifikkeOpplysninger.ferdigstill)
-                "9999" /* 9999 = automatisk behandling */
-            else
-                null,
+            journalfoerendeEnhet = when (sak.referanse.system) {
+                FagsystemNavn.ARENA ->
+                    /* 9999 = automatisk behandling */
+                    "9999"
+
+                FagsystemNavn.KELVIN -> null
+            },
             eksternReferanseId = utfylling.referanse.asUuid.toString(),
             datoMottatt = utfylling.sistEndret.toString(),
-            tilleggsopplysninger = fagsystemspesifikkeOpplysninger
-                .tilleggsopplysning
-                .entries
-                .map { DokarkivGateway.Tilleggsopplysning(it.key, it.value) },
-            sak = fagsystemspesifikkeOpplysninger.journalførPåSak,
+            tilleggsopplysninger = when (sak.referanse.system) {
+                FagsystemNavn.ARENA -> listOf(
+                    // TODO:
+                    // "meldekortId" to skjema.meldekortId.toString(),
+                    // "kortKanSendesFra" to kanSendesFra.format(dateFormatter),
+                )
+
+                FagsystemNavn.KELVIN -> emptyList()
+            },
+            sak = when (sak.referanse.system) {
+                FagsystemNavn.KELVIN -> null
+                FagsystemNavn.ARENA -> DokarkivGateway.Sak(
+                    sakstype = DokarkivGateway.Sakstype.FAGSAK,
+                    fagsaksystem = DokarkivGateway.FagsaksSystem.AO01,
+                    fagsakId = sak.referanse.nummer.asString,
+                )
+            },
             dokumenter = listOf(
                 DokarkivGateway.Dokument(
-                    tittel = fagsystemspesifikkeOpplysninger.tittel,
-                    brevkode = fagsystemspesifikkeOpplysninger.brevkode,
+                    tittel = tittel,
+                    brevkode = when (utfylling.flyt) {
+                        UtfyllingFlytNavn.ARENA_VANLIG_FLYT,
+                        UtfyllingFlytNavn.AAP_FLYT ->
+                            "NAV 00-10.02"
+
+                        UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT,
+                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
+                            "NAV 00-10.03"
+                    },
                     dokumentvarianter = listOf(
                         DokarkivGateway.DokumentVariant(
                             filtype = DokarkivGateway.Filetype.PDF,
@@ -124,6 +167,9 @@ class JournalføringService(
     }
 
     companion object {
+        private val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.YYYY")
+        private val uke = WeekFields.of(Locale.of("nb", "NO")).weekOfWeekBasedYear()
+
         fun konstruer(connection: DBConnection): JournalføringService {
             return JournalføringService(
                 dokarkivGateway = GatewayProvider.provide(),

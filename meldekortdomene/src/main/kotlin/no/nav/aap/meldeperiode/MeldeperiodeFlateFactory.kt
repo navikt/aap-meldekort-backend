@@ -16,8 +16,8 @@ class MeldeperiodeFlateFactoryImpl: MeldeperiodeFlateFactory {
     override fun flateForBruker(innloggetBruker: InnloggetBruker, connection: DBConnection): MeldeperiodeFlate {
         val sak = SakerService.konstruer(connection).finnSak(innloggetBruker.ident, LocalDate.now())
         return when (sak?.referanse?.system) {
-            null, FagsystemNavn.KELVIN -> KelvinMeldeperiodeFlate.konstruer(innloggetBruker.ident, connection)
-            FagsystemNavn.ARENA -> ArenaMeldeperiodeFlate.konstruer(innloggetBruker.ident, connection)
+            null, FagsystemNavn.KELVIN -> KelvinMeldeperiodeFlate.konstruer(connection)
+            FagsystemNavn.ARENA -> ArenaMeldeperiodeFlate.konstruer(connection)
         }
     }
 }

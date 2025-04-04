@@ -6,9 +6,7 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.lookup.repository.RepositoryProvider
 import no.nav.aap.sak.Sak
-import no.nav.aap.sak.SakService
 import no.nav.aap.sak.SakerService
-import no.nav.aap.sak.sakServiceFactory
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
@@ -24,26 +22,28 @@ import java.time.ZoneId
 
 class KelvinUtfyllingFlate(
     private val utfyllingRepository: UtfyllingRepository,
-    private val sakService: SakService,
+    private val kelvinSakRepository: KelvinSakRepository,
+    private val sakService: KelvinSakService,
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) : UtfyllingFlate {
 
-    private fun antallMeldeperioderUtenOpplysninger(innloggetBruker: InnloggetBruker): Int {
-        return sakService.ventendeOgNesteMeldeperioder(innloggetBruker).ventende.size
-    }
-
     override fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): UtfyllingFlate.StartUtfyllingResponse {
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: return UtfyllingFlate.StartUtfyllingResponse(
+            metadata = null,
+            utfylling = null,
+            feil = "finner ikke sak",
+        )
+
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
-            sakService.forberedVanligFlyt(innloggetBruker, periode, utfyllingReferanse)
 
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = sakService.innsendingsflyt,
-                svar = sakService.tomtSvar(periode),
-                sak = sakService.sak,
+                flyt = UtfyllingFlytNavn.AAP_FLYT,
+                svar = Svar.tomt(periode),
+                sak = sak,
             )
         }
 
@@ -55,17 +55,28 @@ class KelvinUtfyllingFlate(
     }
 
     override fun startKorrigering(innloggetBruker: InnloggetBruker, periode: Periode): UtfyllingFlate.StartUtfyllingResponse {
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: return UtfyllingFlate.StartUtfyllingResponse(
+            metadata = null,
+            utfylling = null,
+            feil = "finner ikke sak",
+        )
+
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
-            sakService.forberedKorrigeringFlyt(innloggetBruker, periode, utfyllingReferanse)
 
+            val timerArbeidet = sakService.registrerteTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = sakService.korrigeringsflyt,
-                svar = sakService.hentHistoriskeSvar(innloggetBruker, periode),
-                sak = sakService.sak,
+                flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
+                svar = Svar(
+                    svarerDuSant = null,
+                    harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },
+                    timerArbeidet = timerArbeidet,
+                    stemmerOpplysningene = null,
+                ),
+                sak = sak,
             )
         }
 
@@ -84,7 +95,7 @@ class KelvinUtfyllingFlate(
         return UtfyllingFlate.Metadata(
             referanse = utfylling.referanse,
             periode = utfylling.periode,
-            antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker),
+            antallUbesvarteMeldeperioder = sakService.antallUbesvarteMeldeperioder(innloggetBruker.ident, utfylling.fagsak),
             tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
@@ -93,13 +104,8 @@ class KelvinUtfyllingFlate(
 
 
     private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
-        val utfylling = utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode) ?: return null
-
-        if (sakService.utfyllingGyldig(utfylling)) {
-            return utfylling
-        }
-
-        return null
+        /* TODO: noen sjekk på gyldighet? Utløpt? */
+        return utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode)
     }
 
 
@@ -127,25 +133,13 @@ class KelvinUtfyllingFlate(
         return nyUtfylling
     }
 
-
-
     override fun hentUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse): UtfyllingFlate.UtfyllingResponse? {
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
             ?: return null
 
-        val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
-        val fristForInnsending = utfylling.periode.tom.plusDays(9).atTime(23, 59)
-        val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
 
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = UtfyllingFlate.Metadata(
-                referanse = utfylling.referanse,
-                periode = utfylling.periode,
-                antallUbesvarteMeldeperioder = antallMeldeperioderUtenOpplysninger(innloggetBruker),
-                tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
-                fristForInnsending = fristForInnsending,
-                kanSendesInn = kanSendesInn,
-            ),
+            metadata = utledMetadata(innloggetBruker, utfylling),
             utfylling = utfylling,
             feil = null,
         )
@@ -212,7 +206,11 @@ class KelvinUtfyllingFlate(
 
             return KelvinUtfyllingFlate(
                 utfyllingRepository = repositoryProvider.provide(),
-                sakService = sakServiceFactory(connection, sak),
+                kelvinSakRepository = repositoryProvider.provide(),
+                sakService = KelvinSakService(
+                    kelvinSakRepository = repositoryProvider.provide(),
+                    timerArbeidetRepository = repositoryProvider.provide(),
+                ),
                 flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(connection, sak, flytNavn) }
             )
         }
