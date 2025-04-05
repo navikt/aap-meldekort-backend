@@ -7,10 +7,12 @@ import io.ktor.http.*
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
+import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
+import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
@@ -34,6 +36,12 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
                     opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
                     meldeplikt = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                    status = when (body.sakStatus) {
+                        SakStatus.UTREDES -> KelvinSakStatus.UTREDES
+                        SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
+                        SakStatus.AVSLUTTET -> KelvinSakStatus.AVSLUTTET
+                        null -> null
+                    }
                 )
         }
         respondWithStatus(HttpStatusCode.OK)

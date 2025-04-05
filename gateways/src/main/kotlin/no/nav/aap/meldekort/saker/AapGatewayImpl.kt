@@ -20,6 +20,10 @@ import java.net.URI
 import java.time.LocalDate
 
 object AapGatewayImpl : AapGateway {
+    private class GatewaySak(
+        override val referanse: FagsakReferanse,
+        override val rettighetsperiode: Periode
+    ) : Sak
     private val log = LoggerFactory.getLogger(this::class.java)
 
     private val aapApiUrl = requiredConfigForKey("aap.api.intern.url")
@@ -53,7 +57,7 @@ object AapGatewayImpl : AapGateway {
             ),
         )!!
             .map {
-                Sak(
+                GatewaySak(
                     referanse = FagsakReferanse(
                         system = when (it.kilde) {
                             "KELVIN" -> FagsystemNavn.KELVIN

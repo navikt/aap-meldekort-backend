@@ -12,9 +12,9 @@ import io.ktor.server.routing.*
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
-import no.nav.aap.sak.Sak
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,9 +24,14 @@ object FakeAapApi : FakeServer {
         System.setProperty("aap.api.intern.scope", "api://local:aap:api-intern/.default")
     }
 
-    private val saker = ConcurrentHashMap<String, List<Sak>>()
+    private val saker = ConcurrentHashMap<String, List<FakeSak>>()
 
-    fun upsert(ident: Ident, sak: Sak) {
+    class FakeSak(
+        val referanse: FagsakReferanse,
+        val rettighetsperiode: Periode,
+    )
+
+    fun upsert(ident: Ident, sak: FakeSak) {
         saker.compute(ident.asString) { _, oldValue ->
             oldValue.orEmpty()
                 .filter { it.referanse != sak.referanse }

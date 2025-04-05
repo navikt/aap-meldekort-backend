@@ -101,11 +101,12 @@ class AnsvarligSystemIntegrasjonsTest {
                 meldeperioder = listOf(),
                 meldeplikt = listOf(),
                 opplysningsbehov = listOf(),
+                status = null,
             )
         }
         FakeAapApi.upsert(
             fnr,
-            Sak(
+            FakeAapApi.FakeSak(
                 referanse = FagsakReferanse(
                     FagsystemNavn.KELVIN,
                     saksnummer,
@@ -122,7 +123,7 @@ class AnsvarligSystemIntegrasjonsTest {
     ) {
         FakeAapApi.upsert(
             fnr,
-            Sak(
+            FakeAapApi.FakeSak(
                 referanse = FagsakReferanse(
                     FagsystemNavn.ARENA,
                     (sak ?: saksnummerGenerator.next()),

@@ -181,11 +181,12 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                 }.toList().also {println(it)},
                 meldeplikt = listOf(),
                 opplysningsbehov = opplysningsbehov ?: listOf(sakenGjelderFor),
+                status = null,
             )
         }
         FakeAapApi.upsert(
             fnr,
-            Sak(
+            FakeAapApi.FakeSak(
                 referanse = FagsakReferanse(
                     FagsystemNavn.KELVIN,
                     saksnummer,

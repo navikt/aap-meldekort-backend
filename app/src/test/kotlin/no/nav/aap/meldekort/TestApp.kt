@@ -6,6 +6,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
+import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
@@ -27,7 +28,7 @@ fun main() {
     val idag = LocalDate.now()
     FakeAapApi.upsert(
         Ident("1".repeat(11)),
-        Sak(
+        FakeAapApi.FakeSak(
             referanse = FagsakReferanse(KELVIN, Fagsaknummer("1015")),
             rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
         )
@@ -35,7 +36,7 @@ fun main() {
 
     FakeAapApi.upsert(
         Ident("2".repeat(11)),
-        Sak(
+        FakeAapApi.FakeSak(
             referanse = FagsakReferanse(ARENA, Fagsaknummer("")),
             rettighetsperiode = Periode(idag.minusDays(100), idag.plusDays(20)),
         )
@@ -52,15 +53,16 @@ fun main() {
             identer = listOf(Ident("11111111111")),
             meldeperioder =
                 listOf(
-                    "2025-02-10" to "2025-02-25",
-                    "2025-02-24" to "2025-03-11",
-                    "2025-03-10" to "2025-03-25",
-                    "2025-03-24" to "2025-04-08",
+                    "2025-02-10" to "2025-02-23",
+                    "2025-02-24" to "2025-03-09",
+                    "2025-03-10" to "2025-03-23",
+                    "2025-03-24" to "2025-04-06",
                 ).map { (fom, tom) -> Periode(LocalDate.parse(fom), LocalDate.parse(tom)) },
             meldeplikt = listOf(),
             opplysningsbehov = listOf(
                 Periode(LocalDate.of(2025, 2, 13), LocalDate.of(2025, 4, 8)),
-            )
+            ),
+            status = KelvinSakStatus.LØPENDE,
         )
     }
 

@@ -7,6 +7,7 @@ public class MeldeperioderV0(
     public val saksnummer: String,
     public val sakenGjelderFor: Periode,
     public val meldeperioder: List<Periode>,
+    public val sakStatus: SakStatus? = null,
 
     /* Når medlemmet skal melde seg. */
     public val meldeplikt: List<Periode> = emptyList(),
@@ -16,3 +17,9 @@ public class MeldeperioderV0(
      */
     public val opplysningsbehov: List<Periode> = emptyList(),
 )
+
+public enum class SakStatus {
+    UTREDES,
+    LØPENDE,
+    AVSLUTTET,
+}
