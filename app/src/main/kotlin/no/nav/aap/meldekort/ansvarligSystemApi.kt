@@ -10,6 +10,7 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
+import java.time.Clock
 import java.time.LocalDate
 import javax.sql.DataSource
 
@@ -22,7 +23,7 @@ enum class AnsvarligMeldekortløsningDto {
 fun NormalOpenAPIRoute.ansvarligSystemApi(
     dataSource: DataSource,
     repositoryRegistry: RepositoryRegistry,
-    dagensDato: LocalDate? = null,
+    clock: Clock,
 ) {
     route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
@@ -31,7 +32,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                 kelvinSakRepository = repositoryRegistry.provider(connection).provide(),
             )
 
-            val sak = sakerService.finnSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
+            val sak = sakerService.finnSak(innloggetBruker().ident, LocalDate.now(clock))
             when (sak?.referanse?.system) {
                 FagsystemNavn.ARENA -> AnsvarligMeldekortløsningDto.FELLES
                 null, FagsystemNavn.KELVIN -> AnsvarligMeldekortløsningDto.AAP
@@ -43,7 +44,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
     route("ansvarlig-system-felles").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
-            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, dagensDato ?: LocalDate.now())
+            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, LocalDate.now(clock))
             if (kelvinSak == null)
                 AnsvarligMeldekortløsningDto.FELLES
             else

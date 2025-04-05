@@ -12,6 +12,7 @@ import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
 import org.slf4j.LoggerFactory
+import java.time.Clock
 
 class App
 
@@ -29,7 +30,8 @@ fun main() {
         tokenxConfig = TokenxConfig(),
         azureConfig = AzureConfig(),
         dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus),
-        repositoryRegistry = postgresRepositoryRegistry
+        repositoryRegistry = postgresRepositoryRegistry,
+        clock = Clock.systemDefaultZone(),
     )
 }
 

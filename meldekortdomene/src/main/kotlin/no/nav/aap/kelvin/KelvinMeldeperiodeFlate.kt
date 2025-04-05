@@ -8,21 +8,24 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.utfylling.Svar
+import java.time.Clock
 
 class KelvinMeldeperiodeFlate(
     private val sakService: KelvinSakService,
     private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val clock: Clock,
 ) : MeldeperiodeFlate {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
-        sakService = KelvinSakService(repositoryProvider, gatewayProvider),
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock): this(
+        sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         timerArbeidetRepository = repositoryProvider.provide(),
+        clock = clock,
     )
 
     override fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): MeldeperiodeFlate.KommendeMeldeperioder {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now())
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now(clock))
             ?: return MeldeperiodeFlate.KommendeMeldeperioder(
                 antallUbesvarteMeldeperioder = 0,
                 manglerOpplysninger = null,
@@ -39,7 +42,7 @@ class KelvinMeldeperiodeFlate(
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
 
         val ventende = meldeperioderUtenInnsending
-            .takeWhile { it.meldevindu.tom <= LocalDate.now() }
+            .takeWhile { it.meldevindu.tom <= LocalDate.now(clock) }
 
         val manglerOpplysninger = ventende
             .takeIf { it.isNotEmpty() }
@@ -58,7 +61,7 @@ class KelvinMeldeperiodeFlate(
     }
 
     override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<MeldeperiodeFlate.HistoriskMeldeperiode> {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now()) ?: return emptyList()
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now(clock)) ?: return emptyList()
 
         val perioder = sakService.hentMeldeperioder(innloggetBruker.ident, sak.referanse)
 

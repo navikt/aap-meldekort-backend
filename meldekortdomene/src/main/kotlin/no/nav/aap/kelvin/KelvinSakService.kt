@@ -8,16 +8,19 @@ import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.utfylling.TimerArbeidet
+import java.time.Clock
 import java.time.LocalDate
 
 class KelvinSakService(
     private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val clock: Clock,
 )  {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock): this(
         timerArbeidetRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
+        clock = clock,
     )
 
     fun hentMeldeperioder(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
@@ -58,7 +61,7 @@ class KelvinSakService(
         val meldeperioderUtenInnsending =
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
-            .takeWhile { it.meldevindu.tom <= LocalDate.now() }
+            .takeWhile { it.meldevindu.tom <= LocalDate.now(clock) }
 
         return meldeperioderUtenInnsendingSomKanSendesInn.size
     }

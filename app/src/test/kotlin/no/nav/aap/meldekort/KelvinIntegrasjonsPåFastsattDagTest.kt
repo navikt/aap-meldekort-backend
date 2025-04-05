@@ -28,11 +28,12 @@ import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.Clock
+import java.time.ZoneId
 
 /**
  * 2024
@@ -77,9 +78,7 @@ import org.junit.jupiter.api.Test
  *                                                      30
  */
 
-private val idag = 6 januar 2025
 
-@Disabled("Funker ikke i github action :(")
 class KelvinIntegrasjonsPåFastsattDagTest {
     @Test
     fun `ikke vedtak, på dagen`() {
@@ -197,6 +196,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
     }
 
     companion object {
+        private val idag = 6 januar 2025
+
         private lateinit var embeddedServer: EmbeddedServer<*, *>
         lateinit var client: RestClient<InputStream>
 
@@ -216,11 +217,13 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         }
 
 
+        private val fakeServers = FakeServers()
+
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
             FakeTokenX.port = 0
-            FakeServers.start()
+            fakeServers.start()
 
             setupRegistries()
 
@@ -235,6 +238,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     dataSource = dataSource,
                     wait = false,
                     repositoryRegistry = postgresRepositoryRegistry,
+                    clock = Clock.fixed(idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(), ZoneId.of("Europe/Oslo"))
                 )
             }
 
@@ -248,10 +252,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         @AfterAll
         fun afterAll() {
             embeddedServer.stop(0L, 0L)
-            FakeServers.close()
+            fakeServers.close()
         }
-
-
     }
 }
 

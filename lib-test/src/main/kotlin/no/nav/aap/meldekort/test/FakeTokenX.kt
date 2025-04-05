@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 object FakeTokenX : FakeServer {
 
-    override var port = 8081 /* Så kan frontend hente token lokalt */
+    override var port = 0
 
     val log = LoggerFactory.getLogger(this.javaClass)!!
 

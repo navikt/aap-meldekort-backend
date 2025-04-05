@@ -12,16 +12,19 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
+import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
 import no.nav.aap.sak.Sak
+import java.time.Clock
 import java.time.LocalDate
 
 fun main() {
-    FakeServers.start()
+    FakeTokenX.port = 8081
+    FakeServers().start()
 
     setupRegistries()
 
@@ -76,5 +79,6 @@ fun main() {
         azureConfig = AzureConfig(),
         dataSource = dataSource,
         repositoryRegistry = postgresRepositoryRegistry,
+        clock = Clock.systemDefaultZone(),
     )
 }

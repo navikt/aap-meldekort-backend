@@ -1,13 +1,9 @@
 package no.nav.aap.meldekort
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import java.io.InputStream
-import java.net.URI
-import java.time.LocalDate
-import kotlin.test.assertEquals
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.behandlingsflyt.prometheus
@@ -29,13 +25,16 @@ import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.io.InputStream
+import java.net.URI
+import java.time.Clock
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlin.test.assertEquals
 
-@Disabled("Funker ikke i github action :(")
 class AnsvarligSystemIntegrasjonsTest {
     private val idag = LocalDate.now()
 
@@ -136,6 +135,7 @@ class AnsvarligSystemIntegrasjonsTest {
     companion object {
         private lateinit var embeddedServer: EmbeddedServer<*, *>
         lateinit var client: RestClient<InputStream>
+        private val fakeServers = FakeServers()
 
         val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
@@ -156,8 +156,7 @@ class AnsvarligSystemIntegrasjonsTest {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            FakeTokenX.port = 0
-            FakeServers.start()
+            fakeServers.start()
 
             setupRegistries()
 
@@ -172,6 +171,7 @@ class AnsvarligSystemIntegrasjonsTest {
                     dataSource = dataSource,
                     wait = false,
                     repositoryRegistry = postgresRepositoryRegistry,
+                    clock = Clock.systemDefaultZone(),
                 )
             }
 
@@ -185,7 +185,7 @@ class AnsvarligSystemIntegrasjonsTest {
         @AfterAll
         fun afterAll() {
             embeddedServer.stop(0L, 0L)
-            FakeServers.close()
+            fakeServers.close()
         }
     }
 }

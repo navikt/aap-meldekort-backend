@@ -15,6 +15,7 @@ import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -26,10 +27,10 @@ class KelvinUtfyllingFlate(
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
 ) : UtfyllingFlate {
 
-    constructor(connection: DBConnection, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         utfyllingRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
-        sakService = KelvinSakService(repositoryProvider, gatewayProvider),
+        sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(repositoryProvider, gatewayProvider, flytNavn) }
     )
 

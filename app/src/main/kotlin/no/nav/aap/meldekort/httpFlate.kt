@@ -35,6 +35,7 @@ import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import javax.sql.DataSource
 
 class HttpServer
@@ -48,6 +49,7 @@ fun startHttpServer(
     dataSource: DataSource,
     wait: Boolean = true,
     repositoryRegistry: RepositoryRegistry,
+    clock: Clock,
 ): EmbeddedServer<*, *> {
     return embeddedServer(Netty, configure = {
         connectionGroupSize = 8
@@ -71,7 +73,7 @@ fun startHttpServer(
             azureConfig = azureConfig,
         )
 
-        val motor = startMotor(dataSource, repositoryRegistry, prometheus)
+        val motor = startMotor(dataSource, repositoryRegistry, prometheus, clock)
 
         install(StatusPages) {
             exception<Throwable> { call, cause ->
@@ -105,10 +107,10 @@ fun startHttpServer(
             authenticate(TOKENX) {
                 apiRouting {
                     route("api") {
-                        ansvarligSystemApi(dataSource, repositoryRegistry)
+                        ansvarligSystemApi(dataSource, repositoryRegistry, clock)
                         arenaApi()
-                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(), repositoryRegistry)
-                        utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(), repositoryRegistry)
+                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(clock), repositoryRegistry)
+                        utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(clock), repositoryRegistry)
                     }
                 }
             }
@@ -126,7 +128,8 @@ fun startHttpServer(
 private fun Application.startMotor(
     dataSource: DataSource,
     repositoryRegistry: RepositoryRegistry,
-    prometheus: PrometheusMeterRegistry
+    prometheus: PrometheusMeterRegistry,
+    clock: Clock,
 ): Motor {
     val motor = Motor(
         dataSource = dataSource,
@@ -134,7 +137,7 @@ private fun Application.startMotor(
         logInfoProvider = JournalføringJobbUtfører.LogInfoProvider,
         jobber = listOf(
             JournalføringJobbUtfører.jobbKonstruktør(repositoryRegistry),
-            SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry),
+            SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
         ),
         prometheus = prometheus,
     )

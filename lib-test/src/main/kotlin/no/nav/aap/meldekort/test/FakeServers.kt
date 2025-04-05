@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 
-private val logger = LoggerFactory.getLogger(FakesExtension::class.java)
 
 interface FakeServer {
     fun setProperties(port: Int)
@@ -15,7 +14,9 @@ interface FakeServer {
     val port: Int get() = 0
 }
 
-object FakeServers : AutoCloseable {
+class FakeServers : AutoCloseable {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+
     private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
         .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
 
