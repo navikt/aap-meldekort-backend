@@ -42,7 +42,7 @@ class KelvinMeldeperiodeFlate(
             perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
 
         val ventende = meldeperioderUtenInnsending
-            .takeWhile { it.meldevindu.tom <= LocalDate.now(clock) }
+            .takeWhile { it.meldevindu.fom <= LocalDate.now(clock) }
 
         val manglerOpplysninger = ventende
             .takeIf { it.isNotEmpty() }
