@@ -101,7 +101,7 @@ class UtfyllingMetadataDto(
                 fristForInnsending = metadata.fristForInnsending,
                 kanSendesInn = metadata.kanSendesInn,
                 antallUbesvarteMeldeperioder = metadata.antallUbesvarteMeldeperioder,
-                harBrukerVedtakIKelvin = true
+                harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin
             )
         }
 
