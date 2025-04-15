@@ -3,7 +3,6 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -103,7 +102,7 @@ class KelvinUtfyllingFlate(
         )
     }
 
-    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling): UtfyllingFlate.Metadata {
+    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null): UtfyllingFlate.Metadata {
         val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
         val fristForInnsending = utfylling.periode.tom.plusDays(8).atTime(23, 59)
         val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
@@ -118,6 +117,7 @@ class KelvinUtfyllingFlate(
             tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
+            brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
         )
     }
 
@@ -159,9 +159,11 @@ class KelvinUtfyllingFlate(
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
             ?: return null
 
+        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, utfylling.periode.fom)
+        val brukerHarVedtakIKelvin = sak?.status == KelvinSakStatus.LØPENDE
 
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling),
+            metadata = utledMetadata(innloggetBruker, utfylling, brukerHarVedtakIKelvin),
             utfylling = utfylling,
             feil = null,
         )

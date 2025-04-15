@@ -12,6 +12,7 @@ interface UtfyllingFlate {
         val tidligsteInnsendingstidspunkt: LocalDateTime?,
         val fristForInnsending: LocalDateTime?,
         val kanSendesInn: Boolean,
+        val brukerHarVedtakIKelvin:  Boolean? = null
     )
 
     class StartUtfyllingResponse(
