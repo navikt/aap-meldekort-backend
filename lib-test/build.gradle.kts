@@ -37,5 +37,5 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.2")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    implementation("org.testcontainers:postgresql:1.20.6")
+    implementation("org.testcontainers:postgresql:1.21.0")
 }
