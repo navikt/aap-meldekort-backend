@@ -1,12 +1,13 @@
 val ktorVersion = "3.1.2"
 val komponenterVersjon = "1.0.232"
-val tilgangVersjon = "1.0.45"
 val junitVersjon = "5.12.2"
+val jacksonVersjon = "2.18.3"
 
 plugins {
     id("meldekort.conventions")
     id("java-test-fixtures")
 }
+
 
 dependencies {
     implementation(project(":meldekortdomene"))
@@ -29,8 +30,9 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersjon")
+
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersjon")
 
     implementation("ch.qos.logback:logback-classic:1.5.18")
 
