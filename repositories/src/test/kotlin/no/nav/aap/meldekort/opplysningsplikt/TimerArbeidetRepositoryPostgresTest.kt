@@ -31,7 +31,7 @@ class TimerArbeidetRepositoryPostgresTest {
 
     @Test
     fun `skriv og les timer arbeidet`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val t0 = Instant.ofEpochSecond(1739960455)
             val t1 = t0.plusSeconds(1)
 

@@ -28,7 +28,7 @@ class KelvinSakRepositoryPostgresTest {
 
     @Test
     fun `endring og lesing av meldeperioder `() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = KelvinSakRepositoryPostgres(connection)
 
             repo.upsertSak(sak1, periode4, listOf(fnr1), listOf(), listOf(periode3), listOf(periode4), KelvinSakStatus.UTREDES)

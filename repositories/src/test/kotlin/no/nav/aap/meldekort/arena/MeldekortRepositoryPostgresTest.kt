@@ -18,7 +18,7 @@ class MeldekortRepositoryPostgresTest {
 
     @Test
     fun `lagre, oppdatere og hente ut meldekort`() {
-        InitTestDatabase.dataSource.transaction {
+        InitTestDatabase.freshDatabase().transaction {
             val repo = MeldekortRepositoryPostgres(it)
             val ident = nextIdent()
             val kommendeMeldekort = KommendeMeldekort(
@@ -62,7 +62,7 @@ class MeldekortRepositoryPostgresTest {
 
     @Test
     fun `hent batch av meldekort`() {
-        InitTestDatabase.dataSource.transaction {
+        InitTestDatabase.freshDatabase().transaction {
             val repo = MeldekortRepositoryPostgres(it)
             val ident = nextIdent()
             val kommendeMeldekort = KommendeMeldekort(

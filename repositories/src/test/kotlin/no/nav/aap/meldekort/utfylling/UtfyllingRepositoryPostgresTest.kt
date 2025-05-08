@@ -28,7 +28,7 @@ private val ident = Ident("1111")
 class UtfyllingRepositoryPostgresTest {
     @Test
     fun `enkel read write`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val flyt = UtfyllingFlytNavn.AAP_FLYT
@@ -104,7 +104,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett gamle utkast`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(LocalDate.of(2020, 1, 1))
@@ -116,7 +116,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett enda eldre utkast`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(LocalDate.of(2019, 1, 1))
@@ -128,7 +128,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett gamle innsendte`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val utfylling = repo.ny(LocalDate.of(2019, 1, 1)).let {
@@ -146,7 +146,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett nyere`() {
-        InitTestDatabase.dataSource.transaction { connection ->
+        InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(LocalDate.of(2020, 1, 3))

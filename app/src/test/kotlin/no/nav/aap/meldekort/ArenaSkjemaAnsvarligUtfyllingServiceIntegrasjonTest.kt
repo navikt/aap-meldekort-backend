@@ -27,7 +27,7 @@ package no.nav.aap.meldekort
 //
 //    @Test
 //    fun `korrigering dukker opp i liste med historiske meldekort`() {
-//        InitTestDatabase.dataSource.transaction { connection ->
+//        InitTestDatabase.freshDatabase().transaction { connection ->
 //            val arenaClient = FakeArenaGateway()
 //
 //            val arenaSkjemaFlate = ArenaSkjemaFlate.konstruer(connection, arenaGateway = arenaClient)
