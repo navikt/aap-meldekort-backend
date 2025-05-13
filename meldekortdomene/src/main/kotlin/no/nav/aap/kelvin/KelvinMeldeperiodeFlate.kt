@@ -1,6 +1,5 @@
 package no.nav.aap.kelvin
 
-import java.time.LocalDate
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -9,6 +8,7 @@ import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
 import no.nav.aap.utfylling.Svar
 import java.time.Clock
+import java.time.LocalDate
 
 class KelvinMeldeperiodeFlate(
     private val sakService: KelvinSakService,
@@ -17,7 +17,7 @@ class KelvinMeldeperiodeFlate(
     private val clock: Clock,
 ) : MeldeperiodeFlate {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock): this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         timerArbeidetRepository = repositoryProvider.provide(),
@@ -32,14 +32,7 @@ class KelvinMeldeperiodeFlate(
                 nesteMeldeperiode = null,
             )
 
-        val senesteOpplysningsdato = timerArbeidetRepository
-            .hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
-            ?: LocalDate.MIN
-
-        val perioder = sakService.hentMeldeperioder(innloggetBruker.ident, sak.referanse)
-
-        val meldeperioderUtenInnsending =
-            perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
+        val meldeperioderUtenInnsending = sakService.meldeperioderUtenInnsending(innloggetBruker.ident, sak.referanse)
 
         val ventende = meldeperioderUtenInnsending
             .takeWhile { it.meldevindu.fom <= LocalDate.now(clock) }

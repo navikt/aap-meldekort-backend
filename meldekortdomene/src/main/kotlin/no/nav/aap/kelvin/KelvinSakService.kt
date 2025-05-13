@@ -15,9 +15,9 @@ class KelvinSakService(
     private val kelvinSakRepository: KelvinSakRepository,
     private val timerArbeidetRepository: TimerArbeidetRepository,
     private val clock: Clock,
-)  {
+) {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock): this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         timerArbeidetRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
         clock = clock,
@@ -52,14 +52,7 @@ class KelvinSakService(
     }
 
     fun antallUbesvarteMeldeperioder(ident: Ident, sak: FagsakReferanse): Int {
-        val senesteOpplysningsdato =
-            timerArbeidetRepository.hentSenesteOpplysningsdato(ident, sak)
-                ?: LocalDate.MIN
-
-        val perioder = hentMeldeperioder(ident, sak)
-
-        val meldeperioderUtenInnsending =
-            perioder.dropWhile { it.meldeperioden.tom <= senesteOpplysningsdato }
+        val meldeperioderUtenInnsending = meldeperioderUtenInnsending(ident, sak)
         val meldeperioderUtenInnsendingSomKanSendesInn = meldeperioderUtenInnsending
             .takeWhile { it.meldevindu.tom <= LocalDate.now(clock) }
 
@@ -88,4 +81,31 @@ class KelvinSakService(
         }
         return timerArbeidet.toList()
     }
+
+    fun meldeperioderUtenInnsending(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
+        val perioder = hentMeldeperioder(ident, sak)
+        val timerRegistrert = timerRegistrertForMeldeperiodene(perioder, ident, sak)
+        return perioder.filter { periode ->
+            for (meldeperiodeDag in periode.meldeperioden) {
+                val erRegistrertTimerForDag = timerRegistrert.any { it.dato == meldeperiodeDag }
+                if (!erRegistrertTimerForDag) {
+                    return@filter true
+                }
+            }
+            false
+        }
+    }
+
+    private fun timerRegistrertForMeldeperiodene(
+        perioder: List<Meldeperiode>,
+        ident: Ident,
+        sak: FagsakReferanse
+    ): List<no.nav.aap.opplysningsplikt.TimerArbeidet> {
+        val tidligsteFom = perioder.minByOrNull { it.meldeperioden.fom }?.meldeperioden?.fom ?: LocalDate.MIN
+        val senesteTom = perioder.maxByOrNull { it.meldeperioden.tom }?.meldeperioden?.tom ?: LocalDate.MAX
+        val timerPeriode = Periode(fom = tidligsteFom, tom = senesteTom)
+
+        return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)
+    }
+
 }
