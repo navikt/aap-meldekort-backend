@@ -72,18 +72,7 @@ class KelvinMeldeperiodeFlateTest {
     @Test
     fun `skal hente ut aktuelle meldekort når alt unntatt siste meldekortperiode er fylt ut`() {
         val timerArbeidetPerioder = meldeperioder.filter { it.tom.plusWeeks(2) <= LocalDate.now() }
-        val utfyllingReferanse = UtfyllingReferanse(UUID.randomUUID())
-        val timerArbeidet = timerArbeidetPerioder.flatMap { periode ->
-            periode.iterator().asSequence().map { dag ->
-                TimerArbeidet(
-                    registreringstidspunkt = clock.instant(),
-                    utfylling = utfyllingReferanse,
-                    fagsak = sak.referanse,
-                    dato = dag,
-                    timerArbeidet = 0.0
-                )
-            }
-        }
+        val timerArbeidet = utledArbeidedeTimer(timerArbeidetPerioder)
         every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
 
         val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
@@ -98,18 +87,7 @@ class KelvinMeldeperiodeFlateTest {
     @Test
     fun `skal hente ut aktuelle meldekort hvor eldste ikke er fylt ut, men resten frem til i dag er utfylt (utvidelse av rettighetsperiode)`() {
         val timerArbeidetPerioder = meldeperioder.filter { it.fom >= sak.rettighetsperiode.fom.plusWeeks(2) && it.tom <= LocalDate.now() }
-        val utfyllingReferanse = UtfyllingReferanse(UUID.randomUUID())
-        val timerArbeidet = timerArbeidetPerioder.flatMap { periode ->
-            periode.iterator().asSequence().map { dag ->
-                TimerArbeidet(
-                    registreringstidspunkt = clock.instant(),
-                    utfylling = utfyllingReferanse,
-                    fagsak = sak.referanse,
-                    dato = dag,
-                    timerArbeidet = 0.0
-                )
-            }
-        }
+        val timerArbeidet = utledArbeidedeTimer(timerArbeidetPerioder)
         every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
 
         val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
@@ -122,7 +100,21 @@ class KelvinMeldeperiodeFlateTest {
     @Test
     fun `skal hente ut aktuelle meldekort hvor eldste er delvis fylt ut, mens resten frem til i dag er utfylt (utvidelse av rettighetsperiode)`() {
         val timerArbeidetPerioder = meldeperioder.filter { it.fom >= sak.rettighetsperiode.fom.plusDays(6) && it.tom <= LocalDate.now() }
+        val timerArbeidet = utledArbeidedeTimer(timerArbeidetPerioder)
+        every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
+
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
+
+        assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
+        assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
+        assertThat(aktuellePerioder.manglerOpplysninger).isEqualTo(førstePeriode)
+    }
+
+    private fun utledArbeidedeTimer(
+        timerArbeidetPerioder: List<Periode>,
+    ): List<TimerArbeidet> {
         val utfyllingReferanse = UtfyllingReferanse(UUID.randomUUID())
+
         val timerArbeidet = timerArbeidetPerioder.flatMap { periode ->
             periode.iterator().asSequence().map { dag ->
                 TimerArbeidet(
@@ -134,12 +126,6 @@ class KelvinMeldeperiodeFlateTest {
                 )
             }
         }
-        every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
-
-        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
-
-        assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
-        assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
-        assertThat(aktuellePerioder.manglerOpplysninger).isEqualTo(førstePeriode)
+        return timerArbeidet
     }
 }
