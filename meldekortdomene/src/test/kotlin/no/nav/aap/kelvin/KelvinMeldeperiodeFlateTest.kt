@@ -113,7 +113,6 @@ class KelvinMeldeperiodeFlateTest {
         every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
 
         val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
-        val førstePeriode = Periode(LocalDate.now().minusWeeks(8), LocalDate.now().minusWeeks(6).minusDays(1))
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
         assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
@@ -138,7 +137,6 @@ class KelvinMeldeperiodeFlateTest {
         every { timerArbeidetRepository.hentTimerArbeidet(any(), any(), any()) } returns timerArbeidet
 
         val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
-        val førstePeriode = Periode(LocalDate.now().minusWeeks(8), LocalDate.now().minusWeeks(6).minusDays(1))
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
         assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
