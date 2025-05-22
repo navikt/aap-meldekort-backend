@@ -12,6 +12,10 @@ class KelvinSak(
     override val rettighetsperiode: Periode,
 ): Sak {
     override val referanse = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer)
+
+    fun erUnderBehandling():Boolean {return status == KelvinSakStatus.UTREDES}
+    fun erLøpende():Boolean {return status == KelvinSakStatus.LØPENDE}
+
 }
 
 enum class KelvinSakStatus {
