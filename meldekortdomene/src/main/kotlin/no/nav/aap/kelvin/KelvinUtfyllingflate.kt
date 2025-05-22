@@ -102,7 +102,7 @@ class KelvinUtfyllingFlate(
         )
     }
 
-    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null): UtfyllingFlate.Metadata {
+    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null, brukerHarSakUnderBehandling: Boolean? = null): UtfyllingFlate.Metadata {
         val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
         val fristForInnsending = utfylling.periode.tom.plusDays(8).atTime(23, 59)
         val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
@@ -118,6 +118,7 @@ class KelvinUtfyllingFlate(
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
             brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
+            brukerHarSakUnderBehandling = brukerHarSakUnderBehandling,
         )
     }
 
@@ -160,10 +161,11 @@ class KelvinUtfyllingFlate(
             ?: return null
 
         val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, utfylling.periode.fom)
-        val brukerHarVedtakIKelvin = sak?.status == KelvinSakStatus.LØPENDE
+        val brukerHarVedtakIKelvin = sak?.erLøpende()
+        val brukerHarSakUnderBehandling = sak?.erUnderBehandling()
 
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling, brukerHarVedtakIKelvin),
+            metadata = utledMetadata(innloggetBruker, utfylling, brukerHarVedtakIKelvin, brukerHarSakUnderBehandling),
             utfylling = utfylling,
             feil = null,
         )
