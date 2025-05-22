@@ -74,6 +74,7 @@ class UtfyllingTilstandDto(
 
 class UtfyllingMetadataDto(
     val harBrukerVedtakIKelvin: Boolean? = null,
+    val harBrukerSakUnderBehandling: Boolean? = null,
     val referanse: UUID,
     val periode: PeriodeDto,
     val antallUbesvarteMeldeperioder: Int,
@@ -101,7 +102,8 @@ class UtfyllingMetadataDto(
                 fristForInnsending = metadata.fristForInnsending,
                 kanSendesInn = metadata.kanSendesInn,
                 antallUbesvarteMeldeperioder = metadata.antallUbesvarteMeldeperioder,
-                harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin
+                harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin,
+                harBrukerSakUnderBehandling = metadata.brukerHarSakUnderBehandling,
             )
         }
 
