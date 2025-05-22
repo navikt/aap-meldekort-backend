@@ -13,8 +13,8 @@ class KelvinSak(
 ): Sak {
     override val referanse = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer)
 
-    fun erUnderBehandling():Boolean {return status == KelvinSakStatus.UTREDES}
-    fun erLøpende():Boolean {return status == KelvinSakStatus.LØPENDE}
+    fun erUnderBehandling(): Boolean {return status == KelvinSakStatus.UTREDES}
+    fun erLøpende(): Boolean {return status == KelvinSakStatus.LØPENDE}
 
 }
 
