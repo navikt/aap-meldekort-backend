@@ -5,7 +5,6 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import no.nav.aap.kelvin.KelvinSakRepository
-import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import java.time.Clock
@@ -21,7 +20,7 @@ fun NormalOpenAPIRoute.metadataApi(
         val response = dataSource.transaction { connection ->
             val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
             val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, LocalDate.now(clock))
-            MetadataDto(brukerHarVedtakIKelvin = kelvinSak?.status?.equals(KelvinSakStatus.LØPENDE) ?: false, brukerHarSakUnderBehandling = kelvinSak?.status?.equals(KelvinSakStatus.UTREDES) ?: false)
+            MetadataDto(brukerHarVedtakIKelvin = kelvinSak?.erLøpende(), brukerHarSakUnderBehandling = kelvinSak?.erUnderBehandling())
         }
         respond(response)
     }
