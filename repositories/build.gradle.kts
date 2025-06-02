@@ -20,7 +20,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
-    implementation("org.flywaydb:flyway-database-postgresql:11.8.2")
+    implementation("org.flywaydb:flyway-database-postgresql:11.9.0")
     runtimeOnly("org.postgresql:postgresql:42.7.6")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
