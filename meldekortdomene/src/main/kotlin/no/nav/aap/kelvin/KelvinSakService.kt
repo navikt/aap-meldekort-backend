@@ -10,6 +10,7 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.utfylling.TimerArbeidet
 import java.time.Clock
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class KelvinSakService(
     private val kelvinSakRepository: KelvinSakRepository,
@@ -108,4 +109,45 @@ class KelvinSakService(
         return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)
     }
 
+
+    // TODO vurder navn
+    fun finnTidspunktForOpplysningsbehov(ident: Ident, sak:FagsakReferanse):LocalDateTime? {
+        val senesteOpplysningsdato = timerArbeidetRepository.hentSenesteOpplysningsdato(ident, sak)?: LocalDate.MIN
+        val akkuratNå = LocalDate.now(clock)
+        val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(ident, sak.nummer)
+
+        meldepliktperioder.forEach {   // gå igjennom alle perioder
+            // hva hvis senesteOpplysningsdato er i samme periode? Da er vel meldeplikten oppfylt og vi skal ikke vise en frist?
+            if (akkuratNå in it.fom..it.tom && senesteOpplysningsdato !in it.fom..it.tom) { // hvis dd er i en periode med meldeplikt, og senesteOpplysningsdato ikke er i samme periode
+                return it.tom.atTime(23, 59)
+            }
+        }
+        return null
+    }
+
+    private fun dagensDatoFinnesIEnMeldepliktPeriode(dagensDato: LocalDate, meldepliktPerioder: List<Periode>): Boolean {
+        meldepliktPerioder.forEach {
+            if (dagensDato in it.fom..it.tom)
+                return true
+        }
+        return false
+    }
+
+    fun fristErOversittet(ident: Ident, sak:FagsakReferanse):Boolean {
+        val senesteOpplysningsdato = timerArbeidetRepository.hentSenesteOpplysningsdato(ident, sak)
+        val akkuratNå = LocalDate.now(clock)
+        val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(ident, sak.nummer)
+        val meldeperioder = kelvinSakRepository.hentMeldeperioder(ident, sak.nummer)
+
+        val ddErIMeldeperiode = dagensDatoFinnesIEnMeldepliktPeriode(akkuratNå, meldepliktperioder)
+        if (!ddErIMeldeperiode) {
+            // må finne meldeperioden som gjelder for i dag og sjekke om den tilhører en tidligere periode
+            val meldeperioden = meldeperioder.find { akkuratNå in it.fom..it.tom }
+            if (meldeperioden != null) {
+                val tidligereOverlappendeMeldepliktPeriode = meldepliktperioder.find { it.overlapper(meldeperioden) }
+                return senesteOpplysningsdato != null && senesteOpplysningsdato <= tidligereOverlappendeMeldepliktPeriode?.fom
+            }
+        }
+        return false
+    }
 }

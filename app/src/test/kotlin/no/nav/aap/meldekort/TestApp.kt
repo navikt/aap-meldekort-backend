@@ -65,7 +65,8 @@ fun main() {
             opplysningsbehov = listOf(
                 Periode(LocalDate.of(2025, 2, 13), LocalDate.of(2025, 4, 8)),
             ),
-            status = KelvinSakStatus.LØPENDE,
+//            status = KelvinSakStatus.LØPENDE,
+            status = KelvinSakStatus.UTREDES
         )
     }
 

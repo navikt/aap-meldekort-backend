@@ -105,6 +105,7 @@ class KelvinUtfyllingFlate(
     private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null, brukerHarSakUnderBehandling: Boolean? = null): UtfyllingFlate.Metadata {
         val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
         val fristForInnsending = utfylling.periode.tom.plusDays(8).atTime(23, 59)
+//        val fristForInnsending = sakService.finnTidspunktForOpplysningsbehov(innloggetBruker.ident, utfylling.fagsak)
         val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
 
         return UtfyllingFlate.Metadata(
