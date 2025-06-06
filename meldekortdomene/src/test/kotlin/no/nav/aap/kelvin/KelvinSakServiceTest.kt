@@ -10,6 +10,7 @@ import no.nav.aap.sak.Fagsaknummer
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.BeforeEach
+import org.assertj.core.api.Assertions.assertThat
 import java.time.*
 
 class KelvinSakServiceTest {
@@ -23,7 +24,7 @@ class KelvinSakServiceTest {
 
     val sak = KelvinSak(
         saksnummer = Fagsaknummer("1234"),
-        status = KelvinSakStatus.UTREDES,
+        status = KelvinSakStatus.LØPENDE,
         rettighetsperiode = totalPeriode,
     )
 
@@ -44,7 +45,8 @@ class KelvinSakServiceTest {
     fun setUp() {
         every { kelvinSakRepository.hentMeldeperioder(any(), any()) } returns meldeperioder
         every { kelvinSakRepository.hentMeldeplikt(any(), any()) } returns fastsattePerioder
-        every { timerArbeidetRepository.hentSenesteOpplysningsdato(any(), any())} returns LocalDate.MIN
+        every { timerArbeidetRepository.hentSenesteOpplysningsdato(any(), any()) } returns LocalDate.MIN
+        every { kelvinSakRepository.hentSak(any(), any()) } returns sak
     }
 
 //    @Test
@@ -94,23 +96,81 @@ class KelvinSakServiceTest {
 //    }
 
     @Test
-    fun `har fått innvilget aap tilbake i tid, ser på meldekort fra første periode, skal ikke ha frist for meldeplikt på dette kortet`() {
-        val clock = Clock.fixed(Instant.from(LocalDateTime.of(2025, 4, 1, 12, 3, 0 ).toInstant(ZoneOffset.UTC)), ZoneId.of("UTC"))
+    fun `innbygger har søkt om AAP men ikke fått vedtak enda, har ingen melde- eller opplysningsplikt`() {
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2025, 4, 1, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
 
         // gul
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
-        val sakService = KelvinSakService(kelvinSakRepository = kelvinSakRepository, timerArbeidetRepository = timerArbeidetRepository, clock = clock)
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom.plusWeeks(4), opplysningsperiode.tom).slidingWindow(
+        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.tom
+        ).slidingWindow(
             size = 8,
             step = 14,
             partialWindows = true
         )
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom, opplysningsperiode.tom).slidingWindow(
-            size =14,
+        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom,
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 14,
+            step = 14,
+            partialWindows = true
+        )
+
+        every { kelvinSakRepository.hentSak(any(), any()) } returns KelvinSak(
+            saksnummer = Fagsaknummer("1234"),
+            status = KelvinSakStatus.UTREDES,
+            rettighetsperiode = totalPeriode,
+        )
+
+        val resultat = sakService.finnMeldepliktFrist(ident = innloggetBruker.ident, sak = sak.referanse)
+        assertThat(resultat).isNull()
+    }
+
+    @Test
+    fun `har fått innvilget aap tilbake i tid, ser på meldekort fra første periode, skal ikke ha frist for meldeplikt på dette kortet`() {
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2025, 4, 1, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
+
+        // gul
+        val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
+
+        // grønn
+        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 8,
+            step = 14,
+            partialWindows = true
+        )
+
+        // rød
+        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom,
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 14,
             step = 14,
             partialWindows = true
         )
@@ -127,78 +187,117 @@ class KelvinSakServiceTest {
 
     @Test
     fun `står i slutten av en meldeperiode, og har oppfylt tidligere meldeplikt, skal da få frist på slutten av meldepliktperioden`() {
-        val clock = Clock.fixed(Instant.from(LocalDateTime.of(2025, 3, 30, 12, 3, 0 ).toInstant(ZoneOffset.UTC)), ZoneId.of("UTC"))
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2025, 3, 30, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
 
         // gul
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
-        val sakService = KelvinSakService(kelvinSakRepository = kelvinSakRepository, timerArbeidetRepository = timerArbeidetRepository, clock = clock)
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom.plusWeeks(4), opplysningsperiode.tom).slidingWindow(
+        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.tom
+        ).slidingWindow(
             size = 8,
             step = 14,
             partialWindows = true
         )
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom, opplysningsperiode.tom).slidingWindow(
-            size =14,
+        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom,
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 14,
             step = 14,
             partialWindows = true
         )
 
         // står i slutten av en meldeperiode, tidligere meldeplikt er oppfylt. Skal få frist på slutten av meldeplikt-perioden (7.4.2025)
-        println("NÅ:\t\t\t\t" + LocalDate.now(clock))
-        println("MELDEPLIKT:\t\t" + kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer))
-        println("MELDEPERIODE:\t" + kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer))
+        val resultat = sakService.finnMeldepliktFrist(innloggetBruker.ident, sak.referanse)
+        assertThat(resultat).isNotNull()
+        assertThat(resultat).isEqualTo(LocalDate.of(2025, 4, 7))
     }
 
     @Test
     fun `meldeperioden er passert, men er innenfor meldepliktperioden, skal få frist i slutten av meldepliktperioden`() {
-        val clock = Clock.fixed(Instant.from(LocalDateTime.of(2025, 4, 2, 12, 3, 0 ).toInstant(ZoneOffset.UTC)), ZoneId.of("UTC"))
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2025, 4, 2, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
 
         // gul
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
-        val sakService = KelvinSakService(kelvinSakRepository = kelvinSakRepository, timerArbeidetRepository = timerArbeidetRepository, clock = clock)
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom.plusWeeks(4), opplysningsperiode.tom).slidingWindow(
+        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.tom
+        ).slidingWindow(
             size = 8,
             step = 14,
             partialWindows = true
         )
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom, opplysningsperiode.tom).slidingWindow(
-            size =14,
+        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom,
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 14,
             step = 14,
             partialWindows = true
         )
 
         // meldeperioden er passert, men er fortsatt innenfor meldepliktperioden. Skal få frist i slutten av meldeplikt-perioden
-        println("NÅ:\t\t\t\t" + LocalDate.now(clock))
-        println("MELDEPLIKT:\t\t" + kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer))
-        println("MELDEPERIODE:\t" + kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer))
+        val resultat = sakService.finnMeldepliktFrist(innloggetBruker.ident, sak.referanse)
+        assertThat(resultat).isNotNull()
+        assertThat(resultat).isEqualTo(LocalDate.of(2025, 4, 7))
     }
 
     @Test
     fun `meldepliktperioden er passert, frist for meldeplikt skal være i dag`() {
-        val clock = Clock.fixed(Instant.from(LocalDateTime.of(2025, 4, 8, 12, 3, 0 ).toInstant(ZoneOffset.UTC)), ZoneId.of("UTC"))
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2025, 4, 8, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
 
         // gul
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
-        val sakService = KelvinSakService(kelvinSakRepository = kelvinSakRepository, timerArbeidetRepository = timerArbeidetRepository, clock = clock)
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom.plusWeeks(4), opplysningsperiode.tom).slidingWindow(
+        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.tom
+        ).slidingWindow(
             size = 8,
             step = 14,
             partialWindows = true
         )
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(opplysningsperiode.fom, opplysningsperiode.tom).slidingWindow(
-            size =14,
+        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+            opplysningsperiode.fom,
+            opplysningsperiode.tom
+        ).slidingWindow(
+            size = 14,
             step = 14,
             partialWindows = true
         )

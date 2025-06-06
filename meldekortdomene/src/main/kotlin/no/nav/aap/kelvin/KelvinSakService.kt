@@ -125,6 +125,25 @@ class KelvinSakService(
         return null
     }
 
+    fun finnMeldepliktFrist(ident:Ident, sak: FagsakReferanse):LocalDate? {
+        val saken = kelvinSakRepository.hentSak(ident, LocalDate.now(clock)) ?: return null
+        if (!saken.erLøpende()) {
+            return null
+        }
+
+        val senesteOpplysningsdato = timerArbeidetRepository.hentSenesteOpplysningsdato(ident, sak)?: LocalDate.MIN
+        val akkuratNå = LocalDate.now(clock)
+        val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(ident, sak.nummer)
+
+        meldepliktperioder.forEach {   // gå igjennom alle perioder
+            // hva hvis senesteOpplysningsdato er i samme periode? Da er vel meldeplikten oppfylt og vi skal ikke vise en frist?
+            if (akkuratNå in it.fom..it.tom && senesteOpplysningsdato !in it.fom..it.tom) { // hvis dd er i en periode med meldeplikt, og senesteOpplysningsdato ikke er i samme periode
+                return it.tom
+            }
+        }
+        return null
+    }
+
     private fun dagensDatoFinnesIEnMeldepliktPeriode(dagensDato: LocalDate, meldepliktPerioder: List<Periode>): Boolean {
         meldepliktPerioder.forEach {
             if (dagensDato in it.fom..it.tom)
@@ -150,4 +169,5 @@ class KelvinSakService(
         }
         return false
     }
+
 }
