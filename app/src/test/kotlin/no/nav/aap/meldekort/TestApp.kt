@@ -18,7 +18,6 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
-import no.nav.aap.sak.Sak
 import java.time.Clock
 import java.time.LocalDate
 
@@ -65,8 +64,7 @@ fun main() {
             opplysningsbehov = listOf(
                 Periode(LocalDate.of(2025, 2, 13), LocalDate.of(2025, 4, 8)),
             ),
-//            status = KelvinSakStatus.LØPENDE,
-            status = KelvinSakStatus.UTREDES
+            status = KelvinSakStatus.LØPENDE,
         )
     }
 
