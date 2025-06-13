@@ -87,11 +87,11 @@ class UtfyllingMetadataDto(
 
     /** Hvis `null` skal det tolkes som at det ikke er en bestemt frist som i seg selv
      * påvirker ytelsen.
-     * Foreløpig er den alltid satt, siden logikken ikke er implementert skikkelig
-     * enda.
+     * Settes til `null` når perioden man ser på ikke har vært en del av en periode med meldeplikt
      */
     val fristForInnsending: LocalDateTime?,
     val kanSendesInn: Boolean,
+    val visFrist: Boolean
 ) {
     companion object {
         fun fraDomene(utfylling: Utfylling, metadata: UtfyllingFlate.Metadata): UtfyllingMetadataDto {
@@ -104,6 +104,7 @@ class UtfyllingMetadataDto(
                 antallUbesvarteMeldeperioder = metadata.antallUbesvarteMeldeperioder,
                 harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin,
                 harBrukerSakUnderBehandling = metadata.brukerHarSakUnderBehandling,
+                visFrist = metadata.visFrist
             )
         }
 

@@ -14,6 +14,7 @@ interface UtfyllingFlate {
         val kanSendesInn: Boolean,
         val brukerHarVedtakIKelvin:  Boolean? = null,
         val brukerHarSakUnderBehandling: Boolean? = null,
+        val visFrist: Boolean = true,
     )
 
     class StartUtfyllingResponse(
