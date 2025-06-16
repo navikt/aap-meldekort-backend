@@ -109,7 +109,7 @@ class KelvinSakService(
         return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)
     }
 
-    fun finnMeldepliktfristForPeriode(ident:Ident, sak: FagsakReferanse, periode:Periode):LocalDateTime? {
+    fun finnMeldepliktfristForPeriode(ident: Ident, sak: FagsakReferanse, periode: Periode): LocalDateTime? {
         val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(ident, sak.nummer)
         if (meldepliktperioder.any{ it.overlapper(Periode(periode.tom.plusDays(1), periode.tom.plusDays(8))) }) {
             return periode.tom.plusDays(8).atTime(23, 59)
