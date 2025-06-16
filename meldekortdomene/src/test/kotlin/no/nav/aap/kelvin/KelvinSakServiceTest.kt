@@ -49,24 +49,10 @@ class KelvinSakServiceTest {
         )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
-            opplysningsperiode.fom.plusWeeks(4),
-            opplysningsperiode.tom
-        ).slidingWindow(
-            size = 8,
-            step = 14,
-            partialWindows = true
-        )
+        gittMeldeplikt(etterUker = 4, opplysningsperiode)
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
-            opplysningsperiode.fom,
-            opplysningsperiode.tom
-        ).slidingWindow(
-            size = 14,
-            step = 14,
-            partialWindows = true
-        )
+        gittMeldeperioder(opplysningsperiode)
 
         val meldeperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 16))
         assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isNull()
@@ -88,24 +74,10 @@ class KelvinSakServiceTest {
         )
 
         // grønn
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
-            opplysningsperiode.fom.plusWeeks(4),
-            opplysningsperiode.tom
-        ).slidingWindow(
-            size = 8,
-            step = 14,
-            partialWindows = true
-        )
+        gittMeldeplikt(etterUker = 4, opplysningsperiode)
 
         // rød
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
-            opplysningsperiode.fom,
-            opplysningsperiode.tom
-        ).slidingWindow(
-            size = 14,
-            step = 14,
-            partialWindows = true
-        )
+        gittMeldeperioder(opplysningsperiode)
 
         val meldeperiode = Periode(LocalDate.of(2025, 3, 17), LocalDate.of(2025, 3, 30))
         assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 4, 7).atTime(23, 59))
@@ -118,25 +90,37 @@ class KelvinSakServiceTest {
             ZoneId.of("UTC")
         )
 
-        // gul
-        val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
         val sakService = KelvinSakService(
             kelvinSakRepository = kelvinSakRepository,
             timerArbeidetRepository = timerArbeidetRepository,
             clock = clock
         )
 
+        // gul
+        val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
+
         // grønn
+        gittMeldeplikt(etterUker = 4, opplysningsperiode)
+
+        // rød
+        gittMeldeperioder(opplysningsperiode)
+
+        val meldeperiode = Periode(LocalDate.of(2025, 4, 14), LocalDate.of(2025, 4, 27))
+        assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 5, 5).atTime(23, 59))
+    }
+
+    private fun gittMeldeplikt(etterUker: Long, opplysningsperiode: Periode) {
         every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
-            opplysningsperiode.fom.plusWeeks(4),
+            opplysningsperiode.fom.plusWeeks(etterUker),
             opplysningsperiode.tom
         ).slidingWindow(
             size = 8,
             step = 14,
             partialWindows = true
         )
+    }
 
-        // rød
+    private fun gittMeldeperioder(opplysningsperiode: Periode) {
         every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
             opplysningsperiode.fom,
             opplysningsperiode.tom
@@ -145,8 +129,5 @@ class KelvinSakServiceTest {
             step = 14,
             partialWindows = true
         )
-
-        val meldeperiode = Periode(LocalDate.of(2025, 4, 14), LocalDate.of(2025, 4, 27))
-        assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 5, 5).atTime(23, 59))
     }
 }
