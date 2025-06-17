@@ -18,7 +18,6 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
-import no.nav.aap.sak.Sak
 import java.time.Clock
 import java.time.LocalDate
 
