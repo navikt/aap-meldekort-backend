@@ -35,7 +35,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
                     opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
-                    meldeplikt = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                    meldeplikt = body.meldeplikt.map { Periode(it.fom, it.tom) },
                     status = when (body.sakStatus) {
                         SakStatus.UTREDES -> KelvinSakStatus.UTREDES
                         SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
