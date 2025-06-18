@@ -69,7 +69,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
-    api("no.nav:ktor-openapi-generator:1.0.112")
+    api("no.nav:ktor-openapi-generator:1.0.113")
 
     testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
