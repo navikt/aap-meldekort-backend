@@ -11,11 +11,13 @@ import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
+import no.nav.aap.varsel.VarselService
 import java.util.*
 import javax.sql.DataSource
 
@@ -28,9 +30,11 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
         auditLogConfig = null,
     ) { _, body ->
         dataSource.transaction { connection ->
-            repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
+            val repositoryProvider = repositoryRegistry.provider(connection)
+            val fagsaknummer = Fagsaknummer(body.saksnummer)
+            repositoryProvider.provide<KelvinSakRepository>()
                 .upsertSak(
-                    saksnummer = Fagsaknummer(body.saksnummer),
+                    saksnummer = fagsaknummer,
                     identer = body.identer.map { Ident(it) },
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
@@ -43,6 +47,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
                         null -> null
                     }
                 )
+            VarselService(repositoryProvider, GatewayProvider).planleggFremtidigVarsel(fagsaknummer)
         }
         respondWithStatus(HttpStatusCode.OK)
     }
