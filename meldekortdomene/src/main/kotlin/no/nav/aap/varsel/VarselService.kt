@@ -33,10 +33,12 @@ class VarselService(
                 - Neste meldepliktperiode: Oppgave - Må sende meldekort for meldeplikt
          */
         val sendingstidspunkt = Instant.now() // TODO
-        val varselType = VarselType.OPPGAVE // TODO
+        val typeVarsel = TypeVarsel.OPPGAVE // TODO
+        val typeVarselTekst = TypeVarselTekst.MELDEPLIKTPERIODE // TODO
         val varsel = Varsel(
             varselId = VarselId(UUID.randomUUID()),
-            varselType = varselType,
+            typeVarsel = typeVarsel,
+            typeVarselTekst = typeVarselTekst,
             fagsaknummer = fagsaknummer,
             sendingstidspunkt = sendingstidspunkt,
             status = VarselStatus.PLANLAGT,
@@ -54,14 +56,22 @@ class VarselService(
     private fun sendVarselOgPlanleggNeste(varsel: Varsel) {
         // TODO inaktiver sendte (aktive) varsler?:
         varselRepository.hentVarsler(varsel.fagsaknummer)
-            .filter { it.status == VarselStatus.SENDT }
+            .filter { it.status == VarselStatus.SENDT && it.typeVarsel == TypeVarsel.OPPGAVE }
             .forEach { varsel ->
                 varselRepository.upsert(varsel.copy(status = VarselStatus.INAKTIVERT))
                 varselGateway.inaktiverVarsel(varsel)
             }
 
         varselRepository.upsert(varsel.copy(status = VarselStatus.SENDT))
-        varselGateway.sendVarsel(varsel)
+
+        val brukerId =
+            TODO() // slå opp vilkårlig ident for sak fra kelvin_person_ident og hent gjeldende ident fra PDL?
+        val varselTekster = when (varsel.typeVarselTekst) {
+            TypeVarselTekst.VALGFRITT_OPPLYSNINGSBEHOV -> TEKSTER_BESKJED_FREMTIDIG_OPPLYSNINGSBEHOV
+            TypeVarselTekst.OPPLYSNINGSBEHOV -> TEKSTER_OPPGAVE_OPPLYSNINGSBEHOV
+            TypeVarselTekst.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
+        }
+        varselGateway.sendVarsel(brukerId = brukerId, varsel = varsel, varselTekster = varselTekster)
 
         planleggFremtidigVarsel(varsel.fagsaknummer)
     }

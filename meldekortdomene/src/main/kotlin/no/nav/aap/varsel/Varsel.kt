@@ -6,7 +6,8 @@ import java.util.UUID
 
 data class Varsel(
     val varselId: VarselId,
-    val varselType: VarselType,
+    val typeVarsel: TypeVarsel,
+    val typeVarselTekst: TypeVarselTekst,
     val fagsaknummer: Fagsaknummer,
     val sendingstidspunkt: Instant,
     val status: VarselStatus
@@ -15,8 +16,12 @@ data class Varsel(
 @JvmInline
 value class VarselId(val id: UUID)
 
-enum class VarselType {
-    VARSEL, OPPGAVE
+enum class TypeVarsel {
+    BESKJED, OPPGAVE
+}
+
+enum class TypeVarselTekst {
+    VALGFRITT_OPPLYSNINGSBEHOV, OPPLYSNINGSBEHOV, MELDEPLIKTPERIODE
 }
 
 enum class VarselStatus {
