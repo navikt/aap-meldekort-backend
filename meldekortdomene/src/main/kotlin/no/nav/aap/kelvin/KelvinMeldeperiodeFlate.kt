@@ -56,7 +56,7 @@ class KelvinMeldeperiodeFlate(
     override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<MeldeperiodeFlate.HistoriskMeldeperiode> {
         val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now(clock)) ?: return emptyList()
 
-        val perioder = sakService.hentMeldeperioder(innloggetBruker.ident, sak.referanse)
+        val perioder = sakService.hentMeldeperioder(sak.referanse)
 
         val senesteOpplysningsdato =
             timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)

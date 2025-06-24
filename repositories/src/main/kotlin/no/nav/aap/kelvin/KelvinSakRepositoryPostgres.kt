@@ -165,20 +165,19 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
-    override fun hentMeldeperioder(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
+    override fun hentMeldeperioder(saksnummer: Fagsaknummer): List<Periode> {
         return connection.queryList(
             """
             select kelvin_meldeperiode.periode from kelvin_meldeperiode
             join kelvin_sak on kelvin_meldeperiode.sak_id = kelvin_sak.id
             join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
             join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
-            where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
+            where kelvin_sak.saksnummer = ?
             order by kelvin_meldeperiode.periode
         """
         ) {
             setParams {
-                setString(1, ident.asString)
-                setString(2, saksnummer.asString)
+                setString(1, saksnummer.asString)
             }
             setRowMapper {
                 it.getPeriode("periode").let { Periode(it.fom, it.tom) }
@@ -186,20 +185,19 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
-    override fun hentMeldeplikt(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
+    override fun hentMeldeplikt(saksnummer: Fagsaknummer): List<Periode> {
         return connection.queryList(
             """
             select kelvin_fastsatt_periode.periode from kelvin_fastsatt_periode
             join kelvin_sak on kelvin_fastsatt_periode.sak_id = kelvin_sak.id
             join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
             join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
-            where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
+            where kelvin_sak.saksnummer = ?
             order by kelvin_fastsatt_periode.periode
         """
         ) {
             setParams {
-                setString(1, ident.asString)
-                setString(2, saksnummer.asString)
+                setString(1, saksnummer.asString)
             }
             setRowMapper {
                 it.getPeriode("periode").let { Periode(it.fom, it.tom) }
@@ -207,20 +205,19 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
-    override fun hentOpplysningsbehov(ident: Ident, saksnummer: Fagsaknummer): List<Periode> {
+    override fun hentOpplysningsbehov(saksnummer: Fagsaknummer): List<Periode> {
         return connection.queryList(
             """
             select kelvin_opplysningsbehov.periode from kelvin_opplysningsbehov
             join kelvin_sak on kelvin_opplysningsbehov.sak_id = kelvin_sak.id
             join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
             join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
-            where kelvin_person_ident.ident = ? and kelvin_sak.saksnummer = ?
+            where kelvin_sak.saksnummer = ?
             order by kelvin_opplysningsbehov.periode
         """
         ) {
             setParams {
-                setString(1, ident.asString)
-                setString(2, saksnummer.asString)
+                setString(1, saksnummer.asString)
             }
             setRowMapper {
                 it.getPeriode("periode").let { Periode(it.fom, it.tom) }

@@ -34,11 +34,10 @@ class KelvinSakRepositoryPostgresTest {
             repo.upsertSak(sak1, periode4, listOf(fnr1), listOf(), listOf(periode3), listOf(periode4), KelvinSakStatus.UTREDES)
             repo.upsertSak(sak2, periode4, listOf(fnr3), listOf(periode1, periode2), listOf(), listOf(), KelvinSakStatus.AVSLUTTET)
 
-            assertEquals(listOf(), repo.hentMeldeperioder(fnr1, sak1))
-            assertEquals(listOf(), repo.hentMeldeperioder(fnr2, sak1))
-            assertEquals(listOf(periode3), repo.hentMeldeplikt(fnr1, sak1))
-            assertEquals(listOf(periode4), repo.hentOpplysningsbehov(fnr1, sak1))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
+            assertEquals(listOf(), repo.hentMeldeperioder(sak1))
+            assertEquals(listOf(periode3), repo.hentMeldeplikt(sak1))
+            assertEquals(listOf(periode4), repo.hentOpplysningsbehov(sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(sak2))
             repo.hentSak(fnr1, periode4.fom).also {
                 assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
                 assertEquals(periode4, it?.rettighetsperiode)
@@ -52,9 +51,8 @@ class KelvinSakRepositoryPostgresTest {
 
             repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode1, periode3), listOf(), listOf(), KelvinSakStatus.LØPENDE)
 
-            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr1, sak1))
-            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(fnr2, sak1))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
+            assertEquals(listOf(periode1, periode3), repo.hentMeldeperioder(sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(sak2))
 
             repo.hentSak(fnr1, periode2.fom).also {
                 assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
@@ -68,9 +66,8 @@ class KelvinSakRepositoryPostgresTest {
             }
 
             repo.upsertSak(sak1, periode2, listOf(fnr1, fnr2), listOf(periode2, periode3), listOf(), listOf(), KelvinSakStatus.AVSLUTTET)
-            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr1, sak1))
-            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(fnr2, sak1))
-            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(fnr3, sak2))
+            assertEquals(listOf(periode2, periode3), repo.hentMeldeperioder(sak1))
+            assertEquals(listOf(periode2, periode1), repo.hentMeldeperioder(sak2))
             repo.hentSak(fnr1, periode2.fom).also {
                 assertEquals(FagsakReferanse(FagsystemNavn.KELVIN, sak1), it?.referanse)
                 assertEquals(periode2, it?.rettighetsperiode)

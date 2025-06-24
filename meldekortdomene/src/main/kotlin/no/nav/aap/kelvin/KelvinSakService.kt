@@ -24,9 +24,9 @@ class KelvinSakService(
         clock = clock,
     )
 
-    fun hentMeldeperioder(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
-        val opplysningsbehov = kelvinSakRepository.hentOpplysningsbehov(ident, sak.nummer)
-        val meldeperioder = kelvinSakRepository.hentMeldeperioder(ident, sak.nummer)
+    fun hentMeldeperioder(sak: FagsakReferanse): List<Meldeperiode> {
+        val opplysningsbehov = kelvinSakRepository.hentOpplysningsbehov(sak.nummer)
+        val meldeperioder = kelvinSakRepository.hentMeldeperioder(sak.nummer)
 
         fun harOpplysningsbehov(dag: LocalDate): Boolean {
             return opplysningsbehov.any { periode -> dag in periode }
@@ -84,7 +84,7 @@ class KelvinSakService(
     }
 
     fun meldeperioderUtenInnsending(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
-        val perioder = hentMeldeperioder(ident, sak)
+        val perioder = hentMeldeperioder(sak)
         val timerRegistrert = timerRegistrertForMeldeperiodene(perioder, ident, sak)
         return perioder.filter { periode ->
             for (meldeperiodeDag in periode.meldeperioden) {
@@ -109,9 +109,9 @@ class KelvinSakService(
         return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)
     }
 
-    fun finnMeldepliktfristForPeriode(ident: Ident, sak: FagsakReferanse, periode: Periode): LocalDateTime? {
-        val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(ident, sak.nummer)
-        if (meldepliktperioder.any{ it.overlapper(Periode(periode.tom.plusDays(1), periode.tom.plusDays(8))) }) {
+    fun finnMeldepliktfristForPeriode(sak: FagsakReferanse, periode: Periode): LocalDateTime? {
+        val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(sak.nummer)
+        if (meldepliktperioder.any { it.overlapper(Periode(periode.tom.plusDays(1), periode.tom.plusDays(8))) }) {
             return periode.tom.plusDays(8).atTime(23, 59)
         }
         return null
