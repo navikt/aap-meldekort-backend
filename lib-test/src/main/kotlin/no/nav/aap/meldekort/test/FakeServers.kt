@@ -55,6 +55,17 @@ object FakeServers : AutoCloseable {
             httpServer.stop(0L, 0L)
         }
     }
+
+    @Suppress("PropertyName")
+    data class TestToken(
+        val access_token: String,
+        val refresh_token: String = "very.secure.token",
+        val id_token: String = "very.secure.token",
+        val token_type: String = "token-type",
+        val scope: String? = null,
+        val expires_in: Int = 3599,
+    )
+
 }
 
 fun EmbeddedServer<*, *>.port(): Int {
