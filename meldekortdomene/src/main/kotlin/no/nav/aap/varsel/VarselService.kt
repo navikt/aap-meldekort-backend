@@ -5,6 +5,7 @@ import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.utfylling.Utfylling
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
@@ -82,5 +83,9 @@ class VarselService(
             TypeVarselOm.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
         }
         varselGateway.sendVarsel(brukerId = brukerId, varsel = varsel, varselTekster = varselTekster)
+    }
+
+    fun inaktiverVarsel(utfylling: Utfylling) {
+        TODO()
     }
 }
