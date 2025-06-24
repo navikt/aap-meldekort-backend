@@ -1,78 +1,86 @@
 package no.nav.aap.varsel
 
+import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Fagsaknummer
+import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.util.*
 
 class VarselService(
+    private val kelvinSakRepository: KelvinSakRepository,
     private val varselRepository: VarselRepository,
-    private val varselGateway: VarselGateway
+    private val varselGateway: VarselGateway,
+    private val clock: Clock
 ) {
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
+        kelvinSakRepository = repositoryProvider.provide(),
         varselRepository = repositoryProvider.provide(),
-        varselGateway = gatewayProvider.provide()
+        varselGateway = gatewayProvider.provide(),
+        clock = clock
     )
 
-    fun planleggFremtidigVarsel(fagsaknummer: Fagsaknummer) {
-        val andrePlanlagteVarsler = varselRepository.hentVarsler(fagsaknummer)
-            .filter { it.status == VarselStatus.PLANLAGT }
+    fun planleggFremtidigeVarsler(fagsaknummer: Fagsaknummer) {
+        val meldeplikt =
+            kelvinSakRepository.hentMeldeplikt(fagsaknummer)
+                .filter { it.contains(LocalDate.now(clock)) }
 
-        // TODO planlegge neste vs planlegge alle varsler frem i tid?:
-        if (andrePlanlagteVarsler.isNotEmpty()) {
-            // Avbryt/slett andrePlanlagteVarsler?
+
+        val varsler = meldeplikt.map {
+            lagVarsel(fagsaknummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
         }
 
-        /*
-        Planlegge neste varsel:
-            - Før vedtak:
-                - Varsel: Kan sende meldekort
-            - Etter vedtak:
-                - Før første meldepliktperiode: Oppgave - Bør sende meldekort for opplysningsplikt
-                - Neste meldepliktperiode: Oppgave - Må sende meldekort for meldeplikt
-         */
-        val sendingstidspunkt = Instant.now() // TODO
-        val typeVarsel = TypeVarsel.OPPGAVE // TODO
-        val typeVarselTekst = TypeVarselTekst.MELDEPLIKTPERIODE // TODO
-        val varsel = Varsel(
-            varselId = VarselId(UUID.randomUUID()),
-            typeVarsel = typeVarsel,
-            typeVarselTekst = typeVarselTekst,
-            fagsaknummer = fagsaknummer,
-            sendingstidspunkt = sendingstidspunkt,
-            status = VarselStatus.PLANLAGT,
-        )
+        // Vurder å ikke slette de som overlapper med nye (beholder opprettet)
+        varselRepository.slettPlanlagteVarsler(fagsaknummer, TypeVarselOm.MELDEPLIKTPERIODE)
+        varsler.forEach { varsel ->
+            varselRepository.upsert(varsel)
+        }
+    }
 
-        varselRepository.upsert(varsel)
+    fun lagVarsel(
+        fagsaknummer: Fagsaknummer,
+        periode: Periode,
+        varselOm: TypeVarselOm
+    ): Varsel {
+        return Varsel(
+            varselId = VarselId(UUID.randomUUID()),
+            typeVarsel = utledTypeVarsel(varselOm),
+            typeVarselOm = varselOm,
+            fagsaknummer = fagsaknummer,
+            sendingstidspunkt = Instant.from(periode.fom), // TODO velge utsendingstidspunkt?
+            status = VarselStatus.PLANLAGT,
+            forPeriode = periode,
+            opprettet = Instant.now(clock),
+            sistEndret = Instant.now(clock)
+        )
+    }
+
+    private fun utledTypeVarsel(varselOm: TypeVarselOm): TypeVarsel {
+        return when (varselOm) {
+            TypeVarselOm.VALGFRITT_OPPLYSNINGSBEHOV -> TypeVarsel.BESKJED
+            TypeVarselOm.OPPLYSNINGSBEHOV, TypeVarselOm.MELDEPLIKTPERIODE -> TypeVarsel.OPPGAVE
+        }
     }
 
     fun sendPlanlagteVarsler() {
         varselRepository.hentVarslerForUtsending().forEach { varsel ->
-            sendVarselOgPlanleggNeste(varsel)
+            sendVarsel(varsel)
         }
     }
 
-    private fun sendVarselOgPlanleggNeste(varsel: Varsel) {
-        // TODO inaktiver sendte (aktive) varsler?:
-        varselRepository.hentVarsler(varsel.fagsaknummer)
-            .filter { it.status == VarselStatus.SENDT && it.typeVarsel == TypeVarsel.OPPGAVE }
-            .forEach { varsel ->
-                varselRepository.upsert(varsel.copy(status = VarselStatus.INAKTIVERT))
-                varselGateway.inaktiverVarsel(varsel)
-            }
-
+    private fun sendVarsel(varsel: Varsel) {
         varselRepository.upsert(varsel.copy(status = VarselStatus.SENDT))
 
-        val brukerId =
-            TODO() // slå opp vilkårlig ident for sak fra kelvin_person_ident og hent gjeldende ident fra PDL?
-        val varselTekster = when (varsel.typeVarselTekst) {
-            TypeVarselTekst.VALGFRITT_OPPLYSNINGSBEHOV -> TEKSTER_BESKJED_FREMTIDIG_OPPLYSNINGSBEHOV
-            TypeVarselTekst.OPPLYSNINGSBEHOV -> TEKSTER_OPPGAVE_OPPLYSNINGSBEHOV
-            TypeVarselTekst.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
+        // TODO hent gjeldende ident fra PDL
+        val brukerId = kelvinSakRepository.hentIdenter(varsel.fagsaknummer).first()
+        val varselTekster = when (varsel.typeVarselOm) {
+            TypeVarselOm.VALGFRITT_OPPLYSNINGSBEHOV -> TEKSTER_BESKJED_FREMTIDIG_OPPLYSNINGSBEHOV
+            TypeVarselOm.OPPLYSNINGSBEHOV -> TEKSTER_OPPGAVE_OPPLYSNINGSBEHOV
+            TypeVarselOm.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
         }
         varselGateway.sendVarsel(brukerId = brukerId, varsel = varsel, varselTekster = varselTekster)
-
-        planleggFremtidigVarsel(varsel.fagsaknummer)
     }
 }

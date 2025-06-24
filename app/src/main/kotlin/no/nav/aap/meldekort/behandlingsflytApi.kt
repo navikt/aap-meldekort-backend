@@ -18,11 +18,16 @@ import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
 import no.nav.aap.varsel.VarselService
+import java.time.Clock
 import java.util.*
 import javax.sql.DataSource
 
 
-fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry) {
+fun NormalOpenAPIRoute.behandlingsflytApi(
+    dataSource: DataSource,
+    repositoryRegistry: RepositoryRegistry,
+    clock: Clock
+) {
     val authorizedAzps = listOfNotNull(configForKey("BEHANDLINGSFLYT_AZP")?.let(UUID::fromString))
 
     route("/api/behandlingsflyt/sak/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
@@ -47,7 +52,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
                         null -> null
                     }
                 )
-            VarselService(repositoryProvider, GatewayProvider).planleggFremtidigVarsel(fagsaknummer)
+            VarselService(repositoryProvider, GatewayProvider, clock).planleggFremtidigeVarsler(fagsaknummer)
         }
         respondWithStatus(HttpStatusCode.OK)
     }

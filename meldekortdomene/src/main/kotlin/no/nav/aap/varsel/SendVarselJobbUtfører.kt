@@ -7,8 +7,11 @@ import no.nav.aap.motor.Jobb
 import no.nav.aap.motor.JobbInput
 import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.cron.CronExpression
+import java.time.Clock
 
-class SendVarselJobbUtfører(private val varselService: VarselService) : JobbUtfører {
+class SendVarselJobbUtfører(
+    private val varselService: VarselService,
+) : JobbUtfører {
     override fun utfør(input: JobbInput) {
         varselService.sendPlanlagteVarsler()
     }
@@ -26,11 +29,14 @@ class SendVarselJobbUtfører(private val varselService: VarselService) : JobbUtf
             }
         }
 
-        fun jobbKonstruktør(repositoryRegistry: RepositoryRegistry) = object : Jobb by jobbInfo {
+        fun jobbKonstruktør(
+            repositoryRegistry: RepositoryRegistry,
+            clock: Clock
+        ) = object : Jobb by jobbInfo {
             override fun konstruer(connection: DBConnection): JobbUtfører {
                 val repositoryProvider = repositoryRegistry.provider(connection)
 
-                return SendVarselJobbUtfører(VarselService(repositoryProvider, GatewayProvider))
+                return SendVarselJobbUtfører(VarselService(repositoryProvider, GatewayProvider, clock))
             }
         }
     }

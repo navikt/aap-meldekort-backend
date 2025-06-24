@@ -251,6 +251,11 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
+    override fun hentIdenter(saksnummer: Fagsaknummer): List<Ident> {
+        //order by desc
+        TODO("Not yet implemented")
+    }
+
     companion object : RepositoryFactory<KelvinSakRepository> {
         override fun konstruer(connection: DBConnection): KelvinSakRepository {
             return KelvinSakRepositoryPostgres(connection)
