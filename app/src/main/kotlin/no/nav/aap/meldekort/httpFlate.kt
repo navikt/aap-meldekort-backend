@@ -36,6 +36,7 @@ import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import org.slf4j.LoggerFactory
 import java.time.Clock
+import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
 class HttpServer
@@ -55,6 +56,7 @@ fun startHttpServer(
         connectionGroupSize = 8
         workerGroupSize = 8
         callGroupSize = 16
+        shutdownGracePeriod = TimeUnit.SECONDS.toMillis(5)
         connector {
             this.port = port
         }
