@@ -39,7 +39,7 @@ object FakeTokenX : FakeServer {
         }
         install(StatusPages) {
             exception<Throwable> { call, cause ->
-                FakeTokenX.log.info("TokenX :: Ukjent feil ved kall til '{}'", call.request.local.uri, cause)
+                log.info("TokenX :: Ukjent feil ved kall til '{}'", call.request.local.uri, cause)
                 call.respond(
                     status = HttpStatusCode.Companion.InternalServerError,
                     message = ErrorRespons(cause.message)

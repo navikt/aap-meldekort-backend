@@ -15,6 +15,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.NoTokenTokenPr
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.meldekort.kontrakt.Periode
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
@@ -120,8 +121,8 @@ class BehandlingsflytApiKtTest {
              }
 
              client = RestClient.withDefaultResponseHandler(
-                 config = ClientConfig(),
-                 tokenProvider = object : TokenProvider {},
+                 config = ClientConfig(scope = "meldekort-backend"),
+                 tokenProvider = ClientCredentialsTokenProvider,
              )
          }
 
