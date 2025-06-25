@@ -84,9 +84,15 @@ class VarselService(
     }
 
     fun sendPlanlagteVarsler() {
-        varselRepository.hentVarslerForUtsending(clock).forEach { varsel ->
-            sendVarsel(varsel)
-        }
+        varselRepository.hentVarslerForUtsending(clock)
+            .also {
+                if (it.isNotEmpty()) {
+                    log.info("Sender ${it.size} varsler")
+                }
+            }
+            .forEach { varsel ->
+                sendVarsel(varsel)
+            }
     }
 
     private fun sendVarsel(varsel: Varsel) {

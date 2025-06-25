@@ -22,7 +22,7 @@ class SendVarselJobbUtfører(
             override fun type() = "batch.sendVarsler"
             override fun navn() = "Send varsler"
 
-            override fun cron() = CronExpression.createWithoutSeconds("0 2 * * *")
+            override fun cron() = CronExpression.createWithoutSeconds("*/5 * * * *")
 
             override fun konstruer(connection: DBConnection): JobbUtfører {
                 error("kun intern for jobb info")
