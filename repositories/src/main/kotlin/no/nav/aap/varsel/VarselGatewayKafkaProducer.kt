@@ -7,7 +7,7 @@ import no.nav.tms.varsel.action.Tekst
 import no.nav.tms.varsel.action.Varseltype
 import no.nav.tms.varsel.builder.VarselActionBuilder
 
-class VarselGatewayKafkaProducer : VarselGateway {
+object VarselGatewayKafkaProducer : VarselGateway {
     override fun sendVarsel(brukerId: Ident, varsel: Varsel, varselTekster: VarselTekster) {
         val melding = opprettKafkaJson(brukerId, varsel, varselTekster)
         TODO("Not yet implemented")

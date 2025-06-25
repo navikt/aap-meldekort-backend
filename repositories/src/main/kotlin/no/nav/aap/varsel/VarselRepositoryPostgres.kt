@@ -3,6 +3,7 @@ package no.nav.aap.varsel
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
+import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.Fagsaknummer
 import java.time.Clock
 import java.time.Instant
@@ -106,5 +107,11 @@ class VarselRepositoryPostgres(private val connection: DBConnection) : VarselRep
             opprettet = row.getInstant("opprettet"),
             sistEndret = row.getInstant("sist_endret")
         )
+    }
+
+    companion object : RepositoryFactory<VarselRepositoryPostgres> {
+        override fun konstruer(connection: DBConnection): VarselRepositoryPostgres {
+            return VarselRepositoryPostgres(connection)
+        }
     }
 }

@@ -5,11 +5,12 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.behandlingsflyt.prometheus
-import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
+import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
@@ -19,6 +20,7 @@ import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
 import java.time.Clock
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 fun main() {
@@ -48,21 +50,30 @@ fun main() {
     val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
     dataSource.transaction { connection ->
-        val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
-        kelvinSakRepository.upsertSak(
-            saksnummer = Fagsaknummer("111111"),
+        val repositoryProvider = postgresRepositoryRegistry.provider(connection)
+        val kelvinMottakService = KelvinMottakService(repositoryProvider, GatewayProvider, Clock.systemDefaultZone())
+        val iDag = LocalDate.now()
+        val sistMandag = generateSequence(iDag) { it.minusDays(1) }
+            .first { it.dayOfWeek == DayOfWeek.MONDAY }
+
+        kelvinMottakService.behandleMottatteMeldeperioder(
+            saksnummer = Fagsaknummer("1015"),
             sakenGjelderFor = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2026, 1, 1)),
             identer = listOf(Ident("11111111111")),
             meldeperioder =
-                listOf(
-                    "2025-02-10" to "2025-02-23",
-                    "2025-02-24" to "2025-03-09",
-                    "2025-03-10" to "2025-03-23",
-                    "2025-03-24" to "2025-04-06",
-                ).map { (fom, tom) -> Periode(LocalDate.parse(fom), LocalDate.parse(tom)) },
-            meldeplikt = listOf(),
+                lagPerioder(
+                    sistMandag.minusDays(14) to sistMandag.minusDays(1),
+                    sistMandag to sistMandag.plusDays(13),
+                    sistMandag.plusDays(14) to sistMandag.plusDays(27),
+                ),
+            meldeplikt =
+                lagPerioder(
+                    sistMandag to sistMandag.plusDays(7),
+                    sistMandag.plusDays(14) to sistMandag.plusDays(21),
+                    sistMandag.plusDays(28) to sistMandag.plusDays(35),
+                ),
             opplysningsbehov = listOf(
-                Periode(LocalDate.of(2025, 2, 13), LocalDate.of(2025, 4, 8)),
+                Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2026, 1, 1)),
             ),
             status = KelvinSakStatus.LØPENDE,
         )
@@ -80,4 +91,8 @@ fun main() {
         repositoryRegistry = postgresRepositoryRegistry,
         clock = Clock.systemDefaultZone(),
     )
+}
+
+private fun lagPerioder(vararg fomTom: Pair<LocalDate, LocalDate>): List<Periode> {
+    return fomTom.map { (fom, tom) -> Periode(fom, tom) }
 }

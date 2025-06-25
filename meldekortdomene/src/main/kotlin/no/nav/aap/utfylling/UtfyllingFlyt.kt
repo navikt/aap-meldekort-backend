@@ -57,6 +57,7 @@ enum class UtfyllingFlytNavn(
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
+            INAKTIVER_VARSEL,
             KVITTERING,
         )
     ),

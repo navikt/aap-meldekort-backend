@@ -1,41 +1,56 @@
 package no.nav.aap.varsel
 
-import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
+import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.Utfylling
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.*
 
 class VarselService(
+    private val kelvinSakService: KelvinSakService,
     private val kelvinSakRepository: KelvinSakRepository,
     private val varselRepository: VarselRepository,
     private val varselGateway: VarselGateway,
     private val clock: Clock
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
+        kelvinSakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         varselRepository = repositoryProvider.provide(),
         varselGateway = gatewayProvider.provide(),
         clock = clock
     )
 
-    fun planleggFremtidigeVarsler(fagsaknummer: Fagsaknummer) {
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    fun planleggFremtidigeVarsler(saksnummer: Fagsaknummer) {
         val meldeplikt =
-            kelvinSakRepository.hentMeldeplikt(fagsaknummer)
-                .filter { it.contains(LocalDate.now(clock)) }
+            kelvinSakRepository.hentMeldeplikt(saksnummer)
+                .filter { it.fom.isAfter(LocalDate.now(clock)) }
 
+        val meldelerioder = kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
+            .filter { meldeplikt.contains(it.meldevindu) }
 
-        val varsler = meldeplikt.map {
-            lagVarsel(fagsaknummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
+        if (meldelerioder.size != meldeplikt.size) {
+            log.warn("Meldevindu i meldeperioder samsvarer ikke med fremtidige meldeplikt-perioder fra Kelvin")
         }
 
-        // Vurder å ikke slette de som overlapper med nye (beholder opprettet)
-        varselRepository.slettPlanlagteVarsler(fagsaknummer, TypeVarselOm.MELDEPLIKTPERIODE)
+        val varsler = meldelerioder.map {
+            lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
+        }
+
+        varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
         varsler.forEach { varsel ->
             varselRepository.upsert(varsel)
         }
@@ -43,7 +58,7 @@ class VarselService(
 
     fun lagVarsel(
         fagsaknummer: Fagsaknummer,
-        periode: Periode,
+        meldeperiode: Meldeperiode,
         varselOm: TypeVarselOm
     ): Varsel {
         return Varsel(
@@ -51,9 +66,11 @@ class VarselService(
             typeVarsel = utledTypeVarsel(varselOm),
             typeVarselOm = varselOm,
             saksnummer = fagsaknummer,
-            sendingstidspunkt = Instant.from(periode.fom), // TODO velge utsendingstidspunkt?
+            // TODO hvilket utsendingstidspunkt?
+            sendingstidspunkt = meldeperiode.meldevindu.fom.atTime(LocalTime.of(9, 0)).atZone(ZoneId.systemDefault())
+                .toInstant(),
             status = VarselStatus.PLANLAGT,
-            forPeriode = periode,
+            forPeriode = meldeperiode.meldeperioden,
             opprettet = Instant.now(clock),
             sistEndret = Instant.now(clock)
         )
@@ -86,6 +103,21 @@ class VarselService(
     }
 
     fun inaktiverVarsel(utfylling: Utfylling) {
-        TODO()
+        if (utfylling.fagsak.system != FagsystemNavn.KELVIN) return
+
+        val varsel = varselRepository.hentVarsler(utfylling.fagsak.nummer)
+            .singleOrNull {
+                it.status == VarselStatus.SENDT &&
+                        it.typeVarsel == TypeVarsel.OPPGAVE &&
+                        it.forPeriode == utfylling.periode
+            }
+
+        if (varsel != null) {
+            log.info("Inaktiverer varsel med varsel id ${varsel.varselId}")
+            varselRepository.upsert(varsel.copy(status = VarselStatus.INAKTIVERT))
+            varselGateway.inaktiverVarsel(varsel)
+        } else {
+            log.info("Fant ikke varsel å inaktivere for utfylling periode ${utfylling.periode}")
+        }
     }
 }
