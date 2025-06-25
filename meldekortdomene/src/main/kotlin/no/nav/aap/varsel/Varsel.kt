@@ -9,7 +9,7 @@ data class Varsel(
     val varselId: VarselId,
     val typeVarsel: TypeVarsel,
     val typeVarselOm: TypeVarselOm,
-    val fagsaknummer: Fagsaknummer,
+    val saksnummer: Fagsaknummer,
     val sendingstidspunkt: Instant,
     val status: VarselStatus,
     val forPeriode: Periode,

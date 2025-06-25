@@ -50,7 +50,7 @@ class VarselService(
             varselId = VarselId(UUID.randomUUID()),
             typeVarsel = utledTypeVarsel(varselOm),
             typeVarselOm = varselOm,
-            fagsaknummer = fagsaknummer,
+            saksnummer = fagsaknummer,
             sendingstidspunkt = Instant.from(periode.fom), // TODO velge utsendingstidspunkt?
             status = VarselStatus.PLANLAGT,
             forPeriode = periode,
@@ -67,7 +67,7 @@ class VarselService(
     }
 
     fun sendPlanlagteVarsler() {
-        varselRepository.hentVarslerForUtsending().forEach { varsel ->
+        varselRepository.hentVarslerForUtsending(clock).forEach { varsel ->
             sendVarsel(varsel)
         }
     }
@@ -76,7 +76,7 @@ class VarselService(
         varselRepository.upsert(varsel.copy(status = VarselStatus.SENDT))
 
         // TODO hent gjeldende ident fra PDL
-        val brukerId = kelvinSakRepository.hentIdenter(varsel.fagsaknummer).first()
+        val brukerId = kelvinSakRepository.hentIdenter(varsel.saksnummer).first()
         val varselTekster = when (varsel.typeVarselOm) {
             TypeVarselOm.VALGFRITT_OPPLYSNINGSBEHOV -> TEKSTER_BESKJED_FREMTIDIG_OPPLYSNINGSBEHOV
             TypeVarselOm.OPPLYSNINGSBEHOV -> TEKSTER_OPPGAVE_OPPLYSNINGSBEHOV

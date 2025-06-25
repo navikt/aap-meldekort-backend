@@ -2,10 +2,11 @@ package no.nav.aap.varsel
 
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.sak.Fagsaknummer
+import java.time.Clock
 
 interface VarselRepository: Repository {
-    fun hentVarsler(fagsaknummer: Fagsaknummer): List<Varsel>
+    fun hentVarsler(saksnummer: Fagsaknummer): List<Varsel>
     fun upsert(varsel: Varsel)
-    fun slettPlanlagteVarsler(fagsaknummer: Fagsaknummer, typeVarselOm: TypeVarselOm)
-    fun hentVarslerForUtsending() : List<Varsel>
+    fun slettPlanlagteVarsler(saksnummer: Fagsaknummer, typeVarselOm: TypeVarselOm)
+    fun hentVarslerForUtsending(clock: Clock) : List<Varsel>
 }
