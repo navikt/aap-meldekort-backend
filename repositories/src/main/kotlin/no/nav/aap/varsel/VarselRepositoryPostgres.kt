@@ -83,6 +83,7 @@ class VarselRepositoryPostgres(private val connection: DBConnection) : VarselRep
             select *
             from varsel
             where status = ? and sendingstidspunkt <= ?
+            for update 
         """
         ) {
             setParams {
