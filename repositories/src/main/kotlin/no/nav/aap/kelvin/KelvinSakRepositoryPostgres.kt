@@ -17,7 +17,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         opplysningsbehov: List<Periode>,
         status: KelvinSakStatus?,
     ) {
-        val sakId = connection.queryFirst<Long>(
+        val sakId = connection.queryFirst(
             """
             insert into kelvin_sak (saksnummer, saken_gjelder_for, status)
             values (?, ?::daterange, ?)
@@ -39,7 +39,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             }
         }
 
-        val personId = connection.queryFirst<Long>(
+        val personId = connection.queryFirst(
             """
             insert into kelvin_person (sak_id) values (?)
             on conflict (sak_id) do update set
@@ -170,8 +170,6 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             """
             select kelvin_meldeperiode.periode from kelvin_meldeperiode
             join kelvin_sak on kelvin_meldeperiode.sak_id = kelvin_sak.id
-            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
-            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
             where kelvin_sak.saksnummer = ?
             order by kelvin_meldeperiode.periode
         """
@@ -190,8 +188,6 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             """
             select kelvin_fastsatt_periode.periode from kelvin_fastsatt_periode
             join kelvin_sak on kelvin_fastsatt_periode.sak_id = kelvin_sak.id
-            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
-            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
             where kelvin_sak.saksnummer = ?
             order by kelvin_fastsatt_periode.periode
         """
@@ -210,8 +206,6 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             """
             select kelvin_opplysningsbehov.periode from kelvin_opplysningsbehov
             join kelvin_sak on kelvin_opplysningsbehov.sak_id = kelvin_sak.id
-            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
-            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
             where kelvin_sak.saksnummer = ?
             order by kelvin_opplysningsbehov.periode
         """
