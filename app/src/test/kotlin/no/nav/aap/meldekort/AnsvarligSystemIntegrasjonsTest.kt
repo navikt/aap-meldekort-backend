@@ -135,7 +135,6 @@ class AnsvarligSystemIntegrasjonsTest {
     companion object {
         private lateinit var embeddedServer: EmbeddedServer<*, *>
         lateinit var client: RestClient<InputStream>
-        private val fakeServers = FakeServers()
 
         val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
@@ -156,7 +155,7 @@ class AnsvarligSystemIntegrasjonsTest {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            fakeServers.start()
+            FakeServers.start()
 
             setupRegistries()
 
@@ -185,7 +184,6 @@ class AnsvarligSystemIntegrasjonsTest {
         @AfterAll
         fun afterAll() {
             embeddedServer.stop(0L, 0L)
-            fakeServers.close()
         }
     }
 }
