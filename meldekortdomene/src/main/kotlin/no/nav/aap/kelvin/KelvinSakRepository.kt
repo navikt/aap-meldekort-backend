@@ -3,7 +3,6 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.sak.Fagsaknummer
-import no.nav.aap.sak.Sak
 import java.time.LocalDate
 
 interface KelvinSakRepository: Repository {
