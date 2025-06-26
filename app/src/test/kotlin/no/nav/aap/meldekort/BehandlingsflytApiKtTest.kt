@@ -80,15 +80,15 @@ class BehandlingsflytApiKtTest {
          val baseUrl: String
              get() = "http://localhost:${embeddedServer.port()}"
 
-         val tokenSchmoken:OidcToken? = null
+         val fakeToken:OidcToken? = null
          fun getToken(): OidcToken {
-            val mahClient = RestClient(
+            val client = RestClient(
                 config = ClientConfig(scope = "behandlingsflyt"),
                 tokenProvider = NoTokenTokenProvider(),
                 responseHandler = DefaultResponseHandler()
             )
-             return tokenSchmoken ?: OidcToken(
-                 mahClient.post<String, FakeServers.TestToken>(
+             return fakeToken ?: OidcToken(
+                 client.post<String, FakeServers.TestToken>(
                      URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
                      PostRequest("grant_type=client_credentials"),
                  )!!.access_token
