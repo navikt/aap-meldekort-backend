@@ -60,21 +60,7 @@ import kotlin.test.*
             meldeplikt = meldeplikt
         )
 
-        fun getToken(): OidcToken {
-            val client = RestClient(
-                config = ClientConfig(scope = "behandlingsflyt"),
-                tokenProvider = NoTokenTokenProvider(),
-                responseHandler = DefaultResponseHandler()
-            )
-            return OidcToken(
-                client.post<String, FakeServers.TestToken>(
-                    URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
-                    PostRequest("grant_type=client_credentials"),
-                )!!.access_token
-            )
-        }
-
-        post<Unit>(meldedata, getToken())
+        post<Unit>(meldedata)
         dataSource.transaction { dbConnection ->
             val kelvinSakRepository = postgresRepositoryRegistry.provider(dbConnection).provide<KelvinSakRepository>()
             val meldepliktFraRepository = kelvinSakRepository.hentMeldeplikt(fnr, Fagsaknummer("SAKSNUMMER"))
@@ -94,26 +80,26 @@ import kotlin.test.*
          val baseUrl: String
              get() = "http://localhost:${embeddedServer.port()}"
 
-//         val fakeToken:OidcToken? = null
-//         fun getToken(): OidcToken {
-//            val client = RestClient(
-//                config = ClientConfig(scope = "behandlingsflyt"),
-//                tokenProvider = NoTokenTokenProvider(),
-//                responseHandler = DefaultResponseHandler()
-//            )
-//             return fakeToken ?: OidcToken(
-//                 client.post<String, FakeServers.TestToken>(
-//                     URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
-//                     PostRequest("grant_type=client_credentials"),
-//                 )!!.access_token
-//             )
-//         }
+         val fakeToken:OidcToken? = null
+         fun getToken(): OidcToken {
+            val client = RestClient(
+                config = ClientConfig(scope = "behandlingsflyt"),
+                tokenProvider = NoTokenTokenProvider(),
+                responseHandler = DefaultResponseHandler()
+            )
+             return fakeToken ?: OidcToken(
+                 client.post<String, FakeServers.TestToken>(
+                     URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
+                     PostRequest("grant_type=client_credentials"),
+                 )!!.access_token
+             )
+         }
 
-         inline fun <reified T> post(meldedata: MeldeperioderV0, token: OidcToken): T? {
+         inline fun <reified T> post(meldedata: MeldeperioderV0): T? {
              return client.post<_, T>(
                  URI("${baseUrl}/api/behandlingsflyt/sak/meldeperioder"), PostRequest(
                      body = meldedata,
-                     currentToken = token
+                     currentToken = getToken()
                  )
              )
          }
