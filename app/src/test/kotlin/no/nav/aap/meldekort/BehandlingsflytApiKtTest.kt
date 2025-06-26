@@ -88,7 +88,6 @@ import kotlin.test.*
      companion object {
          private lateinit var embeddedServer: EmbeddedServer<*, *>
          lateinit var client: RestClient<InputStream>
-         private val fakeServers = FakeServers()
 
          val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
@@ -122,7 +121,7 @@ import kotlin.test.*
          @JvmStatic
          @BeforeAll
          fun beforeAll() {
-             fakeServers.start()
+             FakeServers.start()
 
              setupRegistries()
 
@@ -151,7 +150,6 @@ import kotlin.test.*
          @AfterAll
          fun afterAll() {
              embeddedServer.stop()
-             fakeServers.close()
          }
      }
  }
