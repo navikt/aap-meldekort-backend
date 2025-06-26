@@ -44,6 +44,7 @@ object FakeAzure : FakeServer {
             }
             routing {
                 post("/token") {
+                    log.info("Henter fake Azure-token")
                     val body = call.receiveText()
                     val token = TokenGen.generate(
                         issuer = "fake-azure",
