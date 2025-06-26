@@ -135,7 +135,7 @@ class BehandlingsflytApiKtTest {
          @JvmStatic
          @AfterAll
          fun afterAll() {
-             embeddedServer.stop(0L, 0L)
+             embeddedServer.stop()
              fakeServers.close()
          }
      }
