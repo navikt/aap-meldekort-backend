@@ -9,6 +9,7 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.time.Clock
 import java.time.LocalDate
 
@@ -23,7 +24,9 @@ class UtfyllingFlateFactoryImpl(private val clock: Clock) : UtfyllingFlateFactor
         val sak = SakerService(repositoryProvider, gatewayProvider).finnSak(innloggetBruker.ident, LocalDate.now(clock))
         val saksnummer = sak?.referanse?.nummer?.asString ?: "NULL"
 
-        log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
+        MDC.putCloseable("saksnummer", saksnummer).use {
+            log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
+        }
 
         val flate =  when (sak?.referanse?.system) {
             null, FagsystemNavn.KELVIN -> KelvinUtfyllingFlate(repositoryProvider, gatewayProvider, clock)

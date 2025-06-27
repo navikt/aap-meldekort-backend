@@ -9,6 +9,7 @@ import java.time.LocalDate
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.time.Clock
 
 interface MeldeperiodeFlateFactory {
@@ -22,7 +23,9 @@ class MeldeperiodeFlateFactoryImpl(private val clock: Clock): MeldeperiodeFlateF
         val sak = SakerService(repositoryProvider,gatewayProvider).finnSak(innloggetBruker.ident, LocalDate.now(clock))
         val saksnummer = sak?.referanse?.nummer?.asString ?: "NULL"
 
-        log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for meldepeerioder")
+        MDC.putCloseable("saksnummer", saksnummer).use {
+            log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
+        }
 
         val flate = when (sak?.referanse?.system) {
             null, FagsystemNavn.KELVIN -> KelvinMeldeperiodeFlate(repositoryProvider, gatewayProvider, clock)
