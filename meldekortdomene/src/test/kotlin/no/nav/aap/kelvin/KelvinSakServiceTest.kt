@@ -55,7 +55,7 @@ class KelvinSakServiceTest {
         gittMeldeperioder(opplysningsperiode)
 
         val meldeperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 16))
-        assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isNull()
+        assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isNull()
     }
 
     @Test
@@ -80,7 +80,7 @@ class KelvinSakServiceTest {
         gittMeldeperioder(opplysningsperiode)
 
         val meldeperiode = Periode(LocalDate.of(2025, 3, 17), LocalDate.of(2025, 3, 30))
-        assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 4, 7).atTime(23, 59))
+        assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 4, 7).atTime(23, 59))
     }
 
     @Test
@@ -106,11 +106,11 @@ class KelvinSakServiceTest {
         gittMeldeperioder(opplysningsperiode)
 
         val meldeperiode = Periode(LocalDate.of(2025, 4, 14), LocalDate.of(2025, 4, 27))
-        assertThat(sakService.finnMeldepliktfristForPeriode(innloggetBruker.ident, sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 5, 5).atTime(23, 59))
+        assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 5, 5).atTime(23, 59))
     }
 
     private fun gittMeldeplikt(etterUker: Long, opplysningsperiode: Periode) {
-        every { kelvinSakRepository.hentMeldeplikt(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+        every { kelvinSakRepository.hentMeldeplikt(sak.saksnummer) } returns Periode(
             opplysningsperiode.fom.plusWeeks(etterUker),
             opplysningsperiode.tom
         ).slidingWindow(
@@ -121,7 +121,7 @@ class KelvinSakServiceTest {
     }
 
     private fun gittMeldeperioder(opplysningsperiode: Periode) {
-        every { kelvinSakRepository.hentMeldeperioder(innloggetBruker.ident, sak.saksnummer) } returns Periode(
+        every { kelvinSakRepository.hentMeldeperioder(sak.saksnummer) } returns Periode(
             opplysningsperiode.fom,
             opplysningsperiode.tom
         ).slidingWindow(
