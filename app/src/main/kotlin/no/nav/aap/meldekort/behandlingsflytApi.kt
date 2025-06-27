@@ -6,7 +6,7 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.kelvin.KelvinSakRepository
+import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -28,21 +28,23 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
         auditLogConfig = null,
     ) { _, body ->
         dataSource.transaction { connection ->
-            repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
-                .upsertSak(
-                    saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.identer.map { Ident(it) },
-                    sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
-                    meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
-                    opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
-                    meldeplikt = body.meldeplikt.map { Periode(it.fom, it.tom) },
-                    status = when (body.sakStatus) {
-                        SakStatus.UTREDES -> KelvinSakStatus.UTREDES
-                        SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
-                        SakStatus.AVSLUTTET -> KelvinSakStatus.AVSLUTTET
-                        null -> null
-                    }
-                )
+            val repositoryProvider = repositoryRegistry.provider(connection)
+            val kelvinMottakService = KelvinMottakService(repositoryProvider)
+
+            kelvinMottakService.behandleMottatteMeldeperioder(
+                saksnummer = Fagsaknummer(body.saksnummer),
+                identer = body.identer.map { Ident(it) },
+                sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
+                meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
+                meldeplikt = body.meldeplikt.map { Periode(it.fom, it.tom) },
+                status = when (body.sakStatus) {
+                    SakStatus.UTREDES -> KelvinSakStatus.UTREDES
+                    SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
+                    SakStatus.AVSLUTTET -> KelvinSakStatus.AVSLUTTET
+                    null -> null
+                }
+            )
         }
         respondWithStatus(HttpStatusCode.OK)
     }
