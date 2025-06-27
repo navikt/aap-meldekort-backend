@@ -12,6 +12,7 @@ import no.nav.aap.utfylling.Utfylling
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
+import no.nav.aap.komponenter.config.requiredConfigForKey
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -105,7 +106,11 @@ class VarselService(
             TypeVarselOm.OPPLYSNINGSBEHOV -> TEKSTER_OPPGAVE_OPPLYSNINGSBEHOV
             TypeVarselOm.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
         }
-        varselGateway.sendVarsel(brukerId = brukerId, varsel = varsel, varselTekster = varselTekster)
+        varselGateway.sendVarsel(
+            brukerId = brukerId,
+            varsel = varsel,
+            varselTekster = varselTekster,
+            lenke = requiredConfigForKey("aap.meldekort.lenke"))
     }
 
     fun inaktiverVarsel(utfylling: Utfylling) {

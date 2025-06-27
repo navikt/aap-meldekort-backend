@@ -1,27 +1,47 @@
 package no.nav.aap.varsel
 
 import no.nav.aap.Ident
+import no.nav.aap.KafkaProducerConfig
+import no.nav.aap.komponenter.config.requiredConfigForKey
+import no.nav.aap.lookup.gateway.Factory
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Tekst
 import no.nav.tms.varsel.action.Varseltype
 import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringSerializer
 
-object VarselGatewayKafkaProducer : VarselGateway {
-    override fun sendVarsel(brukerId: Ident, varsel: Varsel, varselTekster: VarselTekster) {
-        val melding = opprettKafkaJson(brukerId, varsel, varselTekster)
-        TODO("Not yet implemented")
+class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGateway {
+
+    companion object : Factory<VarselGatewayKafkaProducer> {
+        override fun konstruer(): VarselGatewayKafkaProducer {
+            return VarselGatewayKafkaProducer(KafkaProducerConfig())
+        }
+    }
+
+    private val topic = requiredConfigForKey("brukervarel.topic")
+    private val producer = KafkaProducer(producerConfig.properties(), StringSerializer(), StringSerializer())
+
+    override fun sendVarsel(brukerId: Ident,
+                            varsel: Varsel,
+                            varselTekster: VarselTekster,
+                            lenke: String) {
+        val melding = opprettKafkaJson(brukerId, varsel, varselTekster, lenke)
+        producer.send(ProducerRecord(topic, varsel.varselId.toString(), melding))
     }
 
     override fun inaktiverVarsel(varsel: Varsel) {
         val melding = VarselActionBuilder.inaktiver { varselId = varsel.varselId.id.toString() }
-        TODO("Not yet implemented")
+        producer.send(ProducerRecord(topic, varsel.varselId.toString(), melding))
     }
 
     private fun opprettKafkaJson(
         brukerId: Ident,
         varsel: Varsel,
-        varselTekster: VarselTekster
+        varselTekster: VarselTekster,
+        lenke: String
     ): String {
         return VarselActionBuilder.opprett {
             type = when (varsel.typeVarsel) {
@@ -46,10 +66,10 @@ object VarselGatewayKafkaProducer : VarselGateway {
                 tekst = varselTekster.en,
                 default = false
             )
-            link = "https://www.nav.no" // TODO lenke til meldekort
-            aktivFremTil = null // TODO aktuell med mindre vi inaktiverer selv
+            link = lenke
+            aktivFremTil = null
             eksternVarsling {
-                preferertKanal = EksternKanal.SMS // TODO også for varseltype varsel?
+                preferertKanal = EksternKanal.SMS
             }
         }
     }

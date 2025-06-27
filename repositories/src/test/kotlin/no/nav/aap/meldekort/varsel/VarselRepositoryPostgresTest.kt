@@ -257,28 +257,4 @@ class VarselRepositoryPostgresTest {
             status = KelvinSakStatus.LØPENDE
         )
     }
-
-    private fun byggVarsel(
-        saksnummer: Fagsaknummer,
-        varselId: VarselId = VarselId(UUID.randomUUID()),
-        typeVarsel: TypeVarsel = TypeVarsel.OPPGAVE,
-        typeVarselOm: TypeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
-        sendingstidspunkt: Instant = Instant.now(),
-        status: VarselStatus = VarselStatus.PLANLAGT,
-        forPeriode: Periode = Periode(LocalDate.of(2020, 12, 1), LocalDate.of(2020, 12, 22)),
-        opprettet: Instant = Instant.now(),
-        sistEndret: Instant = Instant.now()
-    ): Varsel {
-        return Varsel(
-            varselId = varselId,
-            typeVarsel = typeVarsel,
-            typeVarselOm = typeVarselOm,
-            saksnummer = saksnummer,
-            sendingstidspunkt = sendingstidspunkt.truncatedTo(ChronoUnit.MILLIS),
-            status = status,
-            forPeriode = forPeriode,
-            opprettet = opprettet.truncatedTo(ChronoUnit.MILLIS),
-            sistEndret = sistEndret.truncatedTo(ChronoUnit.MILLIS)
-        )
-    }
 }

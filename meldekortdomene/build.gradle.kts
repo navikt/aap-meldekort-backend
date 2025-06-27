@@ -10,6 +10,7 @@ dependencies {
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.177")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
     implementation(kotlin("reflect"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
