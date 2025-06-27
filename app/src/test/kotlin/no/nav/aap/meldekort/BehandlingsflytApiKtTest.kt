@@ -63,10 +63,10 @@ import kotlin.test.*
         post<Unit>(meldedata)
         dataSource.transaction { dbConnection ->
             val kelvinSakRepository = postgresRepositoryRegistry.provider(dbConnection).provide<KelvinSakRepository>()
-            val meldepliktFraRepository = kelvinSakRepository.hentMeldeplikt(fnr, Fagsaknummer("SAKSNUMMER"))
+            val meldepliktFraRepository = kelvinSakRepository.hentMeldeplikt(Fagsaknummer("SAKSNUMMER"))
             assertEquals(meldepliktFraRepository.map { Periode(it.fom, it.tom) }, meldeplikt)
 
-            val meldeperioderFraRepository = kelvinSakRepository.hentMeldeperioder(fnr, Fagsaknummer("SAKSNUMMER"))
+            val meldeperioderFraRepository = kelvinSakRepository.hentMeldeperioder(Fagsaknummer("SAKSNUMMER"))
             assertEquals(meldeperioderFraRepository.map { Periode(it.fom, it.tom)}, meldeperioder)
         }
     }
