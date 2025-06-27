@@ -24,10 +24,12 @@ class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGa
     private val topic = requiredConfigForKey("brukervarel.topic")
     private val producer = KafkaProducer(producerConfig.properties(), StringSerializer(), StringSerializer())
 
-    override fun sendVarsel(brukerId: Ident,
-                            varsel: Varsel,
-                            varselTekster: VarselTekster,
-                            lenke: String) {
+    override fun sendVarsel(
+        brukerId: Ident,
+        varsel: Varsel,
+        varselTekster: VarselTekster,
+        lenke: String
+    ) {
         val melding = opprettKafkaJson(brukerId, varsel, varselTekster, lenke)
         producer.send(ProducerRecord(topic, varsel.varselId.toString(), melding))
     }
@@ -70,6 +72,10 @@ class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGa
             aktivFremTil = null
             eksternVarsling {
                 preferertKanal = EksternKanal.SMS
+                /*
+                utsettSendingTil = ... kan eventuelt brukes til å styre når varsel sendes i stede for når
+                Kafka-meldingen blir sendt. SMS sendes mellom 9-17.
+                */
             }
         }
     }
