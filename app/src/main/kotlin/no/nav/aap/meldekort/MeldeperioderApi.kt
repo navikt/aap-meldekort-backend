@@ -12,6 +12,8 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.meldeperiode.MeldeperiodeFlateFactory
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import javax.sql.DataSource
 
 fun NormalOpenAPIRoute.meldeperioderApi(
@@ -19,14 +21,19 @@ fun NormalOpenAPIRoute.meldeperioderApi(
     meldeperiodeFlateFactory: MeldeperiodeFlateFactory,
     repositoryRegistry: RepositoryRegistry,
 ) {
+    val log = LoggerFactory.getLogger(javaClass)
+
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: MeldeperiodeFlate.() -> T): T {
         return dataSource.transaction { connection ->
-            val meldeperiodeFlate = meldeperiodeFlateFactory.flateForBruker(
+            val (saksnummer, meldeperiodeFlate) = meldeperiodeFlateFactory.flateForBruker(
                 innloggetBruker = innloggetBruker(),
                 repositoryProvider = repositoryRegistry.provider(connection),
                 gatewayProvider = GatewayProvider
             )
-            meldeperiodeFlate.body()
+
+            MDC.putCloseable("saksnummer", saksnummer).use {
+                meldeperiodeFlate.body()
+            }
         }
     }
 
@@ -34,6 +41,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
                 val kommendeMeldeperioder = aktuelleMeldeperioder(innloggetBruker())
+                log.info("Henter kommende meldeperioder. Fant ${kommendeMeldeperioder.antallUbesvarteMeldeperioder} ubsvarte meldeperioder.")
                 KommendeMeldeperioderDto.fraDomene(kommendeMeldeperioder)
             }
             respond(response)
@@ -42,6 +50,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
                 val historiskeMeldeperioder = historiskeMeldeperioder(innloggetBruker())
+                log.info("Hentet ${historiskeMeldeperioder.size} historiske meldeperioder.")
                 historiskeMeldeperioder.map {
                     HistoriskMeldeperiodeDto.fraDomene(it)
                 }
@@ -52,6 +61,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
         route("detaljer").post<Unit, PeriodeDetaljerDto, PeriodeDto> { _, request ->
             val response = medFlate {
                 val detaljer = periodedetaljer(innloggetBruker(), Periode(request.fom, request.tom))
+                log.info("Henter detaljer for peride ${detaljer.periode}")
                 PeriodeDetaljerDto(detaljer)
             }
             respond(response)
