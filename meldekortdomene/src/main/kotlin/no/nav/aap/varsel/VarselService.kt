@@ -67,7 +67,6 @@ class VarselService(
             typeVarsel = utledTypeVarsel(varselOm),
             typeVarselOm = varselOm,
             saksnummer = fagsaknummer,
-            // TODO hvilket utsendingstidspunkt?
             sendingstidspunkt = meldeperiode.meldevindu.fom.atTime(LocalTime.of(9, 0)).atZone(ZoneId.systemDefault())
                 .toInstant(),
             status = VarselStatus.PLANLAGT,
