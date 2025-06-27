@@ -11,6 +11,7 @@ import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
+import no.nav.aap.varsel.VarselGatewayKafkaProducer
 import org.slf4j.LoggerFactory
 import java.time.Clock
 
@@ -42,5 +43,6 @@ fun setupRegistries() {
         .register<AapGatewayImpl>()
         .register<ArenaGatewayImpl>()
         .register<PdfgenGatewayImpl>()
+        .register<VarselGatewayKafkaProducer>()
         .status()
 }

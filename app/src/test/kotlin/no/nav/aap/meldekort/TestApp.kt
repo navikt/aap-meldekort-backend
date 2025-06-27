@@ -10,6 +10,8 @@ import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
@@ -27,6 +29,7 @@ fun main() {
     FakeServers.start()
 
     setupRegistries()
+    GatewayRegistry.register<FakeVarselGateway>()
 
     val idag = LocalDate.now()
     FakeAapApi.upsert(
@@ -50,7 +53,7 @@ fun main() {
 
     dataSource.transaction { connection ->
         val repositoryProvider = postgresRepositoryRegistry.provider(connection)
-        val kelvinMottakService = KelvinMottakService(repositoryProvider)
+        val kelvinMottakService = KelvinMottakService(repositoryProvider, GatewayProvider, Clock.systemDefaultZone())
         val iDag = LocalDate.now()
         val sistMandag = generateSequence(iDag) { it.minusDays(1) }
             .first { it.dayOfWeek == DayOfWeek.MONDAY }
@@ -77,8 +80,6 @@ fun main() {
             status = KelvinSakStatus.LØPENDE,
         )
     }
-
-    setupRegistries()
 
     startHttpServer(
         port = 8080,

@@ -16,7 +16,11 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
+import no.nav.aap.varsel.InaktiverVarselSteg
+import no.nav.aap.varsel.VarselService
 import org.slf4j.LoggerFactory
+import java.time.Clock
 
 enum class UtfyllingFlytNavn(
     val steg: List<UtfyllingStegNavn>,
@@ -53,6 +57,7 @@ enum class UtfyllingFlytNavn(
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
+            INAKTIVER_VARSEL,
             KVITTERING,
         )
     ),
@@ -172,7 +177,8 @@ class UtfyllingFlyt(
         fun konstruer(
             repositoryProvider: RepositoryProvider,
             gatewayProvider: GatewayProvider,
-            flytNavn: UtfyllingFlytNavn
+            flytNavn: UtfyllingFlytNavn,
+            clock: Clock,
         ): UtfyllingFlyt {
             return UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
@@ -185,6 +191,7 @@ class UtfyllingFlyt(
                         ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(ArenaSakService())
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
                         BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))
+                        INAKTIVER_VARSEL -> InaktiverVarselSteg(VarselService(repositoryProvider, gatewayProvider, clock))
                         KVITTERING -> KvitteringSteg
                     }
                 }

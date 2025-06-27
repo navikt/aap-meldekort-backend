@@ -31,6 +31,8 @@ spec:
             destinations:
                 - id: elastic
                 - id: loki
+    kafka:
+        pool: nav-dev
     prometheus:
         enabled: true
         path: /actuator/metrics
@@ -105,4 +107,8 @@ spec:
           value: http://pdfgen-meldekort.aap
         - name: BEHANDLINGSFLYT_AZP
           value: 5b4656d2-e8f0-4df1-9e10-269133df697f
+        - name: AAP_MELDEKORT_LENKE
+          value: https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort
+        - name: BRUKERVARSEL_TOPIC
+          value: min-side.aapen-brukervarsel-v1
 

@@ -28,12 +28,14 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.TOKENX
 import no.nav.aap.komponenter.server.commonKtorModule
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlateFactoryImpl
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
+import no.nav.aap.varsel.SendVarselJobbUtfører
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.util.concurrent.TimeUnit
@@ -120,7 +122,7 @@ fun startHttpServer(
             authenticate(AZURE) {
                 apiRouting {
                     motorApi(dataSource)
-                    behandlingsflytApi(dataSource, repositoryRegistry)
+                    behandlingsflytApi(dataSource, repositoryRegistry, GatewayProvider, clock)
                 }
             }
             actuator(prometheus, motor)
@@ -141,6 +143,7 @@ private fun Application.startMotor(
         jobber = listOf(
             JournalføringJobbUtfører.jobbKonstruktør(repositoryRegistry),
             SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
+            SendVarselJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
         ),
         prometheus = prometheus,
     )

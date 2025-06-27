@@ -8,7 +8,6 @@ import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 
 class StartUtfyllingRequest(
@@ -131,7 +130,8 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
                 UtfyllingStegNavn.ARENAKONTROLL_VANLIG,
                 UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING,
                 UtfyllingStegNavn.PERSISTER_OPPLYSNINGER,
-                UtfyllingStegNavn.BESTILL_JOURNALFØRING -> error("skal ikke stoppe i teknisk steg")
+                UtfyllingStegNavn.BESTILL_JOURNALFØRING,
+                UtfyllingStegNavn.INAKTIVER_VARSEL -> error("skal ikke stoppe i teknisk steg")
             }
         }
     }

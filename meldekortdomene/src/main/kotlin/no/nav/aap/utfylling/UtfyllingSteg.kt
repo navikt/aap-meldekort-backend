@@ -20,6 +20,7 @@ enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     ARENAKONTROLL_KORRIGERING(erTeknisk = true),
     PERSISTER_OPPLYSNINGER(erTeknisk = true),
     BESTILL_JOURNALFØRING(erTeknisk = true),
+    INAKTIVER_VARSEL(erTeknisk = true),
     KVITTERING,
 }
 

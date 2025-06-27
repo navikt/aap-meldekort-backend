@@ -18,6 +18,8 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
+    implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
+    implementation("org.apache.kafka:kafka-clients:4.0.0")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.flywaydb:flyway-database-postgresql:11.10.0")
@@ -40,4 +42,5 @@ dependencies {
     testFixturesImplementation("io.micrometer:micrometer-core:1.15.1")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
+    testImplementation("org.testcontainers:kafka:1.21.2")
 }
