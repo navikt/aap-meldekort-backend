@@ -54,8 +54,8 @@ class KelvinMeldeperiodeFlateTest {
     @BeforeEach
     fun setUp() {
         every { kelvinSakRepository.hentSak(any(), any()) } returns sak
-        every { kelvinSakRepository.hentMeldeperioder(any(), any()) } returns meldeperioder
-        every { kelvinSakRepository.hentOpplysningsbehov(any(), any()) } returns meldeperioder
+        every { kelvinSakRepository.hentMeldeperioder(any()) } returns meldeperioder
+        every { kelvinSakRepository.hentOpplysningsbehov(any()) } returns meldeperioder
     }
 
     @Test

@@ -14,11 +14,15 @@ interface FakeServer {
     val port: Int get() = 0
 }
 
-class FakeServers : AutoCloseable {
+object FakeServers : AutoCloseable {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
         .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
+
+    init {
+        Runtime.getRuntime().addShutdownHook(Thread { close() })
+    }
 
     private val started = AtomicBoolean(false)
 
@@ -51,6 +55,17 @@ class FakeServers : AutoCloseable {
             httpServer.stop(0L, 0L)
         }
     }
+
+    @Suppress("PropertyName")
+    data class TestToken(
+        val access_token: String,
+        val refresh_token: String = "very.secure.token",
+        val id_token: String = "very.secure.token",
+        val token_type: String = "token-type",
+        val scope: String? = null,
+        val expires_in: Int = 3599,
+    )
+
 }
 
 fun EmbeddedServer<*, *>.port(): Int {

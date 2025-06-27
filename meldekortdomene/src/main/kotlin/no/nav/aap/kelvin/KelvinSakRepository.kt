@@ -3,7 +3,6 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.Repository
 import no.nav.aap.sak.Fagsaknummer
-import no.nav.aap.sak.Sak
 import java.time.LocalDate
 
 interface KelvinSakRepository: Repository {
@@ -16,8 +15,8 @@ interface KelvinSakRepository: Repository {
         opplysningsbehov: List<Periode>,
         status: KelvinSakStatus?,
     )
-    fun hentMeldeperioder(ident: Ident, saksnummer: Fagsaknummer): List<Periode>
+    fun hentMeldeperioder(saksnummer: Fagsaknummer): List<Periode>
     fun hentSak(ident: Ident, påDag: LocalDate): KelvinSak?
-    fun hentMeldeplikt(ident: Ident, saksnummer: Fagsaknummer): List<Periode>
-    fun hentOpplysningsbehov(ident: Ident, saksnummer: Fagsaknummer): List<Periode>
+    fun hentMeldeplikt(saksnummer: Fagsaknummer): List<Periode>
+    fun hentOpplysningsbehov(saksnummer: Fagsaknummer): List<Periode>
 }
