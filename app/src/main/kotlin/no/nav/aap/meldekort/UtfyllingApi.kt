@@ -17,6 +17,7 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingFlateFactory
 import no.nav.aap.utfylling.UtfyllingReferanse
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.util.*
 import javax.sql.DataSource
@@ -26,19 +27,24 @@ fun NormalOpenAPIRoute.utfyllingApi(
     utfyllingFlateFactory: UtfyllingFlateFactory,
     repositoryRegistry: RepositoryRegistry,
 ) {
+    val log = LoggerFactory.getLogger(javaClass)
+
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(
         utfyllingReferanse: UtfyllingReferanse? = null,
         body: UtfyllingFlate.() -> T,
     ): T {
         return MDC.putCloseable("utfylling", utfyllingReferanse?.asUuid?.toString()).use {
             dataSource.transaction { connection ->
-                val flate = utfyllingFlateFactory.flateForBruker(
+                val (saksnummer, flate) = utfyllingFlateFactory.flateForBruker(
                     innloggetBruker(),
                     repositoryProvider = repositoryRegistry.provider(connection),
                     gatewayProvider = GatewayProvider,
                     connection = connection,
                 )
-                flate.body()
+
+                MDC.putCloseable("saksnummer", saksnummer).use {
+                    flate.body()
+                }
             }
         }
     }
@@ -46,7 +52,9 @@ fun NormalOpenAPIRoute.utfyllingApi(
     route("start-innsending").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { _, body ->
         val response = try {
             medFlate {
-                val resultat = startUtfylling(innloggetBruker(), Periode(body.fom, body.tom))
+                val periode = Periode(body.fom, body.tom)
+                log.info("Starter innsending av meldekort for periode $periode")
+                val resultat = startUtfylling(innloggetBruker(), periode)
                 StartUtfyllingResponse.fraDomene(resultat)
             }
         } catch (exception: Exception) {
@@ -118,6 +126,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
                 )
+                log.info("Lagret utfylling for periode ${utfylling.utfylling.periode}")
                 UtfyllingResponseDto.fraDomene(utfylling)
             }
             respond(response)

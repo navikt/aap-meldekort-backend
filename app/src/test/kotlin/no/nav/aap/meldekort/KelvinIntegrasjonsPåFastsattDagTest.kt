@@ -218,14 +218,11 @@ class KelvinIntegrasjonsPåFastsattDagTest {
             )
         }
 
-
-        private val fakeServers = FakeServers()
-
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
             FakeTokenX.port = 0
-            fakeServers.start()
+            FakeServers.start()
 
             setupRegistries()
 
@@ -254,7 +251,6 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         @AfterAll
         fun afterAll() {
             embeddedServer.stop(0L, 0L)
-            fakeServers.close()
         }
     }
 }

@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val komponenterVersjon = "1.0.269"
-val junitVersjon = "5.13.1"
-val tilgangVersjon = "1.0.80"
+val komponenterVersjon = "1.0.274"
+val junitVersjon = "5.13.2"
+val tilgangVersjon = "1.0.87"
 val ktorVersion = "3.2.0"
 
 plugins {
@@ -35,6 +35,7 @@ tasks {
 
 fun runCommand(command: String): String {
     val execResult = providers.exec {
+        this.workingDir = project.projectDir
         commandLine(command.split("\\s".toRegex()))
     }.standardOutput.asText
 
@@ -69,7 +70,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.18")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
-    api("no.nav:ktor-openapi-generator:1.0.113")
+    api("no.nav:ktor-openapi-generator:1.0.115")
 
     testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")

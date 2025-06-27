@@ -1,5 +1,5 @@
-val komponenterVersjon = "1.0.269"
-val junitVersjon = "5.13.1"
+val komponenterVersjon = "1.0.274"
+val junitVersjon = "5.13.2"
 
 plugins {
     id("meldekort.conventions")
@@ -21,6 +21,6 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testImplementation("io.mockk:mockk:1.14.2")
+    testImplementation("io.mockk:mockk:1.14.4")
     testImplementation(kotlin("test"))
 }

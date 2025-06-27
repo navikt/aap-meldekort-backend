@@ -26,7 +26,7 @@ import java.time.LocalDate
 
 fun main() {
     FakeTokenX.port = 8081
-    FakeServers().start()
+    FakeServers.start()
 
     setupRegistries()
     GatewayRegistry.register<FakeVarselGateway>()

@@ -1,5 +1,5 @@
-val komponenterVersjon = "1.0.269"
-val junitVersjon = "5.13.1"
+val komponenterVersjon = "1.0.274"
+val junitVersjon = "5.13.2"
 
 plugins {
     id("meldekort.conventions")
@@ -22,7 +22,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.0.0")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
-    implementation("org.flywaydb:flyway-database-postgresql:11.9.1")
+    implementation("org.flywaydb:flyway-database-postgresql:11.10.0")
     runtimeOnly("org.postgresql:postgresql:42.7.7")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
