@@ -2,6 +2,7 @@ package no.nav.aap.kelvin
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Fagsaknummer
@@ -34,6 +35,9 @@ class KelvinMottakService(private val varselService: VarselService,
             opplysningsbehov = opplysningsbehov,
             status = status
         )
-        varselService.planleggFremtidigeVarsler(saksnummer)
+        if (!Miljø.erProd()) {
+            // NB! Hvis "!er prod" fjernes, vurder å fjerne det fra SendVarselJobbUtfører samtidig
+            varselService.planleggFremtidigeVarsler(saksnummer)
+        }
     }
 }
