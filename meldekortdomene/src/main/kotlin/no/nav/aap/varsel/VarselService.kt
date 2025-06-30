@@ -47,11 +47,17 @@ class VarselService(
             log.warn("Meldevindu i meldeperioder samsvarer ikke med fremtidige meldeplikt-perioder fra Kelvin")
         }
 
+        varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
+        varselRepository.hentVarsler(saksnummer)
+            .filter { it.status == VarselStatus.SENDT }
+            .filterNot { meldelerioder.map { it.meldeperioden }.contains(it.forPeriode) }
+            .forEach { varsel ->
+                inaktiverVarsel(varsel)
+            }
+
         val varsler = meldelerioder.map {
             lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
         }
-
-        varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
         varsler.forEach { varsel ->
             varselRepository.upsert(varsel)
         }
@@ -96,7 +102,12 @@ class VarselService(
     }
 
     private fun sendVarsel(varsel: Varsel) {
-        varselRepository.upsert(varsel.copy(status = VarselStatus.SENDT))
+        varselRepository.upsert(
+            varsel.copy(
+                status = VarselStatus.SENDT,
+                sistEndret = Instant.now(clock),
+            )
+        )
 
         // TODO hent gjeldende ident fra PDL
         val brukerId = kelvinSakRepository.hentIdenter(varsel.saksnummer).first()
@@ -109,10 +120,11 @@ class VarselService(
             brukerId = brukerId,
             varsel = varsel,
             varselTekster = varselTekster,
-            lenke = requiredConfigForKey("aap.meldekort.lenke"))
+            lenke = requiredConfigForKey("aap.meldekort.lenke")
+        )
     }
 
-    fun inaktiverVarsel(utfylling: Utfylling) {
+    fun inaktiverVarselForUtfylling(utfylling: Utfylling) {
         if (utfylling.fagsak.system != FagsystemNavn.KELVIN) return
 
         val varsel = varselRepository.hentVarsler(utfylling.fagsak.nummer)
@@ -123,11 +135,20 @@ class VarselService(
             }
 
         if (varsel != null) {
-            log.info("Inaktiverer varsel med varsel id ${varsel.varselId}")
-            varselRepository.upsert(varsel.copy(status = VarselStatus.INAKTIVERT))
-            varselGateway.inaktiverVarsel(varsel)
+            inaktiverVarsel(varsel)
         } else {
             log.info("Fant ikke varsel å inaktivere for utfylling periode ${utfylling.periode}")
         }
+    }
+
+    private fun inaktiverVarsel(varsel: Varsel) {
+        log.info("Inaktiverer varsel med varsel id ${varsel.varselId}")
+        varselRepository.upsert(
+            varsel.copy(
+                status = VarselStatus.INAKTIVERT,
+                sistEndret = Instant.now(clock)
+            )
+        )
+        varselGateway.inaktiverVarsel(varsel)
     }
 }

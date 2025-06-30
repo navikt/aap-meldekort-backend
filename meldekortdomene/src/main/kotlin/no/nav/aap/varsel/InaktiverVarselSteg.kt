@@ -10,6 +10,6 @@ class InaktiverVarselSteg(
 ) : UtfyllingSteg {
     override val navn = INAKTIVER_VARSEL
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        varselService.inaktiverVarsel(utfylling)
+        varselService.inaktiverVarselForUtfylling(utfylling)
     }
 }

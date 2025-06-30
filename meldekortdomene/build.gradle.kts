@@ -13,6 +13,9 @@ dependencies {
     implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
     implementation(kotlin("reflect"))
 
+    testImplementation(project(":repositories"))
+    testImplementation(project(":lib-test"))
+    testImplementation("no.nav.aap.kelvin:dbtest:${komponenterVersjon}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
     testImplementation("org.assertj:assertj-core:3.27.3")
