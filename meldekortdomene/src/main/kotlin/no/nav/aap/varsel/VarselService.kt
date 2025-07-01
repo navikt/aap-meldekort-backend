@@ -165,7 +165,7 @@ class VarselService(
         if (varsel != null) {
             inaktiverVarsel(varsel)
         } else {
-            log.info("Fant ikke varsel å inaktivere for utfylling ${utfylling.referanse.asUuid}, periode ${utfylling.periode}")
+            log.info("Fant ikke varsel å inaktivere for utfylling. Referanse: ${utfylling.referanse.asUuid}, saksnummer: ${utfylling.fagsak.nummer}, periode: ${utfylling.periode}")
         }
     }
 
