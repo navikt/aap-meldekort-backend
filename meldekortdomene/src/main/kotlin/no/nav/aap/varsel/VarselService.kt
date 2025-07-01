@@ -46,7 +46,7 @@ class VarselService(
                 .filter { meldeplikt.contains(it.meldevindu) }
 
         if (meldeperioderMedMeldeplikt.size != meldeplikt.size) {
-            log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin")
+            log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin. Saksnummer: ${saksnummer.asString}")
         }
 
         varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
@@ -165,7 +165,7 @@ class VarselService(
         if (varsel != null) {
             inaktiverVarsel(varsel)
         } else {
-            log.info("Fant ikke varsel å inaktivere for utfylling periode ${utfylling.periode}")
+            log.info("Fant ikke varsel å inaktivere for utfylling ${utfylling.referanse.asUuid}, periode ${utfylling.periode}")
         }
     }
 
