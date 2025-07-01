@@ -9,6 +9,6 @@ data class VarselTekster(
 
 val TEKSTER_OPPGAVE_MELDEPLIKTPERIODE = VarselTekster(
     nb = "Du må sende meldekort. Klikk her for å fylle det ut, og sende det inn.",
-    nn = "", // TODO legg inn tekster
+    nn = "Du må sende meldekort. Klikk her for å fylle det ut, og sende det inn.",
     en = "You need to send us your employment status form. Click here to fill out and submit."
 )
