@@ -1,5 +1,5 @@
 val ktorVersion = "3.2.0"
-val komponenterVersjon = "1.0.274"
+val komponenterVersjon = "1.0.277"
 val junitVersjon = "5.13.2"
 val jacksonVersjon = "2.19.1"
 
@@ -39,5 +39,5 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.3")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    implementation("org.testcontainers:postgresql:1.21.2")
+    implementation("org.testcontainers:postgresql:1.21.3")
 }
