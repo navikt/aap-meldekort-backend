@@ -36,26 +36,26 @@ class VarselService(
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun planleggFremtidigeVarsler(saksnummer: Fagsaknummer) {
-        val meldeplikt =
-            kelvinSakRepository.hentMeldeplikt(saksnummer)
-                .filter { it.fom.isAfter(LocalDate.now(clock)) }
+        val meldeplikt = kelvinSakRepository.hentMeldeplikt(saksnummer)
 
-        val meldelerioder = kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
+        val meldeperioder = kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
             .filter { meldeplikt.contains(it.meldevindu) }
 
-        if (meldelerioder.size != meldeplikt.size) {
-            log.warn("Meldevindu i meldeperioder samsvarer ikke med fremtidige meldeplikt-perioder fra Kelvin")
+        if (meldeperioder.size != meldeplikt.size) {
+            log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin")
         }
 
         varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
         varselRepository.hentVarsler(saksnummer)
             .filter { it.status == VarselStatus.SENDT }
-            .filterNot { meldelerioder.map { it.meldeperioden }.contains(it.forPeriode) }
+            .filterNot { varsel -> meldeperioder.map { it.meldeperioden }.contains(varsel.forPeriode) }
             .forEach { varsel ->
                 inaktiverVarsel(varsel)
             }
 
-        val varsler = meldelerioder.map {
+        val fremtidigeMeldeperioder =
+            meldeperioder.filter { it.meldevindu.fom.isAfter(LocalDate.now(clock)) }
+        val varsler = fremtidigeMeldeperioder.map {
             lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
         }
         varsler.forEach { varsel ->

@@ -242,8 +242,92 @@ class VarselServiceTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `ved ny info fra mottak der det er en tidligere meldepliktperiode det er sendt varsel for, så beholdes varselet`() {
+        InitTestDatabase.freshDatabase().transaction { connection ->
+            val varselRepository = VarselRepositoryPostgres(connection)
+
+            val saksnummer = saksnummerGenerator.next()
+            val ident = fødselsnummerGenerator.next()
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 6, 30).plusYears(1))
+            val opplysningsbehov = listOf(sakenGjelderFor)
+            val meldeperioder = lagPerioder(
+                LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 7, 13),
+                LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 27)
+            )
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 6, 30).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder = meldeperioder,
+                meldeplikt = lagPerioder(
+                    LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 21),
+                    LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4)
+                ),
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            varselService(connection, clockMedTid(LocalDateTime.of(2025, 7, 14, 10, 0)))
+                .sendPlanlagteVarsler()
+
+            verify(exactly = 1) { varselGateway.sendVarsel(ident, any(), any(), any()) }
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 14, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    status = VarselStatus.SENDT
+                ),
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 7, 27).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder,
+                meldeplikt = lagPerioder(
+                    LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 21),
+                    LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4)
+                ),
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            verify(exactly = 0) { varselGateway.inaktiverVarsel(any()) }
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 14, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    status = VarselStatus.SENDT
+                ),
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+        }
 
     }
+
 
     @Test
     fun `lager ingen varsler dersom meldeplikt er tom`() {
