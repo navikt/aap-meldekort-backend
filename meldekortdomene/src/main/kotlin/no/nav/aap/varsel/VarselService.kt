@@ -41,31 +41,45 @@ class VarselService(
     fun planleggFremtidigeVarsler(saksnummer: Fagsaknummer) {
         val meldeplikt = kelvinSakRepository.hentMeldeplikt(saksnummer)
 
-        val meldeperioder = kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
-            .filter { meldeplikt.contains(it.meldevindu) }
+        val meldeperioderMedMeldeplikt =
+            kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
+                .filter { meldeplikt.contains(it.meldevindu) }
 
-        if (meldeperioder.size != meldeplikt.size) {
+        if (meldeperioderMedMeldeplikt.size != meldeplikt.size) {
             log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin")
         }
 
         varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
-        inaktiverVarslerForFjernetMeldeplikt(saksnummer, meldeperioder)
-        lagreFremtidigeVarsler(saksnummer, meldeperioder)
+        val sendteVarsler = varselRepository.hentVarsler(saksnummer).filter { it.status == VarselStatus.SENDT }
+        inaktiverVarslerForFjernetMeldeplikt(meldeperioderMedMeldeplikt, sendteVarsler)
+        lagreFremtidigeVarsler(saksnummer, meldeperioderMedMeldeplikt, sendteVarsler)
     }
 
-    private fun inaktiverVarslerForFjernetMeldeplikt(saksnummer: Fagsaknummer, meldeperioder: List<Meldeperiode>) {
-        varselRepository.hentVarsler(saksnummer)
-            .filter { it.status == VarselStatus.SENDT }
+    private fun inaktiverVarslerForFjernetMeldeplikt(
+        meldeperioder: List<Meldeperiode>,
+        sendteVarsler: List<Varsel>
+    ) {
+        sendteVarsler
             .filterNot { varsel -> meldeperioder.map { it.meldeperioden }.contains(varsel.forPeriode) }
             .forEach { varsel ->
                 inaktiverVarsel(varsel)
             }
     }
 
-    private fun lagreFremtidigeVarsler(saksnummer: Fagsaknummer, meldeperioder: List<Meldeperiode>) {
+    private fun lagreFremtidigeVarsler(
+        saksnummer: Fagsaknummer,
+        meldeperioder: List<Meldeperiode>,
+        sendteVarsler: List<Varsel>
+    ) {
         val avsluttedeUtfyllinger = utfyllingRepository.hentUtfyllinger(saksnummer).filter { it.erAvsluttet }
         val fremtidigeMeldeperioder =
-            meldeperioder.filter { it.meldevindu.fom.isAfter(LocalDate.now(clock)) }
+            meldeperioder.filter { meldeperiode ->
+                val erIMeldevinduet = meldeperiode.meldevindu.contains(LocalDate.now(clock))
+                val harSendtVarselForPerioden = sendteVarsler.map { it.forPeriode }.contains(meldeperiode.meldeperioden)
+                val meldevinduIFremtiden = meldeperiode.meldevindu.fom.isAfter(LocalDate.now(clock))
+
+                (erIMeldevinduet && !harSendtVarselForPerioden) || meldevinduIFremtiden
+            }
         val varsler = fremtidigeMeldeperioder
             .filterNot { harUtfylling(it, avsluttedeUtfyllinger) }
             .map { lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE) }
