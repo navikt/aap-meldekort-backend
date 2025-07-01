@@ -54,7 +54,7 @@ class VarselServiceTest {
         every { varselGateway.inaktiverVarsel(any()) } just Runs
     }
 
-    private val zoneId = ZoneId.of("Europe/Oslo")
+    private val zoneId = ZoneId.systemDefault()
 
     private fun clockMedTid(dateTime: LocalDateTime): Clock {
         return Clock.fixed(
