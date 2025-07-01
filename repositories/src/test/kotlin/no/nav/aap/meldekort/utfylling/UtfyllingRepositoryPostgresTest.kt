@@ -2,8 +2,11 @@ package no.nav.aap.meldekort.utfylling
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.meldekort.fødselsnummerGenerator
+import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
@@ -13,6 +16,7 @@ import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -107,7 +111,12 @@ class UtfyllingRepositoryPostgresTest {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val ref = repo.ny(LocalDate.of(2020, 1, 1))
+            val ref = repo.ny(
+                saksnummer = Fagsaknummer("111"),
+                ident = ident,
+                opprettet = LocalDate.of(2020, 1, 1),
+                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
+            )
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
             assertNull(repo.lastUtfylling(ident, ref))
@@ -119,7 +128,12 @@ class UtfyllingRepositoryPostgresTest {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val ref = repo.ny(LocalDate.of(2019, 1, 1))
+            val ref = repo.ny(
+                saksnummer = Fagsaknummer("111"),
+                ident = ident,
+                opprettet = LocalDate.of(2019, 1, 1),
+                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
+            )
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
             assertNull(repo.lastUtfylling(ident, ref))
@@ -131,13 +145,21 @@ class UtfyllingRepositoryPostgresTest {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val utfylling = repo.ny(LocalDate.of(2019, 1, 1)).let {
-                repo.lastUtfylling(ident, it)!!
-            }
+            val utfylling =
+                repo.ny(
+                    saksnummer = Fagsaknummer("111"),
+                    ident = ident,
+                    opprettet = LocalDate.of(2019, 1, 1),
+                    periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
+                ).let {
+                    repo.lastUtfylling(ident, it)!!
+                }
 
-            repo.lagrUtfylling(utfylling.copy(
-                aktivtSteg = utfylling.flyt.steg.last(),
-            ))
+            repo.lagrUtfylling(
+                utfylling.copy(
+                    aktivtSteg = utfylling.flyt.steg.last(),
+                )
+            )
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
             assertNotNull(repo.lastUtfylling(ident, utfylling.referanse))
@@ -149,28 +171,105 @@ class UtfyllingRepositoryPostgresTest {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
-            val ref = repo.ny(LocalDate.of(2020, 1, 3))
+            val ref = repo.ny(
+                saksnummer = Fagsaknummer("111"),
+                ident = ident,
+                opprettet = LocalDate.of(2020, 1, 3),
+                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
+            )
             repo.slettGamleUtkast(LocalDate.of(2020, 1, 1))
 
             assertNotNull(repo.lastUtfylling(ident, ref))
         }
     }
+
+    @Test
+    fun `hent utfyllinger for sak`() {
+        InitTestDatabase.freshDatabase().transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val sak1 = saksnummerGenerator.next()
+            val sak2 = saksnummerGenerator.next()
+
+            repo.ny(
+                saksnummer = sak1,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 6, 16),
+                periode = Periode(LocalDate.of(2025, 6, 12), LocalDate.of(2025, 6, 25))
+            )
+            repo.ny(
+                saksnummer = sak1,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 6, 27),
+                periode = Periode(LocalDate.of(2025, 6, 26), LocalDate.of(2025, 7, 8))
+            )
+            repo.ny(
+                saksnummer = sak1,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 5, 6),
+                periode = Periode(LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 18))
+            )
+            repo.ny(
+                saksnummer = sak1,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 5, 24),
+                periode = Periode(LocalDate.of(2025, 5, 19), LocalDate.of(2025, 6, 1))
+            )
+            repo.ny(
+                saksnummer = sak2,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 4, 9),
+                periode = Periode(LocalDate.of(2025, 4, 7), LocalDate.of(2025, 4, 20))
+            )
+            repo.ny(
+                saksnummer = sak2,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 4, 21),
+                periode = Periode(LocalDate.of(2025, 4, 21), LocalDate.of(2025, 5, 4))
+            )
+            repo.ny(
+                saksnummer = sak2,
+                ident = fødselsnummerGenerator.next(),
+                opprettet = LocalDate.of(2025, 5, 7),
+                periode = Periode(LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 18))
+            )
+
+            assertThat(repo.hentUtfyllinger(sak1).map { it.periode }).containsExactlyInAnyOrder(
+                Periode(LocalDate.of(2025, 6, 12), LocalDate.of(2025, 6, 25)),
+                Periode(LocalDate.of(2025, 6, 26), LocalDate.of(2025, 7, 8)),
+                Periode(LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 18)),
+                Periode(LocalDate.of(2025, 5, 19), LocalDate.of(2025, 6, 1))
+            )
+
+            assertThat(repo.hentUtfyllinger(sak2).map { it.periode }).containsExactlyInAnyOrder(
+                Periode(LocalDate.of(2025, 4, 7), LocalDate.of(2025, 4, 20)),
+                Periode(LocalDate.of(2025, 4, 21), LocalDate.of(2025, 5, 4)),
+                Periode(LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 18))
+            )
+        }
+    }
 }
 
-private fun UtfyllingRepositoryPostgres.ny(opprettet: LocalDate): UtfyllingReferanse {
+private fun UtfyllingRepositoryPostgres.ny(
+    saksnummer: Fagsaknummer,
+    ident: Ident,
+    opprettet: LocalDate,
+    periode: Periode,
+): UtfyllingReferanse {
     val utfylingReferanse = UtfyllingReferanse.ny()
-    val periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
-    this.lagrUtfylling(Utfylling(
-        referanse = utfylingReferanse,
-        fagsak = FagsakReferanse(FagsystemNavn.KELVIN, Fagsaknummer("111")),
-        ident = ident,
-        periode = periode,
-        flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
-        aktivtSteg = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT.steg.first(),
-        svar = Svar.tomt(periode),
-        opprettet = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
-        sistEndret = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
-    ))
+    this.lagrUtfylling(
+        Utfylling(
+            referanse = utfylingReferanse,
+            fagsak = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
+            ident = ident,
+            periode = periode,
+            flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
+            aktivtSteg = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT.steg.first(),
+            svar = Svar.tomt(periode),
+            opprettet = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
+            sistEndret = opprettet.atStartOfDay(ZoneId.of("Europe/Oslo")).toInstant(),
+        )
+    )
 
     return utfylingReferanse
 }

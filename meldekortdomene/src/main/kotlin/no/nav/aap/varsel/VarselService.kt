@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
 import no.nav.aap.komponenter.config.requiredConfigForKey
+import no.nav.aap.utfylling.UtfyllingRepository
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -22,6 +23,7 @@ class VarselService(
     private val kelvinSakService: KelvinSakService,
     private val kelvinSakRepository: KelvinSakRepository,
     private val varselRepository: VarselRepository,
+    private val utfyllingRepository: UtfyllingRepository,
     private val varselGateway: VarselGateway,
     private val clock: Clock
 ) {
@@ -29,6 +31,7 @@ class VarselService(
         kelvinSakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         varselRepository = repositoryProvider.provide(),
+        utfyllingRepository = repositoryProvider.provide(),
         varselGateway = gatewayProvider.provide(),
         clock = clock
     )
@@ -46,21 +49,33 @@ class VarselService(
         }
 
         varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
+        inaktiverVarslerForFjernetMeldeplikt(saksnummer, meldeperioder)
+        lagreFremtidigeVarsler(saksnummer, meldeperioder)
+    }
+
+    private fun inaktiverVarslerForFjernetMeldeplikt(saksnummer: Fagsaknummer, meldeperioder: List<Meldeperiode>) {
         varselRepository.hentVarsler(saksnummer)
             .filter { it.status == VarselStatus.SENDT }
             .filterNot { varsel -> meldeperioder.map { it.meldeperioden }.contains(varsel.forPeriode) }
             .forEach { varsel ->
                 inaktiverVarsel(varsel)
             }
+    }
 
+    private fun lagreFremtidigeVarsler(saksnummer: Fagsaknummer, meldeperioder: List<Meldeperiode>) {
+        val avsluttedeUtfyllinger = utfyllingRepository.hentUtfyllinger(saksnummer).filter { it.erAvsluttet }
         val fremtidigeMeldeperioder =
             meldeperioder.filter { it.meldevindu.fom.isAfter(LocalDate.now(clock)) }
-        val varsler = fremtidigeMeldeperioder.map {
-            lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE)
-        }
+        val varsler = fremtidigeMeldeperioder
+            .filterNot { harUtfylling(it, avsluttedeUtfyllinger) }
+            .map { lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE) }
         varsler.forEach { varsel ->
             varselRepository.upsert(varsel)
         }
+    }
+
+    private fun harUtfylling(meldeperiode: Meldeperiode, utfyllinger: List<Utfylling>): Boolean {
+        return utfyllinger.map { it.periode }.contains(meldeperiode.meldeperioden)
     }
 
     fun lagVarsel(

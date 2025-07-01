@@ -61,6 +61,23 @@ class UtfyllingRepositoryPostgres(
         }
     }
 
+    override fun hentUtfyllinger(saksnummer: Fagsaknummer): List<Utfylling> {
+        return connection.queryList(
+            """
+                select *
+                from utfylling
+                where utfylling.fagsaknummer = ?
+            """.trimIndent()
+        ) {
+            setParams {
+                setString(1, saksnummer.asString)
+            }
+            setRowMapper {
+                utfyllingRowMapper(it)
+            }
+        }
+    }
+
     override fun lagrUtfylling(utfylling: Utfylling) {
         connection.execute(
             """

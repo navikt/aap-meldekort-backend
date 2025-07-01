@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
@@ -23,6 +24,8 @@ import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
+import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
+import no.nav.aap.utfylling.UtfyllingStegNavn
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -361,6 +364,68 @@ class VarselServiceTest {
     }
 
     @Test
+    fun `lager ikke varsel for meldeplikt der det allerede er en ferdig utfylling`() {
+        InitTestDatabase.freshDatabase().transaction { connection ->
+            val varselRepository = VarselRepositoryPostgres(connection)
+
+            val saksnummer = saksnummerGenerator.next()
+            val ident = fødselsnummerGenerator.next()
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 6, 30).plusYears(1))
+            val opplysningsbehov = listOf(sakenGjelderFor)
+
+            val utfyllingRepository = UtfyllingRepositoryPostgres(connection)
+
+            utfyllingRepository.lagrUtfylling(
+                byggUtfylling(
+                    saksnummer = saksnummer,
+                    ident = ident,
+                    periode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    UtfyllingFlytNavn.AAP_FLYT.steg.last()
+                )
+            )
+
+            utfyllingRepository.lagrUtfylling(
+                byggUtfylling(
+                    saksnummer = saksnummer,
+                    ident = ident,
+                    periode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    UtfyllingFlytNavn.AAP_FLYT.steg.first()
+                )
+            )
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 6, 30).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder = lagPerioder(
+                    LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 7, 13),
+                    LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 27)
+                ),
+                meldeplikt = lagPerioder(
+                    LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 21),
+                    LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4)
+                ),
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+
+        }
+    }
+
+
+    @Test
     fun `inaktiverer varsel når det mottas en utfylling for perioden varselet er sendt`() {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
@@ -411,16 +476,11 @@ class VarselServiceTest {
                 connection,
                 clockMedTid(LocalDate.of(2025, 7, 15).atTime(1, 1))
             ).inaktiverVarselForUtfylling(
-                Utfylling(
-                    referanse = UtfyllingReferanse(UUID.randomUUID()),
-                    fagsak = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
+                byggUtfylling(
+                    saksnummer = saksnummer,
                     ident = ident,
                     periode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
-                    flyt = UtfyllingFlytNavn.AAP_FLYT,
-                    aktivtSteg = UtfyllingFlytNavn.AAP_FLYT.steg.first(),
-                    svar = Svar.tomt(Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13))),
-                    opprettet = Instant.now(),
-                    sistEndret = Instant.now(),
+                    UtfyllingFlytNavn.AAP_FLYT.steg.last()
                 )
             )
 
@@ -497,11 +557,36 @@ class VarselServiceTest {
         val timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection)
         val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
         return VarselService(
-            KelvinSakService(
-                kelvinSakRepository,
-                timerArbeidetRepository,
-                clock
-            ), kelvinSakRepository, VarselRepositoryPostgres(connection), varselGateway, clock
+            kelvinSakService = KelvinSakService(
+                kelvinSakRepository = kelvinSakRepository,
+                timerArbeidetRepository = timerArbeidetRepository,
+                clock = clock
+            ),
+            kelvinSakRepository = kelvinSakRepository,
+            varselRepository = VarselRepositoryPostgres(connection),
+            utfyllingRepository = UtfyllingRepositoryPostgres(connection),
+            varselGateway = varselGateway,
+            clock = clock
         )
+    }
+
+    private fun byggUtfylling(
+        saksnummer: Fagsaknummer,
+        ident: Ident,
+        periode: Periode,
+        aktivtSteg: UtfyllingStegNavn
+    ): Utfylling {
+        return Utfylling(
+            referanse = UtfyllingReferanse(UUID.randomUUID()),
+            fagsak = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
+            ident = ident,
+            periode = periode,
+            flyt = UtfyllingFlytNavn.AAP_FLYT,
+            aktivtSteg = aktivtSteg,
+            svar = Svar.tomt(periode),
+            opprettet = Instant.now(),
+            sistEndret = Instant.now(),
+        )
+
     }
 }
