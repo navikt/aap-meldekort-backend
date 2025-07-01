@@ -80,12 +80,12 @@ class VarselService(
 
                 (erIMeldevinduet && !harSendtVarselForPerioden) || meldevinduIFremtiden
             }
-        val varsler = fremtidigeMeldeperioder
+        fremtidigeMeldeperioder
             .filterNot { harUtfylling(it, avsluttedeUtfyllinger) }
             .map { lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE) }
-        varsler.forEach { varsel ->
-            varselRepository.upsert(varsel)
-        }
+            .forEach { varsel ->
+                varselRepository.upsert(varsel)
+            }
     }
 
     private fun harUtfylling(meldeperiode: Meldeperiode, utfyllinger: List<Utfylling>): Boolean {
