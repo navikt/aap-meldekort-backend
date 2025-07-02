@@ -56,7 +56,7 @@ class VarselGatewayKafkaProducerTest {
         )
         val topic = "brukervarsel-topic"
         System.setProperty("brukervarel.topic", topic)
-        val producerConfig = KafkaProducerConfig("meldekort-backend", kafkaContainer.bootstrapServers, sslConfig = null)
+        val producerConfig = KafkaProducerConfig(kafkaContainer.bootstrapServers, sslConfig = null)
         val producer = VarselGatewayKafkaProducer(producerConfig)
 
         val brukerIdent = fødselsnummerGenerator.next()
