@@ -8,14 +8,13 @@ import org.apache.kafka.common.serialization.StringSerializer
 import java.util.Properties
 
 data class KafkaProducerConfig(
-    val clientId: String = requiredConfigForKey("NAIS_APP_NAME"),
     val brokers: String = requiredConfigForKey("KAFKA_BROKERS"),
     val sslConfig: KafkaSslConfig? = KafkaSslConfig(),
 ) {
     fun properties(): Properties {
         return Properties().apply {
             this[ProducerConfig.ACKS_CONFIG] = "all"
-            this[ProducerConfig.CLIENT_ID_CONFIG] = clientId
+            this[ProducerConfig.CLIENT_ID_CONFIG] = "aap-meldekort-backend-producer"
             this[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
             this[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
             this[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = brokers
