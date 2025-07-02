@@ -55,7 +55,7 @@ class VarselGatewayKafkaProducerTest {
             )
         )
         val topic = "brukervarsel-topic"
-        System.setProperty("brukervarel.topic", topic)
+        System.setProperty("brukervarsel.topic", topic)
         val producerConfig = KafkaProducerConfig(kafkaContainer.bootstrapServers, sslConfig = null)
         val producer = VarselGatewayKafkaProducer(producerConfig)
 

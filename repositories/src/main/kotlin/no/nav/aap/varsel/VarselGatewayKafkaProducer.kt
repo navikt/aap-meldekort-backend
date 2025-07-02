@@ -21,7 +21,7 @@ class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGa
         }
     }
 
-    private val topic = requiredConfigForKey("brukervarel.topic")
+    private val topic = requiredConfigForKey("brukervarsel.topic")
     private val producer = KafkaProducer(producerConfig.properties(), StringSerializer(), StringSerializer())
 
     override fun sendVarsel(
