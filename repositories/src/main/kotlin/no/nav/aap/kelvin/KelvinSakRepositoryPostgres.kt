@@ -245,6 +245,28 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
+    override fun hentIdenter(saksnummer: Fagsaknummer): List<Ident> {
+        return connection.queryList(
+            """
+            select kelvin_person_ident.ident
+            from kelvin_sak
+            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
+            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
+            where kelvin_sak.saksnummer = ?
+            order by kelvin_person_ident.oppdatert desc
+        """
+        ) {
+            setParams {
+                setString(1, saksnummer.asString)
+            }
+
+            setRowMapper {
+                Ident(it.getString("ident"))
+            }
+        }
+
+    }
+
     companion object : RepositoryFactory<KelvinSakRepository> {
         override fun konstruer(connection: DBConnection): KelvinSakRepository {
             return KelvinSakRepositoryPostgres(connection)

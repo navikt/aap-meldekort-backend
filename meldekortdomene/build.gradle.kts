@@ -10,8 +10,12 @@ dependencies {
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.177")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
     implementation(kotlin("reflect"))
 
+    testImplementation(project(":repositories"))
+    testImplementation(project(":lib-test"))
+    testImplementation("no.nav.aap.kelvin:dbtest:${komponenterVersjon}")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
     testImplementation("org.assertj:assertj-core:3.27.3")

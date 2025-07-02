@@ -11,16 +11,23 @@ import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
+import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
+import java.time.Clock
 import java.util.*
 import javax.sql.DataSource
 
 
-fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry) {
+fun NormalOpenAPIRoute.behandlingsflytApi(
+    dataSource: DataSource,
+    repositoryRegistry: RepositoryRegistry,
+    gatewayProvider: GatewayProvider,
+    clock: Clock
+) {
     val authorizedAzps = listOfNotNull(configForKey("BEHANDLINGSFLYT_AZP")?.let(UUID::fromString))
 
     route("/api/behandlingsflyt/sak/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
@@ -29,7 +36,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(dataSource: DataSource, repositoryRegi
     ) { _, body ->
         dataSource.transaction { connection ->
             val repositoryProvider = repositoryRegistry.provider(connection)
-            val kelvinMottakService = KelvinMottakService(repositoryProvider)
+            val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
 
             kelvinMottakService.behandleMottatteMeldeperioder(
                 saksnummer = Fagsaknummer(body.saksnummer),
