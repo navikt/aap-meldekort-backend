@@ -30,6 +30,7 @@ fun main() {
 
     setupRegistries()
     GatewayRegistry.register<FakeVarselGateway>()
+    System.setProperty("aap.meldekort.lenke", "test")
 
     val idag = LocalDate.now()
     FakeAapApi.upsert(
