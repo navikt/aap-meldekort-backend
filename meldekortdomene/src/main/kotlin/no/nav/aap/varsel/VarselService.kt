@@ -121,9 +121,7 @@ class VarselService(
     fun sendPlanlagteVarsler() {
         varselRepository.hentVarslerForUtsending(clock)
             .also {
-                if (it.isNotEmpty()) {
-                    log.info("Sender ${it.size} varsler")
-                }
+                log.info("Sender ${it.size} varsler")
             }
             .forEach { varsel ->
                 sendVarsel(varsel)
