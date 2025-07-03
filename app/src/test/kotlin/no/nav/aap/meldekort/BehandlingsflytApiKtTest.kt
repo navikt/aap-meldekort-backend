@@ -18,6 +18,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
+import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.kontrakt.Periode
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.meldekort.test.FakeServers
@@ -110,8 +111,9 @@ import kotlin.test.*
          fun beforeAll() {
              FakeServers.start()
 
-             setupRegistries()
-             GatewayRegistry.register<FakeVarselGateway>()
+             GatewayRegistry
+                 .register<ArenaGatewayImpl>()
+                 .register<FakeVarselGateway>()
 
              embeddedServer =
                  startHttpServer(
