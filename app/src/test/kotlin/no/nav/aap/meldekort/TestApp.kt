@@ -12,6 +12,10 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
+import no.nav.aap.meldekort.arena.ArenaGatewayImpl
+import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
@@ -20,6 +24,8 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA
 import no.nav.aap.sak.FagsystemNavn.KELVIN
+import org.testcontainers.kafka.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -28,9 +34,20 @@ fun main() {
     FakeTokenX.port = 8081
     FakeServers.start()
 
-    setupRegistries()
-    GatewayRegistry.register<FakeVarselGateway>()
-    System.setProperty("aap.meldekort.lenke", "test")
+    val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.0.0"))
+    kafkaContainer.start()
+    System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
+    System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
+    System.setProperty("brukervarsel.topic", "brukervarsel-topic")
+
+    GatewayRegistry
+        .register<DokarkivGatewayImpl>()
+        .register<AapGatewayImpl>()
+        .register<ArenaGatewayImpl>()
+        .register<PdfgenGatewayImpl>()
+        .register<VarselGatewayKafkaProducerTestcontainers>()
+        .status()
+
 
     val idag = LocalDate.now()
     FakeAapApi.upsert(

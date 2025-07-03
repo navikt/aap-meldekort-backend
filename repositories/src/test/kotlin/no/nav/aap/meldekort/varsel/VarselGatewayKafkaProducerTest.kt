@@ -1,10 +1,9 @@
 package no.nav.aap.meldekort.varsel
 
-import no.nav.aap.KafkaProducerConfig
 import no.nav.aap.komponenter.json.DefaultJsonMapper
+import no.nav.aap.meldekort.VarselGatewayKafkaProducerTestcontainers
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.varsel.TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
-import no.nav.aap.varsel.VarselGatewayKafkaProducer
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.OpprettVarsel
 import no.nav.tms.varsel.action.Produsent
@@ -56,13 +55,12 @@ class VarselGatewayKafkaProducerTest {
         )
         val topic = "brukervarsel-topic"
         System.setProperty("brukervarsel.topic", topic)
-        val producerConfig = KafkaProducerConfig(kafkaContainer.bootstrapServers, sslConfig = null)
-        val producer = VarselGatewayKafkaProducer(producerConfig)
+        System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
 
         val brukerIdent = fødselsnummerGenerator.next()
         val varsel = byggVarsel()
 
-        producer.sendVarsel(brukerIdent, varsel, TEKSTER_OPPGAVE_MELDEPLIKTPERIODE, "https://www.nav.no/aap/meldekort")
+        VarselGatewayKafkaProducerTestcontainers.sendVarsel(brukerIdent, varsel, TEKSTER_OPPGAVE_MELDEPLIKTPERIODE, "https://www.nav.no/aap/meldekort")
 
         val consumer = KafkaConsumer<String, String>(kafkaTestConsumerProperties(kafkaContainer.bootstrapServers))
         consumer.subscribe(listOf(topic))

@@ -4,10 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.server.engine.EmbeddedServer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import java.io.InputStream
-import java.net.URI
-import java.time.LocalDate
-import kotlin.test.assertEquals
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.behandlingsflyt.prometheus
@@ -21,6 +17,9 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.lookup.gateway.GatewayRegistry
+import no.nav.aap.meldekort.arena.ArenaGatewayImpl
+import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
@@ -30,10 +29,13 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.io.InputStream
+import java.net.URI
 import java.time.Clock
+import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.test.assertEquals
 
 /**
  * ```
@@ -224,10 +226,11 @@ class KelvinIntegrasjonsPåFastsattDagTest {
             FakeTokenX.port = 0
             FakeServers.start()
 
-            setupRegistries()
+            GatewayRegistry
+                .register<AapGatewayImpl>()
+                .register<ArenaGatewayImpl>()
 
             embeddedServer = run {
-                setupRegistries()
                 startHttpServer(
                     port = 0,
                     prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),

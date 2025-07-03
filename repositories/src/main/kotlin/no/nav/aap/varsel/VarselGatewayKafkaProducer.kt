@@ -3,7 +3,6 @@ package no.nav.aap.varsel
 import no.nav.aap.Ident
 import no.nav.aap.KafkaProducerConfig
 import no.nav.aap.komponenter.config.requiredConfigForKey
-import no.nav.aap.lookup.gateway.Factory
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Sensitivitet
 import no.nav.tms.varsel.action.Tekst
@@ -12,17 +11,27 @@ import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
+import org.slf4j.LoggerFactory
 
-class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGateway {
+object VarselGatewayKafkaProducerNais : VarselGatewayKafkaProducer(KafkaProducerConfig())
 
-    companion object : Factory<VarselGatewayKafkaProducer> {
-        override fun konstruer(): VarselGatewayKafkaProducer {
-            return VarselGatewayKafkaProducer(KafkaProducerConfig())
-        }
+abstract class VarselGatewayKafkaProducer(kafkaProducerConfig: KafkaProducerConfig) : VarselGateway, AutoCloseable {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    val producer: KafkaProducer<String, String> = KafkaProducer(
+        kafkaProducerConfig.properties(),
+        StringSerializer(),
+        StringSerializer()
+    )
+
+    init {
+        Runtime.getRuntime().addShutdownHook(Thread {
+            close()
+        })
     }
 
     private val topic = requiredConfigForKey("brukervarsel.topic")
-    private val producer = KafkaProducer(producerConfig.properties(), StringSerializer(), StringSerializer())
 
     override fun sendVarsel(
         brukerId: Ident,
@@ -78,5 +87,11 @@ class VarselGatewayKafkaProducer(producerConfig: KafkaProducerConfig) : VarselGa
                 */
             }
         }
+    }
+
+    override fun close() {
+        log.info("Stopper Kafka producer")
+        producer.flush()
+        producer.close()
     }
 }
