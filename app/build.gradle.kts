@@ -86,5 +86,5 @@ dependencies {
     }
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:kafka:1.21.2")
+    testImplementation("org.testcontainers:kafka:1.21.3")
 }
