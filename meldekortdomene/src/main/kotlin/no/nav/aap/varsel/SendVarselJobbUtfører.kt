@@ -1,7 +1,6 @@
 package no.nav.aap.varsel
 
 import no.nav.aap.komponenter.dbconnect.DBConnection
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.Jobb
@@ -14,11 +13,7 @@ class SendVarselJobbUtfører(
     private val varselService: VarselService,
 ) : JobbUtfører {
     override fun utfør(input: JobbInput) {
-        if (!Miljø.erProd()) {
-            // NB! Hvis "!er prod" fjernes etter lagring av varsler KelvinMottakService, vurder om det er gamle varsler
-            // som ikke bør sendes
-            varselService.sendPlanlagteVarsler()
-        }
+        varselService.sendPlanlagteVarsler()
     }
 
     companion object {
