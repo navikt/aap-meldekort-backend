@@ -57,6 +57,22 @@ class VarselRepositoryPostgres(private val connection: DBConnection) : VarselRep
         }
     }
 
+    override fun slettVarsel(varselId: VarselId) {
+        connection.execute(
+            """
+            delete from varsel
+            where varsel_id = ?
+            """
+        ) {
+            setParams {
+                setUUID(1, varselId.id)
+            }
+            setResultValidator {
+                require(it == 1)
+            }
+        }
+    }
+
     override fun slettPlanlagteVarsler(
         saksnummer: Fagsaknummer,
         typeVarselOm: TypeVarselOm
