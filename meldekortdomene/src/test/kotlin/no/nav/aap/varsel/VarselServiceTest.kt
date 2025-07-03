@@ -568,6 +568,76 @@ class VarselServiceTest {
         }
     }
 
+    @Test
+    fun `sletter planlagt varsel som sendes dersom det allerede er en utfylling for perioden`() {
+        InitTestDatabase.freshDatabase().transaction { connection ->
+            val varselRepository = VarselRepositoryPostgres(connection)
+            val utfyllingRepository = UtfyllingRepositoryPostgres(connection)
+
+            val saksnummer = saksnummerGenerator.next()
+            val ident = fødselsnummerGenerator.next()
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 6, 30).plusYears(1))
+            val opplysningsbehov = listOf(sakenGjelderFor)
+            val meldeperioder = lagPerioder(
+                LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 7, 13),
+                LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 27)
+            )
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 6, 30).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder = meldeperioder,
+                meldeplikt = lagPerioder(
+                    LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 21),
+                    LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4)
+                ),
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 14, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    status = VarselStatus.PLANLAGT
+                ),
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+
+            utfyllingRepository.lagrUtfylling(
+                byggUtfylling(
+                    saksnummer = saksnummer,
+                    ident = ident,
+                    periode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    UtfyllingFlytNavn.AAP_FLYT.steg.last()
+                )
+            )
+
+            varselService(connection, clockMedTid(LocalDateTime.of(2025, 7, 14, 10, 0)))
+                .sendPlanlagteVarsler()
+
+            verify(exactly = 0) { varselGateway.sendVarsel(ident, any(), any(), any()) }
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+        }
+    }
+
     private fun lagPerioder(vararg fomTom: Pair<LocalDate, LocalDate>): List<Periode> {
         return fomTom.map { (fom, tom) -> Periode(fom, tom) }
     }

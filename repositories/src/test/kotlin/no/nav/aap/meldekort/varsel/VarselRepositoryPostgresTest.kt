@@ -24,7 +24,7 @@ import java.time.Clock
 
 class VarselRepositoryPostgresTest {
     @Test
-    fun `oppretter, henter og oppdaterer varsler`() {
+    fun `oppretter, henter, oppdaterer og sletter varsler`() {
         val saksnummer = Fagsaknummer("123")
 
         InitTestDatabase.freshDatabase().transaction { connection ->
@@ -67,6 +67,12 @@ class VarselRepositoryPostgresTest {
 
             varselRepo.hentVarsler(saksnummer).also { varsler ->
                 assertThat(varsler).containsExactly(oppdatertVarsel)
+            }
+
+            varselRepo.slettVarsel(varsel.varselId)
+
+            varselRepo.hentVarsler(saksnummer).also { varsler ->
+                assertThat(varsler).isEmpty()
             }
         }
     }

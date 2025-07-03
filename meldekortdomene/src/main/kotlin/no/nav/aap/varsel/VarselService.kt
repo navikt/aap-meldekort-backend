@@ -1,5 +1,6 @@
 package no.nav.aap.varsel
 
+import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -71,7 +72,7 @@ class VarselService(
         meldeperioder: List<Meldeperiode>,
         sendteVarsler: List<Varsel>
     ) {
-        val avsluttedeUtfyllinger = utfyllingRepository.hentUtfyllinger(saksnummer).filter { it.erAvsluttet }
+        val utfyllinger = hentFerdigeUtfyllinger(saksnummer)
         val fremtidigeMeldeperioder =
             meldeperioder.filter { meldeperiode ->
                 val erIMeldevinduet = meldeperiode.meldevindu.contains(LocalDate.now(clock))
@@ -81,15 +82,19 @@ class VarselService(
                 (erIMeldevinduet && !harSendtVarselForPerioden) || meldevinduIFremtiden
             }
         fremtidigeMeldeperioder
-            .filterNot { harUtfylling(it, avsluttedeUtfyllinger) }
+            .filterNot { harUtfylling(it.meldeperioden, utfyllinger) }
             .map { lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE) }
             .forEach { varsel ->
                 varselRepository.upsert(varsel)
             }
     }
 
-    private fun harUtfylling(meldeperiode: Meldeperiode, utfyllinger: List<Utfylling>): Boolean {
-        return utfyllinger.map { it.periode }.contains(meldeperiode.meldeperioden)
+    private fun harUtfylling(forPeriode: Periode, utfyllinger: List<Utfylling>): Boolean {
+        return utfyllinger.map { it.periode }.contains(forPeriode)
+    }
+
+    private fun hentFerdigeUtfyllinger(saksnummer: Fagsaknummer): List<Utfylling> {
+        return utfyllingRepository.hentUtfyllinger(saksnummer).filter { it.erAvsluttet }
     }
 
     fun lagVarsel(
@@ -129,6 +134,13 @@ class VarselService(
     }
 
     private fun sendVarsel(varsel: Varsel) {
+        if (harUtfylling(varsel.forPeriode, hentFerdigeUtfyllinger(varsel.saksnummer))) {
+            log.warn("Sletter varsel som skulle sendes men som allerede har en utfylling. Tyder på forsinkelse i utsendingsjobb. " +
+                    "Saksnummer: ${varsel.saksnummer}, for periode: ${varsel.forPeriode}, planlagt sendingstidspunkt: ${varsel.sendingstidspunkt}")
+            varselRepository.slettVarsel(varsel.varselId)
+            return
+        }
+
         varselRepository.upsert(
             varsel.copy(
                 status = VarselStatus.SENDT,
