@@ -57,6 +57,7 @@ spec:
         inbound:
             rules:
                 - application: meldekort
+                - application: innsyn
                 - application: behandlingsflyt
                 - application: paw-patrol
                 - application: tokenx-token-generator
