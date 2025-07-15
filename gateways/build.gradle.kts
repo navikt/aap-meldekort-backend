@@ -2,7 +2,7 @@ plugins {
     id("meldekort.conventions")
 }
 
-val komponenterVersjon = "1.0.286"
+val komponenterVersjon = "1.0.288"
 val junitVersjon = "5.13.3"
 
 dependencies {
