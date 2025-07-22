@@ -1,5 +1,5 @@
 val komponenterVersjon = "1.0.290"
-val junitVersjon = "5.13.3"
+val junitVersjon = "5.13.4"
 
 plugins {
     id("meldekort.conventions")
