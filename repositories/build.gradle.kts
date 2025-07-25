@@ -21,7 +21,7 @@ dependencies {
     implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
     implementation("org.apache.kafka:kafka-clients:4.0.0")
 
-    implementation("com.zaxxer:HikariCP:6.3.0")
+    implementation("com.zaxxer:HikariCP:6.3.2")
     implementation("org.flywaydb:flyway-database-postgresql:11.10.4")
     runtimeOnly("org.postgresql:postgresql:42.7.7")
 
