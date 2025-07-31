@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 val komponenterVersjon = "1.0.296"
 val junitVersjon = "5.13.4"
 val tilgangVersjon = "1.0.99"
-val ktorVersion = "3.2.2"
+val ktorVersion = "3.2.3"
 
 plugins {
     id("meldekort.conventions")
