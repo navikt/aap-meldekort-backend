@@ -22,7 +22,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.0.0")
 
     implementation("com.zaxxer:HikariCP:7.0.0")
-    implementation("org.flywaydb:flyway-database-postgresql:11.10.4")
+    implementation("org.flywaydb:flyway-database-postgresql:11.10.5")
     runtimeOnly("org.postgresql:postgresql:42.7.7")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
