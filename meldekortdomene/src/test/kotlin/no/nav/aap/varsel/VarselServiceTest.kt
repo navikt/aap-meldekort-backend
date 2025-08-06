@@ -569,7 +569,7 @@ class VarselServiceTest {
     }
 
     @Test
-    fun `sletter planlagt varsel som sendes dersom det allerede er en utfylling for perioden`() {
+    fun `avbryter sending og sletter planlagt varsel som skal sendes dersom det allerede er en utfylling for perioden`() {
         InitTestDatabase.freshDatabase().transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
             val utfyllingRepository = UtfyllingRepositoryPostgres(connection)

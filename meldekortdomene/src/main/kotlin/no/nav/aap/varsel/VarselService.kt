@@ -135,10 +135,21 @@ class VarselService(
 
     private fun sendVarsel(varsel: Varsel) {
         if (harUtfylling(varsel.forPeriode, hentFerdigeUtfyllinger(varsel.saksnummer))) {
-            log.warn("Sletter varsel som skulle sendes men som allerede har en utfylling. Tyder på forsinkelse i utsendingsjobb. " +
-                    "Saksnummer: ${varsel.saksnummer}, for periode: ${varsel.forPeriode}, planlagt sendingstidspunkt: ${varsel.sendingstidspunkt}")
+            log.info(
+                "Avbryter sending og sletter planlagt varsel som allerede har en utfylling." +
+                        "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId} forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+            )
             varselRepository.slettVarsel(varsel.varselId)
             return
+        }
+
+        if (varsel.sendingstidspunkt.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now(clock))) {
+            log.info("Sender varsel med varselId ${varsel.varselId}")
+        } else {
+            log.warn(
+                "Sender varsel som skulle sendes en annen dag enn i dag. Tyder på forsinkelse i utsendingsjobb. " +
+                        "Saksnummer: ${varsel.saksnummer.asString}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+            )
         }
 
         varselRepository.upsert(
