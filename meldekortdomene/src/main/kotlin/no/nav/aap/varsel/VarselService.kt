@@ -137,7 +137,7 @@ class VarselService(
         if (harUtfylling(varsel.forPeriode, hentFerdigeUtfyllinger(varsel.saksnummer))) {
             log.info(
                 "Avbryter sending og sletter planlagt varsel som allerede har en utfylling." +
-                        "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId} forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+                        "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
             )
             varselRepository.slettVarsel(varsel.varselId)
             return
@@ -148,7 +148,7 @@ class VarselService(
         } else {
             log.warn(
                 "Sender varsel som skulle sendes en annen dag enn i dag. Tyder på forsinkelse i utsendingsjobb. " +
-                        "Saksnummer: ${varsel.saksnummer.asString}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+                        "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
             )
         }
 
