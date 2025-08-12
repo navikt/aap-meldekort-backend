@@ -12,7 +12,7 @@ val komponenterVersjon = "1.0.315"
 
 dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations:2.19.2")
-    api("no.nav:ktor-openapi-generator:1.0.120")
+    api("no.nav:ktor-openapi-generator:1.0.121")
     compileOnly("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
