@@ -34,11 +34,6 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    constraints {
-        implementation("org.apache.commons:commons-compress:1.28.0") {
-            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
-        }
-    }
     testFixturesImplementation("io.micrometer:micrometer-core:1.15.3")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
