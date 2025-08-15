@@ -40,12 +40,18 @@ abstract class VarselGatewayKafkaProducer(kafkaProducerConfig: KafkaProducerConf
         lenke: String
     ) {
         val melding = opprettKafkaJson(brukerId, varsel, varselTekster, lenke)
-        producer.send(ProducerRecord(topic, varsel.varselId.toString(), melding))
+        sendSync(ProducerRecord(topic, varsel.varselId.toString(), melding))
     }
 
     override fun inaktiverVarsel(varsel: Varsel) {
         val melding = VarselActionBuilder.inaktiver { varselId = varsel.varselId.id.toString() }
-        producer.send(ProducerRecord(topic, varsel.varselId.toString(), melding))
+        sendSync(ProducerRecord(topic, varsel.varselId.toString(), melding))
+    }
+
+    private fun sendSync(record: ProducerRecord<String, String>) {
+        val future = producer.send(record)
+        producer.flush()
+        future.get()
     }
 
     private fun opprettKafkaJson(
