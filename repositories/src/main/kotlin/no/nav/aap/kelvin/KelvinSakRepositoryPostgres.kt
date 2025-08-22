@@ -240,6 +240,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                     status = it.getEnumOrNull("status"),
                     rettighetsperiode = it.getPeriodeOrNull("saken_gjelder_for")?.let { Periode(it.fom, it.tom) }
                         ?: Periode(LocalDate.MIN, LocalDate.MAX)
+                    // FIXME skjuler denne potensielle bugs? db-feltet kan ikke være null
                 )
             }
         }
@@ -270,10 +271,10 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
     override fun hentSaker(ident: Ident): List<KelvinSak> {
         return connection.queryList(
             query = """
-            select saksnummer, status, saken_gjelder_for from kelvin_sak 
-               left join kelvin_meldeperiode km on kelvin_sak.id = km.sak_id 
-               left join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
-               left join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id 
+            select kelvin_sak.saksnummer, kelvin_sak.status, kelvin_sak.saken_gjelder_for from kelvin_sak 
+                left join kelvin_meldeperiode km on kelvin_sak.id = km.sak_id 
+                left join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
+                left join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id 
             where ident=? order by kelvin_sak.opprettet desc 
         """.trimIndent()
         ) {
@@ -285,8 +286,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 KelvinSak(
                     saksnummer = Fagsaknummer(it.getString("saksnummer")),
                     status = it.getEnumOrNull("status"),
-                    rettighetsperiode = it.getPeriodeOrNull("saken_gjelder_for")?.let { Periode(it.fom, it.tom) }
-                        ?: Periode(LocalDate.MIN, LocalDate.MAX)
+                    rettighetsperiode = it.getPeriode("saken_gjelder_for").let { Periode(it.fom, it.tom) }
                 )
             }
         }

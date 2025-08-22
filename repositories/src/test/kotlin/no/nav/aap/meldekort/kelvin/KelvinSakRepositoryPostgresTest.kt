@@ -175,10 +175,11 @@ class KelvinSakRepositoryPostgresTest {
                 KelvinSakStatus.LØPENDE
             )
 
-            val a = repo.hentSaker(fnr1)
-            val b = repo.hentSaker(fnr2)
-            val c = repo.hentSaker(fnr3)
-            val d = repo.hentSaker(Ident("ikke_funnet"))
+            assertThat(repo.hentSaker(fnr1)).hasSize(1)
+            // 2 saker x 2 perioder
+            assertThat(repo.hentSaker(fnr2)).hasSize(4)
+            assertThat(repo.hentSaker(fnr3)).hasSize(1)
+            assertThat(repo.hentSaker(Ident("finnes ikke"))).isEmpty()
         }
     }
 
