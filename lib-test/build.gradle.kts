@@ -8,7 +8,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
