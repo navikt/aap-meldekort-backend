@@ -22,8 +22,6 @@ dependencies {
     testImplementation("no.nav.aap.kelvin:json:$komponenterVersjon")
 }
 
-group = "no.nav.aap.meldekort"
-
 apply(plugin = "maven-publish")
 apply(plugin = "java-library")
 
@@ -38,8 +36,6 @@ java {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            artifactId = project.name
-            version = project.findProperty("version")?.toString() ?: "0.0.0"
             from(components["java"])
         }
     }

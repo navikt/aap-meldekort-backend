@@ -1,27 +1,11 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+// Felles kode for alle build.gradle.kts filer som laster api-intern.conventions pluginen
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
 }
 
-group = "no.nav.aap"
+group = "no.nav.aap.meldekort"
 version = project.findProperty("version")?.toString() ?: "0.0.0"
-
-repositories {
-    mavenCentral()
-    maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/navikt/behandlingsflyt")
-        credentials {
-            username = "x-access-token"
-            password = (project.findProperty("githubPassword")
-                ?: System.getenv("GITHUB_PASSWORD")
-                ?: System.getenv("GITHUB_TOKEN")
-                ?: error("Fant ikke Github-token")).toString()
-        }
-    }
-}
 
 testing {
     suites {
@@ -31,19 +15,21 @@ testing {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+tasks {
+    test {
+        useJUnitPlatform()
+        maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+    }
 }
 
 kotlin {
     jvmToolchain(21)
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
-        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
     }
 }
-
 
 kotlin.sourceSets["main"].kotlin.srcDirs("main")
 kotlin.sourceSets["test"].kotlin.srcDirs("test")
