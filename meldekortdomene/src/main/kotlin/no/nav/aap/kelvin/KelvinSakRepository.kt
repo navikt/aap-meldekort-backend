@@ -20,4 +20,5 @@ interface KelvinSakRepository: Repository {
     fun hentMeldeplikt(saksnummer: Fagsaknummer): List<Periode>
     fun hentOpplysningsbehov(saksnummer: Fagsaknummer): List<Periode>
     fun hentIdenter(saksnummer: Fagsaknummer): List<Ident>
+    fun hentSaker(ident: Ident): List<KelvinSak>
 }
