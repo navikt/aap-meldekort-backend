@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 class KelvinSakRepositoryPostgresTest {
     val sak1 = Fagsaknummer("111")
     val sak2 = Fagsaknummer("222")
+    val sak3 = Fagsaknummer("333")
     val fnr1 = Ident("1".repeat(11))
     val fnr2 = Ident("2".repeat(11))
     val fnr3 = Ident("3".repeat(11))
@@ -141,4 +142,44 @@ class KelvinSakRepositoryPostgresTest {
             assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr2)
         }
     }
+
+    @Test
+    fun `hent saker basert på ident`() {
+        InitTestDatabase.freshDatabase().transaction { connection ->
+            val repo = KelvinSakRepositoryPostgres(connection)
+            repo.upsertSak(
+                sak1,
+                periode4,
+                listOf(fnr1, fnr3),
+                listOf(),
+                listOf(periode3),
+                listOf(periode4),
+                KelvinSakStatus.UTREDES
+            )
+            repo.upsertSak(
+                sak2,
+                periode3,
+                listOf(fnr2),
+                listOf(periode1, periode2),
+                listOf(),
+                listOf(),
+                KelvinSakStatus.LØPENDE
+            )
+            repo.upsertSak(
+                sak3,
+                periode4,
+                listOf(fnr2),
+                listOf(periode1, periode2),
+                listOf(),
+                listOf(),
+                KelvinSakStatus.LØPENDE
+            )
+
+            val a = repo.hentSaker(fnr1)
+            val b = repo.hentSaker(fnr2)
+            val c = repo.hentSaker(fnr3)
+            val d = repo.hentSaker(Ident("ikke_funnet"))
+        }
+    }
+
 }
