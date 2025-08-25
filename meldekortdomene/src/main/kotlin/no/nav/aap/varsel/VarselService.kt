@@ -90,7 +90,7 @@ class VarselService(
     }
 
     private fun harUtfylling(forPeriode: Periode, utfyllinger: List<Utfylling>): Boolean {
-        return utfyllinger.map { it.periode }.contains(forPeriode)
+        return utfyllinger.any { it.periode.overlapper(forPeriode) }
     }
 
     private fun hentFerdigeUtfyllinger(saksnummer: Fagsaknummer): List<Utfylling> {
