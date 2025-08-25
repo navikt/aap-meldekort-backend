@@ -498,9 +498,13 @@ class VarselServiceTest {
 
             val saksnummer = saksnummerGenerator.next()
             val ident = fødselsnummerGenerator.next()
-            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 6, 30).plusYears(1))
-            val opplysningsbehov = listOf(sakenGjelderFor)
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 16), LocalDate.of(2025, 6, 30).plusYears(1))
+            val opplysningsbehov = lagPerioder(
+                LocalDate.of(2025, 6, 16) to LocalDate.of(2025, 6, 27),
+                LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 6, 30).plusYears(1)
+            )
             val meldeperioder = lagPerioder(
+                LocalDate.of(2025, 6, 16) to LocalDate.of(2025, 6, 29),
                 LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 7, 13),
                 LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 27)
             )
@@ -514,6 +518,7 @@ class VarselServiceTest {
                 listOf(ident),
                 meldeperioder = meldeperioder,
                 meldeplikt = lagPerioder(
+                    LocalDate.of(2025, 6, 30) to LocalDate.of(2025, 7, 7),
                     LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 21),
                     LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4)
                 ),
@@ -521,11 +526,18 @@ class VarselServiceTest {
                 KelvinSakStatus.LØPENDE
             )
 
+            varselService(connection, clockMedTid(LocalDateTime.of(2025, 6, 30, 10, 0)))
+                .sendPlanlagteVarsler()
             varselService(connection, clockMedTid(LocalDateTime.of(2025, 7, 14, 10, 0)))
                 .sendPlanlagteVarsler()
 
             assertVarsler(
                 varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 6, 30, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 6, 16), LocalDate.of(2025, 6, 27)),
+                    status = VarselStatus.SENDT
+                ),
                 ForventetVarsel(
                     sendingstidspunkt = LocalDateTime.of(2025, 7, 14, 9, 0),
                     forPeriode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
@@ -541,11 +553,11 @@ class VarselServiceTest {
             varselService(
                 connection,
                 clockMedTid(LocalDate.of(2025, 7, 15).atTime(1, 1))
-            ).inaktiverVarselForUtfylling(
+            ).inaktiverVarslerForUtfylling(
                 byggUtfylling(
                     saksnummer = saksnummer,
                     ident = ident,
-                    periode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
+                    periode = Periode(LocalDate.of(2025, 6, 16), LocalDate.of(2025, 6, 29)),
                     UtfyllingFlytNavn.AAP_FLYT.steg.last()
                 )
             )
@@ -555,9 +567,14 @@ class VarselServiceTest {
             assertVarsler(
                 varselRepository, saksnummer,
                 ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 6, 30, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 6, 16), LocalDate.of(2025, 6, 27)),
+                    status = VarselStatus.INAKTIVERT
+                ),
+                ForventetVarsel(
                     sendingstidspunkt = LocalDateTime.of(2025, 7, 14, 9, 0),
                     forPeriode = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 7, 13)),
-                    status = VarselStatus.INAKTIVERT
+                    status = VarselStatus.SENDT
                 ),
                 ForventetVarsel(
                     sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
