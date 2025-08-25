@@ -553,7 +553,7 @@ class VarselServiceTest {
             varselService(
                 connection,
                 clockMedTid(LocalDate.of(2025, 7, 15).atTime(1, 1))
-            ).inaktiverVarselForUtfylling(
+            ).inaktiverVarslerForUtfylling(
                 byggUtfylling(
                     saksnummer = saksnummer,
                     ident = ident,

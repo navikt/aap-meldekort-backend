@@ -173,7 +173,7 @@ class VarselService(
         )
     }
 
-    fun inaktiverVarselForUtfylling(utfylling: Utfylling) {
+    fun inaktiverVarslerForUtfylling(utfylling: Utfylling) {
         if (utfylling.fagsak.system != FagsystemNavn.KELVIN) return
 
         val varsler = varselRepository.hentVarsler(utfylling.fagsak.nummer)
