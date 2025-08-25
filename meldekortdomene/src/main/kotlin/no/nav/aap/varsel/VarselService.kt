@@ -176,15 +176,15 @@ class VarselService(
     fun inaktiverVarselForUtfylling(utfylling: Utfylling) {
         if (utfylling.fagsak.system != FagsystemNavn.KELVIN) return
 
-        val varsel = varselRepository.hentVarsler(utfylling.fagsak.nummer)
-            .singleOrNull {
-                it.status == VarselStatus.SENDT &&
-                        it.typeVarsel == TypeVarsel.OPPGAVE &&
-                        it.forPeriode == utfylling.periode
+        val varsler = varselRepository.hentVarsler(utfylling.fagsak.nummer)
+            .filter { varsel ->
+                varsel.status == VarselStatus.SENDT &&
+                        varsel.typeVarsel == TypeVarsel.OPPGAVE &&
+                        utfylling.periode.overlapper(varsel.forPeriode)
             }
 
-        if (varsel != null) {
-            inaktiverVarsel(varsel)
+        if (varsler.isNotEmpty()) {
+            varsler.forEach { inaktiverVarsel(it) }
         } else {
             log.info("Fant ikke varsel å inaktivere for utfylling. Referanse: ${utfylling.referanse.asUuid}, saksnummer: ${utfylling.fagsak.nummer.asString}, periode: ${utfylling.periode}")
         }
