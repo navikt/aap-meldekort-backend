@@ -238,8 +238,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 KelvinSak(
                     saksnummer = Fagsaknummer(it.getString("saksnummer")),
                     status = it.getEnumOrNull("status"),
-                    rettighetsperiode = it.getPeriodeOrNull("saken_gjelder_for")?.let { Periode(it.fom, it.tom) }
-                        ?: Periode(LocalDate.MIN, LocalDate.MAX)
+                    rettighetsperiode = it.getPeriode("saken_gjelder_for").let { Periode(it.fom, it.tom)}
                 )
             }
         }
