@@ -90,7 +90,9 @@ jobs:
         permissions:
             contents: read
             id-token: write
-        needs: dev
+        needs:
+            - dev
+            - publiser-kontrakt
         uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
         secrets: inherit
         with:
