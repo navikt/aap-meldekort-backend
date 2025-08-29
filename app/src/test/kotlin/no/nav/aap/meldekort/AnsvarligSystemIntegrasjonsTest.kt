@@ -18,7 +18,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -35,7 +34,6 @@ import java.io.InputStream
 import java.net.URI
 import java.time.Clock
 import java.time.LocalDate
-import java.time.ZoneId
 import kotlin.test.assertEquals
 
 class AnsvarligSystemIntegrasjonsTest {
@@ -162,7 +160,6 @@ class AnsvarligSystemIntegrasjonsTest {
 
             GatewayRegistry
                 .register<AapGatewayImpl>()
-                .register<ArenaGatewayImpl>()
 
             embeddedServer = run {
                 startHttpServer(

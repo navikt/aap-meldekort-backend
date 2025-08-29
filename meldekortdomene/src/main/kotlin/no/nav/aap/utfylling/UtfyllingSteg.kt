@@ -1,9 +1,6 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaSakService
-import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
-import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
@@ -16,8 +13,6 @@ enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     SPØRSMÅL,
     UTFYLLING,
     BEKREFT,
-    ARENAKONTROLL_VANLIG(erTeknisk = true),
-    ARENAKONTROLL_KORRIGERING(erTeknisk = true),
     PERSISTER_OPPLYSNINGER(erTeknisk = true),
     BESTILL_JOURNALFØRING(erTeknisk = true),
     INAKTIVER_VARSEL(erTeknisk = true),
@@ -118,41 +113,6 @@ object StemmerOpplysningeneSteg : UtfyllingSteg {
     )
 }
 
-class ArenaKontrollVanligSteg(
-    private val arenaSakService: ArenaSakService,
-) : UtfyllingSteg {
-    override val navn = ARENAKONTROLL_VANLIG
-
-    override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        arenaSakService.sendInnVanlig(innloggetBruker, utfylling)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is UtfyllingSteg && this.navn == other.navn
-    }
-
-    override fun hashCode(): Int {
-        return navn.hashCode()
-    }
-}
-
-class ArenaKontrollKorrigeringSteg(
-    private val arenaSakService: ArenaSakService,
-) : UtfyllingSteg {
-    override val navn = ARENAKONTROLL_KORRIGERING
-
-    override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        arenaSakService.sendInnKorrigering(innloggetBruker, utfylling)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other is UtfyllingSteg && this.navn == other.navn
-    }
-
-    override fun hashCode(): Int {
-        return navn.hashCode()
-    }
-}
 
 object KvitteringSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
