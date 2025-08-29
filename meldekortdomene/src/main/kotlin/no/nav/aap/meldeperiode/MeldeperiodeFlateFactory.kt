@@ -1,7 +1,6 @@
 package no.nav.aap.meldeperiode
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaMeldeperiodeFlate
 import no.nav.aap.kelvin.KelvinMeldeperiodeFlate
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
@@ -27,10 +26,7 @@ class MeldeperiodeFlateFactoryImpl(private val clock: Clock): MeldeperiodeFlateF
             log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
         }
 
-        val flate = when (sak?.referanse?.system) {
-            null, FagsystemNavn.KELVIN -> KelvinMeldeperiodeFlate(repositoryProvider, gatewayProvider, clock)
-            FagsystemNavn.ARENA -> ArenaMeldeperiodeFlate(repositoryProvider)
-        }
+        val flate = KelvinMeldeperiodeFlate(repositoryProvider, gatewayProvider, clock)
 
         return Pair(saksnummer, flate)
     }

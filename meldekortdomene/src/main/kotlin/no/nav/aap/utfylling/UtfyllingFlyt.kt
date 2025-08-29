@@ -1,14 +1,11 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaSakService
 import no.nav.aap.journalføring.BestillJournalføringSteg
 import no.nav.aap.journalføring.JournalføringService
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.opplysningsplikt.PersisterOpplysningerSteg
-import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING
-import no.nav.aap.utfylling.UtfyllingStegNavn.ARENAKONTROLL_VANLIG
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
@@ -25,30 +22,6 @@ import java.time.Clock
 enum class UtfyllingFlytNavn(
     val steg: List<UtfyllingStegNavn>,
 ) {
-    ARENA_VANLIG_FLYT(
-        listOf(
-            INTRODUKSJON,
-            SPØRSMÅL,
-            UTFYLLING,
-            BEKREFT,
-            ARENAKONTROLL_VANLIG,
-            PERSISTER_OPPLYSNINGER,
-            BESTILL_JOURNALFØRING,
-            KVITTERING,
-        )
-    ),
-    ARENA_KORRIGERING_FLYT(
-        listOf(
-            INTRODUKSJON,
-            SPØRSMÅL,
-            UTFYLLING,
-            BEKREFT,
-            ARENAKONTROLL_KORRIGERING,
-            PERSISTER_OPPLYSNINGER,
-            BESTILL_JOURNALFØRING,
-            KVITTERING,
-        )
-    ),
     AAP_FLYT(
         listOf(
             INTRODUKSJON,
@@ -187,8 +160,6 @@ class UtfyllingFlyt(
                         SPØRSMÅL -> SpørsmålSteg
                         UTFYLLING -> TimerArbeidetSteg
                         BEKREFT -> StemmerOpplysningeneSteg
-                        ARENAKONTROLL_VANLIG -> ArenaKontrollVanligSteg(ArenaSakService())
-                        ARENAKONTROLL_KORRIGERING -> ArenaKontrollKorrigeringSteg(ArenaSakService())
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
                         BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))
                         INAKTIVER_VARSEL -> InaktiverVarselSteg(VarselService(repositoryProvider, gatewayProvider, clock))
