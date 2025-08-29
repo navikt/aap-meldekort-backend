@@ -18,6 +18,8 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.slf4j.LoggerFactory
+import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import java.util.*
@@ -28,19 +30,33 @@ import kotlin.time.toJavaDuration
 class VarselGatewayKafkaProducerTest {
 
     companion object {
-        val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.0.0"))
+        val log = LoggerFactory.getLogger("KafkaTest")
+
+        val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
             .withReuse(true)
+            .withLogConsumer(Slf4jLogConsumer(log)) // stream to SLF4J
 
         @BeforeAll
         @JvmStatic
         internal fun beforeAll() {
-            kafkaContainer.start()
+            try {
+                kafkaContainer.start()
+                log.debug("Kafka container id: {}", kafkaContainer.containerId)
+                log.debug("Kafka mapped bootstrap: {}", kafkaContainer.bootstrapServers)
+            } catch (e: Exception) {
+                // Dump whatever logs were collected before failing startup
+                log.error("Kafka container failed to start:\n{}", kafkaContainer.logs)
+                throw e
+            }
         }
 
         @AfterAll
         @JvmStatic
         internal fun afterAll() {
-            kafkaContainer.stop()
+            if (kafkaContainer.isRunning) {
+                log.debug("Stopping Kafka container {}", kafkaContainer.containerId)
+                kafkaContainer.stop()
+            }
         }
     }
 
