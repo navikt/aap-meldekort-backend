@@ -18,7 +18,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -228,7 +227,6 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
             GatewayRegistry
                 .register<AapGatewayImpl>()
-                .register<ArenaGatewayImpl>()
 
             embeddedServer = run {
                 startHttpServer(
