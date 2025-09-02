@@ -1,7 +1,6 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.arena.ArenaUtfyllingFlate
 import no.nav.aap.kelvin.KelvinUtfyllingFlate
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -28,10 +27,7 @@ class UtfyllingFlateFactoryImpl(private val clock: Clock) : UtfyllingFlateFactor
             log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
         }
 
-        val flate =  when (sak?.referanse?.system) {
-            null, FagsystemNavn.KELVIN -> KelvinUtfyllingFlate(repositoryProvider, gatewayProvider, clock)
-            FagsystemNavn.ARENA -> ArenaUtfyllingFlate(repositoryProvider)
-        }
+        val flate = KelvinUtfyllingFlate(repositoryProvider, gatewayProvider, clock)
 
         return Pair(saksnummer, flate)
     }
