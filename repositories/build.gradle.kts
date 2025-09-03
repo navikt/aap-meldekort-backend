@@ -19,7 +19,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
     implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
-    implementation("org.apache.kafka:kafka-clients:4.0.0")
+    implementation("org.apache.kafka:kafka-clients:4.1.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("org.flywaydb:flyway-database-postgresql:11.11.1")
