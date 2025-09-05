@@ -32,7 +32,7 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.5.18")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.4.2")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.5")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:postgresql:1.21.3")
