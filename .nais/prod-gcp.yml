@@ -75,6 +75,8 @@ spec:
               databases:
                   - name: meldekort-backend
                     envVarPrefix: DB
+                    users:
+                      - name: datastream
     env:
         - name: MELDEKORTSERVICE_URL
           value: https://meldekortservice.prod-fss-pub.nais.io/meldekortservice/api

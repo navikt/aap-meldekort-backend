@@ -14,8 +14,6 @@ spec:
     ingresses:
         - https://aap-meldekort-backend.intern.dev.nav.no
     image: {{image}}
-    strategy:
-        type: Recreate
     port: 8080
     resources:
         limits:
@@ -91,6 +89,8 @@ spec:
               databases:
                   - name: meldekort-backend
                     envVarPrefix: DB
+                    users:
+                      - name: datastream
     env:
         - name: MELDEKORTSERVICE_URL
           value: https://meldekortservice-q2.dev-fss-pub.nais.io/meldekortservice/api
