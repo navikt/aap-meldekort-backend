@@ -84,6 +84,10 @@ spec:
         sqlInstances:
             - type: POSTGRES_16
               tier: db-f1-micro
+              diskAutoresize: true
+              flags:
+                - name: cloudsql.logical_decoding
+                  value: "on"
               databases:
                   - name: meldekort-backend
                     envVarPrefix: DB

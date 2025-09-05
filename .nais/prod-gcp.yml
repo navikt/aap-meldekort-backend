@@ -66,8 +66,12 @@ spec:
                 - host: dokarkiv.prod-fss-pub.nais.io
     gcp:
         sqlInstances:
-            - type: POSTGRES_16
+            - type: POSTGRES_16 
+              flags:
+                - name: cloudsql.logical_decoding
+                  value: "on"
               tier: db-custom-1-3840
+              diskAutoresize: true
               databases:
                   - name: meldekort-backend
                     envVarPrefix: DB
