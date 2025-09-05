@@ -1,0 +1,11 @@
+DO
+$$
+    BEGIN
+        ALTER USER "meldekort-backend" WITH REPLICATION;
+        CREATE PUBLICATION "ds_publication" FOR ALL TABLES;
+
+        ALTER DEFAULT PRIVILEGES IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO "datastream";
+        GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC TO "datastream";
+        ALTER USER "datastream" WITH REPLICATION;
+    END
+$$ LANGUAGE 'plpgsql';
