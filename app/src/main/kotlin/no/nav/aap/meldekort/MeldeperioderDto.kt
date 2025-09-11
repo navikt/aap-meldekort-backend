@@ -54,26 +54,17 @@ class HistoriskMeldeperiodeDto(
             return HistoriskMeldeperiodeDto(
                 antallTimerArbeidetIPerioden = domene.totaltAntallTimerIPerioden,
                 meldeperiode = PeriodeDto(domene.meldeperiode.meldeperioden),
-                status = MeldeperiodeStatusDto.KELVIN, /* TODO: arena */
+                status = MeldeperiodeStatusDto.KELVIN, 
             )
         }
     }
 }
 
 enum class MeldeperiodeStatusDto {
-    ARENA_INNSENDT,
-    ARENA_FERDIG,
-    ARENA_FEILET,
-
     KELVIN,
 }
 
 enum class MeldekortTypeDto {
-    ARENA_VANLIG,
-    ARENA_ETTERREGISTRERING,
-    ARENA_KORRIGERING,
-    ARENA_ANNET,
-
     KELVIN,
 }
 
@@ -88,11 +79,11 @@ data class PeriodeDetaljerDto(
 ) {
     constructor(detaljer: MeldeperiodeFlate.PeriodeDetaljer) : this(
         periode = PeriodeDto(detaljer.periode),
-        status = MeldeperiodeStatusDto.KELVIN /* TODO: arena */,
-        bruttoBeløp = null /* TODO: arena */,
+        status = MeldeperiodeStatusDto.KELVIN ,
+        bruttoBeløp = null ,
         innsendtDato = null /* TODO */,
-        kanEndres = true /* TODO: arena */,
-        type = MeldekortTypeDto.KELVIN /* TODO: arena */,
+        kanEndres = true ,
+        type = MeldekortTypeDto.KELVIN ,
         svar = SvarDto(detaljer.svar)
     )
 }
