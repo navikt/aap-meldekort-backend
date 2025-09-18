@@ -12,7 +12,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.meldekort.arena.ArenaGatewayImpl
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
@@ -43,7 +42,6 @@ fun main() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
-        .register<ArenaGatewayImpl>()
         .register<PdfgenGatewayImpl>()
         .register<VarselGatewayKafkaProducerTestcontainers>()
         .status()

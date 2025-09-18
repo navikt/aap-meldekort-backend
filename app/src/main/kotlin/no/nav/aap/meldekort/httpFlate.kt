@@ -112,7 +112,6 @@ fun startHttpServer(
                 apiRouting {
                     route("api") {
                         ansvarligSystemApi(dataSource, repositoryRegistry, clock)
-                        arenaApi()
                         meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(clock), repositoryRegistry)
                         utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(clock), repositoryRegistry)
                         metadataApi(dataSource, repositoryRegistry, clock)

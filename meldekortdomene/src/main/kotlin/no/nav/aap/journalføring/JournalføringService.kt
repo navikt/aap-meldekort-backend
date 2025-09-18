@@ -95,11 +95,9 @@ class JournalføringService(
         val til = utfylling.periode.tom.format(dateFormatter)
         val tittelsuffix = "for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av NAV"
         val tittel = when (utfylling.flyt) {
-            UtfyllingFlytNavn.ARENA_VANLIG_FLYT,
             UtfyllingFlytNavn.AAP_FLYT ->
                 "Meldekort $tittelsuffix"
 
-            UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT,
             UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
                 "Korrigert meldekort $tittelsuffix"
         }
@@ -147,11 +145,9 @@ class JournalføringService(
                 DokarkivGateway.Dokument(
                     tittel = tittel,
                     brevkode = when (utfylling.flyt) {
-                        UtfyllingFlytNavn.ARENA_VANLIG_FLYT,
                         UtfyllingFlytNavn.AAP_FLYT ->
                             "NAV 00-10.02"
 
-                        UtfyllingFlytNavn.ARENA_KORRIGERING_FLYT,
                         UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
                             "NAV 00-10.03"
                     },

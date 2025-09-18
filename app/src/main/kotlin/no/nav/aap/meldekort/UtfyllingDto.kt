@@ -127,8 +127,6 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
                 UtfyllingStegNavn.BEKREFT -> BEKREFT
                 UtfyllingStegNavn.KVITTERING -> KVITTERING
 
-                UtfyllingStegNavn.ARENAKONTROLL_VANLIG,
-                UtfyllingStegNavn.ARENAKONTROLL_KORRIGERING,
                 UtfyllingStegNavn.PERSISTER_OPPLYSNINGER,
                 UtfyllingStegNavn.BESTILL_JOURNALFØRING,
                 UtfyllingStegNavn.INAKTIVER_VARSEL -> error("skal ikke stoppe i teknisk steg")
