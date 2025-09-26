@@ -94,7 +94,7 @@ fun startHttpServer(
                     }
 
                     else -> {
-                        logger.warn("Ukjent feil ved kall til '{}'", call.request.local.uri, cause)
+                        logger.error("Ukjent feil ved kall til '{}'", call.request.local.uri, cause)
                         call.respond(
                             status = HttpStatusCode.InternalServerError,
                             message = ErrorRespons(cause.message)
