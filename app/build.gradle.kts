@@ -7,7 +7,7 @@ val ktorVersion = "3.3.0"
 
 plugins {
     id("meldekort.conventions")
-    id("io.ktor.plugin") version "3.3.0"
+    id("io.ktor.plugin") version "3.2.3"
 }
 
 application {
