@@ -77,7 +77,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
 
     route("utfylling/{referanse}") {
         data class Referanse(
-            @param:PathParam("referanse") val referanse: UUID,
+            @PathParam("referanse") val referanse: UUID,
         )
         get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
