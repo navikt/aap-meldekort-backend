@@ -8,7 +8,7 @@ plugins {
 
 val tilgangVersjon = "1.0.134"
 val junitVersion = "5.12.0"
-val komponenterVersjon = "1.0.387"
+val komponenterVersjon = "1.0.389"
 
 dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations:2.20")
