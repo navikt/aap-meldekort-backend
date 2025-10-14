@@ -66,7 +66,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.15.4")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.15.5")
     implementation("ch.qos.logback:logback-classic:1.5.19")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
