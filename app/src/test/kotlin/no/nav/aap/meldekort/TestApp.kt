@@ -18,6 +18,7 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.postgresRepositoryRegistry
+import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn.ARENA

@@ -22,6 +22,7 @@ import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
+import no.nav.aap.prometheus
 import no.nav.aap.sak.Fagsaknummer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

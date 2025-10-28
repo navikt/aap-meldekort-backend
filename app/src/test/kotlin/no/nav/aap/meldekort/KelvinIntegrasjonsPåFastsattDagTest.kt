@@ -23,6 +23,7 @@ import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
+import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
 import org.junit.jupiter.api.AfterAll
