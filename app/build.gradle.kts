@@ -1,8 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val komponenterVersjon = "1.0.403"
+val komponenterVersjon = "1.0.414"
 val junitVersjon = "6.0.0"
-val tilgangVersjon = "1.0.138"
+val tilgangVersjon = "1.0.143"
 val ktorVersion = "3.3.1"
 
 plugins {
