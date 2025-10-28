@@ -17,7 +17,7 @@ application {
 
 tasks {
     val projectProps by registering(WriteProperties::class) {
-        destinationFile = layout.buildDirectory.file("version.properties")
+        destinationFile = layout.buildDirectory.file("meldekort-backend-version.properties")
         // Define property.
         property("project.version", getCheckedOutGitCommitHash())
     }
