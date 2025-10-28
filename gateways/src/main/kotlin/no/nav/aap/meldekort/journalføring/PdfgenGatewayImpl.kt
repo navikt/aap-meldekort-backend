@@ -1,7 +1,5 @@
 package no.nav.aap.meldekort.journalføring
 
-import java.net.URI
-import java.time.Instant
 import no.nav.aap.Ident
 import no.nav.aap.journalføring.PdfgenGateway
 import no.nav.aap.komponenter.config.requiredConfigForKey
@@ -10,22 +8,26 @@ import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
+import no.nav.aap.prometheus
 import no.nav.aap.utfylling.Utfylling
+import java.net.URI
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
-import java.util.Locale
+import java.util.*
 
 object PdfgenGatewayImpl : PdfgenGateway {
     private val baseUrl = requiredConfigForKey("pdfgen.url")
     private val uri = URI("$baseUrl/api/v1/genpdf/meldekort-backend/meldekort")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(),
-        object : TokenProvider {},
+        config = ClientConfig(),
+        tokenProvider = object : TokenProvider {},
+        prometheus = prometheus
     )
 
     override fun genererPdf(

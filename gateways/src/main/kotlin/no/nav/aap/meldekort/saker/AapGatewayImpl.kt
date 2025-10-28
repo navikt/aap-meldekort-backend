@@ -9,12 +9,13 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.prometheus
+import no.nav.aap.sak.AapGateway
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.sak.Saker
-import no.nav.aap.sak.AapGateway
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.time.LocalDate
@@ -24,13 +25,15 @@ object AapGatewayImpl : AapGateway {
         override val referanse: FagsakReferanse,
         override val rettighetsperiode: Periode
     ) : Sak
+
     private val log = LoggerFactory.getLogger(this::class.java)
 
     private val aapApiUrl = requiredConfigForKey("aap.api.intern.url")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = requiredConfigForKey("aap.api.intern.scope")),
-        tokenProvider = ClientCredentialsTokenProvider
+        tokenProvider = ClientCredentialsTokenProvider,
+        prometheus = prometheus
     )
 
     private val sakerByFnrUrl = URI("$aapApiUrl/sakerByFnr")

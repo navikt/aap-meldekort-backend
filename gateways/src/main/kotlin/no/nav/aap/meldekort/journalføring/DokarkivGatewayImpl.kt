@@ -10,6 +10,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.journalføring.DokarkivGateway
+import no.nav.aap.prometheus
 import java.net.URI
 
 object DokarkivGatewayImpl : DokarkivGateway {
@@ -17,7 +18,8 @@ object DokarkivGatewayImpl : DokarkivGateway {
 
     private val httpClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = requiredConfigForKey("dokarkiv.scope")),
-        tokenProvider = ClientCredentialsTokenProvider
+        tokenProvider = ClientCredentialsTokenProvider,
+        prometheus = prometheus
     )
 
     override fun oppdater(

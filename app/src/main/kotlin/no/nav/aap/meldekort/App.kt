@@ -1,7 +1,6 @@
 package no.nav.aap.meldekort
 
 import no.nav.aap.DbConfig
-import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.createPostgresDataSource
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
@@ -10,6 +9,7 @@ import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
+import no.nav.aap.prometheus
 import no.nav.aap.varsel.VarselGatewayKafkaProducerNais
 import org.slf4j.LoggerFactory
 import java.time.Clock

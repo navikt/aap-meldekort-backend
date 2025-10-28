@@ -3,7 +3,6 @@ package no.nav.aap.meldekort
 import io.ktor.server.engine.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.aap.behandlingsflyt.prometheus
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.dbconnect.transaction

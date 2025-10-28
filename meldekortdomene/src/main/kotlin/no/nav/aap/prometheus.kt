@@ -1,4 +1,4 @@
-package no.nav.aap.behandlingsflyt
+package no.nav.aap
 
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
