@@ -5,6 +5,8 @@ import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.komponenter.dbtest.TestDataSource
+import no.nav.aap.komponenter.dbtest.TestDataSource.Companion.invoke
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.sak.FagsakReferanse
@@ -17,9 +19,11 @@ import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import java.time.Instant
@@ -30,9 +34,22 @@ import java.time.temporal.ChronoUnit
 private val ident = Ident("1111")
 
 class UtfyllingRepositoryPostgresTest {
+
+    private lateinit var dataSource: TestDataSource
+    @BeforeEach
+    fun setUp() {
+        dataSource = TestDataSource()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        dataSource.close()
+        dataSource = TestDataSource()
+    }
+
     @Test
     fun `enkel read write`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val flyt = UtfyllingFlytNavn.AAP_FLYT
@@ -108,7 +125,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett gamle utkast`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(
@@ -125,7 +142,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett enda eldre utkast`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(
@@ -142,7 +159,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett gamle innsendte`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val utfylling =
@@ -168,7 +185,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett nyere`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(
@@ -185,7 +202,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `hent utfyllinger for sak`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val sak1 = saksnummerGenerator.next()

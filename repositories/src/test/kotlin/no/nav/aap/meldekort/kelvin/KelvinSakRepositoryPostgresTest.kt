@@ -6,10 +6,13 @@ import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,10 +29,21 @@ class KelvinSakRepositoryPostgresTest {
     val periode3 = Periode(LocalDate.of(2020, 10, 1), LocalDate.of(2020, 11, 22))
     val periode4 = Periode(LocalDate.of(2020, 12, 1), LocalDate.of(2020, 12, 22))
 
+    private lateinit var dataSource: TestDataSource
+    @BeforeEach
+    fun setUp() {
+        dataSource = TestDataSource()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        dataSource.close()
+        dataSource = TestDataSource()
+    }
 
     @Test
     fun `endring og lesing av meldeperioder `() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = KelvinSakRepositoryPostgres(connection)
 
             repo.upsertSak(
@@ -116,7 +130,7 @@ class KelvinSakRepositoryPostgresTest {
 
     @Test
     fun `hent identer basert på sak`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val repo = KelvinSakRepositoryPostgres(connection)
             repo.upsertSak(
                 sak1,

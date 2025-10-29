@@ -7,6 +7,8 @@ import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.komponenter.dbtest.TestDataSource
+import no.nav.aap.komponenter.dbtest.TestDataSource.Companion.invoke
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.varsel.TypeVarsel
 import no.nav.aap.varsel.TypeVarselOm
@@ -20,14 +22,29 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import java.time.Clock
 
 class VarselRepositoryPostgresTest {
+
+    private lateinit var dataSource: TestDataSource
+    @BeforeEach
+    fun setUp() {
+        dataSource = TestDataSource()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        dataSource.close()
+        dataSource = TestDataSource()
+    }
+    
     @Test
     fun `oppretter, henter, oppdaterer og sletter varsler`() {
         val saksnummer = Fagsaknummer("123")
 
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val sakRepo = KelvinSakRepositoryPostgres(connection)
             val varselRepo = VarselRepositoryPostgres(connection)
 
@@ -81,7 +98,7 @@ class VarselRepositoryPostgresTest {
     fun `sletter planlagte varsler`() {
         val saksnummer = Fagsaknummer("1234")
 
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val sakRepo = KelvinSakRepositoryPostgres(connection)
             val varselRepo = VarselRepositoryPostgres(connection)
 
@@ -140,7 +157,7 @@ class VarselRepositoryPostgresTest {
         val saksnummer3 = Fagsaknummer("3")
         val saksnummer4 = Fagsaknummer("4")
 
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val clock = Clock.systemDefaultZone()
             val sakRepo = KelvinSakRepositoryPostgres(connection)
             val varselRepo = VarselRepositoryPostgres(connection)

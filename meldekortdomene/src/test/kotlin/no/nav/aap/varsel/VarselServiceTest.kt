@@ -14,6 +14,7 @@ import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
@@ -27,6 +28,7 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import java.time.Clock
@@ -48,10 +50,19 @@ class VarselServiceTest {
         }
     }
 
+    private lateinit var dataSource: TestDataSource
+    
     @BeforeEach
     fun beforeEach() {
         every { varselGateway.sendVarsel(any(), any(), any(), any()) } just Runs
         every { varselGateway.inaktiverVarsel(any()) } just Runs
+        dataSource = TestDataSource()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        dataSource.close()
+        dataSource = TestDataSource()
     }
 
     private val zoneId = ZoneId.systemDefault()
@@ -66,7 +77,7 @@ class VarselServiceTest {
 
     @Test
     fun `planlegger varsler, og ingen endring i varsler dersom ny identisk info i mottak`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -141,7 +152,7 @@ class VarselServiceTest {
 
     @Test
     fun `lager ikke nytt varsel for sendt varsel i nåværende meldevindu`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -207,7 +218,7 @@ class VarselServiceTest {
 
     @Test
     fun `ved ny info fra mottak der det mangler en meldepliktperiode det er sendt varsel for, inaktivers varselet, planlagte varsler som mangler slettes`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -315,7 +326,7 @@ class VarselServiceTest {
 
     @Test
     fun `ved ny info fra mottak der det er en tidligere meldepliktperiode det er sendt varsel for, så beholdes varselet`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -400,7 +411,7 @@ class VarselServiceTest {
 
     @Test
     fun `lager ingen varsler dersom meldeplikt er tom`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -431,7 +442,7 @@ class VarselServiceTest {
 
     @Test
     fun `lager ikke varsel for meldeplikt der det allerede er en ferdig utfylling`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -493,7 +504,7 @@ class VarselServiceTest {
 
     @Test
     fun `inaktiverer varsel når det mottas en utfylling for perioden varselet er sendt`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
 
             val saksnummer = saksnummerGenerator.next()
@@ -587,7 +598,7 @@ class VarselServiceTest {
 
     @Test
     fun `avbryter sending og sletter planlagt varsel som skal sendes dersom det allerede er en utfylling for perioden`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)
             val utfyllingRepository = UtfyllingRepositoryPostgres(connection)
 

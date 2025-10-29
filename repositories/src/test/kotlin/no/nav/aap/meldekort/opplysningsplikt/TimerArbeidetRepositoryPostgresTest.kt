@@ -7,6 +7,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.InitTestDatabase
+import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.opplysningsplikt.TimerArbeidet
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import no.nav.aap.sak.FagsakReferanse
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.Test
 
 class TimerArbeidetRepositoryPostgresTest {
     private val ident1 = Ident("1".repeat(11))
-    private val ident2 = Ident("1".repeat(11))
     private val utfylling1 = UtfyllingReferanse.ny()
     private val utfylling2 = UtfyllingReferanse.ny()
     private val fagsak1 = FagsakReferanse(
@@ -29,15 +29,17 @@ class TimerArbeidetRepositoryPostgresTest {
         nummer = Fagsaknummer("123"),
     )
 
+    private val dataSource = TestDataSource()
+
     @Test
     fun `skriv og les timer arbeidet`() {
-        InitTestDatabase.freshDatabase().transaction { connection ->
+        dataSource.transaction { connection ->
             val t0 = Instant.ofEpochSecond(1739960455)
             val t1 = t0.plusSeconds(1)
 
             val repo = TimerArbeidetRepositoryPostgres(connection)
 
-            /* Lagr forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
+            /* Lager forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
             repo.lagrTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
