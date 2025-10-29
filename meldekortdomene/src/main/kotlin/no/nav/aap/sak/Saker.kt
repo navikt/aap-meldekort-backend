@@ -21,7 +21,7 @@ class Saker(
                     if (gjelderKelvin(sakerMedRettighetsperiodePåDato)) {
                         throw IllegalStateException(lagFeilmelding(sakerMedRettighetsperiodePåDato))
                     }
-                    log.warn(lagFeilmelding(sakerMedRettighetsperiodePåDato))
+                    log.info(lagFeilmelding(sakerMedRettighetsperiodePåDato))
                 }
             }
             .maxByOrNull { it.rettighetsperiode.tom }
