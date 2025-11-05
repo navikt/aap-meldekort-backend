@@ -23,7 +23,7 @@ jobs:
               with:
                   gradle-version: wrapper
             - name: Bygg & test
-              run: gradle test --continue --no-daemon --configuration-cache --stacktrace --info
+              run: ./gradle test --continue --no-daemon --configuration-cache --stacktrace --info
               env:
                   GITHUB_PASSWORD: ${{ secrets.READER_TOKEN }}
             - uses: dorny/test-reporter@v2.1.1
