@@ -6,9 +6,7 @@ import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.dbtest.InitTestDatabase
 import no.nav.aap.komponenter.dbtest.TestDataSource
-import no.nav.aap.komponenter.dbtest.TestDataSource.Companion.invoke
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.varsel.TypeVarsel
 import no.nav.aap.varsel.TypeVarselOm

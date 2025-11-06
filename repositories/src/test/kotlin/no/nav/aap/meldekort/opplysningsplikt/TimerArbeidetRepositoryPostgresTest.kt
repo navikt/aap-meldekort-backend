@@ -6,7 +6,6 @@ import kotlin.test.assertEquals
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.dbtest.InitTestDatabase
 import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.opplysningsplikt.TimerArbeidet
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
