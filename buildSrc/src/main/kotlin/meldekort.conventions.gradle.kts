@@ -1,4 +1,4 @@
-// Felles kode for alle build.gradle.kts filer som laster api-intern.conventions pluginen
+// Felles kode for alle build.gradle.kts filer som laster inn denne conventions pluginen
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -7,6 +7,7 @@ plugins {
 group = "no.nav.aap.meldekort"
 version = project.findProperty("version")?.toString() ?: "0.0.0"
 
+// https://docs.gradle.org/8.12.1/userguide/jvm_test_suite_plugin.html
 testing {
     suites {
         @Suppress("UnstableApiUsage") val test by getting(JvmTestSuite::class) {
@@ -55,6 +56,7 @@ val toolchainLauncher = javaToolchains.launcherFor {
 }
 tasks.withType<Test>().configureEach { javaLauncher.set(toolchainLauncher) }
 tasks.withType<JavaExec>().configureEach { javaLauncher.set(toolchainLauncher) }
+
 
 kotlin.sourceSets["main"].kotlin.srcDirs("main")
 kotlin.sourceSets["test"].kotlin.srcDirs("test")
