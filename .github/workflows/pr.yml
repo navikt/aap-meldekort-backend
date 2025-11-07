@@ -8,4 +8,6 @@ jobs:
             pull-requests: write
             contents: write
         uses: navikt/aap-workflows/.github/workflows/gradle-pr.yml@main
+        with:
+          jdk: 25
         secrets: inherit
