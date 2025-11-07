@@ -1,15 +1,13 @@
-name: Pull Request
-
-on:
-    pull_request:
+name: pr
+on: pull_request
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        secrets: inherit
+    gradle:
         permissions:
-            contents: read
-            id-token: write
-            packages: write
             checks: write
-        uses: navikt/aap-workflows/.github/workflows/gradle-build.yml@main            
+            pull-requests: write
+            contents: write
+        uses: navikt/aap-workflows/.github/workflows/gradle-pr.yml@main
+        with:
+            jdk: 21
+        secrets: inherit
