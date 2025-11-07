@@ -13,7 +13,6 @@ import no.nav.aap.kelvin.KelvinSakService
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.dbtest.InitTestDatabase
 import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.meldekort.saksnummerGenerator

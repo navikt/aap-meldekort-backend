@@ -32,7 +32,7 @@ class VarselGatewayKafkaProducerTest {
     companion object {
         val log = LoggerFactory.getLogger("KafkaTest")
 
-        val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:4.0.0"))
+        val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka:4.1.0"))
             .withReuse(true)
             .withLogConsumer(Slf4jLogConsumer(log)) // stream to SLF4J
 

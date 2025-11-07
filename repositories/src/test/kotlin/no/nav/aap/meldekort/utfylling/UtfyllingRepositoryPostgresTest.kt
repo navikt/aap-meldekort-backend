@@ -2,11 +2,8 @@ package no.nav.aap.meldekort.utfylling
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.dbtest.InitTestDatabase
 import no.nav.aap.komponenter.dbtest.TestDataSource
-import no.nav.aap.komponenter.dbtest.TestDataSource.Companion.invoke
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.sak.FagsakReferanse

@@ -33,7 +33,7 @@ fun main() {
     FakeTokenX.port = 8081
     FakeServers.start()
 
-    val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.0.0"))
+    val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.1.0"))
     kafkaContainer.start()
     System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
     System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
