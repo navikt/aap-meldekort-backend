@@ -1,4 +1,4 @@
-val ktorVersion = "3.3.1"
+val ktorVersion = "3.3.2"
 val komponenterVersjon = "1.0.418"
 val junitVersjon = "6.0.1"
 val jacksonVersjon = "2.20.1"
@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.479")
-    implementation("io.micrometer:micrometer-core:1.15.5")
+    implementation("io.micrometer:micrometer-core:1.16.0")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -32,7 +32,7 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:1.5.20")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.5")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:postgresql:1.21.3")
