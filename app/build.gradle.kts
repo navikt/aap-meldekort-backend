@@ -3,11 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 val komponenterVersjon = "1.0.418"
 val junitVersjon = "6.0.1"
 val tilgangVersjon = "1.0.149"
-val ktorVersion = "3.3.1"
+val ktorVersion = "3.3.2"
 
 plugins {
     id("meldekort.conventions")
-    id("io.ktor.plugin") version "3.3.1"
+    id("io.ktor.plugin") version "3.3.2"
     id("com.gradleup.shadow") version "9.2.2"
 }
 
@@ -88,7 +88,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.15.5")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.16.0")
     implementation("ch.qos.logback:logback-classic:1.5.20")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
 
