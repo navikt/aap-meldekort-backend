@@ -1,5 +1,5 @@
 val ktorVersion = "3.3.2"
-val komponenterVersjon = "1.0.432"
+val komponenterVersjon = "1.0.435"
 val junitVersjon = "6.0.1"
 val jacksonVersjon = "2.20.1"
 
@@ -11,7 +11,7 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.483")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.484")
     implementation("io.micrometer:micrometer-core:1.16.0")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
