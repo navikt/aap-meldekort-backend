@@ -11,7 +11,7 @@ dependencies {
 
     implementation("io.micrometer:micrometer-core:1.16.0")
     implementation("ch.qos.logback:logback-classic:1.5.21")
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbmigrering:$komponenterVersjon")
