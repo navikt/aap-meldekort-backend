@@ -6,8 +6,8 @@ import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
-import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
+import no.nav.aap.komponenter.httpklient.httpclient.retryablePost
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.prometheus
 import no.nav.aap.sak.AapGateway
@@ -52,7 +52,7 @@ object AapGatewayImpl : AapGateway {
     }
 
     override fun hentSaker(ident: Ident): Saker {
-        val saker = httpClient.post<_, List<SakStatus>>(
+        val saker = httpClient.retryablePost<_, List<SakStatus>>(
             uri = sakerByFnrUrl,
             request = PostRequest(
                 body = mapOf("personidentifikatorer" to listOf(ident.asString)),
@@ -88,7 +88,7 @@ object AapGatewayImpl : AapGateway {
     override fun hentMeldeperioder(ident: Ident, periode: Periode): List<Periode> {
         class KelvinPeriode(val fom: LocalDate, val tom: LocalDate)
 
-        return httpClient.post<_, List<KelvinPeriode>>(
+        return httpClient.retryablePost<_, List<KelvinPeriode>>(
             uri = perioderMeldekortUrl,
             request = PostRequest(
                 body = mapOf(
