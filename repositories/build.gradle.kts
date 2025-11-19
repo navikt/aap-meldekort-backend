@@ -37,5 +37,5 @@ dependencies {
     testFixturesImplementation("io.micrometer:micrometer-core:1.16.0")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:testcontainers-kafka:2.0.1")
+    testImplementation("org.testcontainers:testcontainers-kafka:2.0.2")
 }
