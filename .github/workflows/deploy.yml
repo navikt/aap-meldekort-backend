@@ -21,6 +21,7 @@ jobs:
         secrets: inherit
 
     publiser-kontrakt:
+        needs: dev
         permissions:
             contents: write
             packages: write
@@ -91,9 +92,7 @@ jobs:
         permissions:
             contents: read
             id-token: write
-        needs:
-            - dev
-            - publiser-kontrakt
+        needs: dev
         uses: navikt/aap-workflows/.github/workflows/deploy.yml@main
         secrets: inherit
         concurrency: deploy-prod
