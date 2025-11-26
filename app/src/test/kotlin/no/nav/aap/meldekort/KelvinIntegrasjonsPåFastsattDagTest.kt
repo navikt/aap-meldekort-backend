@@ -1,11 +1,12 @@
 package no.nav.aap.meldekort
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.journalføring.DokarkivGateway
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
@@ -22,18 +23,26 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
+import no.nav.aap.opplysningsplikt.TimerArbeidet
+import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
+import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.UtfyllingReferanse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 import java.net.URI
 import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.UUID
 import kotlin.test.assertEquals
 
 /**
@@ -128,7 +137,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
     @Test
     fun `med vedtak, tre uker etter søknad`() {
         val fnr = fødselsnummerGenerator.next()
-        kelvinSak(fnr,
+        kelvinSak(
+            fnr,
             rettighetsperiode = Periode(16 desember 2024, idag.plusWeeks(49)),
             opplysningsbehov = listOf(Periode(16 desember 2024, idag.plusWeeks(49)))
         )
@@ -145,7 +155,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
     @Test
     fun `med vedtak, en uke etter søknad med opplysningsbehov i dag`() {
         val fnr = fødselsnummerGenerator.next()
-        kelvinSak(fnr,
+        kelvinSak(
+            fnr,
             rettighetsperiode = Periode(16 desember 2024, idag.plusWeeks(51)),
             opplysningsbehov = listOf(Periode(16 desember 2024, idag.plusWeeks(51)))
         )
@@ -160,11 +171,88 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         }
     }
 
+    @Test
+    fun `med vedtak, en uke etter dasdasdas med opplysningsbehov i dag`() {
+        val idag = LocalDate.of(2025, 12, 8)
+        clockHolder.idag = idag
+
+        val fnr = fødselsnummerGenerator.next()
+        val saksnummer = kelvinSak(
+            fnr,
+            rettighetsperiode = Periode(29 november 2025, idag.plusWeeks(51)),
+            opplysningsbehov = listOf(Periode(13 november 2025, idag.plusWeeks(51)))
+        )
+
+        fyllInnTimer(
+            fnr, FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
+            opplysningerOm = Periode(24 november 2025, 7 desember 2025),
+            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 8, 12, 0, 0, 0)
+        )
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(null, it, "/manglerOpplysninger")
+            assertEqualsAt(0, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-08", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2025-12-21", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2025-12-17", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2025-12-29", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+
+        clockHolder.idag = LocalDate.of(2025, 12, 17)
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt("2025-12-08", it, "/manglerOpplysninger/fom")
+            assertEqualsAt("2025-12-21", it, "/manglerOpplysninger/tom")
+            assertEqualsAt(1, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-08", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2025-12-21", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2025-12-17", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2025-12-29", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+
+        fyllInnTimer(
+            fnr, FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
+            opplysningerOm = Periode(8 desember 2025, 21 desember 2025),
+            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 17, 12, 0, 0, 0)
+        )
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(null, it, "/manglerOpplysninger")
+            assertEqualsAt(0, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-22", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2026-01-04", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2026-01-05", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2026-01-12", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+    }
+
+    // TODO: kall api-endepunkter
+    private fun fyllInnTimer(
+        fnr: Ident,
+        fagsakReferanse: FagsakReferanse,
+        opplysningerOm: Periode,
+        innsendingsTidspunkt: LocalDateTime
+    ) {
+        dataSource.transaction {
+            TimerArbeidetRepositoryPostgres(it).lagrTimerArbeidet(
+                fnr, opplysningerOm.map {
+                    TimerArbeidet(
+                        fagsak = fagsakReferanse,
+                        dato = it,
+                        timerArbeidet = 0.0,
+                        registreringstidspunkt = innsendingsTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
+                        utfylling = UtfyllingReferanse(UUID.randomUUID())
+                    )
+                }
+            )
+        }
+    }
+
     private fun kelvinSak(
         fnr: Ident,
         rettighetsperiode: Periode? = null,
         opplysningsbehov: List<Periode>? = null,
-    ) {
+    ): Fagsaknummer {
         val saksnummer = saksnummerGenerator.next()
         val sakenGjelderFor =
             rettighetsperiode ?: Periode(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1))
@@ -180,7 +268,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                         yield(Periode(fom, fom.plusDays(13)))
                         fom = fom.plusDays(14)
                     }
-                }.toList().also {println(it)},
+                }.toList().also { println(it) },
                 meldeplikt = listOf(),
                 opplysningsbehov = opplysningsbehov ?: listOf(sakenGjelderFor),
                 status = null,
@@ -196,10 +284,18 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                 rettighetsperiode = sakenGjelderFor,
             )
         )
+        return saksnummer
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        clockHolder.idag = idag
     }
 
     companion object {
         private val idag = 6 januar 2025
+
+        val clockHolder = ClockHolder(idag)
 
         private lateinit var embeddedServer: EmbeddedServer<*, *>
         lateinit var client: RestClient<InputStream>
@@ -238,7 +334,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     dataSource = dataSource,
                     wait = false,
                     repositoryRegistry = postgresRepositoryRegistry,
-                    clock = Clock.fixed(idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(), ZoneId.of("Europe/Oslo"))
+                    clock = clockHolder,
                 )
             }
 
@@ -268,8 +364,29 @@ fun assertEqualsAt(expected: Any?, json: JsonNode, path: String) {
         obj.isInt -> obj.asInt()
         expectedNormalized is Periode ->
             Periode(LocalDate.parse(obj["fom"].asText()), LocalDate.parse(obj["tom"].asText()))
+
         else -> error("uforventet type ${obj.javaClass.name}")
     }
 
     assertEquals(expectedNormalized, result)
+}
+
+
+class ClockHolder(var idag: LocalDate) : Clock() {
+    var default = fixed(
+        idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(),
+        ZoneId.of("Europe/Oslo")
+    )
+
+    override fun getZone(): ZoneId? {
+        return ZoneId.of("Europe/Oslo")
+    }
+
+    override fun withZone(zone: ZoneId?): Clock? {
+        TODO()
+    }
+
+    override fun instant(): Instant? {
+        return idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant()
+    }
 }

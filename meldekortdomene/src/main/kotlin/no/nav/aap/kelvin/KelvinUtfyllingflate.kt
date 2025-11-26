@@ -16,6 +16,7 @@ import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.Clock
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -102,10 +103,20 @@ class KelvinUtfyllingFlate(
         )
     }
 
-    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null, brukerHarSakUnderBehandling: Boolean? = null): UtfyllingFlate.Metadata {
-        val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
+    private fun utledMetadata(
+        innloggetBruker: InnloggetBruker,
+        utfylling: Utfylling,
+        brukerHarVedtakIKelvin: Boolean? = null,
+        brukerHarSakUnderBehandling: Boolean? = null,
+    ): UtfyllingFlate.Metadata {
+
+        val startPåNesteMeldeperiode = utfylling.periode.tom.plusDays(1)
+        val tidligsteInnsendingstidspunkt =
+            tidligsteInnsendingstidspunkt(startPåNesteMeldeperiode).atStartOfDay()
+
         val fristForInnsending = sakService.finnMeldepliktfristForPeriode(utfylling.fagsak, utfylling.periode)
         val periodeHarHattMeldeplikt = fristForInnsending != null
+
         val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
 
         return UtfyllingFlate.Metadata(
@@ -115,7 +126,7 @@ class KelvinUtfyllingFlate(
                 innloggetBruker.ident,
                 utfylling.fagsak
             ),
-            tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
+            tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt, ////
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
             brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
