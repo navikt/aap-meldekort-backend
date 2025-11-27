@@ -49,7 +49,6 @@ class VarselService(
             kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
                 .filter {
                     meldeplikt.contains(it.meldevindu.copy(fom = originalInnsendingstidspunkt(it.meldevindu.fom)))
-//                    meldeplikt.any { mp -> mp.contains(it.meldevindu.fom) }
                 }
 
         if (meldeperioderMedMeldeplikt.size != meldeplikt.size) {

@@ -50,7 +50,7 @@ class KelvinSakService(
                     meldevindu = Periode(
                         tidligsteInnsendingstidspunkt(meldeperiode.tom.plusDays(1)),
                         meldeperiode.tom.plusDays(8)
-                    ), // fikses her
+                    ),
                 )
             }
     }
