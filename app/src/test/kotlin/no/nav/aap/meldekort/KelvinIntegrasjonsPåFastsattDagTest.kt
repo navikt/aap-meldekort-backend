@@ -235,7 +235,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
         val referanse = startUtfylling!!.metadata!!.referanse
 
-        val dagerJobbet = opplysningerOm.map {
+        val dagerJobbet = opplysningerOm.copy(fom = sakStart).map {
             DagSvarDto(
                 dato = it,
                 timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
