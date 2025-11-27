@@ -1,11 +1,13 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
+import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
+import java.time.Clock
 import java.time.LocalDate
 
 enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
@@ -99,7 +101,7 @@ object TimerArbeidetSteg : UtfyllingSteg {
     )
 }
 
-object StemmerOpplysningeneSteg : UtfyllingSteg {
+class StemmerOpplysningeneSteg(clock: Clock) : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
         get() = BEKREFT
 
@@ -108,7 +110,8 @@ object StemmerOpplysningeneSteg : UtfyllingSteg {
             utfylling.svar.stemmerOpplysningene == true
         },
         "KUN_HISTORISKE_OPPLYSNINGER" to { utfylling ->
-            utfylling.periode.tom < LocalDate.now()
+            val justertTidligsteDag = tidligsteInnsendingstidspunkt(utfylling.periode.tom.plusDays(1)).minusDays(1)
+            justertTidligsteDag < LocalDate.now(clock)
         }
     )
 }

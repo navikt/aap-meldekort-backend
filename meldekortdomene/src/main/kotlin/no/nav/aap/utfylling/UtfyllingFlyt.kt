@@ -58,7 +58,7 @@ class UtfyllingFlyt(
 
     fun kjør(innloggetBruker: InnloggetBruker, utfylling: Utfylling): FlytResultat {
         check(stegene.any { it.navn == utfylling.aktivtSteg })
-        check(!utfylling.erAvsluttet)
+        check(!utfylling.erAvsluttet) { "Utfylling er allerede avsluttet"}
 
         val formkravFeilerSteg = oppfyllerFormkrav(utfylling)
         if (formkravFeilerSteg != null) {
@@ -159,7 +159,7 @@ class UtfyllingFlyt(
                         INTRODUKSJON -> IntroduksjonSteg
                         SPØRSMÅL -> SpørsmålSteg
                         UTFYLLING -> TimerArbeidetSteg
-                        BEKREFT -> StemmerOpplysningeneSteg
+                        BEKREFT -> StemmerOpplysningeneSteg(clock)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
                         BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))
                         INAKTIVER_VARSEL -> InaktiverVarselSteg(VarselService(repositoryProvider, gatewayProvider, clock))

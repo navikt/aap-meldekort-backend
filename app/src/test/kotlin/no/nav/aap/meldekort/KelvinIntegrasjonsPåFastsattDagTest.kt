@@ -6,18 +6,21 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.journalføring.DokarkivGateway
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
+import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
+import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
+import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -30,7 +33,9 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingReferanse
+import no.nav.aap.utfylling.UtfyllingSteg
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -177,16 +182,18 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         clockHolder.idag = idag
 
         val fnr = fødselsnummerGenerator.next()
+        val rettighetsperiode = Periode(29 november 2025, idag.plusWeeks(51))
         val saksnummer = kelvinSak(
             fnr,
-            rettighetsperiode = Periode(29 november 2025, idag.plusWeeks(51)),
-            opplysningsbehov = listOf(Periode(13 november 2025, idag.plusWeeks(51)))
+            rettighetsperiode = rettighetsperiode,
+            opplysningsbehov = listOf(Periode(29 november 2025, idag.plusWeeks(51)))
         )
 
         fyllInnTimer(
             fnr, FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
             opplysningerOm = Periode(24 november 2025, 7 desember 2025),
-            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 8, 12, 0, 0, 0)
+            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 8, 12, 0, 0, 0),
+            sakStart = rettighetsperiode.fom
         )
 
         get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
@@ -213,7 +220,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         fyllInnTimer(
             fnr, FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
             opplysningerOm = Periode(8 desember 2025, 21 desember 2025),
-            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 17, 12, 0, 0, 0)
+            innsendingsTidspunkt = LocalDateTime.of(2025, 12, 17, 12, 0, 0, 0),
         )
 
         get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
@@ -231,21 +238,132 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         fnr: Ident,
         fagsakReferanse: FagsakReferanse,
         opplysningerOm: Periode,
-        innsendingsTidspunkt: LocalDateTime
+        innsendingsTidspunkt: LocalDateTime,
+        sakStart: LocalDate = opplysningerOm.fom
     ) {
-        dataSource.transaction {
-            TimerArbeidetRepositoryPostgres(it).lagrTimerArbeidet(
-                fnr, opplysningerOm.map {
-                    TimerArbeidet(
-                        fagsak = fagsakReferanse,
-                        dato = it,
-                        timerArbeidet = 0.0,
-                        registreringstidspunkt = innsendingsTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
-                        utfylling = UtfyllingReferanse(UUID.randomUUID())
-                    )
-                }
+        println(1)
+        val r = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
+            fnr, "/api/start-innsending", StartUtfyllingRequest(
+                fom = sakStart,
+                tom = opplysningerOm.tom
             )
+        )
+
+        println(2)
+        val referanse = r!!.metadata!!.referanse
+        val r2 = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(
+                nyTilstand = UtfyllingTilstandDto(
+                    aktivtSteg = StegDto.INTRODUKSJON,
+                    svar = SvarDto(
+                        vilSvareRiktig = true,
+                        harDuJobbet = null,
+                        dager = emptyList(),
+                        stemmerOpplysningene = true
+                    )
+                )
+            )
+        )
+
+        println(3)
+        val r3 = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(
+                nyTilstand = UtfyllingTilstandDto(
+                    aktivtSteg = StegDto.SPØRSMÅL,
+                    svar = SvarDto(
+                        vilSvareRiktig = true,
+                        harDuJobbet = true,
+                        dager = opplysningerOm.map {
+                            DagSvarDto(
+                                dato = it,
+                                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                            )
+                        },
+                        stemmerOpplysningene = true
+                    )
+                )
+            )
+        )
+
+        println(3.5)
+        val r35 = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(
+                nyTilstand = UtfyllingTilstandDto(
+                    aktivtSteg = StegDto.UTFYLLING,
+                    svar = SvarDto(
+                        vilSvareRiktig = true,
+                        harDuJobbet = true,
+                        dager = opplysningerOm.copy(fom = sakStart).map {
+                            DagSvarDto(
+                                dato = it,
+                                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                            )
+                        },
+                        stemmerOpplysningene = true
+                    )
+                )
+            )
+        )
+
+        println(4)
+        val r4 = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(
+                nyTilstand = UtfyllingTilstandDto(
+                    aktivtSteg = StegDto.BEKREFT,
+                    svar = SvarDto(
+                        vilSvareRiktig = true,
+                        harDuJobbet = true,
+                        dager = opplysningerOm.copy(fom = sakStart).map {
+                            DagSvarDto(
+                                dato = it,
+                                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                            )
+                        },
+                        stemmerOpplysningene = true
+                    )
+                )
+            )
+        )
+//
+        println(5)
+//        val r5 = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+//            fnr, "/api/utfylling/$referanse/lagre", EndreUtfyllingRequest(
+//                nyTilstand = UtfyllingTilstandDto(
+//                    aktivtSteg = StegDto.KVITTERING,
+//                    svar = SvarDto(
+//                        vilSvareRiktig = true,
+//                        harDuJobbet = true,
+//                        dager = opplysningerOm.copy(fom = sakStart).map {
+//                            DagSvarDto(
+//                                dato = it,
+//                                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+//                            )
+//                        },
+//                        stemmerOpplysningene = true
+//                    )
+//                )
+//            )
+//        )
+
+
+        dataSource.transaction {
+            val sakRepo = KelvinSakRepositoryPostgres(it)
+            val sak = sakRepo.hentMeldeperioder(fagsakReferanse.nummer)
         }
+//            TimerArbeidetRepositoryPostgres(it).lagrTimerArbeidet(
+//                fnr, opplysningerOm.map {
+//                    TimerArbeidet(
+//                        fagsak = f    agsakReferanse,
+//                        dato = it,
+//                        timerArbeidet = 0.0,
+//                        registreringstidspunkt = innsendingsTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toInstant(),
+//                        utfylling = UtfyllingReferanse(UUID.randomUUID())
+//                    )
+//                }
+//            )
+//        }
+
+        println("xxx")
     }
 
     private fun kelvinSak(
@@ -315,6 +433,19 @@ class KelvinIntegrasjonsPåFastsattDagTest {
             )
         }
 
+        inline fun <reified T, B : Any> myPost(fnr: Ident, path: String, body: B): T? {
+            return client.post<B, T>(
+                URI("$baseUrl$path"),
+                PostRequest(
+                    additionalHeaders = listOf(
+                        Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                    ),
+                    body = body
+                )
+            )
+        }
+
+
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
@@ -323,6 +454,9 @@ class KelvinIntegrasjonsPåFastsattDagTest {
 
             GatewayRegistry
                 .register<AapGatewayImpl>()
+                .register<DokarkivGatewayImpl>()
+                .register<PdfgenGatewayImpl>()
+                .register<FakeVarselGateway>()
 
             embeddedServer = run {
                 startHttpServer(
