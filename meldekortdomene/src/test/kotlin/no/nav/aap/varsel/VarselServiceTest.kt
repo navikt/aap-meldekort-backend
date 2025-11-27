@@ -31,10 +31,12 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import java.time.Clock
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 import kotlin.test.Test
 
@@ -50,7 +52,7 @@ class VarselServiceTest {
     }
 
     private lateinit var dataSource: TestDataSource
-    
+
     @BeforeEach
     fun beforeEach() {
         every { varselGateway.sendVarsel(any(), any(), any(), any()) } just Runs
@@ -145,6 +147,70 @@ class VarselServiceTest {
                     forPeriode = Periode(LocalDate.of(2025, 7, 28), LocalDate.of(2025, 8, 10)),
                     status = VarselStatus.PLANLAGT
                 )
+            )
+        }
+    }
+
+    @Test
+    fun `sender varsel tidligere (17 desember) for meldeperioden i uke 50-51`() {
+        dataSource.transaction { connection ->
+            val varselRepository = VarselRepositoryPostgres(connection)
+
+            val saksnummer = saksnummerGenerator.next()
+            val ident = fødselsnummerGenerator.next()
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 11, 29), LocalDate.of(2026, 6, 30))
+            val opplysningsbehov = listOf(sakenGjelderFor)
+            val meldeperioder = listOf(Periode(LocalDate.of(2025, 12, 8), LocalDate.of(2025, 12, 21)))
+
+            val meldeplikt = listOf(Periode(LocalDate.of(2025, 12, 22), LocalDate.of(2025, 12, 29)))
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 12, 17).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder,
+                meldeplikt,
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 12, 17, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 12, 8), LocalDate.of(2025, 12, 21)),
+                    status = VarselStatus.PLANLAGT
+                )
+            )
+
+            // Sender planlagte varsler
+            varselService(connection, clockMedTid(LocalDateTime.of(2025, 12, 17, 9, 0)))
+                .sendPlanlagteVarsler()
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 12, 22).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident),
+                meldeperioder,
+                meldeplikt,
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            // Ikke planlagt noen flere varsler
+            assertVarsler(
+                varselRepository, saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 12, 17, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 12, 8), LocalDate.of(2025, 12, 21)),
+                    status = VarselStatus.SENDT
+                ),
             )
         }
     }

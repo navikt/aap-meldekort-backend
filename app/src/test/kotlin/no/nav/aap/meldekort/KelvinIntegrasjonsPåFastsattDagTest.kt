@@ -172,7 +172,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
     }
 
     @Test
-    fun `med vedtak, en uke etter dasdasdas med opplysningsbehov i dag`() {
+    fun `kommende meldeperiode for helligdagsunntak`() {
         val idag = LocalDate.of(2025, 12, 8)
         clockHolder.idag = idag
 
