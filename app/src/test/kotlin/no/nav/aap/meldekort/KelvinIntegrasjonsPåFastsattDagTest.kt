@@ -221,6 +221,78 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         }
     }
 
+    @Test
+    fun `uendret oppførsel for kommende meldeperioder som går over helligdagsunntak`() {
+        val idag = LocalDate.of(2025, 12, 1)
+        clockHolder.idag = idag
+
+        val fnr = fødselsnummerGenerator.next()
+        val rettighetsperiode = Periode(17 november 2025, idag.plusWeeks(51))
+        kelvinSak(
+            fnr,
+            rettighetsperiode = rettighetsperiode,
+            opplysningsbehov = listOf(Periode(17 november 2025, idag.plusWeeks(51)))
+        )
+
+        fyllInnTimer(
+            fnr,
+            opplysningerOm = Periode(17 november 2025, 30 november 2025),
+            sakStart = rettighetsperiode.fom
+        )
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(null, it, "/manglerOpplysninger")
+            assertEqualsAt(0, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-01", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2025-12-14", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2025-12-15", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2025-12-22", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+
+        clockHolder.idag = LocalDate.of(2025, 12, 15)
+        fyllInnTimer(
+            fnr,
+            opplysningerOm = Periode(1 desember 2025, 14 desember 2025),
+            sakStart = rettighetsperiode.fom
+        )
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(null, it, "/manglerOpplysninger")
+            assertEqualsAt(0, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-15", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2025-12-28", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2025-12-29", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2026-01-05", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+
+        clockHolder.idag = LocalDate.of(2025, 12, 29)
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(1, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-15", it, "/manglerOpplysninger/fom")
+            assertEqualsAt("2025-12-28", it, "/manglerOpplysninger/tom")
+            assertEqualsAt("2025-12-15", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2025-12-28", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2025-12-29", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2026-01-05", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+
+        fyllInnTimer(
+            fnr,
+            opplysningerOm = Periode(15 desember 2025, 28 desember 2025),
+            sakStart = rettighetsperiode.fom
+        )
+
+        get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
+            assertEqualsAt(null, it, "/manglerOpplysninger")
+            assertEqualsAt(0, it, "/antallUbesvarteMeldeperioder")
+            assertEqualsAt("2025-12-29", it, "/nesteMeldeperiode/meldeperiode/fom")
+            assertEqualsAt("2026-01-11", it, "/nesteMeldeperiode/meldeperiode/tom")
+            assertEqualsAt("2026-01-12", it, "/nesteMeldeperiode/innsendingsvindu/fom")
+            assertEqualsAt("2026-01-19", it, "/nesteMeldeperiode/innsendingsvindu/tom")
+        }
+    }
+
     private fun fyllInnTimer(
         fnr: Ident,
         opplysningerOm: Periode,
