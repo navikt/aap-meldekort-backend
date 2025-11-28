@@ -24,13 +24,15 @@ class KelvinUtfyllingFlate(
     private val kelvinSakRepository: KelvinSakRepository,
     private val sakService: KelvinSakService,
     private val flytProvider: (UtfyllingFlytNavn) -> UtfyllingFlyt,
+    private val clock: Clock
 ) : UtfyllingFlate {
 
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         utfyllingRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
         sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
-        flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(repositoryProvider, gatewayProvider, flytNavn, clock) }
+        flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(repositoryProvider, gatewayProvider, flytNavn, clock) },
+        clock = clock,
     )
 
 
@@ -102,11 +104,21 @@ class KelvinUtfyllingFlate(
         )
     }
 
-    private fun utledMetadata(innloggetBruker: InnloggetBruker, utfylling: Utfylling, brukerHarVedtakIKelvin: Boolean? = null, brukerHarSakUnderBehandling: Boolean? = null): UtfyllingFlate.Metadata {
-        val tidligsteInnsendingstidspunkt = utfylling.periode.tom.plusDays(1).atStartOfDay()
+    private fun utledMetadata(
+        innloggetBruker: InnloggetBruker,
+        utfylling: Utfylling,
+        brukerHarVedtakIKelvin: Boolean? = null,
+        brukerHarSakUnderBehandling: Boolean? = null,
+    ): UtfyllingFlate.Metadata {
+
+        val startPåNesteMeldeperiode = utfylling.periode.tom.plusDays(1)
+        val tidligsteInnsendingstidspunkt =
+            tidligsteInnsendingstidspunkt(startPåNesteMeldeperiode).atStartOfDay()
+
         val fristForInnsending = sakService.finnMeldepliktfristForPeriode(utfylling.fagsak, utfylling.periode)
         val periodeHarHattMeldeplikt = fristForInnsending != null
-        val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(ZoneId.of("Europe/Oslo"))
+
+        val kanSendesInn = tidligsteInnsendingstidspunkt <= LocalDateTime.now(clock)
 
         return UtfyllingFlate.Metadata(
             referanse = utfylling.referanse,
@@ -139,7 +151,7 @@ class KelvinUtfyllingFlate(
         svar: Svar,
         sak: Sak,
     ): Utfylling {
-        val opprettet = Instant.now()
+        val opprettet = Instant.now(clock)
         val nyUtfylling = Utfylling(
             referanse = utfyllingReferanse,
             periode = periode,
@@ -185,7 +197,7 @@ class KelvinUtfyllingFlate(
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
             svar = svar,
-            sistEndret = Instant.now(),
+            sistEndret = Instant.now(clock),
         )
         val utfall = flytProvider(utfylling.flyt).kjør(innloggetBruker, utfylling)
         utfyllingRepository.lagrUtfylling(utfall.utfylling)
@@ -208,7 +220,7 @@ class KelvinUtfyllingFlate(
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
             svar = svar,
-            sistEndret = Instant.now(),
+            sistEndret = Instant.now(clock),
         )
 
         utfyllingRepository.lagrUtfylling(utfylling)

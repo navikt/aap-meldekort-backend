@@ -3,6 +3,8 @@ package no.nav.aap.varsel
 import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.kelvin.KelvinSakService
+import no.nav.aap.kelvin.originalInnsendingstidspunkt
+import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
@@ -17,6 +19,7 @@ import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.utfylling.UtfyllingRepository
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.Period
 import java.time.ZoneId
 import java.util.*
 
@@ -44,7 +47,9 @@ class VarselService(
 
         val meldeperioderMedMeldeplikt =
             kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
-                .filter { meldeplikt.contains(it.meldevindu) }
+                .filter {
+                    meldeplikt.contains(it.meldevindu.copy(fom = originalInnsendingstidspunkt(it.meldevindu.fom)))
+                }
 
         if (meldeperioderMedMeldeplikt.size != meldeplikt.size) {
             log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin. Saksnummer: ${saksnummer.asString}")
@@ -75,7 +80,9 @@ class VarselService(
         val utfyllinger = hentFerdigeUtfyllinger(saksnummer)
         val fremtidigeMeldeperioder =
             meldeperioder.filter { meldeperiode ->
-                val erIMeldevinduet = meldeperiode.meldevindu.contains(LocalDate.now(clock))
+                val muligTidligereInnsendingstidspunkt = tidligsteInnsendingstidspunkt(meldeperiode.meldevindu.fom)
+                val meldevindu = Periode(muligTidligereInnsendingstidspunkt, meldeperiode.meldevindu.tom)
+                val erIMeldevinduet = meldevindu.contains(LocalDate.now(clock))
                 val harSendtVarselForPerioden = sendteVarsler.map { it.forPeriode }.contains(meldeperiode.meldeperioden)
                 val meldevinduIFremtiden = meldeperiode.meldevindu.fom.isAfter(LocalDate.now(clock))
 
