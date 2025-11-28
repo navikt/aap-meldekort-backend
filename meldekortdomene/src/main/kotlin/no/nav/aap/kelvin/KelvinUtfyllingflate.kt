@@ -126,7 +126,7 @@ class KelvinUtfyllingFlate(
                 innloggetBruker.ident,
                 utfylling.fagsak
             ),
-            tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt, ////
+            tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
             fristForInnsending = fristForInnsending,
             kanSendesInn = kanSendesInn,
             brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
