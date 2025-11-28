@@ -47,7 +47,6 @@ class VarselServiceTest {
         @JvmStatic
         fun beforeAll() {
             System.setProperty("aap.meldekort.lenke", "test")
-            System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
         }
     }
 
