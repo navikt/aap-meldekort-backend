@@ -110,8 +110,8 @@ class StemmerOpplysningeneSteg(clock: Clock) : UtfyllingSteg {
             utfylling.svar.stemmerOpplysningene == true
         },
         "KUN_HISTORISKE_OPPLYSNINGER" to { utfylling ->
-            val justertTidligsteDag = tidligsteInnsendingstidspunkt(utfylling.periode.tom.plusDays(1)).minusDays(1)
-            justertTidligsteDag < LocalDate.now(clock)
+            val justertTidligsteDag = tidligsteInnsendingstidspunkt(utfylling.periode.tom.plusDays(1))
+            justertTidligsteDag <= LocalDate.now(clock)
         }
     )
 }
