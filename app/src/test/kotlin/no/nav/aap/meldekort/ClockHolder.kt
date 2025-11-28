@@ -6,16 +6,11 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 class ClockHolder(var idag: LocalDate) : Clock() {
-    var default: Clock? = fixed(
-        idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(),
-        ZoneId.of("Europe/Oslo")
-    )
-
     override fun getZone(): ZoneId? {
         return ZoneId.of("Europe/Oslo")
     }
 
-    override fun withZone(zone: ZoneId?): Clock? {
+    override fun withZone(zone: ZoneId?): Clock {
         TODO()
     }
 
