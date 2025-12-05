@@ -34,7 +34,8 @@ object PdfgenGatewayImpl : PdfgenGateway {
         ident: Ident,
         mottatt: Instant,
         meldekort: no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort,
-        utfylling: Utfylling
+        utfylling: Utfylling,
+        harBrukerVedtakIKelvin: Boolean
     ): ByteArray {
         val pdf = httpClient.post(
             uri, PostRequest(
@@ -46,6 +47,7 @@ object PdfgenGatewayImpl : PdfgenGateway {
                         it.timer ?: 0.0
                     }),
                     "harGittRiktigeOpplysninger" to utfylling.svar.svarerDuSant,
+                    "harBrukerVedtakIKelvin" to harBrukerVedtakIKelvin,
                     "meldeperiode" to mapOf(
                         "fraOgMedDato" to formaterDatoForFrontend(meldekort.fom()),
                         "tilOgMedDato" to formaterDatoForFrontend(meldekort.tom()),
