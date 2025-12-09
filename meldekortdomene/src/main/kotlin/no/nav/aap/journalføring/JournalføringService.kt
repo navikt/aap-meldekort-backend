@@ -6,6 +6,7 @@ import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.MeldekortV0
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
+import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
@@ -14,6 +15,7 @@ import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.*
@@ -22,11 +24,13 @@ class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
     private val flytJobbRepository: FlytJobbRepository,
     private val pdfgenGateway: PdfgenGateway,
+    private val kelvinSakRepository: KelvinSakRepository,
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
         gatewayProvider.provide(),
         repositoryProvider.provide(),
         gatewayProvider.provide(),
+        repositoryProvider.provide()
     )
 
     fun bestillJournalføring(ident: Ident, utfylling: Utfylling) {
@@ -54,7 +58,7 @@ class JournalføringService(
                 )
             }
         )
-
+        val kelvinSak = kelvinSakRepository.hentSak(ident, LocalDate.now())
         val journalpost = journalpost(
             ident = ident,
             utfylling = utfylling,
@@ -63,7 +67,8 @@ class JournalføringService(
                 ident = ident,
                 mottatt = utfylling.sistEndret,
                 meldekort = meldekort,
-                utfylling = utfylling
+                utfylling = utfylling,
+                harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
             ),
             sak = sak,
         )

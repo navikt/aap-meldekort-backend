@@ -13,7 +13,8 @@ class FakePdfgenGateway: PdfgenGateway {
         ident: Ident,
         mottatt: Instant,
         meldekort: Meldekort,
-        utfylling: Utfylling
+        utfylling: Utfylling,
+        harBrukerVedtakIKelvin: Boolean
     ): ByteArray {
         return """
          %PDF-1.0
