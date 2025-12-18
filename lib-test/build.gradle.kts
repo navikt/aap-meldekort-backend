@@ -12,7 +12,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.510")
-    implementation("io.micrometer:micrometer-core:1.16.0")
+    implementation("io.micrometer:micrometer-core:1.16.1")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -30,7 +30,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersjon")
 
-    implementation("ch.qos.logback:logback-classic:1.5.21")
+    implementation("ch.qos.logback:logback-classic:1.5.22")
 
     implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
