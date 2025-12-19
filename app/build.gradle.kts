@@ -88,11 +88,11 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.16.0")
-    implementation("ch.qos.logback:logback-classic:1.5.21")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.16.1")
+    implementation("ch.qos.logback:logback-classic:1.5.22")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("no.nav:ktor-openapi-generator:1.0.131")
+    api("no.nav:ktor-openapi-generator:1.0.133")
 
     testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -108,5 +108,5 @@ dependencies {
     }
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:testcontainers-kafka:2.0.2")
+    testImplementation("org.testcontainers:testcontainers-kafka:2.0.3")
 }
