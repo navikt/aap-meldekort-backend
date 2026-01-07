@@ -3,6 +3,7 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
+import no.nav.aap.komponenter.verdityper.Tid
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
@@ -105,8 +106,8 @@ class KelvinSakService(
         ident: Ident,
         sak: FagsakReferanse
     ): List<no.nav.aap.opplysningsplikt.TimerArbeidet> {
-        val tidligsteFom = perioder.minByOrNull { it.meldeperioden.fom }?.meldeperioden?.fom ?: LocalDate.MIN
-        val senesteTom = perioder.maxByOrNull { it.meldeperioden.tom }?.meldeperioden?.tom ?: LocalDate.MAX
+        val tidligsteFom = perioder.minByOrNull { it.meldeperioden.fom }?.meldeperioden?.fom ?: Tid.MIN
+        val senesteTom = perioder.maxByOrNull { it.meldeperioden.tom }?.meldeperioden?.tom ?: Tid.MAKS
         val timerPeriode = Periode(fom = tidligsteFom, tom = senesteTom)
 
         return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)

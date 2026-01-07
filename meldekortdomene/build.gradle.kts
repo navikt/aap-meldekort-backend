@@ -11,6 +11,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
+    implementation("no.nav.aap.kelvin:verdityper:${komponenterVersjon}")
     implementation(kotlin("reflect"))
 
     testImplementation(project(":repositories"))
