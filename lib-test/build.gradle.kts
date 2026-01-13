@@ -30,9 +30,9 @@ dependencies {
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersjon")
 
-    implementation("ch.qos.logback:logback-classic:1.5.23")
+    implementation("ch.qos.logback:logback-classic:1.5.24")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.6")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.7")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:testcontainers-postgresql:2.0.3")
