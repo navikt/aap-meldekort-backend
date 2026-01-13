@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
 
     implementation("io.micrometer:micrometer-core:1.16.1")
-    implementation("ch.qos.logback:logback-classic:1.5.23")
+    implementation("ch.qos.logback:logback-classic:1.5.24")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -22,7 +22,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.1.1")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.0")
+    implementation("org.flywaydb:flyway-database-postgresql:11.20.1")
     runtimeOnly("org.postgresql:postgresql:42.7.8")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
