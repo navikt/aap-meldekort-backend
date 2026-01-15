@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.525")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.527")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
