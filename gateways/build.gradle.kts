@@ -1,5 +1,5 @@
 plugins {
-    id("meldekort.conventions")
+    id("aap.conventions")
 }
 
 val komponenterVersjon = "1.0.479"

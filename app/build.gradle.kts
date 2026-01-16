@@ -6,7 +6,7 @@ val tilgangVersjon = "1.0.177"
 val ktorVersion = "3.3.3"
 
 plugins {
-    id("meldekort.conventions")
+    id("aap.conventions")
     id("io.ktor.plugin") version "3.3.3"
     id("com.gradleup.shadow") version "9.3.1"
 }
