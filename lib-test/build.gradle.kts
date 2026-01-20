@@ -4,7 +4,7 @@ val junitVersjon = "6.0.2"
 val jacksonVersjon = "2.20.1"
 
 plugins {
-    id("meldekort.conventions")
+    id("aap.conventions")
     id("java-test-fixtures")
 }
 
