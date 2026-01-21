@@ -89,7 +89,7 @@ dependencies {
     api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
     implementation("io.micrometer:micrometer-registry-prometheus:1.16.2")
-    implementation("ch.qos.logback:logback-classic:1.5.24")
+    implementation("ch.qos.logback:logback-classic:1.5.25")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     api("no.nav:ktor-openapi-generator:1.0.136")
