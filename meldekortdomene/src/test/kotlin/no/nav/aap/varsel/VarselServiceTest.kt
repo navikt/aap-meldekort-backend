@@ -776,7 +776,11 @@ class VarselServiceTest {
 
     private fun kelvinMottakService(connection: DBConnection, clock: Clock): KelvinMottakService {
         return KelvinMottakService(
-            varselService(connection, clock), KelvinSakRepositoryPostgres(connection)
+            varselService = varselService(connection, clock),
+            kelvinSakRepository = KelvinSakRepositoryPostgres(connection),
+            utfyllingRepository = UtfyllingRepositoryPostgres(connection),
+            timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection),
+            clock = clock
         )
     }
 
