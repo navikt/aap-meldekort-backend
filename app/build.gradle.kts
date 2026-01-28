@@ -1,6 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val komponenterVersjon = "1.0.490"
+val komponenterVersjon = "1.0.934"
 val junitVersjon = "6.0.2"
 val tilgangVersjon = "1.0.178"
 val ktorVersion = "3.3.3"
@@ -92,7 +92,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.25")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
-    api("no.nav:ktor-openapi-generator:1.0.136")
+    api("no.nav.aap.kelvin:ktor-openapi-generator:$komponenterVersjon")
 
     testImplementation(testFixtures(project(":repositories")))
     testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
