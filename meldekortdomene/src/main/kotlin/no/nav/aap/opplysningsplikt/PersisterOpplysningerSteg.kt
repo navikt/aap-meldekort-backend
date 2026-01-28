@@ -7,7 +7,7 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 
 class PersisterOpplysningerSteg(
     private val timerArbeidetRepository: TimerArbeidetRepository,
-): UtfyllingSteg {
+) : UtfyllingSteg {
     override val navn = PERSISTER_OPPLYSNINGER
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
