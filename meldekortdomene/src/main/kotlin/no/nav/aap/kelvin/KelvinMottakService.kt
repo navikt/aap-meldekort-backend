@@ -57,7 +57,7 @@ class KelvinMottakService(
         periode: Periode,
         harDuJobbet: Boolean,
         timerArbeidet: List<no.nav.aap.utfylling.TimerArbeidet>
-    ) {
+    ): UtfyllingReferanse {
         val sak = kelvinSakRepository.hentSak(ident, periode.fom)
             ?: throw IllegalStateException("finner ikke sak")
 
@@ -79,6 +79,7 @@ class KelvinMottakService(
             ),
             opprettet = Instant.now(clock),
             sistEndret = Instant.now(clock),
+            erDigitalisert = true
         )
 
         utfyllingRepository.lagrUtfylling(utfylling)
@@ -96,5 +97,6 @@ class KelvinMottakService(
         )
 
         varselService.inaktiverVarslerForUtfylling(utfylling)
+        return utfyllingReferanse
     }
 }

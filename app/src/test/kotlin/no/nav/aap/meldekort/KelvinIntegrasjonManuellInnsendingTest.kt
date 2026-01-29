@@ -40,6 +40,8 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.varsel.VarselRepositoryPostgres
 import no.nav.aap.varsel.VarselService
@@ -51,6 +53,7 @@ import java.io.InputStream
 import java.net.URI
 import java.time.Clock
 import java.time.LocalDate
+import kotlin.test.assertEquals
 
 /**
  * ```
@@ -155,7 +158,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
             assertEqualsAt("2026-01-05", it, "/nesteMeldeperiode/innsendingsvindu/tom")
         }
 
-        fyllInnTimerFraBehandlingsflyt(
+        val utfyllingReferanse = fyllInnTimerFraBehandlingsflyt(
             fnr, Periode(15 desember 2025, 28 desember 2025)
         )
 
@@ -167,13 +170,22 @@ class KelvinIntegrasjonManuellInnsendingTest {
             assertEqualsAt("2026-01-12", it, "/nesteMeldeperiode/innsendingsvindu/fom")
             assertEqualsAt("2026-01-19", it, "/nesteMeldeperiode/innsendingsvindu/tom")
         }
+        val utfylling = hentUtfyllinger(fnr, utfyllingReferanse)
+        assertEquals(utfylling?.erDigitalisert, true)
+    }
+
+    private fun hentUtfyllinger(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
+        return dataSource.transaction { conn ->
+            val utfyllingRepository = UtfyllingRepositoryPostgres(conn)
+            utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
+        }
     }
 
     private fun fyllInnTimerFraBehandlingsflyt(
         fnr: Ident,
         periode: Periode
-    ) {
-        dataSource.transaction { connection ->
+    ): UtfyllingReferanse {
+        return dataSource.transaction { connection ->
             val kelvinMottakService = kelvinMottakService(connection, clockHolder)
 
             val dagerJobbet = periode.map {

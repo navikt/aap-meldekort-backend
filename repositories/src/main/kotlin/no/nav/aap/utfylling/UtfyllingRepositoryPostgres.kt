@@ -81,8 +81,8 @@ class UtfyllingRepositoryPostgres(
     override fun lagrUtfylling(utfylling: Utfylling) {
         connection.execute(
             """
-            insert into utfylling(ident, referanse, fagsystem, fagsaknummer, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar)
-            values (?, ?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?::jsonb)
+            insert into utfylling(ident, referanse, fagsystem, fagsaknummer, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar, er_digitalisert)
+            values (?, ?, ?, ?, ?::daterange, ?, ?, ?, ?, ?, ?::jsonb, ?)
         """
         ) {
             setParams {
@@ -97,6 +97,7 @@ class UtfyllingRepositoryPostgres(
                 setEnumName(9, utfylling.aktivtSteg)
                 setBoolean(10, utfylling.erAvsluttet)
                 setString(11, DefaultJsonMapper.toJson(utfylling.svar))
+                setBoolean(12, utfylling.erDigitalisert)
             }
         }
     }
@@ -140,6 +141,7 @@ class UtfyllingRepositoryPostgres(
             opprettet = row.getInstant("opprettet"),
             sistEndret = row.getInstant("sist_endret"),
             svar = DefaultJsonMapper.fromJson(row.getString("svar")),
+            erDigitalisert = row.getBooleanOrNull("er_digitalisert")
         )
     }
 
