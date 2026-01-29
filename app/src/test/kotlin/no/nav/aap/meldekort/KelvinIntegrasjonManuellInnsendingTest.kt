@@ -6,17 +6,24 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
+import no.nav.aap.kelvin.KelvinSakService
+import no.nav.aap.komponenter.config.requiredConfigForKey
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
+import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
 import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.NoTokenTokenProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
@@ -26,17 +33,23 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
+import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
+import no.nav.aap.varsel.VarselRepositoryPostgres
+import no.nav.aap.varsel.VarselService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 import java.net.URI
+import java.time.Clock
 import java.time.LocalDate
 
 /**
@@ -93,7 +106,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
 
         val fnr = fødselsnummerGenerator.next()
         val rettighetsperiode = Periode(17 november 2025, idag.plusWeeks(51))
-        val fagsaknummer = kelvinSak(
+        kelvinSak(
             fnr,
             rettighetsperiode = rettighetsperiode,
             opplysningsbehov = listOf(Periode(17 november 2025, idag.plusWeeks(51)))
@@ -143,7 +156,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
         }
 
         fyllInnTimerFraBehandlingsflyt(
-            fnr, fagsaknummer.asString, Periode(15 desember 2025, 28 desember 2025)
+            fnr, Periode(15 desember 2025, 28 desember 2025)
         )
 
         get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
@@ -158,28 +171,51 @@ class KelvinIntegrasjonManuellInnsendingTest {
 
     private fun fyllInnTimerFraBehandlingsflyt(
         fnr: Ident,
-        saksnummer: String,
-        periode: Periode,
+        periode: Periode
     ) {
-        val dagerJobbet = periode.map {
-            DagSvarDto(
-                dato = it,
-                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+        dataSource.transaction { connection ->
+            val kelvinMottakService = kelvinMottakService(connection, clockHolder)
+
+            val dagerJobbet = periode.map {
+                DagSvarDto(
+                    dato = it,
+                    timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                )
+            }
+
+            kelvinMottakService.behandleMottatteTimerArbeidet(
+                ident = fnr,
+                periode = periode,
+                harDuJobbet = true,
+                timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
             )
         }
+    }
 
-        val request = BehandslingsflytUtfyllingRequest(
-            saksnummer = saksnummer,
-            ident = fnr.asString,
-            periode = periode,
-            harDuJobbet = true,
-            dager = dagerJobbet
+    private fun kelvinMottakService(connection: DBConnection, clock: Clock): KelvinMottakService {
+        return KelvinMottakService(
+            varselService = varselService(connection, clock),
+            kelvinSakRepository = KelvinSakRepositoryPostgres(connection),
+            utfyllingRepository = UtfyllingRepositoryPostgres(connection),
+            timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection),
+            clock = clock
         )
+    }
 
-        myPost<Unit, BehandslingsflytUtfyllingRequest>(
-            fnr = fnr,
-            path = "/api/behandlingsflyt/sak/timer",
-            body = request
+    private fun varselService(connection: DBConnection, clock: Clock): VarselService {
+        val timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection)
+        val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
+        return VarselService(
+            kelvinSakService = KelvinSakService(
+                kelvinSakRepository = kelvinSakRepository,
+                timerArbeidetRepository = timerArbeidetRepository,
+                clock = clock
+            ),
+            kelvinSakRepository = kelvinSakRepository,
+            varselRepository = VarselRepositoryPostgres(connection),
+            utfyllingRepository = UtfyllingRepositoryPostgres(connection),
+            varselGateway = FakeVarselGateway,
+            clock = clock
         )
     }
 
@@ -321,11 +357,25 @@ class KelvinIntegrasjonManuellInnsendingTest {
                     additionalHeaders = listOf(
                         Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
                     ),
-                    body = body
+                    body = body,
+                    currentToken = getToken()
                 )
             )
         }
 
+        fun getToken(): OidcToken {
+            val client = RestClient(
+                config = ClientConfig(scope = "behandlingsflyt"),
+                tokenProvider = NoTokenTokenProvider(),
+                responseHandler = DefaultResponseHandler()
+            )
+            return OidcToken(
+                client.post<String, FakeServers.TestToken>(
+                    URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
+                    PostRequest("grant_type=client_credentials"),
+                )!!.access_token
+            )
+        }
 
         @JvmStatic
         @BeforeAll
@@ -354,8 +404,8 @@ class KelvinIntegrasjonManuellInnsendingTest {
             }
 
             client = RestClient.withDefaultResponseHandler(
-                config = ClientConfig(),
-                tokenProvider = object : TokenProvider {},
+                config = ClientConfig(scope = "meldekort-backend"),
+                tokenProvider = ClientCredentialsTokenProvider,
             )
         }
 

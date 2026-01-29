@@ -67,7 +67,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
                 val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
                 kelvinMottakService.behandleMottatteTimerArbeidet(
                     ident = Ident(body.ident),
-                    periode = body.periode,
+                    periode = Periode(body.periode.fom, body.periode.tom),
                     harDuJobbet = body.harDuJobbet,
                     timerArbeidet = body.dager.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
                 )
