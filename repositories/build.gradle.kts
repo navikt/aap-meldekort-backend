@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
 
     implementation("io.micrometer:micrometer-core:1.16.2")
-    implementation("ch.qos.logback:logback-classic:1.5.25")
+    implementation("ch.qos.logback:logback-classic:1.5.26")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -28,7 +28,7 @@ dependencies {
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
-    testImplementation("org.assertj:assertj-core:3.27.6")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     constraints {
         implementation("org.apache.commons:commons-compress:1.28.0") {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
