@@ -103,7 +103,7 @@ import kotlin.test.assertEquals
 
 class KelvinIntegrasjonManuellInnsendingTest {
     @Test
-    fun `Kunne sende inn papirmeldekort fra behandlingsflyt imellom elektroniske innsendinger`() {
+    fun `Kunne sende inn digitaliserte meldekort fra behandlingsflyt imellom elektroniske innsendinger`() {
         val idag = LocalDate.of(2025, 12, 1)
         clockHolder.idag = idag
 
