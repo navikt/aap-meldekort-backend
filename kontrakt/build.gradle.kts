@@ -11,14 +11,14 @@ val junitVersion = "5.12.0"
 val komponenterVersjon = "1.0.934"
 
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-annotations:2.20")
+    api("com.fasterxml.jackson.core:jackson-annotations:2.21")
     api("no.nav.aap.kelvin:ktor-openapi-generator:$komponenterVersjon")
     compileOnly("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-    testImplementation("org.assertj:assertj-core:3.27.6")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("no.nav.aap.kelvin:json:$komponenterVersjon")
 }
 
