@@ -17,6 +17,7 @@ import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
+import no.nav.aap.utfylling.TimerArbeidet
 import java.time.Clock
 import java.util.*
 import javax.sql.DataSource
@@ -30,29 +31,49 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 ) {
     val authorizedAzps = listOfNotNull(configForKey("BEHANDLINGSFLYT_AZP")?.let(UUID::fromString))
 
-    route("/api/behandlingsflyt/sak/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
-        routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
-        auditLogConfig = null,
-    ) { _, body ->
-        dataSource.transaction { connection ->
-            val repositoryProvider = repositoryRegistry.provider(connection)
-            val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
+    route("/api/behandlingsflyt/sak") {
+        route("/meldeperioder").authorizedPost<Unit, Unit, MeldeperioderV0>(
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
+            auditLogConfig = null,
+        ) { _, body ->
+            dataSource.transaction { connection ->
+                val repositoryProvider = repositoryRegistry.provider(connection)
+                val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
 
-            kelvinMottakService.behandleMottatteMeldeperioder(
-                saksnummer = Fagsaknummer(body.saksnummer),
-                identer = body.identer.map { Ident(it) },
-                sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
-                meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
-                opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
-                meldeplikt = body.meldeplikt.map { Periode(it.fom, it.tom) },
-                status = when (body.sakStatus) {
-                    SakStatus.UTREDES -> KelvinSakStatus.UTREDES
-                    SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
-                    SakStatus.AVSLUTTET -> KelvinSakStatus.AVSLUTTET
-                    null -> null
-                }
-            )
+                kelvinMottakService.behandleMottatteMeldeperioder(
+                    saksnummer = Fagsaknummer(body.saksnummer),
+                    identer = body.identer.map { Ident(it) },
+                    sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
+                    meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
+                    opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
+                    meldeplikt = body.meldeplikt.map { Periode(it.fom, it.tom) },
+                    status = when (body.sakStatus) {
+                        SakStatus.UTREDES -> KelvinSakStatus.UTREDES
+                        SakStatus.LØPENDE -> KelvinSakStatus.LØPENDE
+                        SakStatus.AVSLUTTET -> KelvinSakStatus.AVSLUTTET
+                        null -> null
+                    }
+                )
+            }
+            respondWithStatus(HttpStatusCode.OK)
         }
-        respondWithStatus(HttpStatusCode.OK)
+
+        route("/timer").authorizedPost<Unit, Unit, BehandslingsflytUtfyllingRequest>(
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
+            auditLogConfig = null,
+        ) { _, body ->
+            dataSource.transaction { connection ->
+                val repositoryProvider = repositoryRegistry.provider(connection)
+                val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
+                kelvinMottakService.behandleMottatteTimerArbeidet(
+                    ident = Ident(body.ident),
+                    periode = Periode(body.periode.fom, body.periode.tom),
+                    harDuJobbet = body.harDuJobbet,
+                    timerArbeidet = body.dager.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+                )
+            }
+
+            respondWithStatus(HttpStatusCode.OK)
+        }
     }
 }

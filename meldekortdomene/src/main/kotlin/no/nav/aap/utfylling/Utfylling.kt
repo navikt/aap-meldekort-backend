@@ -24,6 +24,7 @@ data class Utfylling(
     val svar: Svar,
     val opprettet: Instant,
     val sistEndret: Instant,
+    val erDigitalisert: Boolean? = null
 ) {
     init {
         check(aktivtSteg in flyt.steg)
