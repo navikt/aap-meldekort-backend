@@ -1,7 +1,6 @@
 package no.nav.aap.meldekort
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import no.nav.aap.meldekort.kontrakt.Periode
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -41,14 +40,6 @@ class StartUtfyllingResponse(
         }
     }
 }
-
-data class BehandslingsflytUtfyllingRequest(
-    val saksnummer: String,
-    val ident: String,
-    val periode: Periode,
-    val harDuJobbet: Boolean,
-    val dager: List<DagSvarDto>,
-)
 
 class EndreUtfyllingRequest @JsonCreator constructor(
     val nyTilstand: UtfyllingTilstandDto,

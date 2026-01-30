@@ -12,6 +12,7 @@ import no.nav.aap.komponenter.config.configForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.meldekort.kontrakt.sak.BehandslingsflytUtfyllingRequest
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer

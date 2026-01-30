@@ -1,6 +1,7 @@
 package no.nav.aap.meldekort.kontrakt.sak
 
 import no.nav.aap.meldekort.kontrakt.Periode
+import java.time.LocalDate
 
 public class MeldeperioderV0(
     public val identer: List<String>,
@@ -23,3 +24,16 @@ public enum class SakStatus {
     LØPENDE,
     AVSLUTTET,
 }
+
+public data class BehandslingsflytUtfyllingRequest(
+    val saksnummer: String,
+    val ident: String,
+    val periode: Periode,
+    val harDuJobbet: Boolean,
+    val dager: List<TimerArbeidetDto>,
+)
+
+public data class TimerArbeidetDto(
+    val dato: LocalDate,
+    val timerArbeidet: Double
+)
