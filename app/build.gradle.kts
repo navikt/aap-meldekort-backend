@@ -55,6 +55,11 @@ tasks {
     }
 }
 
+tasks.register<JavaExec>("runTestApp") {
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass.set("no.nav.aap.meldekort.TestAppKt")
+}
+
 fun runCommand(command: String): String {
     val execResult = providers.exec {
         this.workingDir = project.projectDir
