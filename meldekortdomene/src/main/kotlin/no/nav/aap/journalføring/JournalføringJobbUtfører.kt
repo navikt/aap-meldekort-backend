@@ -24,7 +24,7 @@ class JournalføringJobbUtfører(
     private val sakerService: SakerService,
 ) : JobbUtfører {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
         journalføringService = JournalføringService(repositoryProvider, gatewayProvider),
         utfyllingRepository = repositoryProvider.provide(),
         sakerService = SakerService(repositoryProvider, gatewayProvider),
@@ -38,17 +38,27 @@ class JournalføringJobbUtfører(
             Fagsaknummer(input.parameter("fagsak_nummer"))
         )
 
-        val sak = sakerService.finnSak(ident, fagsakReferanse)!!
+        val sak = requireNotNull(
+            sakerService.finnSak(
+                ident,
+                fagsakReferanse
+            )
+        ) { "Fant ikke sak. Referanse: $fagsakReferanse" }
 
         journalføringService.journalfør(
             ident = ident,
-            utfylling = utfyllingRepository.lastAvsluttetUtfylling(ident, utfyllingReferanse)!!,
+            utfylling = requireNotNull(
+                utfyllingRepository.lastAvsluttetUtfylling(
+                    ident,
+                    utfyllingReferanse
+                )
+            ) { "Fant ikke utfylling. Referanse: $utfyllingReferanse" },
             sak = sak,
         )
     }
 
     companion object {
-        private val jobbInfo  = object: Jobb {
+        private val jobbInfo = object : Jobb {
             override fun navn(): String {
                 return "JournalføringJobbUtfører"
             }
@@ -65,7 +75,6 @@ class JournalføringJobbUtfører(
                 error("kun for å lage nye jobber")
             }
         }
-
 
 
         fun jobbKonstruktør(repositoryRegistry: RepositoryRegistry) = object : Jobb by jobbInfo {
