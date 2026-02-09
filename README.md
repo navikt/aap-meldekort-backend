@@ -22,6 +22,12 @@
          
 ```
 
+## Kjør opp lokalt
+```./gradlew runTestApp```
+
+### OpenApi/Swagger UI til API-endepunkter lokalt
+http://127.0.0.1:8080/swagger-ui/index.html
+
 
 ## Analyse av den generelle meldekortløsnignen
 Består av to tjenester:
