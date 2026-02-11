@@ -9,7 +9,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
-    implementation("ch.qos.logback:logback-classic:1.5.25")
+    implementation("ch.qos.logback:logback-classic:1.5.28")
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.546")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
