@@ -9,8 +9,8 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation("io.micrometer:micrometer-core:1.16.2")
-    implementation("ch.qos.logback:logback-classic:1.5.28")
+    implementation("io.micrometer:micrometer-core:1.16.3")
+    implementation("ch.qos.logback:logback-classic:1.5.29")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -34,7 +34,7 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testFixturesImplementation("io.micrometer:micrometer-core:1.16.2")
+    testFixturesImplementation("io.micrometer:micrometer-core:1.16.3")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
     testImplementation("org.testcontainers:testcontainers-kafka:2.0.3")
