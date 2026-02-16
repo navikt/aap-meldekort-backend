@@ -18,8 +18,6 @@ import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.journalføring.JournalføringJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.auth.personBruker
-import no.nav.aap.komponenter.httpklient.auth.token
 import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
@@ -27,6 +25,8 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxC
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.TOKENX
+import no.nav.aap.komponenter.server.auth.personBruker
+import no.nav.aap.komponenter.server.auth.token
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlateFactoryImpl
