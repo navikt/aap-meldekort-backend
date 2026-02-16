@@ -25,9 +25,7 @@ fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSou
 }
 
 private fun postgreSQLContainer(): PostgreSQLContainer {
-    val postgres = PostgreSQLContainer("postgres:16").also {
-        it.portBindings = listOf("30000:5432")
-    }
+    val postgres = PostgreSQLContainer("postgres:16")
     postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
     postgres.start()
     return postgres

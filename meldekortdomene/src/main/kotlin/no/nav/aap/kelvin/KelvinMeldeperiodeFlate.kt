@@ -92,6 +92,7 @@ class KelvinMeldeperiodeFlate(
                 harDuJobbet = true, /* TODO */
                 timerArbeidet = timerArbeidet,
                 stemmerOpplysningene = true, /* TODO */
+                harDuGjennomførtAvtaltAktivitet = null, /* TODO (?)*/
             )
         )
     }

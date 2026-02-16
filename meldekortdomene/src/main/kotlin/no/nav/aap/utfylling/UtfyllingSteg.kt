@@ -5,15 +5,19 @@ import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
-import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
-import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import java.time.Clock
 import java.time.LocalDate
 
 enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     INTRODUKSJON,
-    SPØRSMÅL,
-    UTFYLLING,
+    AAP_SPØRSMÅL,
+    AAP_UTFYLLING,
+    FRAVÆR_SPØRSMÅL,
+    FRAVÆR_UTFYLLING,
     BEKREFT,
     PERSISTER_OPPLYSNINGER(erTeknisk = true),
     BESTILL_JOURNALFØRING(erTeknisk = true),
@@ -53,9 +57,9 @@ object IntroduksjonSteg : UtfyllingSteg {
     )
 }
 
-object SpørsmålSteg : UtfyllingSteg {
+object AapSpørsmålSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
-        get() = SPØRSMÅL
+        get() = AAP_SPØRSMÅL
 
     override var formkrav: Formkrav = mapOf(
         "MÅ_SVARE_OM_JOBBET" to { utfylling ->
@@ -66,7 +70,7 @@ object SpørsmålSteg : UtfyllingSteg {
 
 object TimerArbeidetSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
-        get() = UTFYLLING
+        get() = AAP_UTFYLLING
 
     override fun erRelevant(utfylling: Utfylling): Boolean {
         return utfylling.svar.run {
@@ -116,6 +120,27 @@ class StemmerOpplysningeneSteg(clock: Clock) : UtfyllingSteg {
     )
 }
 
+object FraværSpørsmålSteg : UtfyllingSteg {
+    override val navn: UtfyllingStegNavn
+        get() = FRAVÆR_SPØRSMÅL
+
+    override val formkrav: Formkrav = mapOf(
+        "MÅ_SVARE_OM_GJENNOMFØRT_AVTALT_AKTIVITET" to { utfylling ->
+            utfylling.svar.harDuGjennomførtAvtaltAktivitet != null
+        }
+    )
+}
+
+object DagerFraværSteg : UtfyllingSteg {
+    override val navn: UtfyllingStegNavn
+        get() = FRAVÆR_UTFYLLING
+
+    override fun erRelevant(utfylling: Utfylling): Boolean {
+        return utfylling.svar.run {
+            harDuGjennomførtAvtaltAktivitet == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
+        }
+    }
+}
 
 object KvitteringSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn

@@ -31,6 +31,8 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.FraværSvar
+import no.nav.aap.utfylling.FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -320,24 +322,27 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     vilSvareRiktig = true,
                     harDuJobbet = null,
                     dager = emptyList(),
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
-                aktivtSteg = StegDto.SPØRSMÅL,
+                aktivtSteg = StegDto.AAP_SPØRSMÅL,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ),
             UtfyllingTilstandDto(
-                aktivtSteg = StegDto.UTFYLLING,
+                aktivtSteg = StegDto.AAP_UTFYLLING,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.BEKREFT,
@@ -345,7 +350,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             )
         )
@@ -489,7 +495,6 @@ fun assertEqualsAt(expected: Any?, json: JsonNode, path: String) {
         obj.isInt -> obj.asInt()
         expectedNormalized is Periode ->
             Periode(LocalDate.parse(obj["fom"].asText()), LocalDate.parse(obj["tom"].asText()))
-
         else -> error("uforventet type ${obj.javaClass.name}")
     }
 

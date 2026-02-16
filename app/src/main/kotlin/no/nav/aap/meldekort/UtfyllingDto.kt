@@ -1,6 +1,7 @@
 package no.nav.aap.meldekort
-
 import com.fasterxml.jackson.annotation.JsonCreator
+import no.nav.aap.utfylling.Fravær
+import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -112,8 +113,10 @@ class UtfyllingMetadataDto(
 
 enum class StegDto(val tilDomene: UtfyllingStegNavn) {
     INTRODUKSJON(UtfyllingStegNavn.INTRODUKSJON),
-    SPØRSMÅL(UtfyllingStegNavn.SPØRSMÅL),
-    UTFYLLING(UtfyllingStegNavn.UTFYLLING),
+    AAP_SPØRSMÅL(UtfyllingStegNavn.AAP_SPØRSMÅL),
+    AAP_UTFYLLING(UtfyllingStegNavn.AAP_UTFYLLING),
+    FRAVÆR_SPØRSMÅL(UtfyllingStegNavn.FRAVÆR_SPØRSMÅL),
+    FRAVÆR_UTFYLLING(UtfyllingStegNavn.FRAVÆR_UTFYLLING),
     BEKREFT(UtfyllingStegNavn.BEKREFT),
     KVITTERING(UtfyllingStegNavn.KVITTERING),
     ;
@@ -122,8 +125,10 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
         fun fraDomene(navn: UtfyllingStegNavn): StegDto {
             return when (navn) {
                 UtfyllingStegNavn.INTRODUKSJON -> INTRODUKSJON
-                UtfyllingStegNavn.SPØRSMÅL -> SPØRSMÅL
-                UtfyllingStegNavn.UTFYLLING -> UTFYLLING
+                UtfyllingStegNavn.AAP_SPØRSMÅL -> AAP_SPØRSMÅL
+                UtfyllingStegNavn.AAP_UTFYLLING -> AAP_UTFYLLING
+                UtfyllingStegNavn.FRAVÆR_SPØRSMÅL -> FRAVÆR_SPØRSMÅL
+                UtfyllingStegNavn.FRAVÆR_UTFYLLING -> FRAVÆR_UTFYLLING
                 UtfyllingStegNavn.BEKREFT -> BEKREFT
                 UtfyllingStegNavn.KVITTERING -> KVITTERING
 
@@ -140,6 +145,7 @@ class SvarDto(
     val harDuJobbet: Boolean?,
     val dager: List<DagSvarDto>,
     val stemmerOpplysningene: Boolean?,
+    val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
 ) {
     fun tilDomene(): Svar {
         return Svar(
@@ -147,6 +153,7 @@ class SvarDto(
             harDuJobbet = harDuJobbet,
             timerArbeidet = dager.map { it.tilTimerArbeidet() },
             stemmerOpplysningene = stemmerOpplysningene,
+            harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet
         )
     }
 
@@ -155,23 +162,27 @@ class SvarDto(
         harDuJobbet = svar.harDuJobbet,
         dager = svar.timerArbeidet.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
+        harDuGjennomførtAvtaltAktivitet = svar.harDuGjennomførtAvtaltAktivitet
     )
 }
 
 class DagSvarDto(
     val dato: LocalDate,
     val timerArbeidet: Double?,
+    val fravær: Fravær? = null,
 ) {
     fun tilTimerArbeidet(): TimerArbeidet {
         return TimerArbeidet(
             timer = timerArbeidet,
             dato = dato,
+            fravær = fravær
         )
     }
 
     constructor(timerArbeidet: TimerArbeidet) : this(
         dato = timerArbeidet.dato,
         timerArbeidet = timerArbeidet.timer,
+        fravær = timerArbeidet.fravær
     )
 }
 

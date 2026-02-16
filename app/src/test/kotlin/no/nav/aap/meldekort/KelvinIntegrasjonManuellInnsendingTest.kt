@@ -39,6 +39,8 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.FraværSvar
+import no.nav.aap.utfylling.FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingReferanse
@@ -199,7 +201,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
                 ident = fnr,
                 periode = periode,
                 harDuJobbet = true,
-                timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+                timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet, fravær = null) }
             )
         }
     }
@@ -258,24 +260,27 @@ class KelvinIntegrasjonManuellInnsendingTest {
                     vilSvareRiktig = true,
                     harDuJobbet = null,
                     dager = emptyList(),
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
-                aktivtSteg = StegDto.SPØRSMÅL,
+                aktivtSteg = StegDto.AAP_SPØRSMÅL,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ),
             UtfyllingTilstandDto(
-                aktivtSteg = StegDto.UTFYLLING,
+                aktivtSteg = StegDto.AAP_UTFYLLING,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.BEKREFT,
@@ -283,7 +288,8 @@ class KelvinIntegrasjonManuellInnsendingTest {
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true
+                    stemmerOpplysningene = true,
+                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             )
         )

@@ -9,6 +9,7 @@ import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -64,12 +65,13 @@ class UtfyllingRepositoryPostgresTest {
                     svarerDuSant = null,
                     harDuJobbet = true,
                     timerArbeidet = listOf(
-                        TimerArbeidet(LocalDate.of(2020, 1, 1), null),
-                        TimerArbeidet(LocalDate.of(2020, 1, 2), 0.0),
-                        TimerArbeidet(LocalDate.of(2020, 1, 3), 7.0),
-                        TimerArbeidet(LocalDate.of(2020, 1, 4), 7.5),
+                        TimerArbeidet(LocalDate.of(2020, 1, 1), null, null),
+                        TimerArbeidet(LocalDate.of(2020, 1, 2), 0.0, null),
+                        TimerArbeidet(LocalDate.of(2020, 1, 3), 7.0, null),
+                        TimerArbeidet(LocalDate.of(2020, 1, 4), 7.5, null),
                     ),
                     stemmerOpplysningene = false,
+                    harDuGjennomførtAvtaltAktivitet = FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET,
                 ),
                 opprettet = opprettet,
                 sistEndret = opprettet,

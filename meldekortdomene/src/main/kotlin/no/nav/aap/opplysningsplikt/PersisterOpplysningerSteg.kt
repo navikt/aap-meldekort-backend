@@ -20,6 +20,7 @@ class PersisterOpplysningerSteg(
                     fagsak = utfylling.fagsak,
                     dato = it.dato,
                     timerArbeidet = it.timer,
+                    fravær = it.fravær?.name
                 )
             }
         )

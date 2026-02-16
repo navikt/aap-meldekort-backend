@@ -8,19 +8,20 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.UtfyllingReferanse
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import no.nav.aap.komponenter.type.Periode as DBPeriode
 
 class TimerArbeidetRepositoryPostgres(
     private val connection: DBConnection,
 ) : TimerArbeidetRepository{
-
+    val log = LoggerFactory.getLogger(javaClass)
     override fun lagrTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
         connection.executeBatch(
             """
                 insert into timer_arbeidet
-                (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet)
-                values (?, ?, ?, ?, ?, ?, ?)
+                (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravær)
+                values (?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict do nothing
             """,
             opplysninger,
@@ -34,6 +35,7 @@ class TimerArbeidetRepositoryPostgres(
                     setString(5, fagsak.nummer.asString)
                     setLocalDate(6, dato)
                     setDouble(7, timerArbeidet)
+                    setString(8, fravær)
                 }
             }
         }
@@ -83,7 +85,8 @@ class TimerArbeidetRepositoryPostgres(
                 nummer = Fagsaknummer(row.getString("fagsak_nummer")),
             ),
             dato = row.getLocalDate("dato"),
-            timerArbeidet = row.getDoubleOrNull("timer_arbeidet")
+            timerArbeidet = row.getDoubleOrNull("timer_arbeidet"),
+            fravær = row.getStringOrNull("fravær")
         )
     }
 

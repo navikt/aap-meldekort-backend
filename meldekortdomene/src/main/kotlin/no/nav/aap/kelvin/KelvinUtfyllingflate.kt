@@ -92,6 +92,7 @@ class KelvinUtfyllingFlate(
                     harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },
                     timerArbeidet = timerArbeidet,
                     stemmerOpplysningene = null,
+                    harDuGjennomførtAvtaltAktivitet = null
                 ),
                 sak = sak,
             )

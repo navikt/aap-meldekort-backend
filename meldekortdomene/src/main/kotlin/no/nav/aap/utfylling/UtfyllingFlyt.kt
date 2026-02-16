@@ -11,8 +11,10 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
-import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
-import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
 import no.nav.aap.varsel.InaktiverVarselSteg
 import no.nav.aap.varsel.VarselService
@@ -25,8 +27,10 @@ enum class UtfyllingFlytNavn(
     AAP_FLYT(
         listOf(
             INTRODUKSJON,
-            SPØRSMÅL,
-            UTFYLLING,
+            AAP_SPØRSMÅL,
+            AAP_UTFYLLING,
+            FRAVÆR_SPØRSMÅL,
+            FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
@@ -36,8 +40,8 @@ enum class UtfyllingFlytNavn(
     ),
     AAP_KORRIGERING_FLYT(
         listOf(
-            SPØRSMÅL,
-            UTFYLLING,
+            AAP_SPØRSMÅL,
+            AAP_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
@@ -157,8 +161,10 @@ class UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
-                        SPØRSMÅL -> SpørsmålSteg
-                        UTFYLLING -> TimerArbeidetSteg
+                        AAP_SPØRSMÅL -> AapSpørsmålSteg
+                        AAP_UTFYLLING -> TimerArbeidetSteg
+                        FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
+                        FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
                         BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))

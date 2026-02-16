@@ -72,7 +72,7 @@ class KelvinSakService(
     ): List<TimerArbeidet> {
         val registrerteOpplysninger =
             timerArbeidetRepository.hentTimerArbeidet(ident, sak, periode)
-                .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+                .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet, fravær = null) }
                 .toMutableList()
 
         val timerArbeidet = sequence {
