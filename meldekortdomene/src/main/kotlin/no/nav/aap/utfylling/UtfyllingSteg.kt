@@ -5,8 +5,8 @@ import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
-import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_SPØRSMÅL
-import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import java.time.Clock
@@ -14,8 +14,8 @@ import java.time.LocalDate
 
 enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     INTRODUKSJON,
-    AAP_SPØRSMÅL,
-    AAP_UTFYLLING,
+    SPØRSMÅL,
+    UTFYLLING,
     FRAVÆR_SPØRSMÅL,
     FRAVÆR_UTFYLLING,
     BEKREFT,
@@ -59,7 +59,7 @@ object IntroduksjonSteg : UtfyllingSteg {
 
 object AapSpørsmålSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
-        get() = AAP_SPØRSMÅL
+        get() = SPØRSMÅL
 
     override var formkrav: Formkrav = mapOf(
         "MÅ_SVARE_OM_JOBBET" to { utfylling ->
@@ -70,7 +70,7 @@ object AapSpørsmålSteg : UtfyllingSteg {
 
 object TimerArbeidetSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
-        get() = AAP_UTFYLLING
+        get() = UTFYLLING
 
     override fun erRelevant(utfylling: Utfylling): Boolean {
         return utfylling.svar.run {

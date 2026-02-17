@@ -11,8 +11,8 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
-import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_SPØRSMÅL
-import no.nav.aap.utfylling.UtfyllingStegNavn.AAP_UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
+import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
@@ -27,8 +27,8 @@ enum class UtfyllingFlytNavn(
     AAP_FLYT(
         listOf(
             INTRODUKSJON,
-            AAP_SPØRSMÅL,
-            AAP_UTFYLLING,
+            SPØRSMÅL,
+            UTFYLLING,
             FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
@@ -40,8 +40,8 @@ enum class UtfyllingFlytNavn(
     ),
     AAP_KORRIGERING_FLYT(
         listOf(
-            AAP_SPØRSMÅL,
-            AAP_UTFYLLING,
+            SPØRSMÅL,
+            UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
@@ -161,8 +161,8 @@ class UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
-                        AAP_SPØRSMÅL -> AapSpørsmålSteg
-                        AAP_UTFYLLING -> TimerArbeidetSteg
+                        SPØRSMÅL -> AapSpørsmålSteg
+                        UTFYLLING -> TimerArbeidetSteg
                         FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
                         FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)
