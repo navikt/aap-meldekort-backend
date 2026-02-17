@@ -39,7 +39,6 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET
 import no.nav.aap.utfylling.TimerArbeidet
 import no.nav.aap.utfylling.Utfylling
@@ -264,7 +263,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
                     harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
-                aktivtSteg = StegDto.AAP_SPØRSMÅL,
+                aktivtSteg = StegDto.SPØRSMÅL,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
@@ -274,7 +273,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
                 )
             ),
             UtfyllingTilstandDto(
-                aktivtSteg = StegDto.AAP_UTFYLLING,
+                aktivtSteg = StegDto.UTFYLLING,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,

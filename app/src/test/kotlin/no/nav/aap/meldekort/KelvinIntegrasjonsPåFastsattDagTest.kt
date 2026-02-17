@@ -31,7 +31,6 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -326,7 +325,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
-                aktivtSteg = StegDto.AAP_SPØRSMÅL,
+                aktivtSteg = StegDto.SPØRSMÅL,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,
@@ -336,7 +335,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                 )
             ),
             UtfyllingTilstandDto(
-                aktivtSteg = StegDto.AAP_UTFYLLING,
+                aktivtSteg = StegDto.UTFYLLING,
                 svar = SvarDto(
                     vilSvareRiktig = true,
                     harDuJobbet = true,

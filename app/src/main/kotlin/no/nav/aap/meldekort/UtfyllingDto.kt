@@ -113,8 +113,8 @@ class UtfyllingMetadataDto(
 
 enum class StegDto(val tilDomene: UtfyllingStegNavn) {
     INTRODUKSJON(UtfyllingStegNavn.INTRODUKSJON),
-    AAP_SPØRSMÅL(UtfyllingStegNavn.SPØRSMÅL),
-    AAP_UTFYLLING(UtfyllingStegNavn.UTFYLLING),
+    SPØRSMÅL(UtfyllingStegNavn.SPØRSMÅL),
+    UTFYLLING(UtfyllingStegNavn.UTFYLLING),
     FRAVÆR_SPØRSMÅL(UtfyllingStegNavn.FRAVÆR_SPØRSMÅL),
     FRAVÆR_UTFYLLING(UtfyllingStegNavn.FRAVÆR_UTFYLLING),
     BEKREFT(UtfyllingStegNavn.BEKREFT),
@@ -125,8 +125,8 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
         fun fraDomene(navn: UtfyllingStegNavn): StegDto {
             return when (navn) {
                 UtfyllingStegNavn.INTRODUKSJON -> INTRODUKSJON
-                UtfyllingStegNavn.SPØRSMÅL -> AAP_SPØRSMÅL
-                UtfyllingStegNavn.UTFYLLING -> AAP_UTFYLLING
+                UtfyllingStegNavn.SPØRSMÅL -> SPØRSMÅL
+                UtfyllingStegNavn.UTFYLLING -> UTFYLLING
                 UtfyllingStegNavn.FRAVÆR_SPØRSMÅL -> FRAVÆR_SPØRSMÅL
                 UtfyllingStegNavn.FRAVÆR_UTFYLLING -> FRAVÆR_UTFYLLING
                 UtfyllingStegNavn.BEKREFT -> BEKREFT
