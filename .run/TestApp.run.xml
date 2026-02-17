@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestApp" type="JetRunConfigurationType">
+    <envs>
+        <env name="DB_JDBC_URL" value="jdbc:postgresql://localhost:5539/postgres" />
+        <env name="DB_USERNAME" value="postgres" />
+        <env name="DB_PASSWORD" value="" />
+        <env name="DB_NAME" value="dfs" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.aap.meldekort.TestAppKt" />
+    <module name="meldekort-backend.app.test" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

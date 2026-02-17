@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestApp (med testcontainers)" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="no.nav.aap.meldekort.TestAppKt" />
+    <module name="meldekort-backend.app.test" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
