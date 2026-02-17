@@ -8,19 +8,30 @@ import org.testcontainers.postgresql.PostgreSQLContainer
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
+import kotlin.String
 
 fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSource {
-    val postgres = postgreSQLContainer()
+    val dbConfig = if (System.getenv("DB_JDBC_URL").isNullOrBlank()) {
+        val postgres = postgreSQLContainer()
+
+        println("jdbcUrl: ${postgres.jdbcUrl}. Password: ${postgres.password}. Username: ${postgres.username}.")
+
+        DbConfig(
+            database = "sdf",
+            url = postgres.jdbcUrl,
+            username = postgres.username,
+            password = postgres.password
+        )
+    } else {
+        DbConfig(
+            "sdf",
+            System.getenv("DB_JDBC_URL"),
+            System.getenv("DB_USERNAME"),
+            System.getenv("DB_PASSWORD"),
+        )
+    }
     // Useful for connecting to the test database locally
     // jdbc 'URL contains the host and port and database name.
-    println("jdbcUrl: ${postgres.jdbcUrl}. Password: ${postgres.password}. Username: ${postgres.username}.")
-
-    val dbConfig = DbConfig(
-        database = "sdf",
-        url = postgres.jdbcUrl,
-        username = postgres.username,
-        password = postgres.password
-    )
     return createPostgresDataSource(dbConfig, meterRegistry)
 }
 

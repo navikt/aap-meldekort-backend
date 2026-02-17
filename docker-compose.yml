@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  postgres:
+    restart: always
+    container_name: meldekort-postgres
+    image: postgres:16
+    ports:
+      - '5539:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
