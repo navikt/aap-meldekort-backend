@@ -159,7 +159,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
         }
 
         val utfyllingReferanse = fyllInnTimerFraBehandlingsflyt(
-            fnr, Periode(15 desember 2025, 28 desember 2025)
+            fnr, rettighetsperiode, Periode(15 desember 2025, 28 desember 2025)
         )
 
         get<JsonNode>(fnr, "/api/meldeperiode/kommende")!!.also {
@@ -183,6 +183,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
 
     private fun fyllInnTimerFraBehandlingsflyt(
         fnr: Ident,
+        sakenGjelderFor: Periode,
         periode: Periode
     ): UtfyllingReferanse {
         return dataSource.transaction { connection ->
@@ -197,6 +198,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
 
             kelvinMottakService.behandleMottatteTimerArbeidet(
                 ident = fnr,
+                sakenGjelderFor = sakenGjelderFor,
                 periode = periode,
                 harDuJobbet = true,
                 timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }

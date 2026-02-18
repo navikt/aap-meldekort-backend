@@ -54,11 +54,12 @@ class KelvinMottakService(
 
     fun behandleMottatteTimerArbeidet(
         ident: Ident,
+        sakenGjelderFor: Periode,
         periode: Periode,
         harDuJobbet: Boolean,
         timerArbeidet: List<no.nav.aap.utfylling.TimerArbeidet>
     ): UtfyllingReferanse {
-        val sak = kelvinSakRepository.hentSak(ident, periode.fom)
+        val sak = kelvinSakRepository.hentSak(ident, sakenGjelderFor.fom)
             ?: throw IllegalStateException("finner ikke sak")
 
         val utfyllingReferanse =

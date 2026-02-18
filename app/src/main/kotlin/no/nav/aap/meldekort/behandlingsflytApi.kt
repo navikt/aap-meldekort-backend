@@ -70,6 +70,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
                     ident = Ident(body.ident),
                     periode = Periode(body.periode.fom, body.periode.tom),
                     harDuJobbet = body.harDuJobbet,
+                    sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     timerArbeidet = body.dager.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
                 )
             }

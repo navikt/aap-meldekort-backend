@@ -31,6 +31,7 @@ public data class BehandslingsflytUtfyllingRequest(
     val periode: Periode,
     val harDuJobbet: Boolean,
     val dager: List<TimerArbeidetDto>,
+    val sakenGjelderFor: Periode
 )
 
 public data class TimerArbeidetDto(
