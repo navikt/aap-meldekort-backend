@@ -102,7 +102,8 @@ class JournalføringService(
         val tittel = when (utfylling.flyt) {
             UtfyllingFlytNavn.AAP_FLYT ->
                 "Meldekort $tittelsuffix"
-
+            UtfyllingFlytNavn.AAP_FLYT_V2 ->
+                "Meldekort $tittelsuffix"
             UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
                 "Korrigert meldekort $tittelsuffix"
         }
@@ -152,7 +153,8 @@ class JournalføringService(
                     brevkode = when (utfylling.flyt) {
                         UtfyllingFlytNavn.AAP_FLYT ->
                             "NAV 00-10.02"
-
+                        UtfyllingFlytNavn.AAP_FLYT_V2 ->
+                            "NAV 00-10.02"
                         UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
                             "NAV 00-10.03"
                     },

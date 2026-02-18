@@ -29,6 +29,18 @@ enum class UtfyllingFlytNavn(
             INTRODUKSJON,
             SPØRSMÅL,
             UTFYLLING,
+            BEKREFT,
+            PERSISTER_OPPLYSNINGER,
+            BESTILL_JOURNALFØRING,
+            INAKTIVER_VARSEL,
+            KVITTERING,
+        )
+    ),
+    AAP_FLYT_V2(
+        listOf(
+            INTRODUKSJON,
+            SPØRSMÅL,
+            UTFYLLING,
             FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,

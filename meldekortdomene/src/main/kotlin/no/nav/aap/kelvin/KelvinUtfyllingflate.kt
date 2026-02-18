@@ -54,7 +54,7 @@ class KelvinUtfyllingFlate(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_FLYT,
+                flyt = UtfyllingFlytNavn.AAP_FLYT_V2,
                 svar = Svar.tomt(periode),
                 sak = sak,
             )

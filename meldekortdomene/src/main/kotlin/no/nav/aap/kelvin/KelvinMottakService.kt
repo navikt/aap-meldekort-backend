@@ -61,15 +61,17 @@ class KelvinMottakService(
         val sak = kelvinSakRepository.hentSak(ident, periode.fom)
             ?: throw IllegalStateException("finner ikke sak")
 
-        val utfyllingReferanse =
-            utfyllingRepository.lastÅpenUtfylling(ident, periode)?.referanse ?: UtfyllingReferanse.ny()
+        val åpenUtfylling =
+            utfyllingRepository.lastÅpenUtfylling(ident, periode)
+
+        val utfyllingReferanse = åpenUtfylling?.referanse ?: UtfyllingReferanse.ny()
 
         val utfylling = Utfylling(
             referanse = utfyllingReferanse,
             periode = periode,
             fagsak = sak.referanse,
             ident = ident,
-            flyt = UtfyllingFlytNavn.AAP_FLYT,
+            flyt = åpenUtfylling?.flyt ?: UtfyllingFlytNavn.AAP_FLYT_V2,
             aktivtSteg = KVITTERING,
             svar = Svar(
                 svarerDuSant = true, // Antar dette når bruker sender inn eget papir
