@@ -12,5 +12,5 @@ data class TimerArbeidet(
     val fagsak: FagsakReferanse,
     val dato: LocalDate,
     val timerArbeidet: Double?,
-    val fravær: Fravær? = null,
+    val fravær: Fravær?,
 )

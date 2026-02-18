@@ -12,6 +12,8 @@ import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.Fravær
+import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.UtfyllingReferanse
 import org.junit.jupiter.api.Test
 
@@ -42,22 +44,22 @@ class TimerArbeidetRepositoryPostgresTest {
             repo.lagrTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
-                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null),
-                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 2), 0.0),
-                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 3), 0.5),
-                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), 7.5),
-                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), null),
+                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null, Fravær.SYKDOM_ELLER_SKADE),
+                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 2), 0.0, null),
+                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 3), 0.5, null),
+                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), 7.5, null),
+                    TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), null, Fravær.SYKDOM_ELLER_SKADE),
                 )
             )
 
             repo.lagrTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
-                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0),
-                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 2), null),
-                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 3), 3.5),
-                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), null),
-                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), 1.0),
+                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0, null),
+                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 2), null, null),
+                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 3), 3.5, null),
+                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), null, null),
+                    TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), 1.0, null),
                 )
             )
 
@@ -65,17 +67,17 @@ class TimerArbeidetRepositoryPostgresTest {
             repo.lagrTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
-                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null),
-                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), 8.0),
-                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0),
+                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null, null),
+                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), 8.0, null),
+                    TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0, null),
                 )
             )
             repo.lagrTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
-                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5),
-                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), null),
-                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 6), 1.0),
+                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5, null),
+                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), null, null),
+                    TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 6), 1.0, null),
                 )
             )
 
@@ -85,12 +87,12 @@ class TimerArbeidetRepositoryPostgresTest {
             repo.hentTimerArbeidet(ident1, fagsak1, periode).also { effektiveOpplysninger ->
                 assertEquals(
                     listOf(
-                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null),
-                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 2), 0.0),
-                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 3), 0.5),
-                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null),
-                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), 8.0),
-                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0),
+                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null, Fravær.SYKDOM_ELLER_SKADE),
+                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 2), 0.0, null),
+                        TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 3), 0.5, null),
+                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null, null),
+                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), 8.0, null),
+                        TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0, null),
                     ),
                     effektiveOpplysninger
                 )
@@ -99,12 +101,12 @@ class TimerArbeidetRepositoryPostgresTest {
             repo.hentTimerArbeidet(ident1, fagsak2, periode).also { effektiveOpplysninger ->
                 assertEquals(
                     listOf(
-                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0),
-                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 2), null),
-                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 3), 3.5),
-                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5),
-                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), null),
-                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 6), 1.0),
+                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0, null),
+                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 2), null, null),
+                        TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 3), 3.5, null),
+                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5, null),
+                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), null, null),
+                        TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 6), 1.0, null),
                     ),
                     effektiveOpplysninger
                 )

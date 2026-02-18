@@ -92,6 +92,7 @@ class KelvinMottakService(
                     fagsak = utfylling.fagsak,
                     dato = it.dato,
                     timerArbeidet = it.timer,
+                    fravær = null
                 )
             }
         )

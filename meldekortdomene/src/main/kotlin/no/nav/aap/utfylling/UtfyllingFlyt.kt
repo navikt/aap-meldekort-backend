@@ -42,6 +42,8 @@ enum class UtfyllingFlytNavn(
         listOf(
             SPØRSMÅL,
             UTFYLLING,
+            FRAVÆR_SPØRSMÅL,
+            FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
