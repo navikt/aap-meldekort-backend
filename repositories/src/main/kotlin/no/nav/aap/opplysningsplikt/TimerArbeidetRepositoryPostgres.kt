@@ -7,6 +7,7 @@ import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
+import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.UtfyllingReferanse
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -20,7 +21,7 @@ class TimerArbeidetRepositoryPostgres(
         connection.executeBatch(
             """
                 insert into timer_arbeidet
-                (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravær)
+                (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravaer)
                 values (?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict do nothing
             """,
@@ -35,7 +36,7 @@ class TimerArbeidetRepositoryPostgres(
                     setString(5, fagsak.nummer.asString)
                     setLocalDate(6, dato)
                     setDouble(7, timerArbeidet)
-                    setString(8, fravær)
+                    setString(8, fravær?.name)
                 }
             }
         }
@@ -86,7 +87,7 @@ class TimerArbeidetRepositoryPostgres(
             ),
             dato = row.getLocalDate("dato"),
             timerArbeidet = row.getDoubleOrNull("timer_arbeidet"),
-            fravær = row.getStringOrNull("fravær")
+            fravær = row.getStringOrNull("fravaer")?.let { Fravær.valueOf(it) }
         )
     }
 

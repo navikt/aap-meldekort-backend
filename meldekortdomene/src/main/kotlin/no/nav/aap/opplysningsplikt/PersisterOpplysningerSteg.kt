@@ -1,6 +1,7 @@
 package no.nav.aap.opplysningsplikt
 
 import no.nav.aap.InnloggetBruker
+import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingSteg
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
@@ -20,7 +21,7 @@ class PersisterOpplysningerSteg(
                     fagsak = utfylling.fagsak,
                     dato = it.dato,
                     timerArbeidet = it.timer,
-                    fravær = it.fravær?.name
+                    fravær = it.fravær?.name?.let { Fravær.valueOf(it) }
                 )
             }
         )
