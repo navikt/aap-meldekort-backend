@@ -86,7 +86,7 @@ class KelvinUtfyllingFlate(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
+                flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2,
                 svar = Svar(
                     svarerDuSant = null,
                     harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },

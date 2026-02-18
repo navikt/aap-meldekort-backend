@@ -4,6 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.ArbeidIPeriodeV0
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.MeldekortV0
+import no.nav.aap.journalføring.DokarkivGateway.Dokument
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
 import no.nav.aap.kelvin.KelvinSakRepository
@@ -15,6 +16,10 @@ import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
@@ -100,11 +105,9 @@ class JournalføringService(
         val til = utfylling.periode.tom.format(dateFormatter)
         val tittelsuffix = "for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av NAV"
         val tittel = when (utfylling.flyt) {
-            UtfyllingFlytNavn.AAP_FLYT ->
+            AAP_FLYT, AAP_FLYT_V2 ->
                 "Meldekort $tittelsuffix"
-            UtfyllingFlytNavn.AAP_FLYT_V2 ->
-                "Meldekort $tittelsuffix"
-            UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
+            AAP_KORRIGERING_FLYT, AAP_KORRIGERING_FLYT_V2 ->
                 "Korrigert meldekort $tittelsuffix"
         }
 
@@ -151,11 +154,9 @@ class JournalføringService(
                 DokarkivGateway.Dokument(
                     tittel = tittel,
                     brevkode = when (utfylling.flyt) {
-                        UtfyllingFlytNavn.AAP_FLYT ->
+                        AAP_FLYT, AAP_FLYT_V2 ->
                             "NAV 00-10.02"
-                        UtfyllingFlytNavn.AAP_FLYT_V2 ->
-                            "NAV 00-10.02"
-                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT ->
+                        AAP_KORRIGERING_FLYT, AAP_KORRIGERING_FLYT_V2 ->
                             "NAV 00-10.03"
                     },
                     dokumentvarianter = listOf(

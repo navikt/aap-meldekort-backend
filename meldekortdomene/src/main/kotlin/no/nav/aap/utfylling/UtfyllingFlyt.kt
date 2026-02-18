@@ -54,6 +54,16 @@ enum class UtfyllingFlytNavn(
         listOf(
             SPØRSMÅL,
             UTFYLLING,
+            BEKREFT,
+            PERSISTER_OPPLYSNINGER,
+            BESTILL_JOURNALFØRING,
+            KVITTERING,
+        )
+    ),
+    AAP_KORRIGERING_FLYT_V2(
+        listOf(
+            SPØRSMÅL,
+            UTFYLLING,
             FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
