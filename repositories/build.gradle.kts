@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
 
     implementation("io.micrometer:micrometer-core:1.16.3")
-    implementation("ch.qos.logback:logback-classic:1.5.29")
+    implementation("ch.qos.logback:logback-classic:1.5.31")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
