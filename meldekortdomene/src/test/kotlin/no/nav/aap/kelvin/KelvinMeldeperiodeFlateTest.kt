@@ -122,7 +122,8 @@ class KelvinMeldeperiodeFlateTest {
                     utfylling = utfyllingReferanse,
                     fagsak = sak.referanse,
                     dato = dag,
-                    timerArbeidet = 0.0
+                    timerArbeidet = 0.0,
+                    fravær = null
                 )
             }
         }
