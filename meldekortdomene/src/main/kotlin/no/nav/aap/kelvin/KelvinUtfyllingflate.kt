@@ -17,7 +17,6 @@ import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 class KelvinUtfyllingFlate(
     private val utfyllingRepository: UtfyllingRepository,
@@ -191,8 +190,7 @@ class KelvinUtfyllingFlate(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
-            ?: TODO("kan skje hvis mellomlagring slettes")
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
@@ -214,8 +212,7 @@ class KelvinUtfyllingFlate(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
-            ?: TODO("kan skje hvis mellomlagring slettes")
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
@@ -229,6 +226,17 @@ class KelvinUtfyllingFlate(
             utfylling = utfylling,
             feil = null,
         )
+    }
+
+    private fun lastUtfyllingForÅEndre(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling {
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
+            ?: TODO("kan skje hvis mellomlagring slettes")
+
+        require(!eksisterendeUtfylling.erAvsluttet) {
+            "Kan ikke endre utfylling som er avsluttet."
+        }
+
+        return eksisterendeUtfylling
     }
 
     override fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
