@@ -9,32 +9,12 @@ import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import java.time.LocalDate
-import java.util.*
 
 class UtfyllingRepositoryPostgres(
     private val connection: DBConnection
 ) : UtfyllingRepository {
 
     override fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        /* Midlertidig kode for å få gjennom feilende jobb. */
-        if (utfyllingReferanse == UtfyllingReferanse(UUID.fromString("46dee49c-eb26-40a7-bb9c-325ea2d02862"))) {
-            return connection.queryList(
-                """
-                    select * from utfylling
-                    where ident = ? and referanse = ?
-                """
-            ) {
-                setParams {
-                    setString(1, ident.asString)
-                    setUUID(2, utfyllingReferanse.asUuid)
-                }
-                setRowMapper { row ->
-                    utfyllingRowMapper(row)
-                }
-            }
-                .single { it.erAvsluttet }
-        }
-
         return lastUtfylling(ident, utfyllingReferanse)
             ?.takeIf { it.erAvsluttet }
     }
