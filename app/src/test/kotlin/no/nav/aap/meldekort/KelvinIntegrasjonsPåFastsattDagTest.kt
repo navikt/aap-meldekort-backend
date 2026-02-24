@@ -31,7 +31,6 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -322,7 +321,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = null,
                     dager = emptyList(),
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.SPØRSMÅL,
@@ -331,7 +330,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ),
             UtfyllingTilstandDto(
@@ -341,7 +340,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.BEKREFT,
@@ -350,7 +349,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
                 )
             )
         )

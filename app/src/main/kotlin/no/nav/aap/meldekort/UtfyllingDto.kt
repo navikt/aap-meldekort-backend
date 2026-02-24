@@ -145,7 +145,7 @@ class SvarDto(
     val harDuJobbet: Boolean?,
     val dager: List<DagSvarDto>,
     val stemmerOpplysningene: Boolean?,
-    val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
+    val harDuGjennomførtAvtaltAktivitet: FraværSvarDto? = null,
 ) {
     fun tilDomene(): Svar {
         return Svar(
@@ -153,7 +153,7 @@ class SvarDto(
             harDuJobbet = harDuJobbet,
             timerArbeidet = dager.map { it.tilTimerArbeidet() },
             stemmerOpplysningene = stemmerOpplysningene,
-            harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet
+            harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet?.tilDomene
         )
     }
 
@@ -162,27 +162,69 @@ class SvarDto(
         harDuJobbet = svar.harDuJobbet,
         dager = svar.timerArbeidet.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
-        harDuGjennomførtAvtaltAktivitet = svar.harDuGjennomførtAvtaltAktivitet
+        harDuGjennomførtAvtaltAktivitet = svar.harDuGjennomførtAvtaltAktivitet?.let { FraværSvarDto.fraDomene(it) }
     )
 }
 
 class DagSvarDto(
     val dato: LocalDate,
     val timerArbeidet: Double?,
-    val fravær: Fravær? = null,
+    val fravær: FraværDto? = null,
 ) {
     fun tilTimerArbeidet(): TimerArbeidet {
         return TimerArbeidet(
             timer = timerArbeidet,
             dato = dato,
-            fravær = fravær
+            fravær = fravær?.tilDomene
         )
     }
 
     constructor(timerArbeidet: TimerArbeidet) : this(
         dato = timerArbeidet.dato,
         timerArbeidet = timerArbeidet.timer,
-        fravær = timerArbeidet.fravær
+        fravær = timerArbeidet.fravær?.let { FraværDto.fraDomene(it) }
     )
+}
+
+enum class FraværDto(val tilDomene: Fravær) {
+    SYKDOM_ELLER_SKADE(Fravær.SYKDOM_ELLER_SKADE),
+    OMSORG_FØRSTE_SKOLEDAG_TILVENNING_ELLER_ANNEN_OPPFØLGING_BARN(Fravær.OMSORG_FØRSTE_SKOLEDAG_TILVENNING_ELLER_ANNEN_OPPFØLGING_BARN),
+    OMSORG_PLEIE_I_HJEMMET_AV_NÆR_PÅRØRENDE(Fravær.OMSORG_PLEIE_I_HJEMMET_AV_NÆR_PÅRØRENDE),
+    OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS(Fravær.OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS),
+    OMSORG_MEDDOMMER_ELLER_ANDRE_OFFENTLIGE_PLIKTER(Fravær.OMSORG_MEDDOMMER_ELLER_ANDRE_OFFENTLIGE_PLIKTER),
+    OMSORG_ANNEN_STERK_GRUNN(Fravær.OMSORG_ANNEN_STERK_GRUNN),
+    ANNEN(Fravær.ANNEN),
+    ;
+
+    companion object{
+        fun fraDomene(fravær: Fravær): FraværDto {
+            return when (fravær) {
+                Fravær.SYKDOM_ELLER_SKADE -> SYKDOM_ELLER_SKADE
+                Fravær.OMSORG_FØRSTE_SKOLEDAG_TILVENNING_ELLER_ANNEN_OPPFØLGING_BARN -> OMSORG_FØRSTE_SKOLEDAG_TILVENNING_ELLER_ANNEN_OPPFØLGING_BARN
+                Fravær.OMSORG_PLEIE_I_HJEMMET_AV_NÆR_PÅRØRENDE -> OMSORG_PLEIE_I_HJEMMET_AV_NÆR_PÅRØRENDE
+                Fravær.OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS -> OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS
+                Fravær.OMSORG_MEDDOMMER_ELLER_ANDRE_OFFENTLIGE_PLIKTER -> OMSORG_MEDDOMMER_ELLER_ANDRE_OFFENTLIGE_PLIKTER
+                Fravær.OMSORG_ANNEN_STERK_GRUNN -> OMSORG_ANNEN_STERK_GRUNN
+                Fravær.ANNEN -> ANNEN
+            }
+        }
+    }
+}
+
+enum class FraværSvarDto(val tilDomene: FraværSvar) {
+    GJENNOMFØRT_AVTALT_AKTIVITET(FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET),
+    NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET(FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET),
+    INGEN_AVTALTE_AKTIVITETER(FraværSvar.INGEN_AVTALTE_AKTIVITETER),
+    ;
+
+    companion object {
+        fun fraDomene(fraværSvar: FraværSvar): FraværSvarDto {
+            return when (fraværSvar) {
+                FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET -> GJENNOMFØRT_AVTALT_AKTIVITET
+                FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET -> NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
+                FraværSvar.INGEN_AVTALTE_AKTIVITETER -> INGEN_AVTALTE_AKTIVITETER
+            }
+        }
+    }
 }
 
