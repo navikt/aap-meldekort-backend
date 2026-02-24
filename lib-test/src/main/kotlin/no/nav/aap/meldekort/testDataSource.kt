@@ -22,7 +22,7 @@ fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSou
             password = postgres.password
         )
     } else {
-        DbConfig()
+        DbConfig(database = "sdf")
     }
     // Useful for connecting to the test database locally
     // jdbc 'URL contains the host and port and database name.

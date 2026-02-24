@@ -7,7 +7,7 @@ import no.nav.aap.komponenter.dbmigrering.Migrering
 import javax.sql.DataSource
 
 class DbConfig(
-    val database: String = "sdf",
+    val database: String = System.getenv("DB_DATABASE"),
     val url: String = System.getenv("DB_JDBC_URL"),
     val username: String = System.getenv("DB_USERNAME"),
     val password: String = System.getenv("DB_PASSWORD"),
