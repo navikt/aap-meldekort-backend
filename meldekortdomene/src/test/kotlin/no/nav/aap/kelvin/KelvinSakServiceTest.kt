@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import org.junit.jupiter.api.Test
 
@@ -16,7 +16,7 @@ import java.time.*
 class KelvinSakServiceTest {
     val innloggetBruker = InnloggetBruker(Ident("12345678901"), "test-token")
 
-    val timerArbeidetRepository = mockk<TimerArbeidetRepository>()
+    val aktivitetsInformasjonRepository = mockk<AktivitetsInformasjonRepository>()
     val kelvinSakRepository = mockk<KelvinSakRepository>()
     val clock = Clock.systemDefaultZone()
 
@@ -44,7 +44,7 @@ class KelvinSakServiceTest {
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
         val sakService = KelvinSakService(
             kelvinSakRepository = kelvinSakRepository,
-            timerArbeidetRepository = timerArbeidetRepository,
+            aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
             clock = clock
         )
 
@@ -69,7 +69,7 @@ class KelvinSakServiceTest {
         val opplysningsperiode = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 5, 25))
         val sakService = KelvinSakService(
             kelvinSakRepository = kelvinSakRepository,
-            timerArbeidetRepository = timerArbeidetRepository,
+            aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
             clock = clock
         )
 
@@ -92,7 +92,7 @@ class KelvinSakServiceTest {
 
         val sakService = KelvinSakService(
             kelvinSakRepository = kelvinSakRepository,
-            timerArbeidetRepository = timerArbeidetRepository,
+            aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
             clock = clock
         )
 

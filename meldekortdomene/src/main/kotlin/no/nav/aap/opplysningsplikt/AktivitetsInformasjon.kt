@@ -6,7 +6,7 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import java.time.Instant
 import java.time.LocalDate
 
-data class TimerArbeidet(
+data class AktivitetsInformasjon(
     val registreringstidspunkt: Instant,
     val utfylling: UtfyllingReferanse,
     val fagsak: FagsakReferanse,

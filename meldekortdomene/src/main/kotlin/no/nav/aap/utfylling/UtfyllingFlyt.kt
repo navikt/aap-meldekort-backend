@@ -186,7 +186,7 @@ class UtfyllingFlyt(
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
                         SPØRSMÅL -> ArbeidetSpørsmål
-                        UTFYLLING -> TimerArbeidetSteg
+                        UTFYLLING -> AktivitetsInformasjonSteg
                         FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
                         FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)

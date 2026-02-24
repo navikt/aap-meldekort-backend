@@ -18,7 +18,7 @@ import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
 import no.nav.aap.tilgang.authorizedPost
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import java.time.Clock
 import java.util.*
 import javax.sql.DataSource
@@ -66,11 +66,11 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
             dataSource.transaction { connection ->
                 val repositoryProvider = repositoryRegistry.provider(connection)
                 val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
-                kelvinMottakService.behandleMottatteTimerArbeidet(
+                kelvinMottakService.behandleMottatteAktivitetsInformasjon(
                     ident = Ident(body.ident),
                     periode = Periode(body.periode.fom, body.periode.tom),
                     harDuJobbet = body.harDuJobbet,
-                    timerArbeidet = body.dager.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet, fravær = null) }
+                    aktivitetsInformasjon = body.dager.map { AktivitetsInformasjon(dato = it.dato, timer = it.aktivitetsInformasjon, fravær = null) }
                 )
             }
 

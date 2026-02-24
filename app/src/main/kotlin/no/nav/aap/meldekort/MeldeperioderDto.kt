@@ -45,14 +45,14 @@ class KommendeMeldeperioderDto(
 }
 
 class HistoriskMeldeperiodeDto(
-    val antallTimerArbeidetIPerioden: Double,
+    val antallAktivitetsInformasjonIPerioden: Double,
     val meldeperiode: PeriodeDto,
     val status: MeldeperiodeStatusDto,
 ) {
     companion object {
         fun fraDomene(domene: MeldeperiodeFlate.HistoriskMeldeperiode): HistoriskMeldeperiodeDto {
             return HistoriskMeldeperiodeDto(
-                antallTimerArbeidetIPerioden = domene.totaltAntallTimerIPerioden,
+                antallAktivitetsInformasjonIPerioden = domene.totaltAntallTimerIPerioden,
                 meldeperiode = PeriodeDto(domene.meldeperiode.meldeperioden),
                 status = MeldeperiodeStatusDto.KELVIN, 
             )

@@ -68,7 +68,7 @@ object ArbeidetSpørsmål : UtfyllingSteg {
     )
 }
 
-object TimerArbeidetSteg : UtfyllingSteg {
+object AktivitetsInformasjonSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
         get() = UTFYLLING
 
@@ -80,24 +80,24 @@ object TimerArbeidetSteg : UtfyllingSteg {
 
     override val formkrav: Formkrav = mapOf(
         "OPPGIR_OPPLYSNINGER_INNENFOR_PERIODE" to { utfylling ->
-            utfylling.svar.timerArbeidet.all { it.dato in utfylling.periode }
+            utfylling.svar.aktivitetsInformasjon.all { it.dato in utfylling.periode }
         },
         "HELE_ELLER_HALVE_TIMER" to { utfylling ->
-            utfylling.svar.timerArbeidet.all {
+            utfylling.svar.aktivitetsInformasjon.all {
                 val timer = it.timer ?: return@all true
                 timer in 0.0..24.0 && (timer.toString().let { it.endsWith(".0") || it.endsWith(".5") })
             }
         },
         "HAR_REGISTRERT_TIMER_OM_ARBEIDET" to { utfylling ->
             if (utfylling.svar.harDuJobbet == true) {
-                utfylling.svar.timerArbeidet.any { it.timer != null && it.timer > 0.0 }
+                utfylling.svar.aktivitetsInformasjon.any { it.timer != null && it.timer > 0.0 }
             } else {
                 true
             }
         },
         "HAR_IKKE_REGISTRERT_TIMER_OM_IKKE_ARBEIDET" to { utfylling ->
             if (utfylling.svar.harDuJobbet == false) {
-                utfylling.svar.timerArbeidet.all { it.timer == null || it.timer == 0.0 }
+                utfylling.svar.aktivitetsInformasjon.all { it.timer == null || it.timer == 0.0 }
             } else {
                 true
             }

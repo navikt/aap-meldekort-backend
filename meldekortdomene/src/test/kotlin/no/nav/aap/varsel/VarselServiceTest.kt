@@ -16,7 +16,7 @@ import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.meldekort.fødselsnummerGenerator
 import no.nav.aap.meldekort.saksnummerGenerator
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepositoryPostgres
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
@@ -779,19 +779,19 @@ class VarselServiceTest {
             varselService = varselService(connection, clock),
             kelvinSakRepository = KelvinSakRepositoryPostgres(connection),
             utfyllingRepository = UtfyllingRepositoryPostgres(connection),
-            timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection),
+            aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection),
             clock = clock
         )
     }
 
     private val varselGateway = mockk<VarselGateway>()
     private fun varselService(connection: DBConnection, clock: Clock): VarselService {
-        val timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection)
+        val aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection)
         val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
         return VarselService(
             kelvinSakService = KelvinSakService(
                 kelvinSakRepository = kelvinSakRepository,
-                timerArbeidetRepository = timerArbeidetRepository,
+                aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
                 clock = clock
             ),
             kelvinSakRepository = kelvinSakRepository,

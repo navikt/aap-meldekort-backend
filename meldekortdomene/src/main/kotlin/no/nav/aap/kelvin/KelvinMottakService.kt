@@ -4,7 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
@@ -20,13 +20,13 @@ class KelvinMottakService(
     private val varselService: VarselService,
     private val kelvinSakRepository: KelvinSakRepository,
     private val utfyllingRepository: UtfyllingRepository,
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         kelvinSakRepository = repositoryProvider.provide(),
         utfyllingRepository = repositoryProvider.provide(),
-        timerArbeidetRepository = repositoryProvider.provide(),
+        aktivitetsInformasjonRepository = repositoryProvider.provide(),
         varselService = VarselService(repositoryProvider, gatewayProvider, clock),
         clock = clock
     )
@@ -52,11 +52,11 @@ class KelvinMottakService(
         varselService.planleggFremtidigeVarsler(saksnummer)
     }
 
-    fun behandleMottatteTimerArbeidet(
+    fun behandleMottatteAktivitetsInformasjon(
         ident: Ident,
         periode: Periode,
         harDuJobbet: Boolean,
-        timerArbeidet: List<no.nav.aap.utfylling.TimerArbeidet>
+        aktivitetsInformasjon: List<no.nav.aap.utfylling.AktivitetsInformasjon>
     ): UtfyllingReferanse {
         val sak = kelvinSakRepository.hentSak(ident, periode.fom)
             ?: throw IllegalStateException("finner ikke sak")
@@ -76,7 +76,7 @@ class KelvinMottakService(
             svar = Svar(
                 svarerDuSant = true, // Antar dette når bruker sender inn eget papir
                 harDuJobbet = harDuJobbet,
-                timerArbeidet = timerArbeidet,
+                aktivitetsInformasjon = aktivitetsInformasjon,
                 stemmerOpplysningene = true // Antar dette når bruker sender inn eget papir,
             ),
             opprettet = Instant.now(clock),
@@ -85,10 +85,10 @@ class KelvinMottakService(
         )
 
         utfyllingRepository.lagrUtfylling(utfylling)
-        timerArbeidetRepository.lagrTimerArbeidet(
+        aktivitetsInformasjonRepository.lagrAktivitetsInformasjon(
             ident = utfylling.ident,
-            opplysninger = utfylling.svar.timerArbeidet.map {
-                no.nav.aap.opplysningsplikt.TimerArbeidet(
+            opplysninger = utfylling.svar.aktivitetsInformasjon.map {
+                no.nav.aap.opplysningsplikt.AktivitetsInformasjon(
                     registreringstidspunkt = utfylling.sistEndret,
                     utfylling = utfylling.referanse,
                     fagsak = utfylling.fagsak,

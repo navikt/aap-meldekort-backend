@@ -1,0 +1,1 @@
+ALTER TABLE timer_arbeidet RENAME TO aktivitetsinformasjon;

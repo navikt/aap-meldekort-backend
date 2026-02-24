@@ -5,7 +5,7 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.utfylling.Svar
 import java.time.Clock
 import java.time.LocalDate
@@ -13,14 +13,14 @@ import java.time.LocalDate
 class KelvinMeldeperiodeFlate(
     private val sakService: KelvinSakService,
     private val kelvinSakRepository: KelvinSakRepository,
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock,
 ) : MeldeperiodeFlate {
 
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
-        timerArbeidetRepository = repositoryProvider.provide(),
+        aktivitetsInformasjonRepository = repositoryProvider.provide(),
         clock = clock,
     )
 
@@ -59,7 +59,7 @@ class KelvinMeldeperiodeFlate(
         val perioder = sakService.hentMeldeperioder(sak.referanse)
 
         val senesteOpplysningsdato =
-            timerArbeidetRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
+            aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
                 ?: LocalDate.MIN
 
         /* Her ønsker vi å liste opp meldeperioder hvor:
@@ -74,7 +74,7 @@ class KelvinMeldeperiodeFlate(
                 val detaljer = periodedetaljer(innloggetBruker, it.meldeperioden)
                 MeldeperiodeFlate.HistoriskMeldeperiode(
                     meldeperiode = it,
-                    totaltAntallTimerIPerioden = detaljer.svar.timerArbeidet.sumOf { it.timer ?: 0.0 }
+                    totaltAntallTimerIPerioden = detaljer.svar.aktivitetsInformasjon.sumOf { it.timer ?: 0.0 }
                 )
             }
     }
@@ -84,13 +84,13 @@ class KelvinMeldeperiodeFlate(
         periode: Periode
     ): MeldeperiodeFlate.PeriodeDetaljer {
         val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: error("ingen sak i perioden")
-        val timerArbeidet = sakService.registrerteTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+        val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
         return MeldeperiodeFlate.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
                 svarerDuSant = true, /* TODO */
                 harDuJobbet = true, /* TODO */
-                timerArbeidet = timerArbeidet,
+                aktivitetsInformasjon = aktivitetsInformasjon,
                 stemmerOpplysningene = true, /* TODO */
                 harDuGjennomførtAvtaltAktivitet = null, /* TODO (?)*/
             )

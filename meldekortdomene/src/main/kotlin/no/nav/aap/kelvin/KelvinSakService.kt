@@ -6,21 +6,21 @@ import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.verdityper.Tid
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class KelvinSakService(
     private val kelvinSakRepository: KelvinSakRepository,
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock,
 ) {
 
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
-        timerArbeidetRepository = repositoryProvider.provide(),
+        aktivitetsInformasjonRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
         clock = clock,
     )
@@ -65,26 +65,26 @@ class KelvinSakService(
     }
 
 
-    fun registrerteTimerArbeidet(
+    fun registrerteAktivitetsInformasjon(
         ident: Ident,
         sak: FagsakReferanse,
         periode: Periode
-    ): List<TimerArbeidet> {
+    ): List<AktivitetsInformasjon> {
         val registrerteOpplysninger =
-            timerArbeidetRepository.hentTimerArbeidet(ident, sak, periode)
-                .map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet, fravær = it.fravær) }
+            aktivitetsInformasjonRepository.hentAktivitetsInformasjon(ident, sak, periode)
+                .map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet, fravær = it.fravær) }
                 .toMutableList()
 
-        val timerArbeidet = sequence {
+        val aktivitetsInformasjon = sequence {
             for (dato in periode) {
                 if (registrerteOpplysninger.firstOrNull()?.dato == dato) {
                     yield(registrerteOpplysninger.removeFirst())
                 } else {
-                    yield(TimerArbeidet(dato, null))
+                    yield(AktivitetsInformasjon(dato, null))
                 }
             }
         }
-        return timerArbeidet.toList()
+        return aktivitetsInformasjon.toList()
     }
 
     fun meldeperioderUtenInnsending(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
@@ -105,12 +105,12 @@ class KelvinSakService(
         perioder: List<Meldeperiode>,
         ident: Ident,
         sak: FagsakReferanse
-    ): List<no.nav.aap.opplysningsplikt.TimerArbeidet> {
+    ): List<no.nav.aap.opplysningsplikt.AktivitetsInformasjon> {
         val tidligsteFom = perioder.minByOrNull { it.meldeperioden.fom }?.meldeperioden?.fom ?: Tid.MIN
         val senesteTom = perioder.maxByOrNull { it.meldeperioden.tom }?.meldeperioden?.tom ?: Tid.MAKS
         val timerPeriode = Periode(fom = tidligsteFom, tom = senesteTom)
 
-        return timerArbeidetRepository.hentTimerArbeidet(ident, sak, timerPeriode)
+        return aktivitetsInformasjonRepository.hentAktivitetsInformasjon(ident, sak, timerPeriode)
     }
 
     fun finnMeldepliktfristForPeriode(sak: FagsakReferanse, periode: Periode): LocalDateTime? {

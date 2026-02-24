@@ -3,7 +3,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingStegNavn
@@ -151,7 +151,7 @@ class SvarDto(
         return Svar(
             svarerDuSant = vilSvareRiktig,
             harDuJobbet = harDuJobbet,
-            timerArbeidet = dager.map { it.tilTimerArbeidet() },
+            aktivitetsInformasjon = dager.map { it.tilAktivitetsInformasjon() },
             stemmerOpplysningene = stemmerOpplysningene,
             harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet?.tilDomene
         )
@@ -160,7 +160,7 @@ class SvarDto(
     constructor(svar: Svar) : this(
         vilSvareRiktig = svar.svarerDuSant,
         harDuJobbet = svar.harDuJobbet,
-        dager = svar.timerArbeidet.map { DagSvarDto(it) },
+        dager = svar.aktivitetsInformasjon.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
         harDuGjennomførtAvtaltAktivitet = svar.harDuGjennomførtAvtaltAktivitet?.let { FraværSvarDto.fraDomene(it) }
     )
@@ -168,21 +168,21 @@ class SvarDto(
 
 class DagSvarDto(
     val dato: LocalDate,
-    val timerArbeidet: Double?,
+    val aktivitetsInformasjon: Double?,
     val fravær: FraværDto? = null,
 ) {
-    fun tilTimerArbeidet(): TimerArbeidet {
-        return TimerArbeidet(
-            timer = timerArbeidet,
+    fun tilAktivitetsInformasjon(): AktivitetsInformasjon {
+        return AktivitetsInformasjon(
+            timer = aktivitetsInformasjon,
             dato = dato,
             fravær = fravær?.tilDomene
         )
     }
 
-    constructor(timerArbeidet: TimerArbeidet) : this(
-        dato = timerArbeidet.dato,
-        timerArbeidet = timerArbeidet.timer,
-        fravær = timerArbeidet.fravær?.let { FraværDto.fraDomene(it) }
+    constructor(aktivitetsInformasjon: AktivitetsInformasjon) : this(
+        dato = aktivitetsInformasjon.dato,
+        aktivitetsInformasjon = aktivitetsInformasjon.timer,
+        fravær = aktivitetsInformasjon.fravær?.let { FraværDto.fraDomene(it) }
     )
 }
 

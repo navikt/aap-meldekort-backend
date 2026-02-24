@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class Svar(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
-    val timerArbeidet: List<TimerArbeidet>,
+    val aktivitetsInformasjon: List<AktivitetsInformasjon>,
     val stemmerOpplysningene: Boolean?,
     val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
 ) {
@@ -15,7 +15,7 @@ data class Svar(
             return Svar(
                 svarerDuSant = null,
                 harDuJobbet = null,
-                timerArbeidet = periode.map { TimerArbeidet(it, null, null) },
+                aktivitetsInformasjon = periode.map { AktivitetsInformasjon(it, null, null) },
                 stemmerOpplysningene = null,
                 harDuGjennomførtAvtaltAktivitet = null
             )
@@ -23,7 +23,7 @@ data class Svar(
     }
 }
 
-data class TimerArbeidet(
+data class AktivitetsInformasjon(
     val dato: LocalDate,
     val timer: Double?,
     val fravær: Fravær? = null

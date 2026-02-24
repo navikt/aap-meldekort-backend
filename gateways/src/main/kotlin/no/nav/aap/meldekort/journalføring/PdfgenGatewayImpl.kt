@@ -43,7 +43,7 @@ object PdfgenGatewayImpl : PdfgenGateway {
                     "ident" to ident.asString,
                     "sendtInnDato" to formaterDatoForFrontend(mottatt.atZone(ZoneId.of("Europe/Oslo")).toLocalDate()),
                     "meldekortid" to utfylling.referanse.asUuid.toString(),
-                    "sammenlagtArbeidIPerioden" to formaterTimer(utfylling.svar.timerArbeidet.sumOf {
+                    "sammenlagtArbeidIPerioden" to formaterTimer(utfylling.svar.aktivitetsInformasjon.sumOf {
                         it.timer ?: 0.0
                     }),
                     "harGittRiktigeOpplysninger" to utfylling.svar.svarerDuSant,
@@ -59,7 +59,7 @@ object PdfgenGatewayImpl : PdfgenGateway {
                     ),
                     "meldekort" to mapOf(
                         "harDuArbeidet" to utfylling.svar.harDuJobbet,
-                        "timerArbeidPerUkeIPerioden" to utfylling.svar.timerArbeidet
+                        "timerArbeidPerUkeIPerioden" to utfylling.svar.aktivitetsInformasjon
                             .filter { it.timer != null }
                             .groupBy { it.dato.with(DayOfWeek.MONDAY) }
                             .map { (mandag, dager) ->

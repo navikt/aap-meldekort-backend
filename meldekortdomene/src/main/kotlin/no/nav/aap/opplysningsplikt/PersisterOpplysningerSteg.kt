@@ -7,15 +7,15 @@ import no.nav.aap.utfylling.UtfyllingSteg
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 
 class PersisterOpplysningerSteg(
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
 ) : UtfyllingSteg {
     override val navn = PERSISTER_OPPLYSNINGER
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        timerArbeidetRepository.lagrTimerArbeidet(
+        aktivitetsInformasjonRepository.lagrAktivitetsInformasjon(
             ident = utfylling.ident,
-            opplysninger = utfylling.svar.timerArbeidet.map {
-                TimerArbeidet(
+            opplysninger = utfylling.svar.aktivitetsInformasjon.map {
+                AktivitetsInformasjon(
                     registreringstidspunkt = utfylling.sistEndret,
                     utfylling = utfylling.referanse,
                     fagsak = utfylling.fagsak,

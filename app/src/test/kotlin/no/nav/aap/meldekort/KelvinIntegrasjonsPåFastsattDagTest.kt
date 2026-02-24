@@ -310,7 +310,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
         val dagerJobbet = opplysningerOm.copy(fom = sakStart).map {
             DagSvarDto(
                 dato = it,
-                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                aktivitetsInformasjon = (Math.random() * 3.0).toInt().toDouble()
             )
         }
         val utfyllinger = listOf(

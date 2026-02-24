@@ -13,14 +13,14 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import no.nav.aap.komponenter.type.Periode as DBPeriode
 
-class TimerArbeidetRepositoryPostgres(
+class AktivitetsInformasjonRepositoryPostgres(
     private val connection: DBConnection,
-) : TimerArbeidetRepository{
+) : AktivitetsInformasjonRepository{
     val log = LoggerFactory.getLogger(javaClass)
-    override fun lagrTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
+    override fun lagrAktivitetsInformasjon(ident: Ident, opplysninger: List<AktivitetsInformasjon>) {
         connection.executeBatch(
             """
-                insert into timer_arbeidet
+                insert into aktivitetsinformasjon
                 (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravaer)
                 values (?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict do nothing
@@ -44,7 +44,7 @@ class TimerArbeidetRepositoryPostgres(
 
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
         return connection.queryFirstOrNull("""
-            select dato from timer_arbeidet
+            select dato from aktivitetsinformasjon
             where ident = ? and fagsak_system = ? and fagsak_nummer = ?
             order by dato desc
             limit 1
@@ -60,10 +60,10 @@ class TimerArbeidetRepositoryPostgres(
         }
     }
 
-    override fun hentTimerArbeidet(ident: Ident, sak: FagsakReferanse, periode: Periode): List<TimerArbeidet> {
+    override fun hentAktivitetsInformasjon(ident: Ident, sak: FagsakReferanse, periode: Periode): List<AktivitetsInformasjon> {
         return connection.queryList("""
             select distinct on (dato) *
-            from timer_arbeidet
+            from aktivitetsinformasjon
             where ident = ? and fagsak_system = ? and fagsak_nummer = ? and ?::daterange @> dato
             order by dato, registreringstidspunkt desc
         """) {
@@ -73,12 +73,12 @@ class TimerArbeidetRepositoryPostgres(
                 setString(3, sak.nummer.asString)
                 setPeriode(4, DBPeriode(periode.fom, periode.tom))
             }
-            setRowMapper(::timerArbeidetRowMapper)
+            setRowMapper(::aktivitetsInformasjonRowMapper)
         }
     }
     
-    private fun timerArbeidetRowMapper(row: Row): TimerArbeidet {
-        return TimerArbeidet(
+    private fun aktivitetsInformasjonRowMapper(row: Row): AktivitetsInformasjon {
+        return AktivitetsInformasjon(
             registreringstidspunkt = row.getInstant("registreringstidspunkt"),
             utfylling = UtfyllingReferanse(row.getUUID("utfylling_referanse")),
             fagsak = FagsakReferanse(
@@ -91,9 +91,9 @@ class TimerArbeidetRepositoryPostgres(
         )
     }
 
-    companion object : RepositoryFactory<TimerArbeidetRepositoryPostgres> {
-        override fun konstruer(connection: DBConnection): TimerArbeidetRepositoryPostgres {
-            return TimerArbeidetRepositoryPostgres(connection)
+    companion object : RepositoryFactory<AktivitetsInformasjonRepositoryPostgres> {
+        override fun konstruer(connection: DBConnection): AktivitetsInformasjonRepositoryPostgres {
+            return AktivitetsInformasjonRepositoryPostgres(connection)
         }
     }
 }

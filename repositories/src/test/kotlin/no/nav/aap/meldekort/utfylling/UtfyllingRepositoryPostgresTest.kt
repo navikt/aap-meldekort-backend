@@ -11,7 +11,7 @@ import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingReferanse
@@ -64,11 +64,11 @@ class UtfyllingRepositoryPostgresTest {
                 svar = Svar(
                     svarerDuSant = null,
                     harDuJobbet = true,
-                    timerArbeidet = listOf(
-                        TimerArbeidet(LocalDate.of(2020, 1, 1), null, null),
-                        TimerArbeidet(LocalDate.of(2020, 1, 2), 0.0, null),
-                        TimerArbeidet(LocalDate.of(2020, 1, 3), 7.0, null),
-                        TimerArbeidet(LocalDate.of(2020, 1, 4), 7.5, null),
+                    aktivitetsInformasjon = listOf(
+                        AktivitetsInformasjon(LocalDate.of(2020, 1, 1), null, null),
+                        AktivitetsInformasjon(LocalDate.of(2020, 1, 2), 0.0, null),
+                        AktivitetsInformasjon(LocalDate.of(2020, 1, 3), 7.0, null),
+                        AktivitetsInformasjon(LocalDate.of(2020, 1, 4), 7.5, null),
                     ),
                     stemmerOpplysningene = false,
                     harDuGjennomførtAvtaltAktivitet = FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET,

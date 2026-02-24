@@ -34,13 +34,13 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepositoryPostgres
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
@@ -192,15 +192,15 @@ class KelvinIntegrasjonManuellInnsendingTest {
             val dagerJobbet = periode.map {
                 DagSvarDto(
                     dato = it,
-                    timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                    aktivitetsInformasjon = (Math.random() * 3.0).toInt().toDouble()
                 )
             }
 
-            kelvinMottakService.behandleMottatteTimerArbeidet(
+            kelvinMottakService.behandleMottatteAktivitetsInformasjon(
                 ident = fnr,
                 periode = periode,
                 harDuJobbet = true,
-                timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet, fravær = null) }
+                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.aktivitetsInformasjon, fravær = null) }
             )
         }
     }
@@ -210,18 +210,18 @@ class KelvinIntegrasjonManuellInnsendingTest {
             varselService = varselService(connection, clock),
             kelvinSakRepository = KelvinSakRepositoryPostgres(connection),
             utfyllingRepository = UtfyllingRepositoryPostgres(connection),
-            timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection),
+            aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection),
             clock = clock
         )
     }
 
     private fun varselService(connection: DBConnection, clock: Clock): VarselService {
-        val timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection)
+        val aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection)
         val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
         return VarselService(
             kelvinSakService = KelvinSakService(
                 kelvinSakRepository = kelvinSakRepository,
-                timerArbeidetRepository = timerArbeidetRepository,
+                aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
                 clock = clock
             ),
             kelvinSakRepository = kelvinSakRepository,
@@ -249,7 +249,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
         val dagerJobbet = opplysningerOm.copy(fom = sakStart).map {
             DagSvarDto(
                 dato = it,
-                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
+                aktivitetsInformasjon = (Math.random() * 3.0).toInt().toDouble()
             )
         }
         val utfyllinger = listOf(

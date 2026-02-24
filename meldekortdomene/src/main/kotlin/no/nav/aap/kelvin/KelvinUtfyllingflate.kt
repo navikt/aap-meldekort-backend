@@ -81,7 +81,7 @@ class KelvinUtfyllingFlate(
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
-            val timerArbeidet = sakService.registrerteTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+            val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
@@ -89,8 +89,8 @@ class KelvinUtfyllingFlate(
                 flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2,
                 svar = Svar(
                     svarerDuSant = null,
-                    harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },
-                    timerArbeidet = timerArbeidet,
+                    harDuJobbet = aktivitetsInformasjon.any { (it.timer ?: 0.0) > 0.0 },
+                    aktivitetsInformasjon = aktivitetsInformasjon,
                     stemmerOpplysningene = null,
                     harDuGjennomførtAvtaltAktivitet = null
                 ),

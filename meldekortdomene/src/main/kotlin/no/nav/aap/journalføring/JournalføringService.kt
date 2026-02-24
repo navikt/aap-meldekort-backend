@@ -55,7 +55,7 @@ class JournalføringService(
     ) {
         val meldekort = MeldekortV0(
             harDuArbeidet = utfylling.svar.harDuJobbet!!,
-            timerArbeidPerPeriode = utfylling.svar.timerArbeidet.map {
+            timerArbeidPerPeriode = utfylling.svar.aktivitetsInformasjon.map {
                 ArbeidIPeriodeV0(
                     fraOgMedDato = it.dato,
                     tilOgMedDato = it.dato,
