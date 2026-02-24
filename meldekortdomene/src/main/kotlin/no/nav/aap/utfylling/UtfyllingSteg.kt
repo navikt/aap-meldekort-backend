@@ -57,7 +57,7 @@ object IntroduksjonSteg : UtfyllingSteg {
     )
 }
 
-object AapSpørsmålSteg : UtfyllingSteg {
+object ArbeidetSpørsmål : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
         get() = SPØRSMÅL
 

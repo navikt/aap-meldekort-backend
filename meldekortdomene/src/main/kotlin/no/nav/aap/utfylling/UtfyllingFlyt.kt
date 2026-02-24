@@ -185,7 +185,7 @@ class UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
-                        SPØRSMÅL -> AapSpørsmålSteg
+                        SPØRSMÅL -> ArbeidetSpørsmål
                         UTFYLLING -> TimerArbeidetSteg
                         FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
                         FRAVÆR_UTFYLLING -> DagerFraværSteg
