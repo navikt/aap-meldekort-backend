@@ -6,6 +6,7 @@ import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -91,7 +92,8 @@ class UtfyllingMetadataDto(
      */
     val fristForInnsending: LocalDateTime?,
     val kanSendesInn: Boolean,
-    val visFrist: Boolean
+    val visFrist: Boolean,
+    val flytNavn: UtfyllingFlytNavn?,
 ) {
     companion object {
         fun fraDomene(utfylling: Utfylling, metadata: UtfyllingFlate.Metadata): UtfyllingMetadataDto {
@@ -104,7 +106,8 @@ class UtfyllingMetadataDto(
                 antallUbesvarteMeldeperioder = metadata.antallUbesvarteMeldeperioder,
                 harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin,
                 harBrukerSakUnderBehandling = metadata.brukerHarSakUnderBehandling,
-                visFrist = metadata.visFrist
+                visFrist = metadata.visFrist,
+                flytNavn = metadata.flytNavn,
             )
         }
 

@@ -134,6 +134,7 @@ class KelvinUtfyllingFlate(
             brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
             brukerHarSakUnderBehandling = brukerHarSakUnderBehandling,
             visFrist = periodeHarHattMeldeplikt,
+            flytNavn = utfylling.flyt
         )
     }
 
