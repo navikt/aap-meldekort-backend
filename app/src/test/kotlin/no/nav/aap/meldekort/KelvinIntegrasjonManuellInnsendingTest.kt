@@ -192,7 +192,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
             val dagerJobbet = periode.map {
                 DagSvarDto(
                     dato = it,
-                    aktivitetsInformasjon = (Math.random() * 3.0).toInt().toDouble()
+                    timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
                 )
             }
 
@@ -200,7 +200,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
                 ident = fnr,
                 periode = periode,
                 harDuJobbet = true,
-                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.aktivitetsInformasjon, fravær = null) }
+                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet, fravær = null) }
             )
         }
     }
@@ -249,7 +249,7 @@ class KelvinIntegrasjonManuellInnsendingTest {
         val dagerJobbet = opplysningerOm.copy(fom = sakStart).map {
             DagSvarDto(
                 dato = it,
-                aktivitetsInformasjon = (Math.random() * 3.0).toInt().toDouble()
+                timerArbeidet = (Math.random() * 3.0).toInt().toDouble()
             )
         }
         val utfyllinger = listOf(

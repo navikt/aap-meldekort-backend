@@ -1,11 +1,13 @@
 package no.nav.aap.utfylling
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import no.nav.aap.Periode
 import java.time.LocalDate
 
 data class Svar(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
+    @field:JsonAlias("timerArbeidet")
     val aktivitetsInformasjon: List<AktivitetsInformasjon>,
     val stemmerOpplysningene: Boolean?,
     val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
@@ -23,7 +25,7 @@ data class Svar(
     }
 }
 
-data class AktivitetsInformasjon(
+data class  AktivitetsInformasjon(
     val dato: LocalDate,
     val timer: Double?,
     val fravær: Fravær? = null

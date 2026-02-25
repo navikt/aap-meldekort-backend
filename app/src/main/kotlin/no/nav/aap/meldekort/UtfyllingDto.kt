@@ -171,12 +171,12 @@ class SvarDto(
 
 class DagSvarDto(
     val dato: LocalDate,
-    val aktivitetsInformasjon: Double?,
+    val timerArbeidet: Double?,
     val fravær: FraværDto? = null,
 ) {
     fun tilAktivitetsInformasjon(): AktivitetsInformasjon {
         return AktivitetsInformasjon(
-            timer = aktivitetsInformasjon,
+            timer = timerArbeidet,
             dato = dato,
             fravær = fravær?.tilDomene
         )
@@ -184,7 +184,7 @@ class DagSvarDto(
 
     constructor(aktivitetsInformasjon: AktivitetsInformasjon) : this(
         dato = aktivitetsInformasjon.dato,
-        aktivitetsInformasjon = aktivitetsInformasjon.timer,
+        timerArbeidet = aktivitetsInformasjon.timer,
         fravær = aktivitetsInformasjon.fravær?.let { FraværDto.fraDomene(it) }
     )
 }
