@@ -321,7 +321,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = null,
                     dager = emptyList(),
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = null
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.SPØRSMÅL,
@@ -330,7 +330,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.INGEN_AVTALTE_AKTIVITETER
                 )
             ),
             UtfyllingTilstandDto(
@@ -340,7 +340,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.INGEN_AVTALTE_AKTIVITETER
                 )
             ), UtfyllingTilstandDto(
                 aktivtSteg = StegDto.BEKREFT,
@@ -348,8 +348,8 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
+                    stemmerOpplysningene = false,
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.INGEN_AVTALTE_AKTIVITETER
                 )
             )
         )

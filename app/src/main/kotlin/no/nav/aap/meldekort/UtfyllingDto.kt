@@ -118,7 +118,6 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
     INTRODUKSJON(UtfyllingStegNavn.INTRODUKSJON),
     SPØRSMÅL(UtfyllingStegNavn.SPØRSMÅL),
     UTFYLLING(UtfyllingStegNavn.UTFYLLING),
-    FRAVÆR_SPØRSMÅL(UtfyllingStegNavn.FRAVÆR_SPØRSMÅL),
     FRAVÆR_UTFYLLING(UtfyllingStegNavn.FRAVÆR_UTFYLLING),
     BEKREFT(UtfyllingStegNavn.BEKREFT),
     KVITTERING(UtfyllingStegNavn.KVITTERING),
@@ -130,7 +129,6 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
                 UtfyllingStegNavn.INTRODUKSJON -> INTRODUKSJON
                 UtfyllingStegNavn.SPØRSMÅL -> SPØRSMÅL
                 UtfyllingStegNavn.UTFYLLING -> UTFYLLING
-                UtfyllingStegNavn.FRAVÆR_SPØRSMÅL -> FRAVÆR_SPØRSMÅL
                 UtfyllingStegNavn.FRAVÆR_UTFYLLING -> FRAVÆR_UTFYLLING
                 UtfyllingStegNavn.BEKREFT -> BEKREFT
                 UtfyllingStegNavn.KVITTERING -> KVITTERING

@@ -13,7 +13,6 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
-import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
 import no.nav.aap.varsel.InaktiverVarselSteg
@@ -41,7 +40,6 @@ enum class UtfyllingFlytNavn(
             INTRODUKSJON,
             SPØRSMÅL,
             UTFYLLING,
-            FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
@@ -64,7 +62,6 @@ enum class UtfyllingFlytNavn(
         listOf(
             SPØRSMÅL,
             UTFYLLING,
-            FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
@@ -186,8 +183,7 @@ class UtfyllingFlyt(
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
                         SPØRSMÅL -> ArbeidetSpørsmål
-                        UTFYLLING -> AktivitetsInformasjonSteg
-                        FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
+                        UTFYLLING -> TimerArbeidetSteg
                         FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
