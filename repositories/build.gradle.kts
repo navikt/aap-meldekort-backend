@@ -18,7 +18,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
+    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
     implementation("org.apache.kafka:kafka-clients:4.2.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
