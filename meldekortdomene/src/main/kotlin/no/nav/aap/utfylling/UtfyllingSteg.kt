@@ -127,7 +127,23 @@ object DagerFraværSteg : UtfyllingSteg {
     }
 
     override val formkrav: Formkrav = mapOf(
-        //TODO()
+        "OPPGIR_OPPLYSNINGER_INNENFOR_PERIODE" to { utfylling ->
+            utfylling.svar.aktivitetsInformasjon.all { it.dato in utfylling.periode }
+        },
+        "HAR_REGISTRERT_FRAVÆR" to { utfylling ->
+            if (utfylling.svar.harDuGjennomførtAvtaltAktivitet == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET) {
+                utfylling.svar.aktivitetsInformasjon.any { it.fravær != null }
+            } else {
+                true
+            }
+        },
+        "HAR_IKKE_REGISTRERT_UNØDVENDIG_FRAVÆR" to { utfylling ->
+            if (utfylling.svar.harDuGjennomførtAvtaltAktivitet != FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET) {
+                utfylling.svar.aktivitetsInformasjon.all { it.timer == null || it.timer == 0.0 }
+            } else {
+                true
+            }
+        }
     )
 }
 
