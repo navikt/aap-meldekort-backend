@@ -36,5 +36,5 @@ dependencies {
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:testcontainers-postgresql:2.0.3")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
+    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
 }
