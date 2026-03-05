@@ -2,7 +2,7 @@ plugins {
     id("aap.conventions")
 }
 
-val komponenterVersjon = "2.0.15"
+val komponenterVersjon = "2.0.16"
 val junitVersjon = "6.0.3"
 
 dependencies {
