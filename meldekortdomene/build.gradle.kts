@@ -10,6 +10,7 @@ dependencies {
     implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.568")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
+    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
     implementation("no.nav.aap.kelvin:verdityper:${komponenterVersjon}")
     implementation(kotlin("reflect"))
