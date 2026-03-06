@@ -108,7 +108,7 @@ spec:
         - name: DOKARKIV_SCOPE
           value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
         - name: AAP_API_INTERN_URL
-          value: http://api-intern.aap/
+          value: http://api-intern.aap
         - name: AAP_API_INTERN_SCOPE
           value: api://dev-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
