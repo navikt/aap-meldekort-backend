@@ -3,6 +3,7 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -232,8 +233,8 @@ class KelvinUtfyllingFlate(
         val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
             ?: TODO("kan skje hvis mellomlagring slettes")
 
-        require(!eksisterendeUtfylling.erAvsluttet) {
-            "Kan ikke endre utfylling som er avsluttet."
+        if (eksisterendeUtfylling.erAvsluttet) {
+            throw UgyldigForespørselException("Kan ikke endre utfylling som er avsluttet.")
         }
 
         return eksisterendeUtfylling
@@ -241,7 +242,9 @@ class KelvinUtfyllingFlate(
 
     override fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse) ?: return
-        require(!utfylling.erAvsluttet)
+        if (utfylling.erAvsluttet) {
+            throw UgyldigForespørselException("Kan ikke slette utfylling som er avsluttet.")
+        }
         utfyllingRepository.slettUtkast(innloggetBruker.ident, utfyllingReferanse)
     }
 }

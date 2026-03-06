@@ -19,8 +19,6 @@ import no.nav.aap.journalføring.JournalføringJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.auth.personBruker
 import no.nav.aap.komponenter.httpklient.auth.token
-import no.nav.aap.komponenter.httpklient.httpclient.error.IkkeFunnetException
-import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.repository.RepositoryRegistry
@@ -35,12 +33,9 @@ import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import no.nav.aap.varsel.SendVarselJobbUtfører
-import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
-
-class HttpServer
 
 fun startHttpServer(
     port: Int,
@@ -78,30 +73,8 @@ fun startHttpServer(
 
         val motor = startMotor(dataSource, repositoryRegistry, prometheus, clock)
 
-        install(StatusPages) {
-            exception<Throwable> { call, cause ->
-                val logger = LoggerFactory.getLogger(HttpServer::class.java)
-                when (cause) {
-                    is ManglerTilgangException -> {
-                        logger.warn("Mangler tilgang til å vise route: '{}'", call.request.local.uri, cause)
-                        call.respondText(status = HttpStatusCode.Forbidden, text = "Forbidden")
-                    }
+        install(StatusPages, StatusPagesConfigHelper.setup())
 
-                    is IkkeFunnetException -> {
-                        logger.warn("Fikk 404 fra ekstern integrasjon.", cause)
-                        call.respondText(status = HttpStatusCode.NotFound, text = "Ikke funnet")
-                    }
-
-                    else -> {
-                        logger.error("Ukjent feil ved kall til '${call.request.local.uri}': ", cause)
-                        call.respond(
-                            status = HttpStatusCode.InternalServerError,
-                            message = ErrorRespons(cause.message)
-                        )
-                    }
-                }
-            }
-        }
         routing {
             authenticate(TOKENX) {
                 apiRouting {
