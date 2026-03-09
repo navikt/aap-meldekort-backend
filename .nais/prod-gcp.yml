@@ -18,7 +18,7 @@ spec:
             memory: 1024Mi
         requests:
             cpu: 500m
-            memory: 1024Mi
+            memory: 750Mi
     observability:
         autoInstrumentation:
             enabled: true
