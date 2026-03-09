@@ -48,7 +48,7 @@ object FakeAapApi : FakeServer {
         }
         routing {
             post("/sakerByFnr") {
-                val fnr = call.receive<JsonNode>().at("/personidentifikatorer/0").asText()
+                val fnr = call.receive<JsonNode>().at("/personidentifikator").asText()
                 call.respond(saker.getOrDefault(fnr, emptyList()).map {
                     mapOf(
                         "sakId" to it.referanse.nummer.asString,
