@@ -55,7 +55,7 @@ object AapGatewayImpl : AapGateway {
         val saker = httpClient.retryablePost<_, List<SakStatus>>(
             uri = sakerByFnrUrl,
             request = PostRequest(
-                body = mapOf("personidentifikatorer" to listOf(ident.asString)),
+                body = mapOf("personidentifikator" to ident.asString),
                 additionalHeaders = listOf(Header("accept", "application/json")),
             ),
         )!!
