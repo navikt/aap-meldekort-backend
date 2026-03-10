@@ -83,8 +83,8 @@ class KelvinMottakService(
             erDigitalisert = true
         )
 
-        utfyllingRepository.lagrUtfylling(utfylling)
-        timerArbeidetRepository.lagrTimerArbeidet(
+        utfyllingRepository.lagreUtfylling(utfylling)
+        timerArbeidetRepository.lagreTimerArbeidet(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.timerArbeidet.map {
                 no.nav.aap.opplysningsplikt.TimerArbeidet(

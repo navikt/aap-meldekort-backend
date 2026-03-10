@@ -15,7 +15,7 @@ interface TimerArbeidetRepository: Repository {
         periode: Periode,
     ): List<TimerArbeidet>
 
-    fun lagrTimerArbeidet(
+    fun lagreTimerArbeidet(
         ident: Ident,
         opplysninger: List<TimerArbeidet>,
     )

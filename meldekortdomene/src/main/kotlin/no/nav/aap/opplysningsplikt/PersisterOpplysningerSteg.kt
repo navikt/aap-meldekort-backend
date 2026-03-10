@@ -11,7 +11,7 @@ class PersisterOpplysningerSteg(
     override val navn = PERSISTER_OPPLYSNINGER
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        timerArbeidetRepository.lagrTimerArbeidet(
+        timerArbeidetRepository.lagreTimerArbeidet(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.timerArbeidet.map {
                 TimerArbeidet(

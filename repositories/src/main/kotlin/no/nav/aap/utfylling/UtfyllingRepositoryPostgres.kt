@@ -78,7 +78,7 @@ class UtfyllingRepositoryPostgres(
         }
     }
 
-    override fun lagrUtfylling(utfylling: Utfylling) {
+    override fun lagreUtfylling(utfylling: Utfylling) {
         connection.execute(
             """
             insert into utfylling(ident, referanse, fagsystem, fagsaknummer, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar, er_digitalisert)

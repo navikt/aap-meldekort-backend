@@ -39,7 +39,7 @@ class TimerArbeidetRepositoryPostgresTest {
             val repo = TimerArbeidetRepositoryPostgres(connection)
 
             /* Lager forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
-            repo.lagrTimerArbeidet(
+            repo.lagreTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
                     TimerArbeidet(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null),
@@ -50,7 +50,7 @@ class TimerArbeidetRepositoryPostgresTest {
                 )
             )
 
-            repo.lagrTimerArbeidet(
+            repo.lagreTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
                     TimerArbeidet(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0),
@@ -62,7 +62,7 @@ class TimerArbeidetRepositoryPostgresTest {
             )
 
             /* Gjør delevis overskriving av periodene */
-            repo.lagrTimerArbeidet(
+            repo.lagreTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
                     TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null),
@@ -70,7 +70,7 @@ class TimerArbeidetRepositoryPostgresTest {
                     TimerArbeidet(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0),
                 )
             )
-            repo.lagrTimerArbeidet(
+            repo.lagreTimerArbeidet(
                 ident = ident1,
                 opplysninger = listOf(
                     TimerArbeidet(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5),
