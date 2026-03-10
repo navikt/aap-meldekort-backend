@@ -1,0 +1,1 @@
+create index timer_arbeidet_uthenting on timer_arbeidet(ident, fagsak_system, fagsak_nummer, dato);

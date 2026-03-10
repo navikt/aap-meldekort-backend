@@ -15,8 +15,22 @@ class UtfyllingRepositoryPostgres(
 ) : UtfyllingRepository {
 
     override fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        return lastUtfylling(ident, utfyllingReferanse)
-            ?.takeIf { it.erAvsluttet }
+        return connection.queryFirstOrNull(
+            """
+            select * from utfylling
+            where ident = ? and referanse = ? and avsluttet
+            order by sist_endret desc
+            limit 1
+        """
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setUUID(2, utfyllingReferanse.asUuid)
+            }
+            setRowMapper { row ->
+                utfyllingRowMapper(row)
+            }
+        }
     }
 
     override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
