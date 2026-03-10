@@ -136,13 +136,6 @@ object DagerFraværSteg : UtfyllingSteg {
             } else {
                 true
             }
-        },
-        "HAR_IKKE_REGISTRERT_UNØDVENDIG_FRAVÆR" to { utfylling ->
-            if (utfylling.svar.harDuGjennomførtAvtaltAktivitet != FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET) {
-                utfylling.svar.aktivitetsInformasjon.all { it.timer == null || it.timer == 0.0 }
-            } else {
-                true
-            }
         }
     )
 }
