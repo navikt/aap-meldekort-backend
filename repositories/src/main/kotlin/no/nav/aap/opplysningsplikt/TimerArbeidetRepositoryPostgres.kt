@@ -15,7 +15,7 @@ class TimerArbeidetRepositoryPostgres(
     private val connection: DBConnection,
 ) : TimerArbeidetRepository{
 
-    override fun lagrTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
+    override fun lagreTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
         connection.executeBatch(
             """
                 insert into timer_arbeidet

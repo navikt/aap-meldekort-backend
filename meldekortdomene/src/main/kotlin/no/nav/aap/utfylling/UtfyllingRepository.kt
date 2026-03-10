@@ -11,7 +11,7 @@ interface UtfyllingRepository: Repository {
     fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun lastUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun hentUtfyllinger(saksnummer: Fagsaknummer): List<Utfylling>
-    fun lagrUtfylling(utfylling: Utfylling)
+    fun lagreUtfylling(utfylling: Utfylling)
     fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse)
     fun slettGamleUtkast(slettTilOgMed: LocalDate)
 }

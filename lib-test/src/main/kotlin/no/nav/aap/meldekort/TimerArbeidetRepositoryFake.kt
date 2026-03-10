@@ -12,7 +12,7 @@ class TimerArbeidetRepositoryFake: TimerArbeidetRepository {
         return listOf()
     }
 
-    override fun lagrTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
+    override fun lagreTimerArbeidet(ident: Ident, opplysninger: List<TimerArbeidet>) {
     }
 
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {

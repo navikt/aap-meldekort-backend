@@ -164,7 +164,7 @@ class KelvinUtfyllingFlate(
             opprettet = opprettet,
             sistEndret = opprettet,
         )
-        utfyllingRepository.lagrUtfylling(nyUtfylling)
+        utfyllingRepository.lagreUtfylling(nyUtfylling)
         return nyUtfylling
     }
 
@@ -200,7 +200,7 @@ class KelvinUtfyllingFlate(
             sistEndret = Instant.now(clock),
         )
         val utfall = flytProvider(utfylling.flyt).kjør(innloggetBruker, utfylling)
-        utfyllingRepository.lagrUtfylling(utfall.utfylling)
+        utfyllingRepository.lagreUtfylling(utfall.utfylling)
         return UtfyllingFlate.UtfyllingResponse(
             metadata = utledMetadata(innloggetBruker, utfylling),
             utfylling = utfall.utfylling,
@@ -222,7 +222,7 @@ class KelvinUtfyllingFlate(
             sistEndret = Instant.now(clock),
         )
 
-        utfyllingRepository.lagrUtfylling(utfylling)
+        utfyllingRepository.lagreUtfylling(utfylling)
         return UtfyllingFlate.UtfyllingResponse(
             metadata = utledMetadata(innloggetBruker, utfylling),
             utfylling = utfylling,
