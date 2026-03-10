@@ -12,6 +12,7 @@ import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.transaction
+import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.utfylling.UtfyllingFlate
@@ -82,17 +83,12 @@ fun NormalOpenAPIRoute.utfyllingApi(
         get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val response = medFlate(utfyllingReferanse) {
-                val utfylling = hentUtfylling(innloggetBruker(), utfyllingReferanse)
-                if (utfylling == null) {
-                    return@medFlate null
-                } else {
-                    UtfyllingResponseDto.fraDomene(utfylling)
-                }
+                hentUtfylling(innloggetBruker(), utfyllingReferanse)
+                    ?.let { UtfyllingResponseDto.fraDomene(it) }
+                    ?: throw VerdiIkkeFunnetException("Fant ingen utfylling for referanse ${params.referanse}")
             }
-            if (response == null)
-                respondWithStatus(HttpStatusCode.NotFound)
-            else
-                respond(response)
+
+            respond(response)
         }
 
         delete<Referanse, Unit> { params ->

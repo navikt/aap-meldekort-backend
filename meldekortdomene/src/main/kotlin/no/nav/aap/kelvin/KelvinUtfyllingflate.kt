@@ -4,6 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
+import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -231,9 +232,10 @@ class KelvinUtfyllingFlate(
 
     private fun lastUtfyllingForÅEndre(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling {
         val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
-            ?: TODO("kan skje hvis mellomlagring slettes")
 
-        if (eksisterendeUtfylling.erAvsluttet) {
+        if (eksisterendeUtfylling == null) {
+            throw VerdiIkkeFunnetException("Utfyllingen er allerede slettet.")
+        } else if (eksisterendeUtfylling.erAvsluttet) {
             throw UgyldigForespørselException("Kan ikke endre utfylling som er avsluttet.")
         }
 
