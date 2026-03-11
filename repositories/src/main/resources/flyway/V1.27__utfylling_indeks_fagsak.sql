@@ -1,0 +1,1 @@
+create index utfylling_fagsaknummer on utfylling(fagsaknummer);
