@@ -1,39 +1,17 @@
 package no.nav.aap.meldekort
 
-import io.ktor.server.engine.*
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.kelvin.KelvinSakRepository
-import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
-import no.nav.aap.komponenter.httpklient.httpclient.RestClient
-import no.nav.aap.komponenter.httpklient.httpclient.error.DefaultResponseHandler
-import no.nav.aap.komponenter.httpklient.httpclient.post
-import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.NoTokenTokenProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
-import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.kontrakt.Periode
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
-import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
-import no.nav.aap.prometheus
 import no.nav.aap.sak.Fagsaknummer
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import java.io.InputStream
-import java.net.URI
-import java.time.Clock
 import java.time.LocalDate
 import kotlin.test.Test
-import kotlin.test.*
+import kotlin.test.assertEquals
 
-    class BehandlingsflytApiKtTest {
+class BehandlingsflytApiKtTest {
+        private val app = AppInstance()
 
     @Test
     fun `meldeplikt settes korrekt i databasen ved melding fra behandlingsflyt`() {
@@ -61,8 +39,8 @@ import kotlin.test.*
             meldeplikt = meldeplikt
         )
 
-        post<Unit>(meldedata)
-        dataSource.transaction { dbConnection ->
+        app.behandlingsflytPost<Unit, MeldeperioderV0>(meldedata)
+        app.dataSource.transaction { dbConnection ->
             val kelvinSakRepository = postgresRepositoryRegistry.provider(dbConnection).provide<KelvinSakRepository>()
             val meldepliktFraRepository = kelvinSakRepository.hentMeldeplikt(Fagsaknummer("SAKSNUMMER"))
             assertEquals(meldepliktFraRepository.map { Periode(it.fom, it.tom) }, meldeplikt)
@@ -71,71 +49,4 @@ import kotlin.test.*
             assertEquals(meldeperioderFraRepository.map { Periode(it.fom, it.tom)}, meldeperioder)
         }
     }
-
-     companion object {
-         private lateinit var embeddedServer: EmbeddedServer<*, *>
-         lateinit var client: RestClient<InputStream>
-
-         val dataSource = createTestcontainerPostgresDataSource(prometheus)
-
-         val baseUrl: String
-             get() = "http://localhost:${embeddedServer.port()}"
-
-         val fakeToken:OidcToken? = null
-         fun getToken(): OidcToken {
-            val client = RestClient(
-                config = ClientConfig(scope = "behandlingsflyt"),
-                tokenProvider = NoTokenTokenProvider(),
-                responseHandler = DefaultResponseHandler()
-            )
-             return fakeToken ?: OidcToken(
-                 client.post<String, FakeServers.TestToken>(
-                     URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
-                     PostRequest("grant_type=client_credentials"),
-                 )!!.access_token
-             )
-         }
-
-         inline fun <reified T> post(meldedata: MeldeperioderV0): T? {
-             return client.post<_, T>(
-                 URI("${baseUrl}/api/behandlingsflyt/sak/meldeperioder"), PostRequest(
-                     body = meldedata,
-                     currentToken = getToken()
-                 )
-             )
-         }
-
-         @JvmStatic
-         @BeforeAll
-         fun beforeAll() {
-             FakeServers.start()
-
-             GatewayRegistry
-                 .register<FakeVarselGateway>()
-
-             embeddedServer =
-                 startHttpServer(
-                     port = 0,
-                     prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-                     applikasjonsVersjon = "TestApp",
-                     tokenxConfig = TokenxConfig(),
-                     azureConfig = AzureConfig(),
-                     dataSource = dataSource,
-                     wait = false,
-                     repositoryRegistry = postgresRepositoryRegistry,
-                     clock = Clock.systemDefaultZone(),
-                 )
-
-             client = RestClient.withDefaultResponseHandler(
-                 config = ClientConfig(scope = "meldekort-backend"),
-                 tokenProvider = ClientCredentialsTokenProvider,
-             )
-         }
-
-         @JvmStatic
-         @AfterAll
-         fun afterAll() {
-             embeddedServer.stop()
-         }
-     }
  }
