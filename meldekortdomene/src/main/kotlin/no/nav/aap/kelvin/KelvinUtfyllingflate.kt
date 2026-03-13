@@ -114,7 +114,7 @@ class KelvinUtfyllingFlate(
 
         val startPåNesteMeldeperiode = utfylling.periode.tom.plusDays(1)
         val tidligsteInnsendingstidspunkt =
-            tidligsteInnsendingstidspunkt(startPåNesteMeldeperiode).atStartOfDay()
+            tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode).atStartOfDay()
 
         val fristForInnsending = sakService.finnMeldepliktfristForPeriode(utfylling.fagsak, utfylling.periode)
         val periodeHarHattMeldeplikt = fristForInnsending != null

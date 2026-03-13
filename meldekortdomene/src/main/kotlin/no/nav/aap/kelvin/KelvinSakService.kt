@@ -49,7 +49,7 @@ class KelvinSakService(
                     meldeperioden = opplysningsperiode,
                     /* TODO: behandlingsflyt burde bestemme hva meldevinduet er. */
                     meldevindu = Periode(
-                        tidligsteInnsendingstidspunkt(meldeperiode.tom.plusDays(1)),
+                        tidligsteInnsendingstidspunktMeldedag(meldeperiode.tom.plusDays(1)),
                         meldeperiode.tom.plusDays(8)
                     ),
                 )
@@ -115,8 +115,10 @@ class KelvinSakService(
 
     fun finnMeldepliktfristForPeriode(sak: FagsakReferanse, periode: Periode): LocalDateTime? {
         val meldepliktperioder = kelvinSakRepository.hentMeldeplikt(sak.nummer)
-        if (meldepliktperioder.any { it.overlapper(Periode(periode.tom.plusDays(1), periode.tom.plusDays(8))) }) {
-            return periode.tom.plusDays(8).atTime(23, 59)
+        val muligForlengetMeldefrist = senesteInnsendingstidspunktMeldefrist(periode.tom.plusDays(8))
+
+        if (meldepliktperioder.any { it.overlapper(Periode(periode.tom.plusDays(1), muligForlengetMeldefrist)) }) {
+            return muligForlengetMeldefrist.atTime(23, 59)
         }
         return null
     }
