@@ -46,6 +46,8 @@ class UtfyllingFlytV2Test {
 
     @Test
     fun `går gjennom alle steg når det finnes fravær fra avtalt aktivitet`() {
+        val idag = LocalDate.of(2025, 3, 1)
+        clockHolder.idag = idag
         val fnr = fødselsnummerGenerator.next()
         val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
         val sakStart = meldeperiode.fom
@@ -109,7 +111,7 @@ class UtfyllingFlytV2Test {
 
         val sisteUtfyllingStatus = get<UtfyllingResponseDto>(fnr, "/api/utfylling/$referanse")
 
-        assertEquals(StegDto.BEKREFT, sisteUtfyllingStatus?.tilstand?.aktivtSteg)
+        assertEquals(StegDto.KVITTERING, sisteUtfyllingStatus?.tilstand?.aktivtSteg)
     }
 
     @Test
