@@ -141,7 +141,7 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
     }
 }
 
-class SvarDto(
+data class SvarDto(
     val vilSvareRiktig: Boolean?,
     val harDuJobbet: Boolean?,
     val dager: List<DagSvarDto>,

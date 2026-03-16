@@ -330,7 +330,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     harDuJobbet = true,
                     dager = dagerJobbet,
                     stemmerOpplysningene = true,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.INGEN_AVTALTE_AKTIVITETER
+                    harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
                 )
             ),
             UtfyllingTilstandDto(
@@ -348,7 +348,7 @@ class KelvinIntegrasjonsPåFastsattDagTest {
                     vilSvareRiktig = true,
                     harDuJobbet = true,
                     dager = dagerJobbet,
-                    stemmerOpplysningene = false,
+                    stemmerOpplysningene = true,
                     harDuGjennomførtAvtaltAktivitet = FraværSvarDto.INGEN_AVTALTE_AKTIVITETER
                 )
             )
