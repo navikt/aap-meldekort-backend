@@ -86,7 +86,7 @@ class KelvinMottakService(
         )
 
         utfyllingRepository.lagreUtfylling(utfylling)
-        aktivitetsInformasjonRepository.lagrAktivitetsInformasjon(
+        aktivitetsInformasjonRepository.lagreAktivitetsInformasjon(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.aktivitetsInformasjon.map {
                 no.nav.aap.opplysningsplikt.AktivitetsInformasjon(

@@ -40,7 +40,7 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             val repo = AktivitetsInformasjonRepositoryPostgres(connection)
 
             /* Lager forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
-            repo.lagrAktivitetsInformasjon(
+            repo.lagreAktivitetsInformasjon(
                 ident = ident1,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t0, utfylling1, fagsak1, LocalDate.of(2020, 1, 1), null, Fravær.SYKDOM_ELLER_SKADE),
@@ -51,7 +51,7 @@ class AktivitetsInformasjonRepositoryPostgresTest {
                 )
             )
 
-            repo.lagrAktivitetsInformasjon(
+            repo.lagreAktivitetsInformasjon(
                 ident = ident1,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t0, utfylling2, fagsak2, LocalDate.of(2020, 1, 1), 1.0, null),
@@ -63,7 +63,7 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             )
 
             /* Gjør delevis overskriving av periodene */
-            repo.lagrAktivitetsInformasjon(
+            repo.lagreAktivitetsInformasjon(
                 ident = ident1,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null, null),
@@ -71,7 +71,7 @@ class AktivitetsInformasjonRepositoryPostgresTest {
                     AktivitetsInformasjon(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 6), 4.0, null),
                 )
             )
-            repo.lagrAktivitetsInformasjon(
+            repo.lagreAktivitetsInformasjon(
                 ident = ident1,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5, null),

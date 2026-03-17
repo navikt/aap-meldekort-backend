@@ -17,7 +17,7 @@ class AktivitetsInformasjonRepositoryPostgres(
     private val connection: DBConnection,
 ) : AktivitetsInformasjonRepository{
     val log = LoggerFactory.getLogger(javaClass)
-    override fun lagrAktivitetsInformasjon(ident: Ident, opplysninger: List<AktivitetsInformasjon>) {
+    override fun lagreAktivitetsInformasjon(ident: Ident, opplysninger: List<AktivitetsInformasjon>) {
         connection.executeBatch(
             """
                 insert into aktivitetsinformasjon
@@ -44,7 +44,7 @@ class AktivitetsInformasjonRepositoryPostgres(
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
         try {
             return connection.queryFirstOrNull("""
-                select dato from timer_arbeidet
+                select dato from aktivitetsinformasjon
                 where ident = ? and fagsak_system = ? and fagsak_nummer = ?
                 order by dato desc
                 limit 1

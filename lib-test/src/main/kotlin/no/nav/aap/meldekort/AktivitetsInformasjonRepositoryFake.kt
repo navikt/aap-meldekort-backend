@@ -12,7 +12,7 @@ class AktivitetsInformasjonRepositoryFake: AktivitetsInformasjonRepository {
         return listOf()
     }
 
-    override fun lagrAktivitetsInformasjon(ident: Ident, opplysninger: List<AktivitetsInformasjon>) {
+    override fun lagreAktivitetsInformasjon(ident: Ident, opplysninger: List<AktivitetsInformasjon>) {
     }
 
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {

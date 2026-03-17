@@ -118,7 +118,7 @@ class KelvinSakServiceTest {
 
         val sakService = KelvinSakService(
             kelvinSakRepository = kelvinSakRepository,
-            timerArbeidetRepository = timerArbeidetRepository,
+            aktivitetsInformasjonRepository= aktivitetsInformasjonRepository,
             clock = clock
         )
 
