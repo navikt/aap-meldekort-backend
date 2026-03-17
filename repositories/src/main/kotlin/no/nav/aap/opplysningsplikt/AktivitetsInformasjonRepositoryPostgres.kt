@@ -23,7 +23,6 @@ class AktivitetsInformasjonRepositoryPostgres(
                 insert into aktivitetsinformasjon
                 (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravaer)
                 values (?, ?, ?, ?, ?, ?, ?, ?)
-                on conflict do nothing
             """,
             opplysninger,
         ) {
@@ -43,19 +42,37 @@ class AktivitetsInformasjonRepositoryPostgres(
     }
 
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
-        return connection.queryFirstOrNull("""
-            select dato from aktivitetsinformasjon
-            where ident = ? and fagsak_system = ? and fagsak_nummer = ?
-            order by dato desc
-            limit 1
-        """) {
-            setParams {
-                setString(1, ident.asString)
-                setEnumName(2, fagsak.system)
-                setString(3, fagsak.nummer.asString)
+        try {
+            return connection.queryFirstOrNull("""
+                select dato from timer_arbeidet
+                where ident = ? and fagsak_system = ? and fagsak_nummer = ?
+                order by dato desc
+                limit 1
+            """) {
+                setParams {
+                    setString(1, ident.asString)
+                    setEnumName(2, fagsak.system)
+                    setString(3, fagsak.nummer.asString)
+                }
+                setRowMapper { row ->
+                    row.getLocalDate("dato")
+                }
             }
-            setRowMapper { row ->
-                row.getLocalDate("dato")
+        } catch (e: Exception) {
+            return connection.queryFirstOrNull("""
+                select dato from aktivitetsinformasjon
+                where ident = ? and fagsak_system = ? and fagsak_nummer = ?
+                order by dato desc
+                limit 1
+            """) {
+                setParams {
+                    setString(1, ident.asString)
+                    setEnumName(2, fagsak.system)
+                    setString(3, fagsak.nummer.asString)
+                }
+                setRowMapper { row ->
+                    row.getLocalDate("dato")
+                }
             }
         }
     }
