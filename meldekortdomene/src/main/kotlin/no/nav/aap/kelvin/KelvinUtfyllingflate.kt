@@ -16,6 +16,8 @@ import no.nav.aap.utfylling.UtfyllingFlyt
 import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
@@ -97,10 +99,10 @@ class KelvinUtfyllingFlate(
                 ident = innloggetBruker.ident,
                 periode = periode,
                 flyt = run {
-                    if (!Miljø.erProd()) {
-                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
+                    if (Miljø.erProd()) {
+                        AAP_KORRIGERING_FLYT
                     } else {
-                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
+                        AAP_KORRIGERING_FLYT_V2
                     }
                 },
                 svar = Svar(

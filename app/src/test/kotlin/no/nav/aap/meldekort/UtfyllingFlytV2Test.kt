@@ -155,6 +155,72 @@ class UtfyllingFlytV2Test {
     }
 
     @Test
+    fun `formkrav brudd returner til feilende stegz`() {
+        val fnr = fødselsnummerGenerator.next()
+        val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
+        val sakStart = meldeperiode.fom
+
+        kelvinSak(
+            fnr,
+            rettighetsperiode = Periode(sakStart, sakStart.plusWeeks(52)),
+            opplysningsbehov = listOf(Periode(sakStart, sakStart.plusWeeks(52)))
+        )
+
+        val startUtfylling = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
+            fnr, "/api/start-innsending", StartUtfyllingRequest(
+                fom = meldeperiode.fom,
+                tom = meldeperiode.tom
+            )
+        )
+
+        val referanse = startUtfylling!!.metadata!!.referanse
+
+        val introduksjonMedFeil = lagTilstand(
+            aktivtSteg = StegDto.INTRODUKSJON,
+            vilSvareRiktig = false,
+            harDuJobbet = null,
+            harDuGjennomførtAvtaltAktivitet = null,
+        )
+
+        val flytSteg = listOf(
+            lagTilstand(
+                aktivtSteg = StegDto.INTRODUKSJON,
+                harDuJobbet = null,
+                harDuGjennomførtAvtaltAktivitet = null,
+            ),
+            lagTilstand(
+                aktivtSteg = StegDto.SPØRSMÅL,
+                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+            ),
+            lagTilstand(
+                aktivtSteg = StegDto.UTFYLLING,
+                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+            ),
+            lagTilstand(
+                aktivtSteg = StegDto.FRAVÆR_UTFYLLING,
+                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+            ),
+            lagTilstand(
+                aktivtSteg = StegDto.BEKREFT,
+                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+            )
+        )
+
+        flytSteg.forEachIndexed { index, tilstand ->
+            val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+                fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+            )
+            assertNotNull(response, "Response null at step $index")
+        }
+
+        val finalResponse = get<UtfyllingResponseDto>(fnr, "/api/utfylling/$referanse")
+        assertNotNull(finalResponse)
+        assertEquals(StegDto.UTFYLLING, finalResponse.tilstand.aktivtSteg)
+
+
+    }
+
+    @Test
     fun `hopper over FRAVÆR_UTFYLLING når avtalt aktivitet er gjennomfør`() {
         val fnr = fødselsnummerGenerator.next()
         val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
