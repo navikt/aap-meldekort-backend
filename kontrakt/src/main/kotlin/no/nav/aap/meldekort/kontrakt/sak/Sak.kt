@@ -30,11 +30,11 @@ public data class BehandslingsflytUtfyllingRequest(
     val ident: String,
     val periode: Periode,
     val harDuJobbet: Boolean,
-    val dager: List<AktivitetsInformasjonDto>,
+    val dager: List<TimerArbeidetDto>,
     val sakenGjelderFor: Periode
 )
 
-public data class AktivitetsInformasjonDto(
+public data class TimerArbeidetDto(
     val dato: LocalDate,
-    val aktivitetsInformasjon: Double
+    val timerArbeidet: Double
 )

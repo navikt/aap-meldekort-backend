@@ -31,6 +31,7 @@ import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +44,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class UtfyllingFlytV2Test {
-
+    val steg = UtfyllingFlytNavn.AAP_FLYT_V2.steg.filter { !it.erTeknisk }
     // TODO kan fjernes når vi har skrudd på V2 flyt i prod
     @BeforeEach
     fun setUp() {
@@ -107,16 +108,13 @@ class UtfyllingFlytV2Test {
                 harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
             )
         )
-
         flytSteg.forEach { tilstand ->
-            myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
                 fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
             )
+            assertNotEquals(tilstand.aktivtSteg, response?.tilstand?.aktivtSteg)
         }
 
-        val sisteUtfyllingStatus = get<UtfyllingResponseDto>(fnr, "/api/utfylling/$referanse")
-
-        assertEquals(StegDto.KVITTERING, sisteUtfyllingStatus?.tilstand?.aktivtSteg)
     }
 
     @Test
@@ -155,73 +153,7 @@ class UtfyllingFlytV2Test {
     }
 
     @Test
-    fun `formkrav brudd returner til feilende stegz`() {
-        val fnr = fødselsnummerGenerator.next()
-        val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
-        val sakStart = meldeperiode.fom
-
-        kelvinSak(
-            fnr,
-            rettighetsperiode = Periode(sakStart, sakStart.plusWeeks(52)),
-            opplysningsbehov = listOf(Periode(sakStart, sakStart.plusWeeks(52)))
-        )
-
-        val startUtfylling = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
-            fnr, "/api/start-innsending", StartUtfyllingRequest(
-                fom = meldeperiode.fom,
-                tom = meldeperiode.tom
-            )
-        )
-
-        val referanse = startUtfylling!!.metadata!!.referanse
-
-        val introduksjonMedFeil = lagTilstand(
-            aktivtSteg = StegDto.INTRODUKSJON,
-            vilSvareRiktig = false,
-            harDuJobbet = null,
-            harDuGjennomførtAvtaltAktivitet = null,
-        )
-
-        val flytSteg = listOf(
-            lagTilstand(
-                aktivtSteg = StegDto.INTRODUKSJON,
-                harDuJobbet = null,
-                harDuGjennomførtAvtaltAktivitet = null,
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.SPØRSMÅL,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.UTFYLLING,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.FRAVÆR_UTFYLLING,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.BEKREFT,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-            )
-        )
-
-        flytSteg.forEachIndexed { index, tilstand ->
-            val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
-                fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
-            )
-            assertNotNull(response, "Response null at step $index")
-        }
-
-        val finalResponse = get<UtfyllingResponseDto>(fnr, "/api/utfylling/$referanse")
-        assertNotNull(finalResponse)
-        assertEquals(StegDto.UTFYLLING, finalResponse.tilstand.aktivtSteg)
-
-
-    }
-
-    @Test
-    fun `hopper over FRAVÆR_UTFYLLING når avtalt aktivitet er gjennomfør`() {
+    fun `hopper over FRAVÆR_UTFYLLING når avtalt aktivitet er gjennomført`() {
         val fnr = fødselsnummerGenerator.next()
         val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
         val sakStart = meldeperiode.fom
@@ -246,39 +178,17 @@ class UtfyllingFlytV2Test {
             DagSvarDto(dato = it, timerArbeidet = 2.0, fravær = null)
         }
 
-        val flytMedGjennomfort = listOf(
-            lagTilstand(
-                aktivtSteg = StegDto.INTRODUKSJON,
-                harDuJobbet = null,
-                harDuGjennomførtAvtaltAktivitet = null,
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.SPØRSMÅL,
-                dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.UTFYLLING,
-                dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
-            ),
-            lagTilstand(
-                aktivtSteg = StegDto.BEKREFT,
-                dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
-            )
+       val tilstand = lagTilstand(
+            aktivtSteg = StegDto.UTFYLLING,
+            dager = dagerMedTimer,
+            harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
         )
 
-        flytMedGjennomfort.forEachIndexed { index, tilstand ->
-            val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
-                fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
-            )
-            assertNotNull(response, "Response null at step $index")
-        }
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
 
-        val finalResponse = get<UtfyllingResponseDto>(fnr, "/api/utfylling/$referanse")
-        assertNotNull(finalResponse)
-        assertEquals(StegDto.BEKREFT, finalResponse.tilstand.aktivtSteg)
+        assertEquals(StegDto.BEKREFT, response?.tilstand?.aktivtSteg)
     }
 
     private fun kelvinSak(

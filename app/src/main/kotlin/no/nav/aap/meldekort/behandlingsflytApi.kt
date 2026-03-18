@@ -71,7 +71,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
                     periode = Periode(body.periode.fom, body.periode.tom),
                     harDuJobbet = body.harDuJobbet,
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
-                    aktivitetsInformasjon = body.dager.map { AktivitetsInformasjon(dato = it.dato, timer = it.aktivitetsInformasjon, fravær = null) },
+                    aktivitetsInformasjon = body.dager.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet, fravær = null) },
                 )
             }
 
