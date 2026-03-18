@@ -29,7 +29,7 @@ fun main() {
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
         tokenxConfig = TokenxConfig(),
         azureConfig = AzureConfig(),
-        dataSource = createPostgresDataSource(DbConfig.fromEnv(), prometheus),
+        dataSource = createPostgresDataSource(DbConfig(), prometheus),
         repositoryRegistry = postgresRepositoryRegistry,
         clock = Clock.systemDefaultZone(),
     )

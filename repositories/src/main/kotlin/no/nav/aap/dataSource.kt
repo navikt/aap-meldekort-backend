@@ -11,17 +11,7 @@ class DbConfig(
     val url: String = System.getenv("DB_JDBC_URL"),
     val username: String = System.getenv("DB_USERNAME"),
     val password: String = System.getenv("DB_PASSWORD"),
-) {
-    companion object {
-        fun fromEnv() = DbConfig(
-            database = System.getenv("DB_DATABASE"),
-            url = System.getenv("DB_JDBC_URL"),
-            username = System.getenv("DB_USERNAME"),
-            password = System.getenv("DB_PASSWORD"),
-        )
-    }
-}
-
+)
 fun createPostgresDataSource(dbConfig: DbConfig, meterRegistry: MeterRegistry): DataSource {
     val dataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = dbConfig.url
