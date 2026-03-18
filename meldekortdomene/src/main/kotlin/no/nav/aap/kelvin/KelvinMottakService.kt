@@ -54,11 +54,12 @@ class KelvinMottakService(
 
     fun behandleMottatteAktivitetsInformasjon(
         ident: Ident,
+        sakenGjelderFor: Periode,
         periode: Periode,
         harDuJobbet: Boolean,
         aktivitetsInformasjon: List<no.nav.aap.utfylling.AktivitetsInformasjon>
     ): UtfyllingReferanse {
-        val sak = kelvinSakRepository.hentSak(ident, periode.fom)
+        val sak = kelvinSakRepository.hentSak(ident, sakenGjelderFor.fom)
             ?: throw IllegalStateException("finner ikke sak")
 
         val åpenUtfylling =
@@ -84,7 +85,7 @@ class KelvinMottakService(
             erDigitalisert = true
         )
 
-        utfyllingRepository.lagrUtfylling(utfylling)
+        utfyllingRepository.lagreUtfylling(utfylling)
         aktivitetsInformasjonRepository.lagrAktivitetsInformasjon(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.aktivitetsInformasjon.map {

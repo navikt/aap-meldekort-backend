@@ -1,5 +1,5 @@
-val komponenterVersjon = "1.0.937"
-val junitVersjon = "6.0.2"
+val komponenterVersjon = "2.0.17"
+val junitVersjon = "6.0.3"
 
 plugins {
     id("aap.conventions")
@@ -10,7 +10,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
 
     implementation("io.micrometer:micrometer-core:1.16.3")
-    implementation("ch.qos.logback:logback-classic:1.5.29")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -18,11 +18,11 @@ dependencies {
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
-    implementation("org.apache.kafka:kafka-clients:4.1.1")
+    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
+    implementation("org.apache.kafka:kafka-clients:4.2.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.2")
+    implementation("org.flywaydb:flyway-database-postgresql:12.0.3")
     runtimeOnly("org.postgresql:postgresql:42.7.10")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")

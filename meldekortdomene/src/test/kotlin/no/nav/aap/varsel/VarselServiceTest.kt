@@ -31,12 +31,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import java.time.Clock
-import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 import kotlin.test.Test
 
@@ -516,7 +514,7 @@ class VarselServiceTest {
 
             val utfyllingRepository = UtfyllingRepositoryPostgres(connection)
 
-            utfyllingRepository.lagrUtfylling(
+            utfyllingRepository.lagreUtfylling(
                 byggUtfylling(
                     saksnummer = saksnummer,
                     ident = ident,
@@ -525,7 +523,7 @@ class VarselServiceTest {
                 )
             )
 
-            utfyllingRepository.lagrUtfylling(
+            utfyllingRepository.lagreUtfylling(
                 byggUtfylling(
                     saksnummer = saksnummer,
                     ident = ident,
@@ -705,7 +703,7 @@ class VarselServiceTest {
                 )
             )
 
-            utfyllingRepository.lagrUtfylling(
+            utfyllingRepository.lagreUtfylling(
                 byggUtfylling(
                     saksnummer = saksnummer,
                     ident = ident,

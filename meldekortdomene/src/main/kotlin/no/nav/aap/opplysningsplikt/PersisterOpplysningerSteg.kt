@@ -12,7 +12,7 @@ class PersisterOpplysningerSteg(
     override val navn = PERSISTER_OPPLYSNINGER
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        aktivitetsInformasjonRepository.lagrAktivitetsInformasjon(
+        aktivitetsInformasjonRepository.lagreAktivitetsInformasjon(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.aktivitetsInformasjon.map {
                 AktivitetsInformasjon(

@@ -3,6 +3,8 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
+import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -17,7 +19,6 @@ import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 class KelvinUtfyllingFlate(
     private val utfyllingRepository: UtfyllingRepository,
@@ -114,7 +115,7 @@ class KelvinUtfyllingFlate(
 
         val startPåNesteMeldeperiode = utfylling.periode.tom.plusDays(1)
         val tidligsteInnsendingstidspunkt =
-            tidligsteInnsendingstidspunkt(startPåNesteMeldeperiode).atStartOfDay()
+            tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode).atStartOfDay()
 
         val fristForInnsending = sakService.finnMeldepliktfristForPeriode(utfylling.fagsak, utfylling.periode)
         val periodeHarHattMeldeplikt = fristForInnsending != null
@@ -165,7 +166,7 @@ class KelvinUtfyllingFlate(
             opprettet = opprettet,
             sistEndret = opprettet,
         )
-        utfyllingRepository.lagrUtfylling(nyUtfylling)
+        utfyllingRepository.lagreUtfylling(nyUtfylling)
         return nyUtfylling
     }
 
@@ -193,8 +194,7 @@ class KelvinUtfyllingFlate(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
-            ?: TODO("kan skje hvis mellomlagring slettes")
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
@@ -202,7 +202,7 @@ class KelvinUtfyllingFlate(
             sistEndret = Instant.now(clock),
         )
         val utfall = flytProvider(utfylling.flyt).kjør(innloggetBruker, utfylling)
-        utfyllingRepository.lagrUtfylling(utfall.utfylling)
+        utfyllingRepository.lagreUtfylling(utfall.utfylling)
         return UtfyllingFlate.UtfyllingResponse(
             metadata = utledMetadata(innloggetBruker, utfylling),
             utfylling = utfall.utfylling,
@@ -216,8 +216,7 @@ class KelvinUtfyllingFlate(
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
-            ?: TODO("kan skje hvis mellomlagring slettes")
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
@@ -225,7 +224,7 @@ class KelvinUtfyllingFlate(
             sistEndret = Instant.now(clock),
         )
 
-        utfyllingRepository.lagrUtfylling(utfylling)
+        utfyllingRepository.lagreUtfylling(utfylling)
         return UtfyllingFlate.UtfyllingResponse(
             metadata = utledMetadata(innloggetBruker, utfylling),
             utfylling = utfylling,
@@ -233,9 +232,23 @@ class KelvinUtfyllingFlate(
         )
     }
 
+    private fun lastUtfyllingForÅEndre(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling {
+        val eksisterendeUtfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
+
+        if (eksisterendeUtfylling == null) {
+            throw VerdiIkkeFunnetException("Utfyllingen er allerede slettet.")
+        } else if (eksisterendeUtfylling.erAvsluttet) {
+            throw UgyldigForespørselException("Kan ikke endre utfylling som er avsluttet.")
+        }
+
+        return eksisterendeUtfylling
+    }
+
     override fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
         val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse) ?: return
-        require(!utfylling.erAvsluttet)
+        if (utfylling.erAvsluttet) {
+            throw UgyldigForespørselException("Kan ikke slette utfylling som er avsluttet.")
+        }
         utfyllingRepository.slettUtkast(innloggetBruker.ident, utfyllingReferanse)
     }
 }

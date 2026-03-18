@@ -31,6 +31,7 @@ public data class BehandslingsflytUtfyllingRequest(
     val periode: Periode,
     val harDuJobbet: Boolean,
     val dager: List<AktivitetsInformasjonDto>,
+    val sakenGjelderFor: Periode
 )
 
 public data class AktivitetsInformasjonDto(

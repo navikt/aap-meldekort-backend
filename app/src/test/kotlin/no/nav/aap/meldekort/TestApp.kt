@@ -28,7 +28,7 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZoneId
+import javax.sql.DataSource
 
 fun main() {
     FakeTokenX.port = 8081
@@ -47,8 +47,26 @@ fun main() {
         .register<VarselGatewayKafkaProducerTestcontainers>()
         .status()
 
-    val idag = LocalDate.of(2025, 12, 29)
-    val rettighetsPeriode = Periode(LocalDate.of(2025, 12, 13), idag.plusDays(110))
+    val dataSource = createTestcontainerPostgresDataSource(prometheus)
+
+    opprettMockMeldekort(dataSource)
+
+    startHttpServer(
+        port = 8080,
+        prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+        applikasjonsVersjon = "TestApp",
+        tokenxConfig = TokenxConfig(),
+        azureConfig = AzureConfig(),
+        dataSource = dataSource,
+        repositoryRegistry = postgresRepositoryRegistry,
+        clock = Clock.systemDefaultZone(),
+    )
+}
+
+private fun opprettMockMeldekort(dataSource: DataSource) {
+    val idag = LocalDate.now()
+    val rettighetsPeriode = Periode(idag.minusMonths(2), idag.plusDays(110))
+
     FakeAapApi.upsert(
         Ident("1".repeat(11)),
         FakeAapApi.FakeSak(
@@ -65,15 +83,12 @@ fun main() {
         )
     )
 
-
-    val dataSource = createTestcontainerPostgresDataSource(prometheus)
-
     dataSource.transaction { connection ->
         val repositoryProvider = postgresRepositoryRegistry.provider(connection)
         val kelvinMottakService = KelvinMottakService(
             repositoryProvider,
             GatewayProvider,
-            Clock.fixed(idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(), ZoneId.of("Europe/Oslo"))
+            Clock.systemDefaultZone(),
         )
         val sistMandag = generateSequence(rettighetsPeriode.fom) { it.minusDays(1) }
             .first { it.dayOfWeek == DayOfWeek.MONDAY }
@@ -98,17 +113,6 @@ fun main() {
             status = KelvinSakStatus.LØPENDE,
         )
     }
-
-    startHttpServer(
-        port = 8080,
-        prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-        applikasjonsVersjon = "TestApp",
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
-        dataSource = dataSource,
-        repositoryRegistry = postgresRepositoryRegistry,
-        clock = Clock.fixed(idag.atTime(10, 10).atZone(ZoneId.of("Europe/Oslo")).toInstant(), ZoneId.of("Europe/Oslo")),
-    )
 }
 
 private fun lagPerioder(vararg fomTom: Pair<LocalDate, LocalDate>): List<Periode> {

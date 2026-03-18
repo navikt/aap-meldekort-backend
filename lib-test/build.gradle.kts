@@ -1,7 +1,7 @@
-val ktorVersion = "3.4.0"
-val komponenterVersjon = "1.0.937"
-val junitVersjon = "6.0.2"
-val jacksonVersjon = "2.21.0"
+val ktorVersion = "3.4.1"
+val komponenterVersjon = "2.0.17"
+val junitVersjon = "6.0.3"
+val jacksonVersjon = "2.21.1"
 
 plugins {
     id("aap.conventions")
@@ -11,7 +11,7 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.550")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.575")
     implementation("io.micrometer:micrometer-core:1.16.3")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
@@ -22,7 +22,6 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
@@ -30,11 +29,11 @@ dependencies {
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersjon")
 
-    implementation("ch.qos.logback:logback-classic:1.5.29")
+    implementation("ch.qos.logback:logback-classic:1.5.32")
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.7")
+    implementation("com.nimbusds:nimbus-jose-jwt:10.8")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     implementation("org.testcontainers:testcontainers-postgresql:2.0.3")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.1.1")
+    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
 }

@@ -1,7 +1,7 @@
 package no.nav.aap.utfylling
 
 import no.nav.aap.InnloggetBruker
-import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
+import no.nav.aap.kelvin.tidligsteInnsendingstidspunktMeldedag
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
@@ -112,7 +112,7 @@ class StemmerOpplysningeneSteg(clock: Clock) : UtfyllingSteg {
             utfylling.svar.stemmerOpplysningene == true
         },
         "KUN_HISTORISKE_OPPLYSNINGER" to { utfylling ->
-            val justertTidligsteDag = tidligsteInnsendingstidspunkt(utfylling.periode.tom.plusDays(1))
+            val justertTidligsteDag = tidligsteInnsendingstidspunktMeldedag(utfylling.periode.tom.plusDays(1))
             justertTidligsteDag <= LocalDate.now(clock)
         }
     )

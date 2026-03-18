@@ -6,8 +6,6 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
-import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
-import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.ClientConfig
 import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
@@ -18,15 +16,11 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.saker.AapGatewayImpl
-import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
-import no.nav.aap.sak.FagsakReferanse
-import no.nav.aap.sak.Fagsaknummer
-import no.nav.aap.sak.FagsystemNavn
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -38,99 +32,52 @@ import kotlin.test.assertEquals
 
 class AnsvarligSystemIntegrasjonsTest {
     private val idag = LocalDate.now()
+    private val app = AppInstance(idag)
 
     @Test
     fun `ansvarlig system, ingen sak i kelvin`() {
         val fnr = fødselsnummerGenerator.next()
-        assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
-        assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
+        assertEquals("AAP", app.get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
+        assertEquals("FELLES", app.get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     @Test
     fun `ansvarlig system, sak kun i kelvin`() {
         val fnr = fødselsnummerGenerator.next()
-        kelvinSak(fnr)
-        assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
-        assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
+        app.kelvinSak(fnr)
+        assertEquals("AAP", app.get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
+        assertEquals("AAP", app.get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     @Test
     fun `ansvarlig system, sak kun i arena`() {
         val fnr = fødselsnummerGenerator.next()
-        arenaSak(fnr)
+        app.arenaSak(fnr)
 
-        assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
-        assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
+        assertEquals("FELLES", app.get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
+        assertEquals("FELLES", app.get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     @Test
     fun `ansvarlig system, saker både i kelvin og arena, nyeste sak i kelvin`() {
         val fnr = fødselsnummerGenerator.next()
 
-        arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
-        kelvinSak(fnr)
+        app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
+        app.kelvinSak(fnr)
 
-        assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
-        assertEquals("AAP", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
+        assertEquals("AAP", app.get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
+        assertEquals("AAP", app.get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     @Test
     fun `ansvarlig system, saker både i kelvin og arena, nyeste sak i arena`() {
         val fnr = fødselsnummerGenerator.next()
 
-        arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(1), idag.plusMonths(1)))
-        kelvinSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
+        app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(1), idag.plusMonths(1)))
+        app.kelvinSak(fnr, rettighetsperiode = Periode(idag.minusMonths(20), idag.minusMonths(18)))
 
-        assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
-        assertEquals("FELLES", get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
-    }
-
-    private fun kelvinSak(
-        fnr: Ident,
-        rettighetsperiode: Periode? = null,
-    ) {
-        val saksnummer = saksnummerGenerator.next()
-        val sakenGjelderFor =
-            rettighetsperiode ?: Periode(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1))
-        dataSource.transaction { conn ->
-            val sakRepo = KelvinSakRepositoryPostgres(conn)
-            sakRepo.upsertSak(
-                saksnummer = saksnummer,
-                sakenGjelderFor = sakenGjelderFor,
-                identer = listOf(fnr),
-                meldeperioder = listOf(),
-                meldeplikt = listOf(),
-                opplysningsbehov = listOf(),
-                status = null,
-            )
-        }
-        FakeAapApi.upsert(
-            fnr,
-            FakeAapApi.FakeSak(
-                referanse = FagsakReferanse(
-                    FagsystemNavn.KELVIN,
-                    saksnummer,
-                ),
-                rettighetsperiode = sakenGjelderFor,
-            )
-        )
-    }
-
-    private fun arenaSak(
-        fnr: Ident,
-        sak: Fagsaknummer? = null,
-        rettighetsperiode: Periode? = null,
-    ) {
-        FakeAapApi.upsert(
-            fnr,
-            FakeAapApi.FakeSak(
-                referanse = FagsakReferanse(
-                    FagsystemNavn.ARENA,
-                    (sak ?: saksnummerGenerator.next()),
-                ),
-                rettighetsperiode = rettighetsperiode ?: Periode(idag.minusMonths(1), idag.plusMonths(1)),
-            )
-        )
+        assertEquals("FELLES", app.get<JsonNode>(fnr, "/api/ansvarlig-system")?.asText())
+        assertEquals("FELLES", app.get<JsonNode>(fnr, "/api/ansvarlig-system-felles")?.asText())
     }
 
     companion object {

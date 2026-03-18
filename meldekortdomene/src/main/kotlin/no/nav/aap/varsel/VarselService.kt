@@ -3,8 +3,9 @@ package no.nav.aap.varsel
 import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.kelvin.KelvinSakService
-import no.nav.aap.kelvin.originalInnsendingstidspunkt
-import no.nav.aap.kelvin.tidligsteInnsendingstidspunkt
+import no.nav.aap.kelvin.originalInnsendingstidspunktMeldedag
+import no.nav.aap.kelvin.tidligsteInnsendingstidspunktMeldedag
+import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
@@ -12,16 +13,15 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.Utfylling
+import no.nav.aap.utfylling.UtfyllingRepository
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
-import no.nav.aap.komponenter.config.requiredConfigForKey
-import no.nav.aap.utfylling.UtfyllingRepository
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.Period
 import java.time.ZoneId
 import java.util.*
+import kotlin.time.measureTime
 
 class VarselService(
     private val kelvinSakService: KelvinSakService,
@@ -48,7 +48,7 @@ class VarselService(
         val meldeperioderMedMeldeplikt =
             kelvinSakService.hentMeldeperioder(FagsakReferanse(FagsystemNavn.KELVIN, saksnummer))
                 .filter {
-                    meldeplikt.contains(it.meldevindu.copy(fom = originalInnsendingstidspunkt(it.meldevindu.fom)))
+                    meldeplikt.contains(it.meldevindu.copy(fom = originalInnsendingstidspunktMeldedag(it.meldevindu.fom)))
                 }
 
         if (meldeperioderMedMeldeplikt.size != meldeplikt.size) {
@@ -80,7 +80,8 @@ class VarselService(
         val utfyllinger = hentFerdigeUtfyllinger(saksnummer)
         val fremtidigeMeldeperioder =
             meldeperioder.filter { meldeperiode ->
-                val muligTidligereInnsendingstidspunkt = tidligsteInnsendingstidspunkt(meldeperiode.meldevindu.fom)
+                val muligTidligereInnsendingstidspunkt =
+                    tidligsteInnsendingstidspunktMeldedag(meldeperiode.meldevindu.fom)
                 val meldevindu = Periode(muligTidligereInnsendingstidspunkt, meldeperiode.meldevindu.tom)
                 val erIMeldevinduet = meldevindu.contains(LocalDate.now(clock))
                 val harSendtVarselForPerioden = sendteVarsler.map { it.forPeriode }.contains(meldeperiode.meldeperioden)
@@ -136,7 +137,11 @@ class VarselService(
                 log.info("Sender ${it.size} varsler")
             }
             .forEach { varsel ->
-                sendVarsel(varsel)
+                measureTime {
+                    sendVarsel(varsel)
+                }.also { tid ->
+                    log.info("Sending av varsel ${varsel.varselId} tok $tid")
+                }
             }
     }
 

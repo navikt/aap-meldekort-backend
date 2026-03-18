@@ -6,8 +6,8 @@ import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.Row
 import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.RepositoryFactory
-import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsakReferanse
+import no.nav.aap.sak.Fagsaknummer
 import java.time.LocalDate
 
 class UtfyllingRepositoryPostgres(
@@ -15,8 +15,22 @@ class UtfyllingRepositoryPostgres(
 ) : UtfyllingRepository {
 
     override fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
-        return lastUtfylling(ident, utfyllingReferanse)
-            ?.takeIf { it.erAvsluttet }
+        return connection.queryFirstOrNull(
+            """
+            select * from utfylling
+            where ident = ? and referanse = ? and avsluttet
+            order by sist_endret desc
+            limit 1
+        """
+        ) {
+            setParams {
+                setString(1, ident.asString)
+                setUUID(2, utfyllingReferanse.asUuid)
+            }
+            setRowMapper { row ->
+                utfyllingRowMapper(row)
+            }
+        }
     }
 
     override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
@@ -78,7 +92,7 @@ class UtfyllingRepositoryPostgres(
         }
     }
 
-    override fun lagrUtfylling(utfylling: Utfylling) {
+    override fun lagreUtfylling(utfylling: Utfylling) {
         connection.execute(
             """
             insert into utfylling(ident, referanse, fagsystem, fagsaknummer, periode, opprettet, sist_endret, flyt, aktivt_steg, avsluttet, svar, er_digitalisert)

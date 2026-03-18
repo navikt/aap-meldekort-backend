@@ -15,7 +15,7 @@ interface AktivitetsInformasjonRepository: Repository {
         periode: Periode,
     ): List<AktivitetsInformasjon>
 
-    fun lagrAktivitetsInformasjon(
+    fun lagreTimerArbeidet(
         ident: Ident,
         opplysninger: List<AktivitetsInformasjon>,
     )

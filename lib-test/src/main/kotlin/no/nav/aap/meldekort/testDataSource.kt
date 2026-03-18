@@ -8,6 +8,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
+import kotlin.String
 
 fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSource {
     val dbConfig = if (System.getenv("DB_JDBC_URL").isNullOrBlank()) {

@@ -109,6 +109,28 @@ class KelvinSakServiceTest {
         assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2025, 5, 5).atTime(23, 59))
     }
 
+    @Test
+    fun `skal utvide meldefristen om dato treffer i helligdagsunntaket`() {
+        val clock = Clock.fixed(
+            Instant.from(LocalDateTime.of(2026, 4, 29, 12, 3, 0).toInstant(ZoneOffset.UTC)),
+            ZoneId.of("UTC")
+        )
+
+        val sakService = KelvinSakService(
+            kelvinSakRepository = kelvinSakRepository,
+            timerArbeidetRepository = timerArbeidetRepository,
+            clock = clock
+        )
+
+        val opplysningsperiode = Periode(LocalDate.of(2026, 3, 2), LocalDate.of(2026, 4, 20))
+
+        gittMeldeplikt(etterUker = 4, opplysningsperiode)
+        gittMeldeperioder(opplysningsperiode)
+
+        val meldeperiode = Periode(LocalDate.of(2026, 3, 16), LocalDate.of(2026, 3, 29))
+        assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2026, 4, 7).atTime(23, 59))
+    }
+
     private fun gittMeldeplikt(etterUker: Long, opplysningsperiode: Periode) {
         every { kelvinSakRepository.hentMeldeplikt(sak.saksnummer) } returns Periode(
             opplysningsperiode.fom.plusWeeks(etterUker),

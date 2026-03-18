@@ -81,7 +81,7 @@ class UtfyllingRepositoryPostgresTest {
                 ),
             )
 
-            repo.lagrUtfylling(utfyllingInn1)
+            repo.lagreUtfylling(utfyllingInn1)
 
             repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertEquals(utfyllingInn1, it)
@@ -95,7 +95,7 @@ class UtfyllingRepositoryPostgresTest {
                 sistEndret = opprettet.plusMillis(100),
                 svar = utfyllingInn1.svar.copy(harDuJobbet = false)
             )
-            repo.lagrUtfylling(utfyllingInn2)
+            repo.lagreUtfylling(utfyllingInn2)
 
             repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertEquals(utfyllingInn2, it)
@@ -110,7 +110,7 @@ class UtfyllingRepositoryPostgresTest {
                 aktivtSteg = utfyllingInn2.flyt.steg.last(),
             )
             assertTrue(endeligUtfylling.erAvsluttet)
-            repo.lagrUtfylling(endeligUtfylling)
+            repo.lagreUtfylling(endeligUtfylling)
 
             repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
                 assertNull(it)
@@ -171,7 +171,7 @@ class UtfyllingRepositoryPostgresTest {
                     repo.lastUtfylling(ident, it)!!
                 }
 
-            repo.lagrUtfylling(
+            repo.lagreUtfylling(
                 utfylling.copy(
                     aktivtSteg = utfylling.flyt.steg.last(),
                 )
@@ -273,7 +273,7 @@ private fun UtfyllingRepositoryPostgres.ny(
     periode: Periode,
 ): UtfyllingReferanse {
     val utfylingReferanse = UtfyllingReferanse.ny()
-    this.lagrUtfylling(
+    this.lagreUtfylling(
         Utfylling(
             referanse = utfylingReferanse,
             fagsak = FagsakReferanse(FagsystemNavn.KELVIN, saksnummer),
