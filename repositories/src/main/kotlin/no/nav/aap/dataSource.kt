@@ -31,11 +31,6 @@ fun createPostgresDataSource(dbConfig: DbConfig, meterRegistry: MeterRegistry): 
         minimumIdle = 1
         driverClassName = "org.postgresql.Driver"
         connectionTestQuery = "SELECT 1"
-        connectionTimeout = 10_000      // 10s to wait for a connection from the pool
-        validationTimeout = 5_000       // 5s to validate a connection
-        keepaliveTime = 30_000          // 30s keepalive to prevent stale connections
-        maxLifetime = 600_000           // 10 min max lifetime for a connection
-        initializationFailTimeout = 30_000 // 30s to wait during pool initialization
         metricRegistry = meterRegistry
     })
 
