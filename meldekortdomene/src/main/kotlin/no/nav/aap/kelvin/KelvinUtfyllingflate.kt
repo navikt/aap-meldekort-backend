@@ -5,6 +5,7 @@ import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
 import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -13,6 +14,8 @@ import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingFlyt
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
@@ -55,7 +58,13 @@ class KelvinUtfyllingFlate(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_FLYT_V2,
+                flyt = run {
+                    if (Miljø.erProd()) {
+                        AAP_FLYT
+                    } else {
+                        AAP_FLYT_V2
+                    }
+                },
                 svar = Svar.tomt(periode),
                 sak = sak,
             )
@@ -87,7 +96,13 @@ class KelvinUtfyllingFlate(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2,
+                flyt = run {
+                    if (!Miljø.erProd()) {
+                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
+                    } else {
+                        UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
+                    }
+                },
                 svar = Svar(
                     svarerDuSant = null,
                     harDuJobbet = aktivitetsInformasjon.any { (it.timer ?: 0.0) > 0.0 },
