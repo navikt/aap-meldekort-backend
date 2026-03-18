@@ -44,6 +44,11 @@ import kotlin.test.assertNotNull
 
 class UtfyllingFlytV2Test {
 
+    // TODO kan fjernes når vi har skrudd på V2 flyt i prod
+    @BeforeEach
+    fun setUp() {
+        System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+    }
     @Test
     fun `går gjennom alle steg når det finnes fravær fra avtalt aktivitet`() {
         val idag = LocalDate.of(2025, 3, 1)

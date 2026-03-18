@@ -2,6 +2,7 @@ package no.nav.aap.kelvin
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
@@ -9,6 +10,8 @@ import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
@@ -72,7 +75,13 @@ class KelvinMottakService(
             periode = periode,
             fagsak = sak.referanse,
             ident = ident,
-            flyt = åpenUtfylling?.flyt ?: UtfyllingFlytNavn.AAP_FLYT_V2,
+            flyt = åpenUtfylling?.flyt ?: run {
+                if (Miljø.erProd()) {
+                    AAP_FLYT
+                } else {
+                    AAP_FLYT_V2
+                }
+            },
             aktivtSteg = KVITTERING,
             svar = Svar(
                 svarerDuSant = true, // Antar dette når bruker sender inn eget papir
