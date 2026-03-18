@@ -32,13 +32,13 @@ import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.meldekort.test.port
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepositoryPostgres
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepositoryPostgres
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.TimerArbeidet
+import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
@@ -278,12 +278,12 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
                 )
             }
 
-            kelvinMottakService.behandleMottatteTimerArbeidet(
+            kelvinMottakService.behandleMottatteAktivitetsInformasjon(
                 ident = fnr,
                 sakenGjelderFor = sakenGjelderFor,
                 periode = periode,
                 harDuJobbet = true,
-                timerArbeidet = dagerJobbet.map { TimerArbeidet(dato = it.dato, timer = it.timerArbeidet) }
+                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet) }
             )
         }
     }
@@ -294,18 +294,18 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
             varselService = varselService(connection, clock),
             kelvinSakRepository = KelvinSakRepositoryPostgres(connection),
             utfyllingRepository = UtfyllingRepositoryPostgres(connection),
-            timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection),
+            aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection),
             clock = clock
         )
     }
 
     fun varselService(connection: DBConnection, clock: Clock): VarselService {
-        val timerArbeidetRepository = TimerArbeidetRepositoryPostgres(connection)
+        val aktivitetsInformasjonRepository = AktivitetsInformasjonRepositoryPostgres(connection)
         val kelvinSakRepository = KelvinSakRepositoryPostgres(connection)
         return VarselService(
             kelvinSakService = KelvinSakService(
                 kelvinSakRepository = kelvinSakRepository,
-                timerArbeidetRepository = timerArbeidetRepository,
+                aktivitetsInformasjonRepository = aktivitetsInformasjonRepository,
                 clock = clock
             ),
             kelvinSakRepository = kelvinSakRepository,

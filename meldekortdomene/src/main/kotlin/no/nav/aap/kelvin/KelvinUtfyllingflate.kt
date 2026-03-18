@@ -5,6 +5,7 @@ import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
 import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.Sak
@@ -13,6 +14,10 @@ import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
 import no.nav.aap.utfylling.UtfyllingFlyt
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn
@@ -55,7 +60,13 @@ class KelvinUtfyllingFlate(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_FLYT,
+                flyt = run {
+                    if (Miljø.erProd()) {
+                        AAP_FLYT
+                    } else {
+                        AAP_FLYT_V2
+                    }
+                },
                 svar = Svar.tomt(periode),
                 sak = sak,
             )
@@ -82,17 +93,24 @@ class KelvinUtfyllingFlate(
         val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
-            val timerArbeidet = sakService.registrerteTimerArbeidet(innloggetBruker.ident, sak.referanse, periode)
+            val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
                 ident = innloggetBruker.ident,
                 periode = periode,
-                flyt = UtfyllingFlytNavn.AAP_KORRIGERING_FLYT,
+                flyt = run {
+                    if (Miljø.erProd()) {
+                        AAP_KORRIGERING_FLYT
+                    } else {
+                        AAP_KORRIGERING_FLYT_V2
+                    }
+                },
                 svar = Svar(
                     svarerDuSant = null,
-                    harDuJobbet = timerArbeidet.any { (it.timer ?: 0.0) > 0.0 },
-                    timerArbeidet = timerArbeidet,
+                    harDuJobbet = aktivitetsInformasjon.any { (it.timer ?: 0.0) > 0.0 },
+                    aktivitetsInformasjon = aktivitetsInformasjon,
                     stemmerOpplysningene = null,
+                    harDuGjennomførtAvtaltAktivitet = null
                 ),
                 sak = sak,
             )
@@ -134,6 +152,7 @@ class KelvinUtfyllingFlate(
             brukerHarVedtakIKelvin = brukerHarVedtakIKelvin,
             brukerHarSakUnderBehandling = brukerHarSakUnderBehandling,
             visFrist = periodeHarHattMeldeplikt,
+            flytNavn = utfylling.flyt
         )
     }
 

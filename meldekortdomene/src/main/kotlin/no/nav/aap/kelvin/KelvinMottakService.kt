@@ -2,13 +2,16 @@ package no.nav.aap.kelvin
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
-import no.nav.aap.opplysningsplikt.TimerArbeidetRepository
+import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
+import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
@@ -20,13 +23,13 @@ class KelvinMottakService(
     private val varselService: VarselService,
     private val kelvinSakRepository: KelvinSakRepository,
     private val utfyllingRepository: UtfyllingRepository,
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         kelvinSakRepository = repositoryProvider.provide(),
         utfyllingRepository = repositoryProvider.provide(),
-        timerArbeidetRepository = repositoryProvider.provide(),
+        aktivitetsInformasjonRepository = repositoryProvider.provide(),
         varselService = VarselService(repositoryProvider, gatewayProvider, clock),
         clock = clock
     )
@@ -52,30 +55,38 @@ class KelvinMottakService(
         varselService.planleggFremtidigeVarsler(saksnummer)
     }
 
-    fun behandleMottatteTimerArbeidet(
+    fun behandleMottatteAktivitetsInformasjon(
         ident: Ident,
         sakenGjelderFor: Periode,
         periode: Periode,
         harDuJobbet: Boolean,
-        timerArbeidet: List<no.nav.aap.utfylling.TimerArbeidet>
+        aktivitetsInformasjon: List<no.nav.aap.utfylling.AktivitetsInformasjon>
     ): UtfyllingReferanse {
         val sak = kelvinSakRepository.hentSak(ident, sakenGjelderFor.fom)
             ?: throw IllegalStateException("finner ikke sak")
 
-        val utfyllingReferanse =
-            utfyllingRepository.lastÅpenUtfylling(ident, periode)?.referanse ?: UtfyllingReferanse.ny()
+        val åpenUtfylling =
+            utfyllingRepository.lastÅpenUtfylling(ident, periode)
+
+        val utfyllingReferanse = åpenUtfylling?.referanse ?: UtfyllingReferanse.ny()
 
         val utfylling = Utfylling(
             referanse = utfyllingReferanse,
             periode = periode,
             fagsak = sak.referanse,
             ident = ident,
-            flyt = UtfyllingFlytNavn.AAP_FLYT,
+            flyt = åpenUtfylling?.flyt ?: run {
+                if (Miljø.erProd()) {
+                    AAP_FLYT
+                } else {
+                    AAP_FLYT_V2
+                }
+            },
             aktivtSteg = KVITTERING,
             svar = Svar(
                 svarerDuSant = true, // Antar dette når bruker sender inn eget papir
                 harDuJobbet = harDuJobbet,
-                timerArbeidet = timerArbeidet,
+                aktivitetsInformasjon = aktivitetsInformasjon,
                 stemmerOpplysningene = true // Antar dette når bruker sender inn eget papir,
             ),
             opprettet = Instant.now(clock),
@@ -84,15 +95,16 @@ class KelvinMottakService(
         )
 
         utfyllingRepository.lagreUtfylling(utfylling)
-        timerArbeidetRepository.lagreTimerArbeidet(
+        aktivitetsInformasjonRepository.lagreAktivitetsInformasjon(
             ident = utfylling.ident,
-            opplysninger = utfylling.svar.timerArbeidet.map {
-                no.nav.aap.opplysningsplikt.TimerArbeidet(
+            opplysninger = utfylling.svar.aktivitetsInformasjon.map {
+                no.nav.aap.opplysningsplikt.AktivitetsInformasjon(
                     registreringstidspunkt = utfylling.sistEndret,
                     utfylling = utfylling.referanse,
                     fagsak = utfylling.fagsak,
                     dato = it.dato,
                     timerArbeidet = it.timer,
+                    fravær = null
                 )
             }
         )

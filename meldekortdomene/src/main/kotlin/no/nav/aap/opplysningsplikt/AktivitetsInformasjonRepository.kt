@@ -7,17 +7,17 @@ import no.nav.aap.sak.FagsakReferanse
 import java.time.LocalDate
 
 
-interface TimerArbeidetRepository: Repository {
+interface AktivitetsInformasjonRepository: Repository {
     /** @return registrerte opplysninger, sorted på dato (ascending) */
-    fun hentTimerArbeidet(
+    fun hentAktivitetsInformasjon(
         ident: Ident,
         sak: FagsakReferanse,
         periode: Periode,
-    ): List<TimerArbeidet>
+    ): List<AktivitetsInformasjon>
 
-    fun lagreTimerArbeidet(
+    fun lagreAktivitetsInformasjon(
         ident: Ident,
-        opplysninger: List<TimerArbeidet>,
+        opplysninger: List<AktivitetsInformasjon>,
     )
 
     fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate?

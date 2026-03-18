@@ -1,25 +1,27 @@
 package no.nav.aap.opplysningsplikt
 
 import no.nav.aap.InnloggetBruker
+import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingSteg
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 
 class PersisterOpplysningerSteg(
-    private val timerArbeidetRepository: TimerArbeidetRepository,
+    private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
 ) : UtfyllingSteg {
     override val navn = PERSISTER_OPPLYSNINGER
 
     override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
-        timerArbeidetRepository.lagreTimerArbeidet(
+        aktivitetsInformasjonRepository.lagreAktivitetsInformasjon(
             ident = utfylling.ident,
-            opplysninger = utfylling.svar.timerArbeidet.map {
-                TimerArbeidet(
+            opplysninger = utfylling.svar.aktivitetsInformasjon.map {
+                AktivitetsInformasjon(
                     registreringstidspunkt = utfylling.sistEndret,
                     utfylling = utfylling.referanse,
                     fagsak = utfylling.fagsak,
                     dato = it.dato,
                     timerArbeidet = it.timer,
+                    fravær = it.fravær?.name?.let { Fravær.valueOf(it) }
                 )
             }
         )

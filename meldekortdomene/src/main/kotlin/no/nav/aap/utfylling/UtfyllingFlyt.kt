@@ -14,6 +14,8 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
+import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
 import no.nav.aap.varsel.InaktiverVarselSteg
 import no.nav.aap.varsel.VarselService
 import org.slf4j.LoggerFactory
@@ -34,10 +36,34 @@ enum class UtfyllingFlytNavn(
             KVITTERING,
         )
     ),
+    AAP_FLYT_V2(
+        listOf(
+            INTRODUKSJON,
+            SPØRSMÅL,
+            UTFYLLING,
+            FRAVÆR_UTFYLLING,
+            BEKREFT,
+            PERSISTER_OPPLYSNINGER,
+            BESTILL_JOURNALFØRING,
+            INAKTIVER_VARSEL,
+            KVITTERING,
+        )
+    ),
     AAP_KORRIGERING_FLYT(
         listOf(
             SPØRSMÅL,
             UTFYLLING,
+            BEKREFT,
+            PERSISTER_OPPLYSNINGER,
+            BESTILL_JOURNALFØRING,
+            KVITTERING,
+        )
+    ),
+    AAP_KORRIGERING_FLYT_V2(
+        listOf(
+            SPØRSMÅL,
+            UTFYLLING,
+            FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
             BESTILL_JOURNALFØRING,
@@ -157,8 +183,9 @@ class UtfyllingFlyt(
                 stegene = flytNavn.steg.map {
                     when (it) {
                         INTRODUKSJON -> IntroduksjonSteg
-                        SPØRSMÅL -> SpørsmålSteg
+                        SPØRSMÅL -> ArbeidetSpørsmål
                         UTFYLLING -> TimerArbeidetSteg
+                        FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
                         BESTILL_JOURNALFØRING -> BestillJournalføringSteg(JournalføringService(repositoryProvider, gatewayProvider))

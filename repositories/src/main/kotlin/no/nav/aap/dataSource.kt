@@ -7,21 +7,11 @@ import no.nav.aap.komponenter.dbmigrering.Migrering
 import javax.sql.DataSource
 
 class DbConfig(
-    val database: String,
-    val url: String,
-    val username: String,
-    val password: String,
-) {
-    companion object {
-        fun fromEnv() = DbConfig(
-            database = System.getenv("DB_DATABASE"),
-            url = System.getenv("DB_JDBC_URL"),
-            username = System.getenv("DB_USERNAME"),
-            password = System.getenv("DB_PASSWORD"),
-        )
-    }
-}
-
+    val database: String = System.getenv("DB_DATABASE"),
+    val url: String = System.getenv("DB_JDBC_URL"),
+    val username: String = System.getenv("DB_USERNAME"),
+    val password: String = System.getenv("DB_PASSWORD"),
+)
 fun createPostgresDataSource(dbConfig: DbConfig, meterRegistry: MeterRegistry): DataSource {
     val dataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = dbConfig.url
