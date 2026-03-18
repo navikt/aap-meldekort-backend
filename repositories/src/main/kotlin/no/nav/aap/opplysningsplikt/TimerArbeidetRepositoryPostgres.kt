@@ -21,7 +21,6 @@ class TimerArbeidetRepositoryPostgres(
                 insert into timer_arbeidet
                 (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet)
                 values (?, ?, ?, ?, ?, ?, ?)
-                on conflict do nothing
             """,
             opplysninger,
         ) {
