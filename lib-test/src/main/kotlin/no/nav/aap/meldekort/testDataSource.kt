@@ -3,7 +3,7 @@ package no.nav.aap.meldekort
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.aap.DbConfig
 import no.nav.aap.createPostgresDataSource
-import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
+import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.postgresql.PostgreSQLContainer
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -32,7 +32,26 @@ fun createTestcontainerPostgresDataSource(meterRegistry: MeterRegistry): DataSou
 
 private fun postgreSQLContainer(): PostgreSQLContainer {
     val postgres = PostgreSQLContainer("postgres:16")
-    postgres.waitingFor(HostPortWaitStrategy().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS)))
+    postgres.waitingFor(
+        Wait.forListeningPort().withStartupTimeout(Duration.of(60L, ChronoUnit.SECONDS))
+    )
     postgres.start()
+    waitForDatabaseReady(postgres)
     return postgres
+}
+
+private fun waitForDatabaseReady(postgres: PostgreSQLContainer, maxAttempts: Int = 30) {
+    repeat(maxAttempts) { attempt ->
+        try {
+            java.sql.DriverManager.getConnection(
+                postgres.jdbcUrl, postgres.username, postgres.password
+            ).use { connection ->
+                connection.createStatement().use { it.execute("SELECT 1") }
+            }
+            return
+        } catch (e: Exception) {
+            if (attempt == maxAttempts - 1) throw e
+            Thread.sleep(500)
+        }
+    }
 }
