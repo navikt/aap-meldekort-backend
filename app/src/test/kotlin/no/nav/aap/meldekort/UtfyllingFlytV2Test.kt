@@ -32,6 +32,8 @@ import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.UtfyllingFlytNavn
+import no.nav.aap.utfylling.UtfyllingStegNavn
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -39,44 +41,30 @@ import org.junit.jupiter.api.Test
 import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
+import java.util.UUID
 
 class UtfyllingFlytV2Test {
-    val steg = UtfyllingFlytNavn.AAP_FLYT_V2.steg.filter { !it.erTeknisk }
+
+    private val steg = UtfyllingFlytNavn.AAP_FLYT_V2.steg.filterNot(UtfyllingStegNavn::erTeknisk)
+    private val standardMeldeperiode = Periode(6 januar 2025, 19 januar 2025)
+
     // TODO kan fjernes når vi har skrudd på V2 flyt i prod
     @BeforeEach
-    fun setUp() {
+    fun beforeEach() {
         System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
     }
+
     @Test
     fun `går gjennom alle steg når det finnes fravær fra avtalt aktivitet`() {
-        val idag = LocalDate.of(2025, 3, 1)
-        clockHolder.idag = idag
+        clockHolder.idag = LocalDate.of(2025, 3, 1)
         val fnr = fødselsnummerGenerator.next()
-        val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
-        val sakStart = meldeperiode.fom
+        val meldeperiode = standardMeldeperiode
+        val referanse = startUtfylling(fnr, meldeperiode)
 
-        kelvinSak(
-            fnr,
-            rettighetsperiode = Periode(sakStart, sakStart.plusWeeks(52)),
-            opplysningsbehov = listOf(Periode(sakStart, sakStart.plusWeeks(52)))
-        )
-
-        val startUtfylling = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
-            fnr, "/api/start-innsending", StartUtfyllingRequest(
-                fom = meldeperiode.fom,
-                tom = meldeperiode.tom
-            )
-        )
-
-        val referanse = startUtfylling!!.metadata!!.referanse
-
-        val dagerMedTimer = meldeperiode.copy(fom = sakStart).mapIndexed { index, dato ->
+        val dagerMedTimer = meldeperiode.mapIndexed { index, dato ->
             DagSvarDto(
                 dato = dato,
-                timerArbeidet = (Math.random() * 3.0).toInt().toDouble(),
+                timerArbeidet = (index % 3).toDouble(),
                 fravær = if (index == 4) FraværDto.OMSORG_FØRSTE_SKOLEDAG_TILVENNING_ELLER_ANNEN_OPPFØLGING_BARN else null
             )
         }
@@ -108,11 +96,12 @@ class UtfyllingFlytV2Test {
                 harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
             )
         )
-        flytSteg.forEach { tilstand ->
+
+        flytSteg.forEachIndexed { i, tilstand ->
             val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
                 fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
             )
-            assertNotEquals(tilstand.aktivtSteg, response?.tilstand?.aktivtSteg)
+            assertThat(response?.tilstand?.aktivtSteg?.tilDomene).isEqualTo(steg[i + 1])
         }
 
     }
@@ -120,23 +109,7 @@ class UtfyllingFlytV2Test {
     @Test
     fun `formkrav brudd returner til feilende steg`() {
         val fnr = fødselsnummerGenerator.next()
-        val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
-        val sakStart = meldeperiode.fom
-
-        kelvinSak(
-            fnr,
-            rettighetsperiode = Periode(sakStart, sakStart.plusWeeks(52)),
-            opplysningsbehov = listOf(Periode(sakStart, sakStart.plusWeeks(52)))
-        )
-
-        val startUtfylling = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
-            fnr, "/api/start-innsending", StartUtfyllingRequest(
-                fom = meldeperiode.fom,
-                tom = meldeperiode.tom
-            )
-        )
-
-        val referanse = startUtfylling!!.metadata!!.referanse
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
 
         val introduksjonMedFeil = lagTilstand(
             aktivtSteg = StegDto.INTRODUKSJON,
@@ -149,32 +122,24 @@ class UtfyllingFlytV2Test {
             fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(introduksjonMedFeil)
         )
 
-        assertEquals(StegDto.INTRODUKSJON, response?.tilstand?.aktivtSteg)
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.INTRODUKSJON)
     }
 
     @Test
     fun `hopper over FRAVÆR_UTFYLLING når avtalt aktivitet er gjennomført`() {
         val fnr = fødselsnummerGenerator.next()
-        val meldeperiode = Periode(6 januar 2025, 19 januar 2025)
+        val meldeperiode = standardMeldeperiode
         val sakStart = meldeperiode.fom
         val helePerioden = Periode(sakStart, sakStart.plusWeeks(52))
 
-        kelvinSak(
-            fnr,
-            helePerioden,
-            listOf(helePerioden)
+        val referanse = startUtfylling(
+            fnr = fnr,
+            meldeperiode = meldeperiode,
+            rettighetsperiode = helePerioden,
+            opplysningsbehov = listOf(helePerioden)
         )
 
-        val startUtfylling = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
-            fnr, "/api/start-innsending", StartUtfyllingRequest(
-                fom = meldeperiode.fom,
-                tom = meldeperiode.tom
-            )
-        )
-
-        val referanse = startUtfylling!!.metadata!!.referanse
-
-        val dagerMedTimer = meldeperiode.copy(fom = sakStart).map {
+        val dagerMedTimer = meldeperiode.map {
             DagSvarDto(dato = it, timerArbeidet = 2.0, fravær = null)
         }
 
@@ -188,7 +153,28 @@ class UtfyllingFlytV2Test {
             fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
         )
 
-        assertEquals(StegDto.BEKREFT, response?.tilstand?.aktivtSteg)
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.BEKREFT)
+    }
+
+    private fun startUtfylling(
+        fnr: Ident,
+        meldeperiode: Periode,
+        rettighetsperiode: Periode = Periode(meldeperiode.fom, meldeperiode.fom.plusWeeks(52)),
+        opplysningsbehov: List<Periode> = listOf(rettighetsperiode),
+    ): UUID {
+        kelvinSak(
+            fnr = fnr,
+            rettighetsperiode = rettighetsperiode,
+            opplysningsbehov = opplysningsbehov,
+        )
+
+        val response = myPost<StartUtfyllingResponse, StartUtfyllingRequest>(
+            fnr,
+            "/api/start-innsending",
+            StartUtfyllingRequest(fom = meldeperiode.fom, tom = meldeperiode.tom)
+        )
+
+        return requireNotNull(response?.metadata?.referanse)
     }
 
     private fun kelvinSak(
@@ -211,7 +197,7 @@ class UtfyllingFlytV2Test {
                         yield(Periode(fom, fom.plusDays(13)))
                         fom = fom.plusDays(14)
                     }
-                }.toList().also { println(it) },
+                }.toList(),
                 meldeplikt = listOf(),
                 opplysningsbehov = opplysningsbehov ?: listOf(sakenGjelderFor),
                 status = null,
@@ -228,11 +214,6 @@ class UtfyllingFlytV2Test {
             )
         )
         return saksnummer
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        clockHolder.idag = idag
     }
 
     companion object {
@@ -256,13 +237,9 @@ class UtfyllingFlytV2Test {
             harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
         )
 
-        val standardTilstand = UtfyllingTilstandDto(
-            aktivtSteg = StegDto.SPØRSMÅL,
-            svar = standardSvar,
-        )
 
         fun lagTilstand(
-            aktivtSteg: StegDto = standardTilstand.aktivtSteg,
+            aktivtSteg: StegDto,
             svar: SvarDto? = null,
             vilSvareRiktig: Boolean? = standardSvar.vilSvareRiktig,
             harDuJobbet: Boolean? = standardSvar.harDuJobbet,
