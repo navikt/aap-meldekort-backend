@@ -7,7 +7,7 @@ import java.time.LocalDate
 data class Svar(
     val svarerDuSant: Boolean?,
     val harDuJobbet: Boolean?,
-    @field:JsonAlias("timerArbeidet")
+    @field:JsonAlias("timerArbeidet") //TODO husk å fjerne når ikke relevant
     val aktivitetsInformasjon: List<AktivitetsInformasjon>,
     val stemmerOpplysningene: Boolean?,
     val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
