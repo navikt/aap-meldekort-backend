@@ -23,6 +23,7 @@ class AktivitetsInformasjonRepositoryPostgres(
                 insert into aktivitetsinformasjon
                 (ident, registreringstidspunkt, utfylling_referanse, fagsak_system, fagsak_nummer, dato, timer_arbeidet, fravaer)
                 values (?, ?, ?, ?, ?, ?, ?, ?)
+                on conflict do nothing 
             """,
             opplysninger,
         ) {
