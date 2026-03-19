@@ -53,7 +53,7 @@ class KelvinUtfyllingFlate(
                 feil = "finner ikke sak",
             )
 
-        val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
+        val utfylling = eksisterendeÅpenUtfylling(innloggetBruker, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
             nyUtfylling(
@@ -90,7 +90,8 @@ class KelvinUtfyllingFlate(
                 feil = "finner ikke sak",
             )
 
-        val utfylling = eksisterendeUtfylling(innloggetBruker, periode) ?: run {
+        val utfylling = eksisterendeÅpenUtfylling(innloggetBruker, periode) ?: run {
+            val eksisterendeAvsluttetUtfylling = eksisterendeUtfylling(innloggetBruker, periode)
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
             val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
@@ -106,11 +107,11 @@ class KelvinUtfyllingFlate(
                     }
                 },
                 svar = Svar(
-                    svarerDuSant = null,
+                    svarerDuSant = eksisterendeAvsluttetUtfylling?.svar?.svarerDuSant,
                     harDuJobbet = aktivitetsInformasjon.any { (it.timer ?: 0.0) > 0.0 },
                     aktivitetsInformasjon = aktivitetsInformasjon,
-                    stemmerOpplysningene = null,
-                    harDuGjennomførtAvtaltAktivitet = null
+                    stemmerOpplysningene = eksisterendeAvsluttetUtfylling?.svar?.stemmerOpplysningene,
+                    harDuGjennomførtAvtaltAktivitet = eksisterendeAvsluttetUtfylling?.svar?.harDuGjennomførtAvtaltAktivitet,
                 ),
                 sak = sak,
             )
@@ -157,9 +158,13 @@ class KelvinUtfyllingFlate(
     }
 
 
-    private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
+    private fun eksisterendeÅpenUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
         /* TODO: noen sjekk på gyldighet? Utløpt? */
         return utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode)
+    }
+
+    private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
+        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, periode)
     }
 
 
