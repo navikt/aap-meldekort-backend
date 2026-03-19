@@ -17,6 +17,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
@@ -51,7 +52,7 @@ class UtfyllingFlytV2Test {
     // TODO kan fjernes når vi har skrudd på V2 flyt i prod
     @BeforeEach
     fun beforeEach() {
-        System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+        System.setProperty("NAIS_CLUSTER_NAME", "dev-")
     }
 
     @Test
