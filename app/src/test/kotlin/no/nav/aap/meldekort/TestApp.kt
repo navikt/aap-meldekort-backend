@@ -39,6 +39,7 @@ fun main() {
     System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
     System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
     System.setProperty("brukervarsel.topic", "brukervarsel-topic")
+    System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
