@@ -33,7 +33,11 @@ class UtfyllingRepositoryPostgres(
         }
     }
 
-    override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
+    override fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? =
+        lastUtfylling(ident, periode)?.takeUnless { it.erAvsluttet }
+
+
+    override fun lastUtfylling(ident: Ident, periode: Periode): Utfylling? {
         return connection.queryFirstOrNull(
             """
             select * from utfylling
@@ -50,7 +54,6 @@ class UtfyllingRepositoryPostgres(
                 utfyllingRowMapper(row)
             }
         }
-            ?.takeUnless { it.erAvsluttet }
     }
 
     override fun lastUtfylling(

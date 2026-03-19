@@ -8,6 +8,7 @@ import java.time.LocalDate
 
 interface UtfyllingRepository: Repository {
     fun lastÅpenUtfylling(ident: Ident, periode: Periode): Utfylling?
+    fun lastUtfylling(ident: Ident, periode: Periode): Utfylling?
     fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun lastUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling?
     fun hentUtfyllinger(saksnummer: Fagsaknummer): List<Utfylling>
