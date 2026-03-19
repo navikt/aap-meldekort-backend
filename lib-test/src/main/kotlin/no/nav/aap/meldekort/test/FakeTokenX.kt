@@ -49,7 +49,7 @@ object FakeTokenX : FakeServer {
         routing {
             post("/token") {
                 val body = call.receiveText()
-                val token = issueToken("1".repeat(11))
+                val token = issueToken(body)
                 call.respond(TestToken(access_token = token))
             }
             get("/jwks") {
