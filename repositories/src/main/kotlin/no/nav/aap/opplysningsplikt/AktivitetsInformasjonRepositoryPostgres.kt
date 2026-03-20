@@ -45,9 +45,15 @@ class AktivitetsInformasjonRepositoryPostgres(
     override fun hentSenesteOpplysningsdato(ident: Ident, fagsak: FagsakReferanse): LocalDate? {
         try {
             return connection.queryFirstOrNull("""
-                select dato from aktivitetsinformasjon
-                where ident = ? and fagsak_system = ? and fagsak_nummer = ?
-                order by dato desc
+                select ai.dato 
+                from aktivitetsinformasjon ai
+                join kelvin_person_ident kpi1 on kpi1.ident = ai.ident
+                join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+                where 
+                    kpi2.ident = ? and 
+                    ai.fagsak_system = ? and 
+                    ai.fagsak_nummer = ?
+                order by ai.dato desc
                 limit 1
             """) {
                 setParams {
@@ -61,8 +67,14 @@ class AktivitetsInformasjonRepositoryPostgres(
             }
         } catch (e: Exception) {
             return connection.queryFirstOrNull("""
-                select dato from aktivitetsinformasjon
-                where ident = ? and fagsak_system = ? and fagsak_nummer = ?
+                select ai.dato 
+                from aktivitetsinformasjon ai
+                join kelvin_person_ident kpi1 on kpi1.ident = ai.ident
+                join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+                where 
+                    kpi2.ident = ? and 
+                    ai.fagsak_system = ? and 
+                    ai.fagsak_nummer = ?
                 order by dato desc
                 limit 1
             """) {
@@ -80,9 +92,15 @@ class AktivitetsInformasjonRepositoryPostgres(
 
     override fun hentAktivitetsInformasjon(ident: Ident, sak: FagsakReferanse, periode: Periode): List<AktivitetsInformasjon> {
         return connection.queryList("""
-            select distinct on (dato) *
-            from aktivitetsinformasjon
-            where ident = ? and fagsak_system = ? and fagsak_nummer = ? and ?::daterange @> dato
+            select distinct on (ai.dato) ai.*
+            from aktivitetsinformasjon ai
+            join kelvin_person_ident kpi1 on kpi1.ident = ai.ident
+            join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+            where 
+                kpi2.ident = ? and 
+                ai.fagsak_system = ? and 
+                ai.fagsak_nummer = ? and 
+                ?::daterange @> ai.dato
             order by dato, registreringstidspunkt desc
         """) {
             setParams {
