@@ -5,9 +5,12 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.Fagsaknummer
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class KelvinSakRepositoryPostgres(private val connection: DBConnection) : KelvinSakRepository {
+    private val log = LoggerFactory.getLogger(javaClass)
+
     override fun upsertSak(
         saksnummer: Fagsaknummer,
         sakenGjelderFor: Periode,
@@ -160,7 +163,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             }
         }
 
-        connection.execute(
+        val deleted = connection.executeReturnUpdated(
             """
             delete from kelvin_person_ident
             where person_id = ?
@@ -171,6 +174,9 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 setLong(1, personId)
                 setArray(2, identer.map { it.asString })
             }
+        }
+        if (deleted > 0) {
+            log.warn("Slettet $deleted person_identer for sak $sakId")
         }
 
         connection.executeBatch(
