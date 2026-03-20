@@ -133,6 +133,9 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             setParams {
                 setString(1, saksnummer.asString)
             }
+            setRowMapper {
+                it.getLong("id")
+            }
         }
         upsertPersonIdenter(sakId, identer)
     }
