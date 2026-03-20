@@ -39,7 +39,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             }
         }
 
-        upsertPersonIdenter(sakId, identer)
+        upsertPersonIdenterIntern(sakId, identer)
 
         connection.execute(
             """
@@ -137,10 +137,10 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 it.getLong("id")
             }
         }
-        upsertPersonIdenter(sakId, identer)
+        upsertPersonIdenterIntern(sakId, identer)
     }
 
-    private fun upsertPersonIdenter(
+    private fun upsertPersonIdenterIntern(
         sakId: Long,
         identer: List<Ident>
     ) {
