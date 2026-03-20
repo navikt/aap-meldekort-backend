@@ -83,6 +83,9 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             /* Leser ut den nye verdien der det er overlapp, ellers den første verdien. Ingen verdi
             * dersom det ikke er oppgitt noe. */
             val periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 7))
+
+            // TODO: feiler da hentAktivitesInformasjon() ikke finner identen i kelvin_person_ident tabellen..
+            // må legges til med KelvinSakRepo..
             repo.hentAktivitetsInformasjon(ident1, fagsak1, periode).also { effektiveOpplysninger ->
                 assertEquals(
                     listOf(

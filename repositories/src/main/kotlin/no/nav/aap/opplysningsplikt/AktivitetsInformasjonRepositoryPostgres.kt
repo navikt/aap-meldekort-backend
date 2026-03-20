@@ -97,11 +97,11 @@ class AktivitetsInformasjonRepositoryPostgres(
             join kelvin_person_ident kpi1 on kpi1.ident = ai.ident
             join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
             where 
-                kpi2.ident = ? and 
+                kpi2.ident = ? and
                 ai.fagsak_system = ? and 
                 ai.fagsak_nummer = ? and 
                 ?::daterange @> ai.dato
-            order by dato, registreringstidspunkt desc
+            order by ai.dato, ai.registreringstidspunkt desc
         """) {
             setParams {
                 setString(1, ident.asString)

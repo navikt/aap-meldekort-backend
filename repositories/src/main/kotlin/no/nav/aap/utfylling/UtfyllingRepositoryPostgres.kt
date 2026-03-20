@@ -17,9 +17,15 @@ class UtfyllingRepositoryPostgres(
     override fun lastAvsluttetUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): Utfylling? {
         return connection.queryFirstOrNull(
             """
-            select * from utfylling
-            where ident = ? and referanse = ? and avsluttet
-            order by sist_endret desc
+            select u.* 
+            from utfylling u
+            join kelvin_person_ident kpi1 on kpi1.ident = u.ident
+            join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+            where 
+                kpi2.ident = ? and 
+                u.referanse = ? and 
+                u.avsluttet
+            order by u.sist_endret desc
             limit 1
         """
         ) {
@@ -40,9 +46,14 @@ class UtfyllingRepositoryPostgres(
     override fun lastUtfylling(ident: Ident, periode: Periode): Utfylling? {
         return connection.queryFirstOrNull(
             """
-            select * from utfylling
-            where ident = ? and periode = ?::daterange
-            order by sist_endret desc
+            select u.* 
+            from utfylling u
+            join kelvin_person_ident kpi1 on kpi1.ident = u.ident
+            join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+            where 
+                kpi2.ident = ? and 
+                u.periode = ?::daterange
+            order by u.sist_endret desc
             limit 1
         """
         ) {
@@ -62,9 +73,14 @@ class UtfyllingRepositoryPostgres(
     ): Utfylling? {
         return connection.queryFirstOrNull(
             """
-            select * from utfylling
-            where ident = ? and referanse = ?
-            order by sist_endret desc
+            select u.* 
+            from utfylling u
+            join kelvin_person_ident kpi1 on kpi1.ident = u.ident
+            join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
+            where 
+                kpi2.ident = ? and 
+                u.referanse = ?
+            order by u.sist_endret desc
             limit 1
         """
         ) {
@@ -122,7 +138,15 @@ class UtfyllingRepositoryPostgres(
     override fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
         connection.execute(
             """
-        DELETE FROM utfylling WHERE ident = ? and referanse = ? AND NOT avsluttet
+        delete 
+        from utfylling u
+        using kelvin_person_ident kpi1, kelvin_person_ident kpi2
+        where 
+            kpi1.ident = u.ident and 
+            kpi2.person_id = kpi1.person_id and 
+            kpi2.ident = ? and 
+            u.referanse = ? and 
+            not u.avsluttet
         """
         ) {
             setParams {
