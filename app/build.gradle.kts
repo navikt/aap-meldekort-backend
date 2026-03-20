@@ -8,7 +8,7 @@ val ktorVersion = "3.4.1"
 plugins {
     id("aap.conventions")
     id("io.ktor.plugin") version "3.4.1"
-    id("com.gradleup.shadow") version "9.3.2"
+    id("com.gradleup.shadow") version "9.4.0"
 }
 
 application {
@@ -92,7 +92,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
     api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.16.3")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.16.4")
     implementation("ch.qos.logback:logback-classic:1.5.32")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
