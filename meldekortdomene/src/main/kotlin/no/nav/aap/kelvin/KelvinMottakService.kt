@@ -76,7 +76,7 @@ class KelvinMottakService(
             fagsak = sak.referanse,
             ident = ident,
             flyt = åpenUtfylling?.flyt ?: run {
-                if (!Miljø.erDev()) {
+                if (Miljø.erProd()) {
                     AAP_FLYT
                 } else {
                     AAP_FLYT_V2

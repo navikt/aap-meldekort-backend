@@ -61,7 +61,7 @@ class KelvinUtfyllingFlate(
                 ident = innloggetBruker.ident,
                 periode = periode,
                 flyt = run {
-                    if (!Miljø.erDev()) {
+                    if (Miljø.erProd()) {
                         AAP_FLYT
                     } else {
                         AAP_FLYT_V2
@@ -100,7 +100,7 @@ class KelvinUtfyllingFlate(
                 ident = innloggetBruker.ident,
                 periode = periode,
                 flyt = run {
-                    if (!Miljø.erDev()) {
+                    if (Miljø.erProd()) {
                         AAP_KORRIGERING_FLYT
                     } else {
                         AAP_KORRIGERING_FLYT_V2

@@ -52,7 +52,7 @@ class UtfyllingFlytV2Test {
     // TODO kan fjernes når vi har skrudd på V2 flyt i prod
     @BeforeEach
     fun beforeEach() {
-        System.setProperty("NAIS_CLUSTER_NAME", "dev-")
+        System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
     }
 
     @Test
