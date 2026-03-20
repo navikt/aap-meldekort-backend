@@ -129,7 +129,11 @@ class KelvinSakRepositoryPostgresTest {
                 assertEquals(KelvinSakStatus.AVSLUTTET, it?.status)
             }
 
+            assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr1, fnr2)
+            assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr3)
             repo.upsertPersonIdenter(sak1, listOf(fnr4, fnr5))
+            assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr4, fnr5)
+            assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr3)
             repo.upsertPersonIdenter(sak2, listOf(fnr6, fnr7))
             assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr4, fnr5)
             assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr6, fnr7)
