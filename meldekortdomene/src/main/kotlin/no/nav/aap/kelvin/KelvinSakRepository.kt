@@ -15,6 +15,10 @@ interface KelvinSakRepository: Repository {
         opplysningsbehov: List<Periode>,
         status: KelvinSakStatus?,
     )
+    fun upsertPersonIdenter(
+        saksnummer: Fagsaknummer,
+        identer: List<Ident>,
+    )
     fun hentMeldeperioder(saksnummer: Fagsaknummer): List<Periode>
     fun hentSak(ident: Ident, påDag: LocalDate): KelvinSak?
     fun hentMeldeplikt(saksnummer: Fagsaknummer): List<Periode>

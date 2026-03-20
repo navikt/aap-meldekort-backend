@@ -9,7 +9,6 @@ import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
-import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingReferanse
@@ -111,5 +110,9 @@ class KelvinMottakService(
 
         varselService.inaktiverVarslerForUtfylling(utfylling)
         return utfyllingReferanse
+    }
+
+    fun behandleOppdaterteIdenter(saksnummer: Fagsaknummer, identer: List<Ident>) {
+        kelvinSakRepository.upsertPersonIdenter(saksnummer, identer)
     }
 }

@@ -38,3 +38,8 @@ public data class TimerArbeidetDto(
     val dato: LocalDate,
     val timerArbeidet: Double
 )
+
+public class OppdaterIdenterV0(
+    public val saksnummer: String,
+    public val identer: List<String>,
+)
