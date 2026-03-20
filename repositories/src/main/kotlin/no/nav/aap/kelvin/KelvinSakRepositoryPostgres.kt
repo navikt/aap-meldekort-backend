@@ -5,9 +5,12 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.repository.RepositoryFactory
 import no.nav.aap.sak.Fagsaknummer
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class KelvinSakRepositoryPostgres(private val connection: DBConnection) : KelvinSakRepository {
+    private val log = LoggerFactory.getLogger(javaClass)
+
     override fun upsertSak(
         saksnummer: Fagsaknummer,
         sakenGjelderFor: Periode,
@@ -39,49 +42,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             }
         }
 
-        val personId = connection.queryFirst(
-            """
-            insert into kelvin_person (sak_id) values (?)
-            on conflict (sak_id) do update set
-            oppdatert = current_timestamp(3)
-            returning id
-        """
-        ) {
-            setParams {
-                setLong(1, sakId)
-            }
-            setRowMapper {
-                it.getLong("id")
-            }
-        }
-
-        connection.execute(
-            """
-            delete from kelvin_person_ident
-            where person_id = ?
-            and ident <> all (?::text[])
-        """
-        ) {
-            setParams {
-                setLong(1, personId)
-                setArray(2, identer.map { it.asString })
-            }
-        }
-
-        connection.executeBatch(
-            """
-            insert into kelvin_person_ident (person_id, ident)
-            values (?, ?)
-            on conflict (person_id, ident) do update set 
-            oppdatert = current_timestamp(3)
-        """,
-            identer
-        ) {
-            setParams { ident ->
-                setLong(1, personId)
-                setString(2, ident.asString)
-            }
-        }
+        upsertPersonIdenterIntern(sakId, identer)
 
         connection.execute(
             """
@@ -165,6 +126,75 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
+    override fun upsertPersonIdenter(
+        saksnummer: Fagsaknummer,
+        identer: List<Ident>
+    ) {
+        val sakId: Long = connection.queryFirst(
+            "select id from kelvin_sak where saksnummer = ?"
+        ) {
+            setParams {
+                setString(1, saksnummer.asString)
+            }
+            setRowMapper {
+                it.getLong("id")
+            }
+        }
+        upsertPersonIdenterIntern(sakId, identer)
+    }
+
+    private fun upsertPersonIdenterIntern(
+        sakId: Long,
+        identer: List<Ident>
+    ) {
+        val personId = connection.queryFirst(
+            """
+            insert into kelvin_person (sak_id) values (?)
+            on conflict (sak_id) do update set
+            oppdatert = current_timestamp(3)
+            returning id
+        """
+        ) {
+            setParams {
+                setLong(1, sakId)
+            }
+            setRowMapper {
+                it.getLong("id")
+            }
+        }
+
+        val deleted = connection.executeReturnUpdated(
+            """
+            delete from kelvin_person_ident
+            where person_id = ?
+            and ident <> all (?::text[])
+        """
+        ) {
+            setParams {
+                setLong(1, personId)
+                setArray(2, identer.map { it.asString })
+            }
+        }
+        if (deleted > 0) {
+            log.warn("Slettet $deleted person_identer for sak $sakId")
+        }
+
+        connection.executeBatch(
+            """
+            insert into kelvin_person_ident (person_id, ident)
+            values (?, ?)
+            on conflict (person_id, ident) do update set 
+            oppdatert = current_timestamp(3)
+        """,
+            identer
+        ) {
+            setParams { ident ->
+                setLong(1, personId)
+                setString(2, ident.asString)
+            }
+        }
+    }
+
     override fun hentMeldeperioder(saksnummer: Fagsaknummer): List<Periode> {
         return connection.queryList(
             """
@@ -238,7 +268,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 KelvinSak(
                     saksnummer = Fagsaknummer(it.getString("saksnummer")),
                     status = it.getEnumOrNull("status"),
-                    rettighetsperiode = it.getPeriode("saken_gjelder_for").let { Periode(it.fom, it.tom)}
+                    rettighetsperiode = it.getPeriode("saken_gjelder_for").let { Periode(it.fom, it.tom) }
                 )
             }
         }

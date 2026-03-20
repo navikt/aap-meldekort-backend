@@ -14,6 +14,7 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldekort.kontrakt.sak.BehandslingsflytUtfyllingRequest
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
+import no.nav.aap.meldekort.kontrakt.sak.OppdaterIdenterV0
 import no.nav.aap.meldekort.kontrakt.sak.SakStatus
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.tilgang.AuthorizationMachineToMachineConfig
@@ -71,10 +72,32 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
                     periode = Periode(body.periode.fom, body.periode.tom),
                     harDuJobbet = body.harDuJobbet,
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
-                    aktivitetsInformasjon = body.dager.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet, fravær = null) },
+                    aktivitetsInformasjon = body.dager.map {
+                        AktivitetsInformasjon(
+                            dato = it.dato,
+                            timer = it.timerArbeidet,
+                            fravær = null
+                        )
+                    },
                 )
             }
 
+            respondWithStatus(HttpStatusCode.OK)
+        }
+
+        route("/oppdater-identer").authorizedPost<Unit, Unit, OppdaterIdenterV0>(
+            routeConfig = AuthorizationMachineToMachineConfig(authorizedAzps = authorizedAzps),
+            auditLogConfig = null,
+        ) { _, body ->
+            dataSource.transaction { connection ->
+                val repositoryProvider = repositoryRegistry.provider(connection)
+                val kelvinMottakService = KelvinMottakService(repositoryProvider, gatewayProvider, clock)
+
+                kelvinMottakService.behandleOppdaterteIdenter(
+                    saksnummer = Fagsaknummer(body.saksnummer),
+                    identer = body.identer.map { Ident(it) },
+                )
+            }
             respondWithStatus(HttpStatusCode.OK)
         }
     }

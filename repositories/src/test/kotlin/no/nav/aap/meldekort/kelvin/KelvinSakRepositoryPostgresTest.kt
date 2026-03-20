@@ -22,6 +22,10 @@ class KelvinSakRepositoryPostgresTest {
     val fnr1 = Ident("1".repeat(11))
     val fnr2 = Ident("2".repeat(11))
     val fnr3 = Ident("3".repeat(11))
+    val fnr4 = Ident("4".repeat(11))
+    val fnr5 = Ident("5".repeat(11))
+    val fnr6 = Ident("6".repeat(11))
+    val fnr7 = Ident("7".repeat(11))
 
     val periode1 = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 2))
     val periode2 = Periode(LocalDate.of(2019, 12, 30), LocalDate.of(2020, 1, 2))
@@ -124,6 +128,15 @@ class KelvinSakRepositoryPostgresTest {
                 assertEquals(periode4, it?.rettighetsperiode)
                 assertEquals(KelvinSakStatus.AVSLUTTET, it?.status)
             }
+
+            assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr1, fnr2)
+            assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr3)
+            repo.upsertPersonIdenter(sak1, listOf(fnr4, fnr5))
+            assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr4, fnr5)
+            assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr3)
+            repo.upsertPersonIdenter(sak2, listOf(fnr6, fnr7))
+            assertThat(repo.hentIdenter(sak1)).containsExactlyInAnyOrder(fnr4, fnr5)
+            assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr6, fnr7)
         }
     }
 
