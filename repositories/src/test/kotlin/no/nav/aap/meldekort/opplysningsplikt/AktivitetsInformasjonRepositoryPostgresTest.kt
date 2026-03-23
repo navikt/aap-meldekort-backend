@@ -5,6 +5,8 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjon
@@ -38,6 +40,9 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             val t1 = t0.plusSeconds(1)
 
             val repo = AktivitetsInformasjonRepositoryPostgres(connection)
+
+            stubSakOgPerson(connection, fagsak1, listOf(ident1), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(connection, fagsak2, listOf(ident1), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
 
             /* Lager forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
             repo.lagreAktivitetsInformasjon(
@@ -115,4 +120,18 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             }
         }
     }
+
+    fun stubSakOgPerson(connection: DBConnection, fagsak: FagsakReferanse, identer: List<Ident>, periode: Periode) {
+        val repo = KelvinSakRepositoryPostgres(connection)
+        val sak = repo.upsertSak(
+            saksnummer = fagsak.nummer,
+            sakenGjelderFor = periode,
+            identer = identer,
+            meldeperioder = emptyList(),
+            meldeplikt = emptyList(),
+            opplysningsbehov = emptyList(),
+            status = null,
+        )
+    }
+
 }

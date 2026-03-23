@@ -2,6 +2,8 @@ package no.nav.aap.meldekort.utfylling
 
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.dbtest.TestDataSource
 import no.nav.aap.meldekort.fødselsnummerGenerator
@@ -50,10 +52,18 @@ class UtfyllingRepositoryPostgresTest {
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
+
             val flyt = UtfyllingFlytNavn.AAP_FLYT
             val ident = Ident("0".repeat(11))
             val opprettet = Instant.now().truncatedTo(ChronoUnit.MILLIS)
             val referanse = UtfyllingReferanse.ny()
+
+            val fagsak = FagsakReferanse(
+                system = FagsystemNavn.KELVIN,
+                nummer = Fagsaknummer("sak1234"),
+            )
+
+            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
 
             val utfyllingInn1 = Utfylling(
                 referanse = referanse,
@@ -75,10 +85,7 @@ class UtfyllingRepositoryPostgresTest {
                 ),
                 opprettet = opprettet,
                 sistEndret = opprettet,
-                fagsak = FagsakReferanse(
-                    system = FagsystemNavn.KELVIN,
-                    nummer = Fagsaknummer("sak1234"),
-                ),
+                fagsak = fagsak,
             )
 
             repo.lagreUtfylling(utfyllingInn1)
@@ -264,6 +271,19 @@ class UtfyllingRepositoryPostgresTest {
             )
         }
     }
+
+    fun stubSakOgPerson(connection: DBConnection, fagsak: FagsakReferanse, identer: List<Ident>, periode: Periode) {
+        val repo = KelvinSakRepositoryPostgres(connection)
+        val sak = repo.upsertSak(
+            saksnummer = fagsak.nummer,
+            sakenGjelderFor = periode,
+            identer = identer,
+            meldeperioder = emptyList(),
+            meldeplikt = emptyList(),
+            opplysningsbehov = emptyList(),
+            status = null,
+        )
+    }
 }
 
 private fun UtfyllingRepositoryPostgres.ny(
@@ -289,3 +309,4 @@ private fun UtfyllingRepositoryPostgres.ny(
 
     return utfylingReferanse
 }
+
