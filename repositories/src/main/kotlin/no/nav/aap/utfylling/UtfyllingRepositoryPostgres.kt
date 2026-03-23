@@ -138,15 +138,7 @@ class UtfyllingRepositoryPostgres(
     override fun slettUtkast(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
         connection.execute(
             """
-        delete 
-        from utfylling u
-        using kelvin_person_ident kpi1, kelvin_person_ident kpi2
-        where 
-            kpi1.ident = u.ident and 
-            kpi2.person_id = kpi1.person_id and 
-            kpi2.ident = ? and 
-            u.referanse = ? and 
-            not u.avsluttet
+        DELETE FROM utfylling WHERE ident = ? and referanse = ? AND NOT avsluttet
         """
         ) {
             setParams {
