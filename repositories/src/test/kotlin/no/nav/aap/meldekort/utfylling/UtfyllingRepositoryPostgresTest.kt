@@ -30,8 +30,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-
-private val ident = Ident("1111")
+import kotlin.random.Random
 
 class UtfyllingRepositoryPostgresTest {
 
@@ -54,7 +53,7 @@ class UtfyllingRepositoryPostgresTest {
 
 
             val flyt = UtfyllingFlytNavn.AAP_FLYT
-            val ident = Ident("0".repeat(11))
+            val ident = randomIdent()
             val opprettet = Instant.now().truncatedTo(ChronoUnit.MILLIS)
             val referanse = UtfyllingReferanse.ny()
 
@@ -131,6 +130,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett gamle utkast`() {
+        val ident = randomIdent()
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
@@ -148,6 +148,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `slett enda eldre utkast`() {
+        val ident = randomIdent()
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
@@ -165,6 +166,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett gamle innsendte`() {
+        val ident = randomIdent()
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
@@ -197,6 +199,7 @@ class UtfyllingRepositoryPostgresTest {
 
     @Test
     fun `ikke slett nyere`() {
+        val ident = randomIdent()
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
             val fagsak = FagsakReferanse(
@@ -321,3 +324,6 @@ private fun UtfyllingRepositoryPostgres.ny(
     return utfylingReferanse
 }
 
+fun randomIdent(): Ident {
+    return Ident(Random.nextLong(1, 1000).toString())
+}
