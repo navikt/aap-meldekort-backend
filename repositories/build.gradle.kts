@@ -22,7 +22,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.2.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-database-postgresql:12.1.0")
+    implementation("org.flywaydb:flyway-database-postgresql:12.1.1")
     runtimeOnly("org.postgresql:postgresql:42.7.10")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
@@ -37,5 +37,5 @@ dependencies {
     testFixturesImplementation("io.micrometer:micrometer-core:1.16.4")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:testcontainers-kafka:2.0.3")
+    testImplementation("org.testcontainers:testcontainers-kafka:2.0.4")
 }
