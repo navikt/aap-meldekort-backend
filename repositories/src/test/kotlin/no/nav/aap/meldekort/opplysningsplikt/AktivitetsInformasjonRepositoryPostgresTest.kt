@@ -16,10 +16,13 @@ import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.UtfyllingReferanse
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class AktivitetsInformasjonRepositoryPostgresTest {
     private val ident1 = Ident("1".repeat(11))
+    private val ident2 = Ident("2".repeat(11))
+    private val ident3 = Ident("3".repeat(11))
     private val utfylling1 = UtfyllingReferanse.ny()
     private val utfylling2 = UtfyllingReferanse.ny()
     private val fagsak1 = FagsakReferanse(
@@ -41,8 +44,8 @@ class AktivitetsInformasjonRepositoryPostgresTest {
 
             val repo = AktivitetsInformasjonRepositoryPostgres(connection)
 
-            stubSakOgPerson(connection, fagsak1, listOf(ident1), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
-            stubSakOgPerson(connection, fagsak2, listOf(ident1), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(connection, fagsak1, listOf(ident1, ident2), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(connection, fagsak2, listOf(ident1, ident2), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
 
             /* Lager forskjellige opplysninger på forskjellige fagsaker men med samme saksnummer */
             repo.lagreAktivitetsInformasjon(
@@ -67,9 +70,9 @@ class AktivitetsInformasjonRepositoryPostgresTest {
                 )
             )
 
-            /* Gjør delevis overskriving av periodene */
+            /* Gjør delevis overskriving av periodene med ny ident for samme person */
             repo.lagreAktivitetsInformasjon(
-                ident = ident1,
+                ident = ident2,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 4), null, null),
                     AktivitetsInformasjon(t1, utfylling1, fagsak1, LocalDate.of(2020, 1, 5), 8.0, null),
@@ -77,7 +80,7 @@ class AktivitetsInformasjonRepositoryPostgresTest {
                 )
             )
             repo.lagreAktivitetsInformasjon(
-                ident = ident1,
+                ident = ident2,
                 opplysninger = listOf(
                     AktivitetsInformasjon(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 4), 3.5, null),
                     AktivitetsInformasjon(t1, utfylling2, fagsak2, LocalDate.of(2020, 1, 5), null, null),
@@ -89,8 +92,6 @@ class AktivitetsInformasjonRepositoryPostgresTest {
             * dersom det ikke er oppgitt noe. */
             val periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 7))
 
-            // TODO: feiler da hentAktivitesInformasjon() ikke finner identen i kelvin_person_ident tabellen..
-            // må legges til med KelvinSakRepo..
             repo.hentAktivitetsInformasjon(ident1, fagsak1, periode).also { effektiveOpplysninger ->
                 assertEquals(
                     listOf(
@@ -118,6 +119,10 @@ class AktivitetsInformasjonRepositoryPostgresTest {
                     effektiveOpplysninger
                 )
             }
+
+            // ident3 er ikke koblet til sak
+            assertThat(repo.hentAktivitetsInformasjon(ident3, fagsak1, periode)).isEmpty()
+            assertThat(repo.hentAktivitetsInformasjon(ident3, fagsak2, periode)).isEmpty()
         }
     }
 
