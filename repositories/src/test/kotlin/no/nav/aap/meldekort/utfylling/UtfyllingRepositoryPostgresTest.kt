@@ -97,6 +97,14 @@ class UtfyllingRepositoryPostgresTest {
                 assertEquals(utfyllingInn1, it)
             }
 
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+                assertEquals(utfyllingInn1, it)
+            }
+
+            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+                assertNull(it)
+            }
+
             val utfyllingInn2 = utfyllingInn1.copy(
                 sistEndret = opprettet.plusMillis(100),
                 svar = utfyllingInn1.svar.copy(harDuJobbet = false)
@@ -111,6 +119,14 @@ class UtfyllingRepositoryPostgresTest {
                 assertEquals(utfyllingInn2, it)
             }
 
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+                assertEquals(utfyllingInn2, it)
+            }
+
+            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+                assertNull(it)
+            }
+
             val endeligUtfylling = utfyllingInn2.copy(
                 sistEndret = utfyllingInn2.sistEndret.plusMillis(300),
                 aktivtSteg = utfyllingInn2.flyt.steg.last(),
@@ -123,6 +139,14 @@ class UtfyllingRepositoryPostgresTest {
             }
 
             repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+                assertEquals(endeligUtfylling, it)
+            }
+
+            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+                assertEquals(endeligUtfylling, it)
+            }
+
+            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
                 assertEquals(endeligUtfylling, it)
             }
         }
