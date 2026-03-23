@@ -57,6 +57,7 @@ class UtfyllingRepositoryPostgresTest {
             val ident = randomIdent()
             val opprettet = Instant.now().truncatedTo(ChronoUnit.MILLIS)
             val referanse = UtfyllingReferanse.ny()
+            val periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 13))
 
             val fagsak = FagsakReferanse(
                 system = FagsystemNavn.KELVIN,
@@ -73,7 +74,7 @@ class UtfyllingRepositoryPostgresTest {
             val utfyllingInn1 = Utfylling(
                 referanse = referanse,
                 ident = ident,
-                periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 13)),
+                periode = periode,
                 flyt = flyt,
                 aktivtSteg = flyt.steg.first(),
                 svar = Svar(
@@ -95,19 +96,19 @@ class UtfyllingRepositoryPostgresTest {
 
             repo.lagreUtfylling(utfyllingInn1)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastÅpenUtfylling(ident, periode).also {
                 assertEquals(utfyllingInn1, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastUtfylling(ident, referanse).also {
                 assertEquals(utfyllingInn1, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastUtfylling(ident, periode).also {
                 assertEquals(utfyllingInn1, it)
             }
 
-            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastAvsluttetUtfylling(ident, referanse).also {
                 assertNull(it)
             }
 
@@ -117,19 +118,19 @@ class UtfyllingRepositoryPostgresTest {
             )
             repo.lagreUtfylling(utfyllingInn2)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastÅpenUtfylling(ident, periode).also {
                 assertEquals(utfyllingInn2, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastUtfylling(ident, referanse).also {
                 assertEquals(utfyllingInn2, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastUtfylling(ident, periode).also {
                 assertEquals(utfyllingInn2, it)
             }
 
-            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastAvsluttetUtfylling(ident, referanse).also {
                 assertNull(it)
             }
 
@@ -140,19 +141,19 @@ class UtfyllingRepositoryPostgresTest {
             assertTrue(endeligUtfylling.erAvsluttet)
             repo.lagreUtfylling(endeligUtfylling)
 
-            repo.lastÅpenUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastÅpenUtfylling(ident, periode).also {
                 assertNull(it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastUtfylling(ident, referanse).also {
                 assertEquals(endeligUtfylling, it)
             }
 
-            repo.lastUtfylling(utfyllingInn1.ident, utfyllingInn1.periode).also {
+            repo.lastUtfylling(ident, periode).also {
                 assertEquals(endeligUtfylling, it)
             }
 
-            repo.lastAvsluttetUtfylling(utfyllingInn1.ident, utfyllingInn1.referanse).also {
+            repo.lastAvsluttetUtfylling(ident, referanse).also {
                 assertEquals(endeligUtfylling, it)
             }
         }
