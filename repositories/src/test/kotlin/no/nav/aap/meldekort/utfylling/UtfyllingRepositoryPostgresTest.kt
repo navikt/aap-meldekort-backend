@@ -168,9 +168,15 @@ class UtfyllingRepositoryPostgresTest {
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
+            val fagsak = FagsakReferanse(
+                system = FagsystemNavn.KELVIN,
+                nummer = Fagsaknummer("111"),
+            )
+            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+
             val utfylling =
                 repo.ny(
-                    saksnummer = Fagsaknummer("111"),
+                    saksnummer = fagsak.nummer,
                     ident = ident,
                     opprettet = LocalDate.of(2019, 1, 1),
                     periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
@@ -193,9 +199,14 @@ class UtfyllingRepositoryPostgresTest {
     fun `ikke slett nyere`() {
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
+            val fagsak = FagsakReferanse(
+                system = FagsystemNavn.KELVIN,
+                nummer = Fagsaknummer("111"),
+            )
+            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
 
             val ref = repo.ny(
-                saksnummer = Fagsaknummer("111"),
+                saksnummer = fagsak.nummer,
                 ident = ident,
                 opprettet = LocalDate.of(2020, 1, 3),
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))

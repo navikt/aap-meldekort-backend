@@ -78,15 +78,15 @@ class UtfyllingRepositoryPostgres(
             join kelvin_person_ident kpi1 on kpi1.ident = u.ident
             join kelvin_person_ident kpi2 on kpi2.person_id = kpi1.person_id
             where 
-                kpi2.ident = ? and 
-                u.referanse = ?
+                u.referanse = ? and
+                kpi2.ident = ? 
             order by u.sist_endret desc
             limit 1
         """
         ) {
             setParams {
-                setString(1, ident.asString)
-                setUUID(2, utfyllingReferanse.asUuid)
+                setUUID(1, utfyllingReferanse.asUuid)
+                setString(2, ident.asString)
             }
             setRowMapper { row ->
                 utfyllingRowMapper(row)
