@@ -35,6 +35,7 @@ import kotlin.random.Random
 class UtfyllingRepositoryPostgresTest {
 
     private lateinit var dataSource: TestDataSource
+
     @BeforeEach
     fun setUp() {
         dataSource = TestDataSource()
@@ -59,10 +60,15 @@ class UtfyllingRepositoryPostgresTest {
 
             val fagsak = FagsakReferanse(
                 system = FagsystemNavn.KELVIN,
-                nummer = Fagsaknummer("sak1234"),
+                nummer = randomFagsaknummer(),
             )
 
-            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(
+                connection,
+                fagsak,
+                listOf(ident),
+                Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31))
+            )
 
             val utfyllingInn1 = Utfylling(
                 referanse = referanse,
@@ -153,13 +159,91 @@ class UtfyllingRepositoryPostgresTest {
     }
 
     @Test
+    fun `kan hente utfyllinger med alle identer til en person`() {
+        val person1Identer = listOf(randomIdent(), randomIdent())
+        val (person1Ident1, person1Ident2) = person1Identer
+        val person2Ident = randomIdent()
+
+        dataSource.transaction { connection ->
+            val repo = UtfyllingRepositoryPostgres(connection)
+
+            val fagsak = FagsakReferanse(
+                system = FagsystemNavn.KELVIN,
+                nummer = randomFagsaknummer(),
+            )
+
+            stubSakOgPerson(
+                connection,
+                fagsak,
+                person1Identer,
+                Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 12, 31))
+            )
+
+            val utfyllingPeriode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 13))
+            val utfyllingReferanse = repo.ny(
+                saksnummer = fagsak.nummer,
+                ident = person1Ident1,
+                opprettet = LocalDate.of(2020, 1, 1),
+                periode = utfyllingPeriode
+            )
+
+            repo.lastÅpenUtfylling(person1Ident1, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastÅpenUtfylling(person1Ident2, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastÅpenUtfylling(person2Ident, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isNull()
+            }
+
+            repo.lastUtfylling(person1Ident1, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastUtfylling(person1Ident2, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastUtfylling(person2Ident, utfyllingPeriode).also { utfylling ->
+                assertThat(utfylling?.referanse).isNull()
+            }
+
+            repo.lastUtfylling(person1Ident1, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastUtfylling(person1Ident2, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastUtfylling(person2Ident, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isNull()
+            }
+
+            val utfylling = repo.lastUtfylling(person1Ident1, utfyllingReferanse)!!
+            val avsluttetUtfylling = utfylling.copy(
+                aktivtSteg = utfylling.flyt.steg.last(),
+            )
+            assertTrue(avsluttetUtfylling.erAvsluttet)
+            repo.lagreUtfylling(avsluttetUtfylling)
+
+            repo.lastAvsluttetUtfylling(person1Ident1, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastAvsluttetUtfylling(person1Ident2, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isEqualTo(utfyllingReferanse)
+            }
+            repo.lastAvsluttetUtfylling(person2Ident, utfyllingReferanse).also { utfylling ->
+                assertThat(utfylling?.referanse).isNull()
+            }
+        }
+    }
+
+    @Test
     fun `slett gamle utkast`() {
         val ident = randomIdent()
         dataSource.transaction { connection ->
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(
-                saksnummer = Fagsaknummer("111"),
+                saksnummer = randomFagsaknummer(),
                 ident = ident,
                 opprettet = LocalDate.of(2020, 1, 1),
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
@@ -177,7 +261,7 @@ class UtfyllingRepositoryPostgresTest {
             val repo = UtfyllingRepositoryPostgres(connection)
 
             val ref = repo.ny(
-                saksnummer = Fagsaknummer("111"),
+                saksnummer = randomFagsaknummer(),
                 ident = ident,
                 opprettet = LocalDate.of(2019, 1, 1),
                 periode = Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 2, 2))
@@ -196,9 +280,14 @@ class UtfyllingRepositoryPostgresTest {
 
             val fagsak = FagsakReferanse(
                 system = FagsystemNavn.KELVIN,
-                nummer = Fagsaknummer("111"),
+                nummer = randomFagsaknummer(),
             )
-            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(
+                connection,
+                fagsak,
+                listOf(ident),
+                Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+            )
 
             val utfylling =
                 repo.ny(
@@ -228,9 +317,14 @@ class UtfyllingRepositoryPostgresTest {
             val repo = UtfyllingRepositoryPostgres(connection)
             val fagsak = FagsakReferanse(
                 system = FagsystemNavn.KELVIN,
-                nummer = Fagsaknummer("111"),
+                nummer = randomFagsaknummer(),
             )
-            stubSakOgPerson(connection, fagsak, listOf(ident), Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31)))
+            stubSakOgPerson(
+                connection,
+                fagsak,
+                listOf(ident),
+                Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 31))
+            )
 
             val ref = repo.ny(
                 saksnummer = fagsak.nummer,
@@ -349,5 +443,9 @@ private fun UtfyllingRepositoryPostgres.ny(
 }
 
 fun randomIdent(): Ident {
-    return Ident(Random.nextLong(1, 1000).toString())
+    return fødselsnummerGenerator.next()
+}
+
+fun randomFagsaknummer(): Fagsaknummer {
+    return Fagsaknummer(CharArray(10) { ('a'..'z').random() }.concatToString())
 }
