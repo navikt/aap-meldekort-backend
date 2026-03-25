@@ -24,9 +24,4 @@ class SakerService(
         val saker = aapGateway.hentSaker(ident)
         return saker.finnSakForDagen(påDag)
     }
-
-    fun finnSak(ident: Ident, fagsakReferanse: FagsakReferanse): Sak? {
-        val saker = aapGateway.hentSaker(ident)
-        return saker.finnSak(fagsakReferanse)
-    }
 }

@@ -4,7 +4,6 @@ import no.nav.aap.Ident
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.ArbeidIPeriodeV0
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.MeldekortV0
-import no.nav.aap.journalføring.DokarkivGateway.Dokument
 import no.nav.aap.journalføring.DokarkivGateway.Journalposttype.INNGAAENDE
 import no.nav.aap.journalføring.DokarkivGateway.Tema.AAP
 import no.nav.aap.kelvin.KelvinSakRepository
@@ -12,10 +11,9 @@ import no.nav.aap.komponenter.json.DefaultJsonMapper
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
+import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.sak.Sak
 import no.nav.aap.utfylling.Utfylling
-import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
@@ -51,7 +49,7 @@ class JournalføringService(
     fun journalfør(
         ident: Ident,
         utfylling: Utfylling,
-        sak: Sak,
+        fagsakReferanse: FagsakReferanse,
     ) {
         val meldekort = MeldekortV0(
             harDuArbeidet = utfylling.svar.harDuJobbet!!,
@@ -75,10 +73,10 @@ class JournalføringService(
                 utfylling = utfylling,
                 harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
             ),
-            sak = sak,
+            fagsakReferanse = fagsakReferanse,
         )
 
-        val forsøkFerdigstill = when (sak.referanse.system) {
+        val forsøkFerdigstill = when (fagsakReferanse.system) {
             FagsystemNavn.ARENA -> true
             FagsystemNavn.KELVIN -> false
         }
@@ -97,7 +95,7 @@ class JournalføringService(
         utfylling: Utfylling,
         meldekort: Meldekort,
         pdf: ByteArray,
-        sak: Sak,
+        fagsakReferanse: FagsakReferanse,
     ): DokarkivGateway.Journalpost {
         val uke1 = utfylling.periode.fom.get(uke)
         val uke2 = utfylling.periode.tom.get(uke)
@@ -124,7 +122,7 @@ class JournalføringService(
             tema = AAP,
             tittel = tittel,
             kanal = "NAV_NO",
-            journalfoerendeEnhet = when (sak.referanse.system) {
+            journalfoerendeEnhet = when (fagsakReferanse.system) {
                 FagsystemNavn.ARENA ->
                     /* 9999 = automatisk behandling */
                     "9999"
@@ -133,7 +131,7 @@ class JournalføringService(
             },
             eksternReferanseId = utfylling.referanse.asUuid.toString(),
             datoMottatt = utfylling.sistEndret.toString(),
-            tilleggsopplysninger = when (sak.referanse.system) {
+            tilleggsopplysninger = when (fagsakReferanse.system) {
                 FagsystemNavn.ARENA -> listOf(
                     // TODO:
                     // "meldekortId" to skjema.meldekortId.toString(),
@@ -142,12 +140,12 @@ class JournalføringService(
 
                 FagsystemNavn.KELVIN -> emptyList()
             },
-            sak = when (sak.referanse.system) {
+            sak = when (fagsakReferanse.system) {
                 FagsystemNavn.KELVIN -> null
                 FagsystemNavn.ARENA -> DokarkivGateway.Sak(
                     sakstype = DokarkivGateway.Sakstype.FAGSAK,
                     fagsaksystem = DokarkivGateway.FagsaksSystem.AO01,
-                    fagsakId = sak.referanse.nummer.asString,
+                    fagsakId = fagsakReferanse.nummer.asString,
                 )
             },
             dokumenter = listOf(

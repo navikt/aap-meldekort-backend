@@ -38,13 +38,6 @@ class JournalføringJobbUtfører(
             Fagsaknummer(input.parameter("fagsak_nummer"))
         )
 
-        val sak = requireNotNull(
-            sakerService.finnSak(
-                ident,
-                fagsakReferanse
-            )
-        ) { "Fant ikke sak. Referanse: $fagsakReferanse" }
-
         journalføringService.journalfør(
             ident = ident,
             utfylling = requireNotNull(
@@ -53,7 +46,7 @@ class JournalføringJobbUtfører(
                     utfyllingReferanse
                 )
             ) { "Fant ikke utfylling. Referanse: $utfyllingReferanse" },
-            sak = sak,
+            fagsakReferanse = fagsakReferanse,
         )
     }
 
