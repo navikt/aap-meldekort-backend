@@ -7,6 +7,7 @@ import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
 import no.nav.aap.kelvin.MeldekortStatusService
+import no.nav.aap.komponenter.config.requiredConfigForKey
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import java.time.Clock
@@ -36,7 +37,7 @@ fun NormalOpenAPIRoute.meldekortStatus(
                 ).map { meldekort ->
                     MeldekortTilUtfyllingDto.fraDomene(meldekort)
                 },
-                redirectUrl = "www.nav.no/aap/meldekort", // TODO hent fra config
+                redirectUrl = requiredConfigForKey("aap.meldekort.lenke"),
             )
         }
 
