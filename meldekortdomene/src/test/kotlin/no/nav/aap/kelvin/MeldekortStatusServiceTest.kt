@@ -84,7 +84,7 @@ class MeldekortStatusServiceTest {
     }
 
     @Test
-    fun `hentMeldekortTilUtfylling ekskluderer meldeperioder der meldevindu fom er i fremtiden`() {
+    fun `hentMeldekortTilUtfylling tar ikke med meldekort der tidligste utfyllingstidspunkt er i fremtiden`() {
         val kanSendesInnFra = andreMars.plusDays(1)
         val toUkerSiden = andreMars.minusDays(14)
 
