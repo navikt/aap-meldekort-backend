@@ -98,7 +98,6 @@ class MeldekortStatusServiceTest {
         assertThat(result).hasSize(1)
         assertThat(result.map { it.kanSendesFra }).containsExactly(toUkerSiden)
     }
-    // --- ok til hit ^^^
 
     private fun meldeperiode(
         meldeperiodeFom: LocalDate = andreMars.minusDays(14),
