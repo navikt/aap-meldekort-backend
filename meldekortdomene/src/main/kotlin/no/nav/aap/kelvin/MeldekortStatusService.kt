@@ -32,7 +32,8 @@ class MeldekortStatusService(
             .takeWhile { it.meldevindu.fom <= LocalDate.now(clock) }
             .map { meldeperiode ->
                 MeldekortTilUtfylling(
-                    kanFyllesUtFra = null, // TODO sjekk om denne er relevant
+                    // vi åpner ikke innsending på et spesielt tidspunkt, man kan alltid kun fylle ut det neste meldekortet som skal sendes inn, kanFyllesUtFra settes derfor alltid til null
+                    kanFyllesUtFra = null,
                     kanSendesFra = meldeperiode.meldevindu.fom,
                     fristForInnsending = meldeperiode.meldevindu.tom
                 )
