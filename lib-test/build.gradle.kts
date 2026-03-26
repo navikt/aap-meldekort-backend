@@ -1,7 +1,7 @@
 val ktorVersion = "3.4.1"
 val komponenterVersjon = "2.0.17"
 val junitVersjon = "6.0.3"
-val jacksonVersjon = "2.21.1"
+val jacksonVersjon = "2.21.2"
 
 plugins {
     id("aap.conventions")
@@ -34,6 +34,6 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.8")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    implementation("org.testcontainers:testcontainers-postgresql:2.0.3")
+    implementation("org.testcontainers:testcontainers-postgresql:2.0.4")
     implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
 }
