@@ -67,6 +67,8 @@ spec:
                   namespace: meldekort
                 - application: meldekort-frontend-q2
                   namespace: meldekort
+                - application: meldekort-landingsside
+                  namespace: meldekort
         outbound:
             rules:
                 - application: meldekortkontroll-api-q2
