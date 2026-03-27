@@ -7,7 +7,7 @@ import no.nav.aap.sak.FagsakReferanse
 import java.time.Clock
 import java.time.LocalDate
 
-class MeldekortStatusService(
+class MeldekortstatusService(
     private val kelvinSakRepository: KelvinSakRepository,
     private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val kelvinSakService: KelvinSakService,
@@ -20,11 +20,15 @@ class MeldekortStatusService(
         clock = clock
     )
 
-    fun brukerHarSakIKelvin(ident: Ident): KelvinSak? {
-        return kelvinSakRepository.hentSak(ident, LocalDate.now(clock))
+    fun hentMeldekortstatus(ident:Ident): Meldekortstatus? {
+        val sak = kelvinSakRepository.hentSak(ident, LocalDate.now(clock)) ?: return null
+        return Meldekortstatus(
+            harInnsendteMeldekort = harInnsendteMeldekort(ident, sak.referanse),
+            meldekortTilUtfylling = hentMeldekortTilUtfylling(ident, sak.referanse),
+        )
     }
 
-    fun hentMeldekortTilUtfylling(ident: Ident, referanse: FagsakReferanse): List<MeldekortTilUtfylling> {
+    private fun hentMeldekortTilUtfylling(ident: Ident, referanse: FagsakReferanse): List<MeldekortTilUtfylling> {
         val meldeperioderUtenInnsending =
             kelvinSakService.meldeperioderUtenInnsending(ident, referanse)
 
@@ -40,7 +44,7 @@ class MeldekortStatusService(
             }
     }
 
-    fun harInnsendteMeldekort(ident: Ident, referanse: FagsakReferanse): Boolean {
+    private fun harInnsendteMeldekort(ident: Ident, referanse: FagsakReferanse): Boolean {
         val perioder = kelvinSakService.hentMeldeperioder(referanse)
 
         val senesteOpplysningsdato =

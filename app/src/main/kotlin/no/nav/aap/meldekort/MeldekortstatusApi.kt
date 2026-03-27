@@ -6,8 +6,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.response.respondWithStatus
 import com.papsign.ktor.openapigen.route.route
 import io.ktor.http.*
-import no.nav.aap.kelvin.MeldekortStatusService
-import no.nav.aap.komponenter.config.requiredConfigForKey
+import no.nav.aap.kelvin.MeldekortstatusService
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import java.time.Clock
@@ -21,24 +20,12 @@ fun NormalOpenAPIRoute.meldekortStatus(
     route("meldekort-status").get<Unit, MeldekortstatusDto> {
 
         val response = dataSource.transaction { connection ->
-            val meldekortStatusService = MeldekortStatusService(repositoryRegistry.provider(connection), clock)
+            val meldekortStatusService = MeldekortstatusService(repositoryRegistry.provider(connection), clock)
 
             val ident = innloggetBruker().ident
-            val sak = meldekortStatusService.brukerHarSakIKelvin(ident) ?: return@transaction null
 
-            MeldekortstatusDto(
-                harInnsendteMeldekort = meldekortStatusService.harInnsendteMeldekort(
-                    ident,
-                    sak.referanse
-                ),
-                meldekortTilUtfylling = meldekortStatusService.hentMeldekortTilUtfylling(
-                    ident,
-                    sak.referanse
-                ).map { meldekort ->
-                    MeldekortTilUtfyllingDto.fraDomene(meldekort)
-                },
-                redirectUrl = requiredConfigForKey("aap.meldekort.lenke"),
-            )
+            meldekortStatusService.hentMeldekortstatus(ident)
+                ?.let { MeldekortstatusDto.fraDomene(it) }
         }
 
         if (response == null) {
