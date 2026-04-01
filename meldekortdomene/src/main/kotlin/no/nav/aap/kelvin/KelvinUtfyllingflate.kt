@@ -36,7 +36,7 @@ class KelvinUtfyllingFlate(
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         utfyllingRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
-        sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
+        sakService = KelvinSakService(repositoryProvider, clock),
         flytProvider = { flytNavn -> UtfyllingFlyt.konstruer(repositoryProvider, gatewayProvider, flytNavn, clock) },
         clock = clock,
     )

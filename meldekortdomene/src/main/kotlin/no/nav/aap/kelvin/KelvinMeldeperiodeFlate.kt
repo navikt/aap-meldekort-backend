@@ -18,7 +18,7 @@ class KelvinMeldeperiodeFlate(
 ) : MeldeperiodeFlate {
 
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
-        sakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
+        sakService = KelvinSakService(repositoryProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         aktivitetsInformasjonRepository = repositoryProvider.provide(),
         clock = clock,
