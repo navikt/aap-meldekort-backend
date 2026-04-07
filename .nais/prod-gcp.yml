@@ -61,6 +61,8 @@ spec:
                 - application: paw-patrol
                 - application: meldekort-frontend
                   namespace: meldekort
+                - application: meldekort-landingsside
+                  namespace: meldekort
         outbound:
             rules:
                 - application: api-intern
