@@ -19,7 +19,7 @@ class KelvinSakService(
     private val clock: Clock,
 ) {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
+    constructor(repositoryProvider: RepositoryProvider, clock: Clock) : this(
         aktivitetsInformasjonRepository = repositoryProvider.provide(),
         kelvinSakRepository = repositoryProvider.provide(),
         clock = clock,

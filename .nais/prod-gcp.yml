@@ -61,6 +61,8 @@ spec:
                 - application: paw-patrol
                 - application: meldekort-frontend
                   namespace: meldekort
+                - application: meldekort-landingsside
+                  namespace: meldekort
         outbound:
             rules:
                 - application: api-intern
@@ -72,6 +74,12 @@ spec:
             - type: POSTGRES_16 
               flags:
                 - name: cloudsql.logical_decoding
+                  value: "on"
+                - name: cloudsql.enable_pgaudit
+                  value: "true"
+                - name: pgaudit.log
+                  value: "write,ddl,role"
+                - name: "pgaudit.log_parameter"
                   value: "on"
               tier: db-custom-1-3840
               diskAutoresize: true

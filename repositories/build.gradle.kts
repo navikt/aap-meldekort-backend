@@ -1,4 +1,4 @@
-val komponenterVersjon = "2.0.17"
+val komponenterVersjon = "2.0.26"
 val junitVersjon = "6.0.3"
 
 plugins {
@@ -22,7 +22,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.2.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-database-postgresql:12.1.1")
+    implementation("org.flywaydb:flyway-database-postgresql:12.3.0")
     runtimeOnly("org.postgresql:postgresql:42.7.10")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")

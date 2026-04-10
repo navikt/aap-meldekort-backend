@@ -32,7 +32,7 @@ class VarselService(
     private val clock: Clock
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
-        kelvinSakService = KelvinSakService(repositoryProvider, gatewayProvider, clock),
+        kelvinSakService = KelvinSakService(repositoryProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         varselRepository = repositoryProvider.provide(),
         utfyllingRepository = repositoryProvider.provide(),
