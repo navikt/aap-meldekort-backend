@@ -99,7 +99,11 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleOppdaterteIdenter(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.identer.map { Ident(it) },
+                    identer = body.brukerIdenter?.map {
+                        Ident(asString = it.ident, aktiv = it.aktiv)
+                    } ?: body.identer.map {
+                        Ident(asString = it, aktiv = null)
+                    },
                 )
             }
             respondWithStatus(HttpStatusCode.OK)
