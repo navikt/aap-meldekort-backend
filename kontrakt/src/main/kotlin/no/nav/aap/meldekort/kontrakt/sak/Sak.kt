@@ -4,7 +4,8 @@ import no.nav.aap.meldekort.kontrakt.Periode
 import java.time.LocalDate
 
 public class MeldeperioderV0(
-    public val brukerIdenter: List<Ident>? = null, // Erstatter `identer`
+    public val personIdenter: List<Ident>? = null,
+    @Deprecated("Erstattes av personIdenter", ReplaceWith("personIdenter"))
     public val identer: List<String>,
     public val saksnummer: String,
     public val sakenGjelderFor: Periode,
@@ -47,6 +48,7 @@ public data class TimerArbeidetDto(
 
 public class OppdaterIdenterV0(
     public val saksnummer: String,
-    public val brukerIdenter: List<Ident>? = null, // Erstatter `identer`
+    public val personIdenter: List<Ident>? = null,
+    @Deprecated("Erstattes av personIdenter", ReplaceWith("personIdenter"))
     public val identer: List<String>,
 )

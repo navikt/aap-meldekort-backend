@@ -44,7 +44,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleMottatteMeldeperioder(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.brukerIdenter?.map {
+                    identer = body.personIdenter?.map {
                         Ident(asString = it.ident, aktiv = it.aktiv)
                     } ?: body.identer.map {
                         Ident(asString = it, aktiv = null)
@@ -99,7 +99,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleOppdaterteIdenter(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.brukerIdenter?.map {
+                    identer = body.personIdenter?.map {
                         Ident(asString = it.ident, aktiv = it.aktiv)
                     } ?: body.identer.map {
                         Ident(asString = it, aktiv = null)
