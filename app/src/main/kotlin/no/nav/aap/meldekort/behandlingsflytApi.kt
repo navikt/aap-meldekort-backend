@@ -44,7 +44,11 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleMottatteMeldeperioder(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.identer.map { Ident(it) },
+                    identer = body.brukerIdenter?.map {
+                        Ident(asString = it.ident, aktiv = it.aktiv)
+                    } ?: body.identer.map {
+                        Ident(asString = it, aktiv = null)
+                    },
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
                     opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
