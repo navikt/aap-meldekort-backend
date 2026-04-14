@@ -44,11 +44,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleMottatteMeldeperioder(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.personIdenter?.map {
-                        Ident(asString = it.ident, aktiv = it.aktiv)
-                    } ?: body.identer.map {
-                        Ident(asString = it, aktiv = null)
-                    },
+                    identer = body.personIdenter.map { Ident(asString = it.ident, aktiv = it.aktiv) },
                     sakenGjelderFor = Periode(body.sakenGjelderFor.fom, body.sakenGjelderFor.tom),
                     meldeperioder = body.meldeperioder.map { Periode(it.fom, it.tom) },
                     opplysningsbehov = body.opplysningsbehov.map { Periode(it.fom, it.tom) },
@@ -99,11 +95,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
 
                 kelvinMottakService.behandleOppdaterteIdenter(
                     saksnummer = Fagsaknummer(body.saksnummer),
-                    identer = body.personIdenter?.map {
-                        Ident(asString = it.ident, aktiv = it.aktiv)
-                    } ?: body.identer.map {
-                        Ident(asString = it, aktiv = null)
-                    },
+                    identer = body.personIdenter.map { Ident(asString = it.ident, aktiv = it.aktiv) },
                 )
             }
             respondWithStatus(HttpStatusCode.OK)
