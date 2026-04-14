@@ -35,7 +35,7 @@ class BehandlingsflytApiKtTest {
         val meldedata = MeldeperioderV0(
             sakenGjelderFor = rettighetsperiode,
             saksnummer = "SAKSNUMMER",
-            personIdenter = listOf(Ident(fnr.asString, fnr.aktiv)),
+            personIdenter = listOf(Ident(fnr.asString, fnr.aktiv ?: false)),
             meldeperioder = meldeperioder,
             meldeplikt = meldeplikt
         )
