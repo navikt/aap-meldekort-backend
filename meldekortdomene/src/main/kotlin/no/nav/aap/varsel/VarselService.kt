@@ -171,8 +171,9 @@ class VarselService(
             )
         )
 
-        // TODO hent gjeldende ident fra PDL
-        val brukerId = kelvinSakRepository.hentIdenter(varsel.saksnummer).first()
+        val brukerId = kelvinSakRepository.hentIdenter(varsel.saksnummer).let { identer ->
+            identer.firstOrNull { it.aktiv ?: false } ?: identer.first()
+        }
         val varselTekster = when (varsel.typeVarselOm) {
             TypeVarselOm.MELDEPLIKTPERIODE -> TEKSTER_OPPGAVE_MELDEPLIKTPERIODE
             else -> TODO("ikke implenetert støtte for varseltype ${varsel.typeVarselOm}")

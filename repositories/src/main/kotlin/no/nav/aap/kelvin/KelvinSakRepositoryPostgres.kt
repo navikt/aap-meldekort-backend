@@ -181,16 +181,18 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
 
         connection.executeBatch(
             """
-            insert into kelvin_person_ident (person_id, ident)
-            values (?, ?)
+            insert into kelvin_person_ident (person_id, ident, aktiv)
+            values (?, ?, ?)
             on conflict (person_id, ident) do update set 
-            oppdatert = current_timestamp(3)
+            oppdatert = current_timestamp(3),
+            aktiv = excluded.aktiv
         """,
             identer
         ) {
             setParams { ident ->
                 setLong(1, personId)
                 setString(2, ident.asString)
+                setBoolean(3, ident.aktiv)
             }
         }
     }
@@ -277,7 +279,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
     override fun hentIdenter(saksnummer: Fagsaknummer): List<Ident> {
         return connection.queryList(
             """
-            select kelvin_person_ident.ident
+            select kelvin_person_ident.ident, kelvin_person_ident.aktiv
             from kelvin_sak
             join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
             join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
@@ -290,7 +292,10 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             }
 
             setRowMapper {
-                Ident(it.getString("ident"))
+                Ident(
+                    asString = it.getString("ident"),
+                    aktiv = it.getBooleanOrNull("aktiv")
+                )
             }
         }
 

@@ -149,6 +149,54 @@ class VarselServiceTest {
     }
 
     @Test
+    fun `sender varsel på aktiv ident`() {
+        dataSource.transaction { connection ->
+            val varselRepository = VarselRepositoryPostgres(connection)
+
+            val saksnummer = saksnummerGenerator.next()
+            val ident1 = fødselsnummerGenerator.next().copy(aktiv = false)
+            val ident2 = fødselsnummerGenerator.next().copy(aktiv = true)
+            val ident3 = fødselsnummerGenerator.next().copy(aktiv = false)
+            val sakenGjelderFor = Periode(LocalDate.of(2025, 6, 30), LocalDate.of(2025, 6, 30).plusYears(1))
+            val opplysningsbehov = listOf(sakenGjelderFor)
+            val meldeperioder = lagPerioder(
+                LocalDate.of(2025, 7, 14) to LocalDate.of(2025, 7, 27),
+            )
+            val meldeplikt = lagPerioder(
+                LocalDate.of(2025, 7, 28) to LocalDate.of(2025, 8, 4),
+            )
+
+            kelvinMottakService(
+                connection,
+                clockMedTid(LocalDate.of(2025, 6, 30).atTime(1, 1))
+            ).behandleMottatteMeldeperioder(
+                saksnummer,
+                sakenGjelderFor,
+                listOf(ident1, ident2, ident3),
+                meldeperioder,
+                meldeplikt,
+                opplysningsbehov,
+                KelvinSakStatus.LØPENDE
+            )
+
+            varselService(connection, clockMedTid(LocalDateTime.of(2025, 7, 28, 9, 0)))
+                .sendPlanlagteVarsler()
+
+            assertVarsler(
+                varselRepository,
+                saksnummer,
+                ForventetVarsel(
+                    sendingstidspunkt = LocalDateTime.of(2025, 7, 28, 9, 0),
+                    forPeriode = Periode(LocalDate.of(2025, 7, 14), LocalDate.of(2025, 7, 27)),
+                    status = VarselStatus.SENDT
+                )
+            )
+
+            verify(exactly = 1) { varselGateway.sendVarsel(ident2, any(), any(), any()) }
+        }
+    }
+
+    @Test
     fun `sender varsel tidligere (17 desember) for meldeperioden i uke 50-51`() {
         dataSource.transaction { connection ->
             val varselRepository = VarselRepositoryPostgres(connection)

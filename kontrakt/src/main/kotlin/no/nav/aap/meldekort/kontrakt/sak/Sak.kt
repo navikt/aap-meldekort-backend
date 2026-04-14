@@ -4,6 +4,8 @@ import no.nav.aap.meldekort.kontrakt.Periode
 import java.time.LocalDate
 
 public class MeldeperioderV0(
+    public val personIdenter: List<Ident>? = null,
+    @Deprecated("Erstattes av personIdenter", ReplaceWith("personIdenter"))
     public val identer: List<String>,
     public val saksnummer: String,
     public val sakenGjelderFor: Periode,
@@ -17,6 +19,11 @@ public class MeldeperioderV0(
      * gir oss opplysninger gjennom meldekortet.
      */
     public val opplysningsbehov: List<Periode> = emptyList(),
+)
+
+public class Ident(
+    public val ident: String,
+    public val aktiv: Boolean? = null,
 )
 
 public enum class SakStatus {
@@ -41,5 +48,7 @@ public data class TimerArbeidetDto(
 
 public class OppdaterIdenterV0(
     public val saksnummer: String,
+    public val personIdenter: List<Ident>? = null,
+    @Deprecated("Erstattes av personIdenter", ReplaceWith("personIdenter"))
     public val identer: List<String>,
 )
