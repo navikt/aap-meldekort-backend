@@ -3,6 +3,7 @@ package no.nav.aap.meldekort
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.meldekort.kontrakt.Periode
+import no.nav.aap.meldekort.kontrakt.sak.Ident
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.Fagsaknummer
@@ -34,7 +35,7 @@ class BehandlingsflytApiKtTest {
         val meldedata = MeldeperioderV0(
             sakenGjelderFor = rettighetsperiode,
             saksnummer = "SAKSNUMMER",
-            identer = listOf(fnr.asString),
+            personIdenter = listOf(Ident(fnr.asString, fnr.aktiv)),
             meldeperioder = meldeperioder,
             meldeplikt = meldeplikt
         )
