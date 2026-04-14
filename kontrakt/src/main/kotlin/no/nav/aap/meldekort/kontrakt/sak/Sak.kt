@@ -21,7 +21,7 @@ public class MeldeperioderV0(
 
 public class Ident(
     public val ident: String,
-    public val aktiv: Boolean? = null,
+    public val aktiv: Boolean,
 )
 
 public enum class SakStatus {
