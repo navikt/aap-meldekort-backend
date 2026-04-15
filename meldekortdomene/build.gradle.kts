@@ -1,4 +1,4 @@
-val komponenterVersjon = "2.0.28"
+val komponenterVersjon = "2.0.30"
 val junitVersjon = "6.0.3"
 
 plugins {
@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.585")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.586")
     implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
