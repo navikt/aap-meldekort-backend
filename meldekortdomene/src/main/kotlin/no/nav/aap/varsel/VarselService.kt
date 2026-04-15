@@ -155,12 +155,15 @@ class VarselService(
             return
         }
 
-        if (varsel.sendingstidspunkt.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now(clock))) {
-            log.info("Sender varsel med varselId ${varsel.varselId}")
+        val varselInfo =
+            "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+        if (varsel.sendingstidspunkt.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now(clock)) ||
+            varsel.opprettet.atZone(ZoneId.systemDefault()).toLocalDate().isEqual(LocalDate.now(clock))
+        ) {
+            log.info("Sender varsel. $varselInfo.")
         } else {
             log.warn(
-                "Sender varsel som skulle sendes en annen dag enn i dag. Tyder på forsinkelse i utsendingsjobb. " +
-                        "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
+                "Sender varsel som skulle sendes en annen dag enn i dag. Dette kan tyde på forsinkelse i utsendingsjobb. $varselInfo."
             )
         }
 
