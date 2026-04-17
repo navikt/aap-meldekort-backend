@@ -283,7 +283,6 @@ class UtfyllingFlytV2Test {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            FakeTokenX.port = 0
             FakeServers.start()
 
             GatewayRegistry
@@ -315,7 +314,9 @@ class UtfyllingFlytV2Test {
         @JvmStatic
         @AfterAll
         fun afterAll() {
-            embeddedServer.stop(0L, 0L)
+            embeddedServer.stop(2_000L, 10_000L)
+            (client as? AutoCloseable)?.close()
+            (dataSource as? AutoCloseable)?.close()
         }
     }
 }
