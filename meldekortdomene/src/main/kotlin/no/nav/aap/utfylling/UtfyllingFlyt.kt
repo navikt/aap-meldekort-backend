@@ -8,6 +8,7 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.opplysningsplikt.PersisterOpplysningerSteg
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.BESTILL_JOURNALFØRING
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
@@ -15,7 +16,6 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.PERSISTER_OPPLYSNINGER
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
-import no.nav.aap.utfylling.UtfyllingStegNavn.INAKTIVER_VARSEL
 import no.nav.aap.varsel.InaktiverVarselSteg
 import no.nav.aap.varsel.VarselService
 import org.slf4j.LoggerFactory
@@ -64,6 +64,7 @@ enum class UtfyllingFlytNavn(
         listOf(
             SPØRSMÅL,
             UTFYLLING,
+            FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
@@ -186,6 +187,7 @@ class UtfyllingFlyt(
                         INTRODUKSJON -> IntroduksjonSteg
                         SPØRSMÅL -> ArbeidetSpørsmål
                         UTFYLLING -> TimerArbeidetSteg
+                        FRAVÆR_SPØRSMÅL -> FraværSpørsmålSteg
                         FRAVÆR_UTFYLLING -> DagerFraværSteg
                         BEKREFT -> StemmerOpplysningeneSteg(clock)
                         PERSISTER_OPPLYSNINGER -> PersisterOpplysningerSteg(repositoryProvider.provide())
