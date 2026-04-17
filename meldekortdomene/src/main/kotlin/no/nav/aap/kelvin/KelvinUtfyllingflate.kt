@@ -111,7 +111,7 @@ class KelvinUtfyllingFlate(
                     harDuJobbet = aktivitetsInformasjon.any { (it.timer ?: 0.0) > 0.0 },
                     aktivitetsInformasjon = aktivitetsInformasjon,
                     stemmerOpplysningene = eksisterendeAvsluttetUtfylling?.svar?.stemmerOpplysningene,
-                    harDuGjennomførtAvtaltAktivitet = eksisterendeAvsluttetUtfylling?.svar?.harDuGjennomførtAvtaltAktivitet,
+                    harDuHattFravær = eksisterendeAvsluttetUtfylling?.svar?.harDuHattFravær,
                 ),
                 sak = sak,
             )

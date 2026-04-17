@@ -6,7 +6,6 @@ import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlate
-import no.nav.aap.utfylling.UtfyllingFlytNavn
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -93,7 +92,6 @@ class UtfyllingMetadataDto(
     val fristForInnsending: LocalDateTime?,
     val kanSendesInn: Boolean,
     val visFrist: Boolean,
-    val flytNavn: UtfyllingFlytNavn?,
 ) {
     companion object {
         fun fraDomene(utfylling: Utfylling, metadata: UtfyllingFlate.Metadata): UtfyllingMetadataDto {
@@ -107,7 +105,6 @@ class UtfyllingMetadataDto(
                 harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin,
                 harBrukerSakUnderBehandling = metadata.brukerHarSakUnderBehandling,
                 visFrist = metadata.visFrist,
-                flytNavn = metadata.flytNavn,
             )
         }
 
@@ -118,6 +115,7 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
     INTRODUKSJON(UtfyllingStegNavn.INTRODUKSJON),
     SPØRSMÅL(UtfyllingStegNavn.SPØRSMÅL),
     UTFYLLING(UtfyllingStegNavn.UTFYLLING),
+    FRAVÆR_SPØRSMÅL(UtfyllingStegNavn.FRAVÆR_SPØRSMÅL),
     FRAVÆR_UTFYLLING(UtfyllingStegNavn.FRAVÆR_UTFYLLING),
     BEKREFT(UtfyllingStegNavn.BEKREFT),
     KVITTERING(UtfyllingStegNavn.KVITTERING),
@@ -129,6 +127,7 @@ enum class StegDto(val tilDomene: UtfyllingStegNavn) {
                 UtfyllingStegNavn.INTRODUKSJON -> INTRODUKSJON
                 UtfyllingStegNavn.SPØRSMÅL -> SPØRSMÅL
                 UtfyllingStegNavn.UTFYLLING -> UTFYLLING
+                UtfyllingStegNavn.FRAVÆR_SPØRSMÅL -> FRAVÆR_SPØRSMÅL
                 UtfyllingStegNavn.FRAVÆR_UTFYLLING -> FRAVÆR_UTFYLLING
                 UtfyllingStegNavn.BEKREFT -> BEKREFT
                 UtfyllingStegNavn.KVITTERING -> KVITTERING
@@ -146,7 +145,8 @@ data class SvarDto(
     val harDuJobbet: Boolean?,
     val dager: List<DagSvarDto>,
     val stemmerOpplysningene: Boolean?,
-    val harDuGjennomførtAvtaltAktivitet: FraværSvarDto? = null,
+    val harDuHattAvtalteAktiviteter: Boolean? = null,
+    val harDuHattFravær: FraværSvarDto? = null,
 ) {
     fun tilDomene(): Svar {
         return Svar(
@@ -154,7 +154,8 @@ data class SvarDto(
             harDuJobbet = harDuJobbet,
             aktivitetsInformasjon = dager.map { it.tilAktivitetsInformasjon() },
             stemmerOpplysningene = stemmerOpplysningene,
-            harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet?.tilDomene
+            harDuHattAvtalteAktiviteter = harDuHattAvtalteAktiviteter,
+            harDuHattFravær = harDuHattFravær?.tilDomene
         )
     }
 
@@ -163,7 +164,7 @@ data class SvarDto(
         harDuJobbet = svar.harDuJobbet,
         dager = svar.aktivitetsInformasjon.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
-        harDuGjennomførtAvtaltAktivitet = svar.harDuGjennomførtAvtaltAktivitet?.let { FraværSvarDto.fraDomene(it) }
+        harDuHattFravær = svar.harDuHattFravær?.let { FraværSvarDto.fraDomene(it) }
     )
 }
 
@@ -213,7 +214,6 @@ enum class FraværDto(val tilDomene: Fravær) {
 enum class FraværSvarDto(val tilDomene: FraværSvar) {
     GJENNOMFØRT_AVTALT_AKTIVITET(FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET),
     NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET(FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET),
-    INGEN_AVTALTE_AKTIVITETER(FraværSvar.INGEN_AVTALTE_AKTIVITETER),
     ;
 
     companion object {
@@ -221,7 +221,6 @@ enum class FraværSvarDto(val tilDomene: FraværSvar) {
             return when (fraværSvar) {
                 FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET -> GJENNOMFØRT_AVTALT_AKTIVITET
                 FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET -> NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
-                FraværSvar.INGEN_AVTALTE_AKTIVITETER -> INGEN_AVTALTE_AKTIVITETER
             }
         }
     }

@@ -30,7 +30,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import kotlin.random.Random
 
 class UtfyllingRepositoryPostgresTest {
 
@@ -87,7 +86,7 @@ class UtfyllingRepositoryPostgresTest {
                         AktivitetsInformasjon(LocalDate.of(2020, 1, 4), 7.5, null),
                     ),
                     stemmerOpplysningene = false,
-                    harDuGjennomførtAvtaltAktivitet = FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET,
+                    harDuHattFravær = FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET,
                 ),
                 opprettet = opprettet,
                 sistEndret = opprettet,
