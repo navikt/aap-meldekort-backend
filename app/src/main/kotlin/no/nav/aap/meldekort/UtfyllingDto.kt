@@ -93,7 +93,6 @@ class UtfyllingMetadataDto(
     val fristForInnsending: LocalDateTime?,
     val kanSendesInn: Boolean,
     val visFrist: Boolean,
-    val flytNavn: UtfyllingFlytNavn?,
 ) {
     companion object {
         fun fraDomene(utfylling: Utfylling, metadata: UtfyllingFlate.Metadata): UtfyllingMetadataDto {
@@ -107,7 +106,6 @@ class UtfyllingMetadataDto(
                 harBrukerVedtakIKelvin = metadata.brukerHarVedtakIKelvin,
                 harBrukerSakUnderBehandling = metadata.brukerHarSakUnderBehandling,
                 visFrist = metadata.visFrist,
-                flytNavn = metadata.flytNavn,
             )
         }
 

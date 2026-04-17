@@ -41,6 +41,7 @@ enum class UtfyllingFlytNavn(
             INTRODUKSJON,
             SPØRSMÅL,
             UTFYLLING,
+            FRAVÆR_SPØRSMÅL,
             FRAVÆR_UTFYLLING,
             BEKREFT,
             PERSISTER_OPPLYSNINGER,
