@@ -140,7 +140,7 @@ object DagerFraværSteg : UtfyllingSteg {
         get() = FRAVÆR_UTFYLLING
 
     override fun erRelevant(utfylling: Utfylling): Boolean {
-        return utfylling.svar.harDuHattFravær == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
+        return utfylling.svar.harDuHattFravær == false
     }
 
     override val formkrav: Formkrav = mapOf(
@@ -148,7 +148,7 @@ object DagerFraværSteg : UtfyllingSteg {
             utfylling.svar.aktivitetsInformasjon.all { it.dato in utfylling.periode }
         },
         "HAR_REGISTRERT_FRAVÆR" to { utfylling ->
-            if (utfylling.svar.harDuHattFravær == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET) {
+            if (utfylling.svar.harDuHattFravær == false) {
                 utfylling.svar.aktivitetsInformasjon.any { it.fravær != null }
             } else {
                 true

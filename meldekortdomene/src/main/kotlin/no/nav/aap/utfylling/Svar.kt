@@ -11,7 +11,7 @@ data class Svar(
     val aktivitetsInformasjon: List<AktivitetsInformasjon>,
     val stemmerOpplysningene: Boolean?,
     val harDuHattAvtalteAktiviteter: Boolean? = null,
-    val harDuHattFravær: FraværSvar? = null,
+    val harDuHattFravær: Boolean? = null,
 ) {
     companion object {
         fun tomt(periode: Periode): Svar {
@@ -43,10 +43,5 @@ enum class Fravær {
     ;
 }
 
-enum class FraværSvar {
-    GJENNOMFØRT_AVTALT_AKTIVITET,
-    NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-    ;
-}
 
 

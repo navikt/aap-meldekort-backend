@@ -11,7 +11,6 @@ import no.nav.aap.meldekort.saksnummerGenerator
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.Fagsaknummer
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
@@ -86,7 +85,7 @@ class UtfyllingRepositoryPostgresTest {
                         AktivitetsInformasjon(LocalDate.of(2020, 1, 4), 7.5, null),
                     ),
                     stemmerOpplysningene = false,
-                    harDuHattFravær = FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET,
+                    harDuHattFravær = false,
                 ),
                 opprettet = opprettet,
                 sistEndret = opprettet,

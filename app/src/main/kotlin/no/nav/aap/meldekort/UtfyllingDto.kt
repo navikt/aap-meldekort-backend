@@ -1,7 +1,6 @@
 package no.nav.aap.meldekort
 import com.fasterxml.jackson.annotation.JsonCreator
 import no.nav.aap.utfylling.Fravær
-import no.nav.aap.utfylling.FraværSvar
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.AktivitetsInformasjon
 import no.nav.aap.utfylling.Utfylling
@@ -146,7 +145,7 @@ data class SvarDto(
     val dager: List<DagSvarDto>,
     val stemmerOpplysningene: Boolean?,
     val harDuHattAvtalteAktiviteter: Boolean? = null,
-    val harDuHattFravær: FraværSvarDto? = null,
+    val harDuHattFravær: Boolean? = null,
 ) {
     fun tilDomene(): Svar {
         return Svar(
@@ -155,7 +154,7 @@ data class SvarDto(
             aktivitetsInformasjon = dager.map { it.tilAktivitetsInformasjon() },
             stemmerOpplysningene = stemmerOpplysningene,
             harDuHattAvtalteAktiviteter = harDuHattAvtalteAktiviteter,
-            harDuHattFravær = harDuHattFravær?.tilDomene
+            harDuHattFravær = harDuHattFravær
         )
     }
 
@@ -164,7 +163,7 @@ data class SvarDto(
         harDuJobbet = svar.harDuJobbet,
         dager = svar.aktivitetsInformasjon.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
-        harDuHattFravær = svar.harDuHattFravær?.let { FraværSvarDto.fraDomene(it) }
+        harDuHattFravær = svar.harDuHattFravær
     )
 }
 
@@ -206,21 +205,6 @@ enum class FraværDto(val tilDomene: Fravær) {
                 Fravær.OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS -> OMSORG_DØDSFALL_I_FAMILIE_ELLER_VENNEKRETS
                 Fravær.OMSORG_ANNEN_STERK_GRUNN -> OMSORG_ANNEN_STERK_GRUNN
                 Fravær.ANNEN -> ANNEN
-            }
-        }
-    }
-}
-
-enum class FraværSvarDto(val tilDomene: FraværSvar) {
-    GJENNOMFØRT_AVTALT_AKTIVITET(FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET),
-    NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET(FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET),
-    ;
-
-    companion object {
-        fun fraDomene(fraværSvar: FraværSvar): FraværSvarDto {
-            return when (fraværSvar) {
-                FraværSvar.GJENNOMFØRT_AVTALT_AKTIVITET -> GJENNOMFØRT_AVTALT_AKTIVITET
-                FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET -> NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
             }
         }
     }

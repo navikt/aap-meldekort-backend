@@ -18,7 +18,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.meldekort.FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
@@ -78,27 +77,27 @@ class UtfyllingFlytV2Test {
             lagTilstand(
                 aktivtSteg = StegDto.SPØRSMÅL,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuGjennomførtAvtaltAktivitet = false,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuGjennomførtAvtaltAktivitet = false,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuGjennomførtAvtaltAktivitet = false,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.FRAVÆR_UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuGjennomførtAvtaltAktivitet = false,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.BEKREFT,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuGjennomførtAvtaltAktivitet = false,
             )
         )
 
@@ -152,7 +151,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             dager = dagerMedTimer,
             harDuHattAvtalteAktiviteter = true,
-            harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+            harDuGjennomførtAvtaltAktivitet = true
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -241,7 +240,7 @@ class UtfyllingFlytV2Test {
             dager = emptyList(),
             stemmerOpplysningene = true,
             harDuHattAvtalteAktiviteter = true,
-            harDuHattFravær = GJENNOMFØRT_AVTALT_AKTIVITET
+            harDuHattFravær = false
         )
 
 
@@ -253,7 +252,7 @@ class UtfyllingFlytV2Test {
             dager: List<DagSvarDto> = standardSvar.dager,
             stemmerOpplysningene: Boolean? = standardSvar.stemmerOpplysningene,
             harDuHattAvtalteAktiviteter: Boolean? = standardSvar.harDuHattAvtalteAktiviteter,
-            harDuGjennomførtAvtaltAktivitet: FraværSvarDto? = standardSvar.harDuHattFravær,
+            harDuGjennomførtAvtaltAktivitet: Boolean? = standardSvar.harDuHattFravær,
         ) = UtfyllingTilstandDto(
             aktivtSteg = aktivtSteg,
             svar = svar ?: standardSvar.copy(
