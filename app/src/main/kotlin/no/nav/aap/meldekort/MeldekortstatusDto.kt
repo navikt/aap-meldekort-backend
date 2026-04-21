@@ -8,7 +8,7 @@ import java.time.LocalDate
 data class MeldekortstatusDto(
     val harInnsendteMeldekort: Boolean,
     val meldekortTilUtfylling: List<MeldekortTilUtfyllingDto>,
-    val redirectUrl: String
+    val redirectUrl: String?
 ) {
     companion object {
         fun fraDomene(domene: Meldekortstatus): MeldekortstatusDto {
@@ -24,7 +24,7 @@ data class MeldekortstatusDto(
 data class MeldekortTilUtfyllingDto(
     val kanSendesFra: LocalDate,
     val kanFyllesUtFra: LocalDate?,
-    val fristForInnsending: LocalDate
+    val fristForInnsending: LocalDate?
 ) {
     companion object {
         fun fraDomene(domene: MeldekortTilUtfylling): MeldekortTilUtfyllingDto {

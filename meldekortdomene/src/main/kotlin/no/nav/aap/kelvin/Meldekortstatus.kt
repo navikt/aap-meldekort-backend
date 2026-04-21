@@ -9,6 +9,6 @@ data class Meldekortstatus(
 
 data class MeldekortTilUtfylling(
     val kanSendesFra: LocalDate,
-    val fristForInnsending: LocalDate,
+    val fristForInnsending: LocalDate?,
     val kanFyllesUtFra: LocalDate?
 )
