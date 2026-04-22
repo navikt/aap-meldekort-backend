@@ -163,6 +163,7 @@ data class SvarDto(
         harDuJobbet = svar.harDuJobbet,
         dager = svar.aktivitetsInformasjon.map { DagSvarDto(it) },
         stemmerOpplysningene = svar.stemmerOpplysningene,
+        harDuHattAvtalteAktiviteter = svar.harDuHattAvtalteAktiviteter,
         harDuHattFravær = svar.harDuHattFravær
     )
 }

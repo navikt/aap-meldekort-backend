@@ -129,8 +129,7 @@ object FraværSpørsmålSteg: UtfyllingSteg {
             utfylling.svar.harDuHattAvtalteAktiviteter != null
         },
         "MÅ_SVARE_OM_FRAVÆR_HVIS_AVTALTE_AKTIVITETER" to { utfylling ->
-            utfylling.svar.harDuHattAvtalteAktiviteter == true &&
-                    utfylling.svar.harDuHattFravær != null
+            utfylling.svar.harDuHattAvtalteAktiviteter != true || utfylling.svar.harDuHattFravær != null
         }
     )
 }
