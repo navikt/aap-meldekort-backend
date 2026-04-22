@@ -161,6 +161,62 @@ class UtfyllingFlytV2Test {
         assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.BEKREFT)
     }
 
+    @Test
+    fun `formkrav - må svare på om man hadde avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = null,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_SPØRSMÅL)
+    }
+
+    @Test
+    fun `formkrav - må svare på fravær når man hadde avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = true,
+            harDuGjennomførtAvtaltAktivitet = null,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_SPØRSMÅL)
+    }
+
+    @Test
+    fun `ingen avtalte aktiviteter - hopper over fravær-steg`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = false,
+            harDuGjennomførtAvtaltAktivitet = null,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.BEKREFT)
+    }
+
     private fun startUtfylling(
         fnr: Ident,
         meldeperiode: Periode,
