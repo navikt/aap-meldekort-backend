@@ -139,7 +139,7 @@ object DagerFraværSteg : UtfyllingSteg {
         get() = FRAVÆR_UTFYLLING
 
     override fun erRelevant(utfylling: Utfylling): Boolean {
-        return utfylling.svar.harDuHattFravær != true
+        return utfylling.svar.harDuHattAvtalteAktiviteter == true && utfylling.svar.harDuHattFravær != true
     }
 
     override val formkrav: Formkrav = mapOf(
