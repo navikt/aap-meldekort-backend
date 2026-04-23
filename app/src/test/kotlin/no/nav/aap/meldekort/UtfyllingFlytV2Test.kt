@@ -72,32 +72,32 @@ class UtfyllingFlytV2Test {
             lagTilstand(
                 aktivtSteg = StegDto.INTRODUKSJON,
                 harDuJobbet = null,
-                harDuGjennomførtAvtaltAktivitet = null,
+                harDuHattFravær = null,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.SPØRSMÅL,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = false,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = false,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = false,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.FRAVÆR_UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = false,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.BEKREFT,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = false,
+                harDuHattFravær = true,
             )
         )
 
@@ -119,7 +119,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.INTRODUKSJON,
             vilSvareRiktig = false,
             harDuJobbet = null,
-            harDuGjennomførtAvtaltAktivitet = null,
+            harDuHattFravær = null,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -151,7 +151,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             dager = dagerMedTimer,
             harDuHattAvtalteAktiviteter = true,
-            harDuGjennomførtAvtaltAktivitet = true
+            harDuHattFravær = false
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -188,7 +188,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             harDuJobbet = false,
             harDuHattAvtalteAktiviteter = true,
-            harDuGjennomførtAvtaltAktivitet = null,
+            harDuHattFravær = null,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -207,7 +207,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             harDuJobbet = false,
             harDuHattAvtalteAktiviteter = true,
-            harDuGjennomførtAvtaltAktivitet = false,
+            harDuHattFravær = true,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -226,7 +226,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             harDuJobbet = false,
             harDuHattAvtalteAktiviteter = false,
-            harDuGjennomførtAvtaltAktivitet = null,
+            harDuHattFravær = null,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -327,7 +327,7 @@ class UtfyllingFlytV2Test {
             dager: List<DagSvarDto> = standardSvar.dager,
             stemmerOpplysningene: Boolean? = standardSvar.stemmerOpplysningene,
             harDuHattAvtalteAktiviteter: Boolean? = standardSvar.harDuHattAvtalteAktiviteter,
-            harDuGjennomførtAvtaltAktivitet: Boolean? = standardSvar.harDuHattFravær,
+            harDuHattFravær: Boolean? = standardSvar.harDuHattFravær,
         ) = UtfyllingTilstandDto(
             aktivtSteg = aktivtSteg,
             svar = svar ?: standardSvar.copy(
@@ -336,7 +336,7 @@ class UtfyllingFlytV2Test {
                 dager = dager,
                 stemmerOpplysningene = stemmerOpplysningene,
                 harDuHattAvtalteAktiviteter = harDuHattAvtalteAktiviteter,
-                harDuHattFravær = harDuGjennomførtAvtaltAktivitet,
+                harDuHattFravær = harDuHattFravær,
             ),
         )
 
