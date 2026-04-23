@@ -199,6 +199,25 @@ class UtfyllingFlytV2Test {
     }
 
     @Test
+    fun `formkrav - går til utfylling når ikke fravær fra avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = true,
+            harDuGjennomførtAvtaltAktivitet = false,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_UTFYLLING)
+    }
+
+    @Test
     fun `ingen avtalte aktiviteter - hopper over fravær-steg`() {
         val fnr = fødselsnummerGenerator.next()
         val referanse = startUtfylling(fnr, standardMeldeperiode)
