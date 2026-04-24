@@ -67,11 +67,15 @@ spec:
             rules:
                 - application: api-intern
                 - application: pdfgen-meldekort
+                - application: meldekortservice
+                  namespace: meldekort
+                  cluster: prod-fss
             external:
                 - host: dokarkiv.prod-fss-pub.nais.io
+                - host: meldekortservice.prod-fss-pub.nais.io
     gcp:
         sqlInstances:
-            - type: POSTGRES_16 
+            - type: POSTGRES_16
               flags:
                 - name: cloudsql.logical_decoding
                   value: "on"

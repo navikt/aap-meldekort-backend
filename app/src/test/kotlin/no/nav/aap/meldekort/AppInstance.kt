@@ -25,8 +25,10 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureC
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
+import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -62,11 +64,13 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     init {
         FakeTokenX.port = 0
         FakeServers.start()
+        System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
 
         GatewayRegistry
             .register<AapGatewayImpl>()
             .register<DokarkivGatewayImpl>()
             .register<PdfgenGatewayImpl>()
+            .register<DefaultMeldekortServiceGateway>()
             .register<FakeVarselGateway>()
     }
 
@@ -190,6 +194,10 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
                 rettighetsperiode = rettighetsperiode ?: Periode(idag.minusMonths(1), idag.plusMonths(1)),
             )
         )
+    }
+
+    fun arenaMeldekort(fnr: Ident, meldekortListe: List<ArenaMeldekort>) {
+        no.nav.aap.meldekort.test.FakeArena.upsertMeldekort(fnr.asString, meldekortListe)
     }
 
     fun fyllInnTimer(

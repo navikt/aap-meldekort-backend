@@ -83,7 +83,7 @@ fun startHttpServer(
                         meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(clock), repositoryRegistry)
                         utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(clock), repositoryRegistry)
                         metadataApi(dataSource, repositoryRegistry, clock)
-                        meldekortStatus(dataSource, repositoryRegistry, clock)
+                        meldekortStatus(dataSource, repositoryRegistry, clock, GatewayProvider)
                     }
                 }
             }
