@@ -100,7 +100,7 @@ spec:
         - name: MELDEKORTSERVICE_URL
           value: https://meldekortservice-q2.dev-fss-pub.nais.io/meldekortservice/api
         - name: MELDEKORTSERVICE_SCOPE
-          value: dev-fss:meldekort:meldekortservice-q2
+          value: dev-fss:meldekort:meldekortservice-q2/.default
         - name: MELDEKORTKONTROLL_URL
           value: https://meldekortkontroll-api-q2.dev-fss-pub.nais.io
         - name: MELDEKORTKONTROLL_SCOPE
