@@ -34,6 +34,6 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.9")
 
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    implementation("org.testcontainers:testcontainers-postgresql:2.0.4")
+    implementation("org.testcontainers:testcontainers-postgresql:2.0.5")
     implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
 }
