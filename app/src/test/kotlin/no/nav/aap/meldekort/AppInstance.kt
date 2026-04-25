@@ -62,7 +62,6 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
     init {
-        FakeTokenX.port = 0
         FakeServers.start()
         System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
 
@@ -89,6 +88,12 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     val client: RestClient<InputStream> = RestClient.withDefaultResponseHandler(
         config = ClientConfig(scope = "meldekort-backend"),
         tokenProvider = ClientCredentialsTokenProvider,
+    )
+
+    private val tokenClient = RestClient(
+        config = ClientConfig(scope = "behandlingsflyt"),
+        tokenProvider = NoTokenTokenProvider(),
+        responseHandler = DefaultResponseHandler()
     )
 
     val baseUrl: String
@@ -127,13 +132,8 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     }
 
     fun getToken(): OidcToken {
-        val client = RestClient(
-            config = ClientConfig(scope = "behandlingsflyt"),
-            tokenProvider = NoTokenTokenProvider(),
-            responseHandler = DefaultResponseHandler()
-        )
         return OidcToken(
-            client.post<String, FakeServers.TestToken>(
+            tokenClient.post<String, FakeServers.TestToken>(
                 URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
                 PostRequest("grant_type=client_credentials"),
             )!!.access_token
@@ -326,6 +326,9 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
 
 
     override fun close() {
-        embeddedServer.stop(0L, 0L)
+        embeddedServer.stop(2_000L, 10_000L)
+        (client as? AutoCloseable)?.close()
+        (tokenClient as? AutoCloseable)?.close()
+        (dataSource as? AutoCloseable)?.close()
     }
 }

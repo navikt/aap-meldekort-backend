@@ -7,12 +7,14 @@ import no.nav.aap.meldekort.kontrakt.sak.Ident
 import no.nav.aap.meldekort.kontrakt.sak.MeldeperioderV0
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.sak.Fagsaknummer
+import org.junit.jupiter.api.AutoClose
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BehandlingsflytApiKtTest {
-        private val app = AppInstance()
+    @AutoClose
+    private val app = AppInstance()
 
     @Test
     fun `meldeplikt settes korrekt i databasen ved melding fra behandlingsflyt`() {
