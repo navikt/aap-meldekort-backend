@@ -11,6 +11,7 @@ import no.nav.aap.kelvin.MeldekortstatusService
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import javax.sql.DataSource
 
@@ -20,6 +21,7 @@ fun NormalOpenAPIRoute.meldekortStatus(
     clock: Clock,
     gatewayProvider: GatewayProvider,
 ) {
+    val log = LoggerFactory.getLogger(javaClass)
     route("meldekort-status").get<Unit, MeldekortstatusDto> {
 
         val response = dataSource.transaction { connection ->
@@ -33,12 +35,14 @@ fun NormalOpenAPIRoute.meldekortStatus(
         if (response != null) {
             respond(response)
         } else {
+            log.info("Fant ikke bruker i Kelvin, sjekker Arena")
             val fellesLandingssideService = FellesLandingssideService(gatewayProvider)
             val arenaMeldekort = fellesLandingssideService.hentFraArena(innloggetBruker().ident.asString)
 
             if (arenaMeldekort != null) {
                 respond(MeldekortstatusDto.fraDomene(arenaMeldekort))
             } else {
+                log.info("Fant ikke bruker, gi 404")
                 respondWithStatus(HttpStatusCode.NotFound)
             }
 

@@ -3,10 +3,12 @@ package no.nav.aap.arena
 import no.nav.aap.kelvin.MeldekortTilUtfylling
 import no.nav.aap.kelvin.Meldekortstatus
 import no.nav.aap.lookup.gateway.GatewayProvider
+import org.slf4j.LoggerFactory
 
 class FellesLandingssideService(
     private val meldekortServiceGateway: MeldekortServiceGateway,
 ) {
+    val log = LoggerFactory.getLogger(javaClass)
     constructor(gatewayProvider: GatewayProvider) : this(
         meldekortServiceGateway = gatewayProvider.provide(),
     )
@@ -14,10 +16,10 @@ class FellesLandingssideService(
     fun hentFraArena(fnr: String): Meldekortstatus? {
         val alleMeldekort = meldekortServiceGateway.hentMeldekort(fnr) ?: return null
         val aapMeldekort = alleMeldekort.filter { it.erAAPMeldekort() }
-
+        log.info("amk:aapmk -> " + alleMeldekort.size + ":" + aapMeldekort.size)
         val harInnsendteMeldekort =
             aapMeldekort.any { it.mottattDato != null } || harInnsendteHistoriskeArenaMeldekort(fnr)
-
+        log.info("harInnsendteMeldekort -> $harInnsendteMeldekort")
         if (!harInnsendteMeldekort && aapMeldekort.isEmpty()) return null
 
         return Meldekortstatus(
