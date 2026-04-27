@@ -10,10 +10,11 @@ import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
 import no.nav.aap.prometheus
+import org.slf4j.LoggerFactory
 import java.net.URI
 
 object DefaultMeldekortServiceGateway : MeldekortServiceGateway {
-
+    val log = LoggerFactory.getLogger(javaClass)
     private val meldekortUri = URI("${requiredConfigForKey("meldekortservice.url")}/v2/meldekort")
     private val historiskeMeldekortUri = URI("${requiredConfigForKey("meldekortservice.url")}/v2/historiskemeldekort")
 
@@ -33,6 +34,7 @@ object DefaultMeldekortServiceGateway : MeldekortServiceGateway {
                 ),
             ),
         ) ?: return null
+        log.info("Antall meldekort funnet:" + response.meldekortListe?.size)
         return response.meldekortListe ?: emptyList()
     }
 
@@ -46,6 +48,7 @@ object DefaultMeldekortServiceGateway : MeldekortServiceGateway {
                 ),
             ),
         ) ?: return null
+        log.info("Antall historiske meldekort funnet:" + response.meldekortListe?.size)
         return response.meldekortListe ?: emptyList()
     }
 
