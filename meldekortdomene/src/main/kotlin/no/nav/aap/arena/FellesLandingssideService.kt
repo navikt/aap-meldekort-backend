@@ -17,7 +17,7 @@ class FellesLandingssideService(
         val alleMeldekort = meldekortServiceGateway.hentMeldekort(fnr) ?: return null
         val aapMeldekort = alleMeldekort.filter { it.erAAPMeldekort() }
         log.info("amk:aapmk -> " + alleMeldekort.size + ":" + aapMeldekort.size)
-        log.info("meldekortgrupper" + alleMeldekort.forEach { it.hoyesteMeldegruppe + ":" + it.mottattDato })
+        log.info("meldekortgrupper: " + alleMeldekort.joinToString { "${it.hoyesteMeldegruppe}:${it.mottattDato}" })
 
         val harInnsendteMeldekort =
             aapMeldekort.any { it.mottattDato != null } || harInnsendteHistoriskeArenaMeldekort(fnr)
