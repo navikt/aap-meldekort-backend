@@ -27,7 +27,7 @@ class MeldekortstatusIntegrasjonsTest {
         meldeperiode = "202608",
         fraDato = tilDato.minusDays(13),
         tilDato = tilDato,
-        hoyesteMeldegruppe = "AAP",
+        hoyesteMeldegruppe = "ATTF",
         beregningstatus = "OPPRE",
         forskudd = false,
         mottattDato = mottattDato,

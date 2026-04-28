@@ -17,7 +17,7 @@ class FellesLandingssideServiceTest {
 
     private fun arenaMeldekort(
         meldekortId: Long = 1L,
-        hoyesteMeldegruppe: String = "AAP",
+        hoyesteMeldegruppe: String = "ATTF",
         tilDato: LocalDate = LocalDate.of(2026, 4, 20),
         mottattDato: LocalDate? = null,
     ) = ArenaMeldekort(
@@ -77,7 +77,7 @@ class FellesLandingssideServiceTest {
 
     @Test
     fun `ikke-AAP meldekort fra Arena ignoreres - returnerer null`() {
-        every { gateway.hentMeldekort(fnr) } returns listOf(arenaMeldekort(hoyesteMeldegruppe = "ATTF", mottattDato = null))
+        every { gateway.hentMeldekort(fnr) } returns listOf(arenaMeldekort(hoyesteMeldegruppe = "DAGP", mottattDato = null))
         every { gateway.hentHistoriskeMeldekort(fnr) } returns emptyList()
 
         val resultat = service.hentFraArena(fnr)
@@ -101,8 +101,8 @@ class FellesLandingssideServiceTest {
     fun `meldekortTilUtfylling inneholder kun AAP-meldekort når Arena returnerer blanding`() {
         val aapTilDato = LocalDate.of(2026, 4, 20)
         every { gateway.hentMeldekort(fnr) } returns listOf(
-            arenaMeldekort(meldekortId = 1L, hoyesteMeldegruppe = "AAP", tilDato = aapTilDato),
-            arenaMeldekort(meldekortId = 2L, hoyesteMeldegruppe = "ATTF", tilDato = aapTilDato),
+            arenaMeldekort(meldekortId = 1L, hoyesteMeldegruppe = "ATTF", tilDato = aapTilDato),
+            arenaMeldekort(meldekortId = 2L, hoyesteMeldegruppe = "DAGP", tilDato = aapTilDato),
         )
         every { gateway.hentHistoriskeMeldekort(fnr) } returns emptyList()
 
