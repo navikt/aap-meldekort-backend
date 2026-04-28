@@ -21,6 +21,6 @@ data class ArenaMeldekort(
     fun kanSendesFra(): LocalDateTime = tilDato.minusDays(1).atStartOfDay()
 
     companion object {
-        private const val AAP = "AAP"
+        private const val AAP = "ATTF"
     }
 }
