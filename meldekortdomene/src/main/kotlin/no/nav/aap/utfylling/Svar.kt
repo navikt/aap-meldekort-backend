@@ -10,7 +10,8 @@ data class Svar(
     @field:JsonAlias("timerArbeidet") //TODO husk å fjerne når ikke relevant
     val aktivitetsInformasjon: List<AktivitetsInformasjon>,
     val stemmerOpplysningene: Boolean?,
-    val harDuGjennomførtAvtaltAktivitet: FraværSvar? = null,
+    val harDuHattAvtalteAktiviteter: Boolean? = null,
+    val harDuHattFravær: Boolean? = null,
 ) {
     companion object {
         fun tomt(periode: Periode): Svar {
@@ -19,7 +20,8 @@ data class Svar(
                 harDuJobbet = null,
                 aktivitetsInformasjon = periode.map { AktivitetsInformasjon(it, null, null) },
                 stemmerOpplysningene = null,
-                harDuGjennomførtAvtaltAktivitet = null
+                harDuHattAvtalteAktiviteter = null,
+                harDuHattFravær = null
             )
         }
     }
@@ -41,11 +43,5 @@ enum class Fravær {
     ;
 }
 
-enum class FraværSvar {
-    GJENNOMFØRT_AVTALT_AKTIVITET,
-    NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
-    INGEN_AVTALTE_AKTIVITETER,
-    ;
-}
 
 

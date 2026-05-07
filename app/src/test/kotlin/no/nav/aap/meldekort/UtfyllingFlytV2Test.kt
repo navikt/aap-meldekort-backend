@@ -17,9 +17,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
-import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.meldekort.FraværSvarDto.GJENNOMFØRT_AVTALT_AKTIVITET
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
@@ -74,27 +72,32 @@ class UtfyllingFlytV2Test {
             lagTilstand(
                 aktivtSteg = StegDto.INTRODUKSJON,
                 harDuJobbet = null,
-                harDuGjennomførtAvtaltAktivitet = null,
+                harDuHattFravær = null,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.SPØRSMÅL,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuHattFravær = true,
+            ),
+            lagTilstand(
+                aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+                dager = dagerMedTimer,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.FRAVÆR_UTFYLLING,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuHattFravær = true,
             ),
             lagTilstand(
                 aktivtSteg = StegDto.BEKREFT,
                 dager = dagerMedTimer,
-                harDuGjennomførtAvtaltAktivitet = FraværSvarDto.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET,
+                harDuHattFravær = true,
             )
         )
 
@@ -116,7 +119,7 @@ class UtfyllingFlytV2Test {
             aktivtSteg = StegDto.INTRODUKSJON,
             vilSvareRiktig = false,
             harDuJobbet = null,
-            harDuGjennomførtAvtaltAktivitet = null,
+            harDuHattFravær = null,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -145,9 +148,85 @@ class UtfyllingFlytV2Test {
         }
 
        val tilstand = lagTilstand(
-            aktivtSteg = StegDto.UTFYLLING,
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             dager = dagerMedTimer,
-            harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+            harDuHattAvtalteAktiviteter = true,
+            harDuHattFravær = false
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.BEKREFT)
+    }
+
+    @Test
+    fun `formkrav - må svare på om man hadde avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = null,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_SPØRSMÅL)
+    }
+
+    @Test
+    fun `formkrav - må svare på fravær når man hadde avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = true,
+            harDuHattFravær = null,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_SPØRSMÅL)
+    }
+
+    @Test
+    fun `formkrav - går til utfylling når ikke fravær fra avtalte aktiviteter`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = true,
+            harDuHattFravær = true,
+        )
+
+        val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
+            fnr, "/api/utfylling/$referanse/lagre-neste", EndreUtfyllingRequest(tilstand)
+        )
+
+        assertThat(response?.tilstand?.aktivtSteg).isEqualTo(StegDto.FRAVÆR_UTFYLLING)
+    }
+
+    @Test
+    fun `ingen avtalte aktiviteter - hopper over fravær-steg`() {
+        val fnr = fødselsnummerGenerator.next()
+        val referanse = startUtfylling(fnr, standardMeldeperiode)
+
+        val tilstand = lagTilstand(
+            aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
+            harDuJobbet = false,
+            harDuHattAvtalteAktiviteter = false,
+            harDuHattFravær = null,
         )
 
         val response = myPost<UtfyllingResponseDto, EndreUtfyllingRequest>(
@@ -235,7 +314,8 @@ class UtfyllingFlytV2Test {
             harDuJobbet = true,
             dager = emptyList(),
             stemmerOpplysningene = true,
-            harDuGjennomførtAvtaltAktivitet = GJENNOMFØRT_AVTALT_AKTIVITET
+            harDuHattAvtalteAktiviteter = true,
+            harDuHattFravær = false
         )
 
 
@@ -246,7 +326,8 @@ class UtfyllingFlytV2Test {
             harDuJobbet: Boolean? = standardSvar.harDuJobbet,
             dager: List<DagSvarDto> = standardSvar.dager,
             stemmerOpplysningene: Boolean? = standardSvar.stemmerOpplysningene,
-            harDuGjennomførtAvtaltAktivitet: FraværSvarDto? = standardSvar.harDuGjennomførtAvtaltAktivitet,
+            harDuHattAvtalteAktiviteter: Boolean? = standardSvar.harDuHattAvtalteAktiviteter,
+            harDuHattFravær: Boolean? = standardSvar.harDuHattFravær,
         ) = UtfyllingTilstandDto(
             aktivtSteg = aktivtSteg,
             svar = svar ?: standardSvar.copy(
@@ -254,7 +335,8 @@ class UtfyllingFlytV2Test {
                 harDuJobbet = harDuJobbet,
                 dager = dager,
                 stemmerOpplysningene = stemmerOpplysningene,
-                harDuGjennomførtAvtaltAktivitet = harDuGjennomførtAvtaltAktivitet,
+                harDuHattAvtalteAktiviteter = harDuHattAvtalteAktiviteter,
+                harDuHattFravær = harDuHattFravær,
             ),
         )
 

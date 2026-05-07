@@ -3,6 +3,7 @@ package no.nav.aap.utfylling
 import no.nav.aap.InnloggetBruker
 import no.nav.aap.kelvin.tidligsteInnsendingstidspunktMeldedag
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
+import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
 import no.nav.aap.utfylling.UtfyllingStegNavn.INTRODUKSJON
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.utfylling.UtfyllingStegNavn.SPØRSMÅL
@@ -15,6 +16,7 @@ enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     INTRODUKSJON,
     SPØRSMÅL,
     UTFYLLING,
+    FRAVÆR_SPØRSMÅL,
     FRAVÆR_UTFYLLING,
     BEKREFT,
     PERSISTER_OPPLYSNINGER(erTeknisk = true),
@@ -118,12 +120,26 @@ class StemmerOpplysningeneSteg(clock: Clock) : UtfyllingSteg {
     )
 }
 
+object FraværSpørsmålSteg: UtfyllingSteg {
+    override val navn: UtfyllingStegNavn
+        get() = FRAVÆR_SPØRSMÅL
+
+    override val formkrav: Formkrav = mapOf(
+        "MÅ_SVARE_OM_AKTIVITETER" to { utfylling ->
+            utfylling.svar.harDuHattAvtalteAktiviteter != null
+        },
+        "MÅ_SVARE_OM_FRAVÆR_HVIS_AVTALTE_AKTIVITETER" to { utfylling ->
+            utfylling.svar.harDuHattAvtalteAktiviteter != true || utfylling.svar.harDuHattFravær != null
+        }
+    )
+}
+
 object DagerFraværSteg : UtfyllingSteg {
     override val navn: UtfyllingStegNavn
         get() = FRAVÆR_UTFYLLING
 
     override fun erRelevant(utfylling: Utfylling): Boolean {
-        return utfylling.svar.harDuGjennomførtAvtaltAktivitet == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET
+        return utfylling.svar.harDuHattAvtalteAktiviteter == true && utfylling.svar.harDuHattFravær != false
     }
 
     override val formkrav: Formkrav = mapOf(
@@ -131,7 +147,7 @@ object DagerFraværSteg : UtfyllingSteg {
             utfylling.svar.aktivitetsInformasjon.all { it.dato in utfylling.periode }
         },
         "HAR_REGISTRERT_FRAVÆR" to { utfylling ->
-            if (utfylling.svar.harDuGjennomførtAvtaltAktivitet == FraværSvar.NEI_IKKE_GJENNOMFORT_AVTALT_AKTIVITET) {
+            if (utfylling.svar.harDuHattFravær == false) {
                 utfylling.svar.aktivitetsInformasjon.any { it.fravær != null }
             } else {
                 true
