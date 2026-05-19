@@ -3,11 +3,11 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 val komponenterVersjon = "2.0.51"
 val junitVersjon = "6.0.3"
 val tilgangVersjon = "1.0.202"
-val ktorVersion = "3.4.3"
+val ktorVersion = "3.5.0"
 
 plugins {
     id("aap.conventions")
-    id("io.ktor.plugin") version "3.4.3"
+    id("io.ktor.plugin") version "3.5.0"
     id("com.gradleup.shadow") version "9.4.1"
 }
 
