@@ -26,6 +26,7 @@ import no.nav.aap.komponenter.server.auth.personBruker
 import no.nav.aap.komponenter.server.auth.token
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.lookup.gateway.GatewayProvider
+import no.nav.aap.meldekort.drift.driftApi
 import no.nav.aap.meldeperiode.MeldeperiodeFlateFactoryImpl
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
@@ -90,6 +91,7 @@ fun startHttpServer(
             authenticate(AZURE) {
                 apiRouting {
                     motorApi(dataSource)
+                    driftApi(dataSource, repositoryRegistry)
                     behandlingsflytApi(dataSource, repositoryRegistry, GatewayProvider, clock)
                 }
             }

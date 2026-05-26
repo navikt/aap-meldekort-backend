@@ -17,8 +17,9 @@ interface FakeServer {
 object FakeServers : AutoCloseable {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    private val fakeServers = listOf(FakeTokenX, FakeAzure, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
-        .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
+    private val fakeServers =
+        listOf(FakeTokenX, FakeAzure, FakeTexas, FakeTilgang, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
+            .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread { close() })

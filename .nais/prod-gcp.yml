@@ -117,3 +117,7 @@ spec:
           value: https://www.nav.no/aap/meldekort
         - name: BRUKERVARSEL_TOPIC
           value: min-side.aapen-brukervarsel-v1
+        - name: INTEGRASJON_TILGANG_URL
+          value: http://tilgang
+        - name: INTEGRASJON_TILGANG_SCOPE
+          value: api://prod-gcp.aap.tilgang/.default

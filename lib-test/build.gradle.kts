@@ -2,6 +2,7 @@ val ktorVersion = "3.4.3"
 val komponenterVersjon = "2.0.51"
 val junitVersjon = "6.0.3"
 val jacksonVersjon = "2.21.2"
+val tilgangVersjon = "1.0.224"
 
 plugins {
     id("aap.conventions")
@@ -16,6 +17,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
+    implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
