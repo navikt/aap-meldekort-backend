@@ -2,6 +2,15 @@ name: Bygg og deploy
 
 on:
     workflow_dispatch:
+        inputs:
+            cluster:
+                description: Cluster
+                required: true
+                default: dev-gcp
+                type: choice
+                options:
+                    - dev-gcp
+                    - prod-gcp
     push:
         branches:
             - main
@@ -10,8 +19,6 @@ on:
 
 jobs:
     gradle:
-        ## push til main eller etter branch (e.g. dependabot) er merget
-        if: github.event.pull_request.merged || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         permissions:
             contents: write
             actions: read
@@ -21,6 +28,8 @@ jobs:
         secrets: inherit
 
     publiser-kontrakt:
+        name: Publiser kontrakt
+        if: ${{ github.ref == 'refs/heads/main' }}
         needs: dev
         permissions:
             contents: write
@@ -73,8 +82,6 @@ jobs:
                         ${{ steps.notes.outputs.CHANGELOG }}
 
     dev:
-        ## push til main eller etter branch (e.g. dependabot) er merget
-        if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'dev-gcp'
         permissions:
             contents: read
             id-token: write
@@ -88,7 +95,7 @@ jobs:
 
     prod:
         ## push til main eller etter branch (e.g. dependabot) er merget
-        if: github.event.pull_request.merged || github.event_name == 'push' || github.event.inputs.cluster == 'prod-gcp'
+        if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.cluster == 'prod-gcp' }}
         permissions:
             contents: read
             id-token: write
