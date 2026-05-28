@@ -65,6 +65,7 @@ spec:
                   namespace: meldekort
         outbound:
             rules:
+                - application: tilgang
                 - application: api-intern
                 - application: pdfgen-meldekort
                 - application: meldekortservice

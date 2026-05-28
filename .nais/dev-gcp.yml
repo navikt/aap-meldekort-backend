@@ -71,6 +71,7 @@ spec:
                   namespace: meldekort
         outbound:
             rules:
+                - application: tilgang
                 - application: meldekortkontroll-api-q2
                   namespace: meldekort
                   cluster: dev-fss
