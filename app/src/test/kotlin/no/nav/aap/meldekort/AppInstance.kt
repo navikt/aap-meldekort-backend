@@ -274,7 +274,8 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     fun fyllInnTimerFraBehandlingsflyt(
         fnr: Ident,
         sakenGjelderFor: Periode,
-        periode: Periode
+        periode: Periode,
+        erDigitalisert: Boolean? = true
     ): UtfyllingReferanse {
         return dataSource.transaction { connection ->
             val kelvinMottakService = kelvinMottakService(connection, clockHolder)
@@ -291,7 +292,8 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
                 sakenGjelderFor = sakenGjelderFor,
                 periode = periode,
                 harDuJobbet = true,
-                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet) }
+                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet) },
+                erDigitalisert = erDigitalisert
             )
         }
     }
