@@ -79,6 +79,7 @@ fun NormalOpenAPIRoute.behandlingsflytApi(
                             fravær = null
                         )
                     },
+                    erDigitalisert = body.erDigitalisert
                 )
             }
 

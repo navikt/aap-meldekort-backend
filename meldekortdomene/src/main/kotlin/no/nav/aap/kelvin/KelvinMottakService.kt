@@ -59,7 +59,8 @@ class KelvinMottakService(
         sakenGjelderFor: Periode,
         periode: Periode,
         harDuJobbet: Boolean,
-        aktivitetsInformasjon: List<no.nav.aap.utfylling.AktivitetsInformasjon>
+        aktivitetsInformasjon: List<no.nav.aap.utfylling.AktivitetsInformasjon>,
+        erDigitalisert: Boolean? = true
     ): UtfyllingReferanse {
         val sak = kelvinSakRepository.hentSak(ident, sakenGjelderFor.fom)
             ?: throw IllegalStateException("finner ikke sak")
@@ -90,7 +91,7 @@ class KelvinMottakService(
             ),
             opprettet = Instant.now(clock),
             sistEndret = Instant.now(clock),
-            erDigitalisert = true
+            erDigitalisert = erDigitalisert
         )
 
         utfyllingRepository.lagreUtfylling(utfylling)
