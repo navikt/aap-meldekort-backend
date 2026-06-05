@@ -128,4 +128,34 @@ class KelvinIntegrasjonManuellInnsendingTest {
         val utfylling = app.hentUtfyllinger(fnr, utfyllingReferanse)
         assertEquals(utfylling?.erDigitalisert, true)
     }
+
+    @Test
+    fun `Manuelt innsent meldekort kan settes til ikke-digitalisert`() {
+        val idag = LocalDate.of(2025, 12, 1)
+        app.idag = idag
+
+        val fnr = fødselsnummerGenerator.next()
+        val rettighetsperiode = Periode(17 november 2025, idag.plusWeeks(51))
+        app.kelvinSak(
+            fnr,
+            rettighetsperiode = rettighetsperiode,
+            opplysningsbehov = listOf(Periode(17 november 2025, idag.plusWeeks(51)))
+        )
+
+        app.fyllInnTimer(
+            fnr,
+            opplysningerOm = Periode(17 november 2025, 30 november 2025),
+            sakStart = rettighetsperiode.fom
+        )
+
+        app.idag = LocalDate.of(2025, 12, 29)
+
+        val utfyllingReferanse = app.fyllInnTimerFraBehandlingsflyt(
+            fnr, rettighetsperiode, Periode(15 desember 2025, 28 desember 2025),
+            erDigitalisert = false
+        )
+
+        val utfylling = app.hentUtfyllinger(fnr, utfyllingReferanse)
+        assertEquals(false, utfylling?.erDigitalisert)
+    }
 }

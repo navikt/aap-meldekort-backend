@@ -36,7 +36,9 @@ public data class BehandslingsflytUtfyllingRequest(
     val periode: Periode,
     val harDuJobbet: Boolean,
     val dager: List<TimerArbeidetDto>,
-    val sakenGjelderFor: Periode
+    val sakenGjelderFor: Periode,
+    val erDigitalisert: Boolean? = true, // bakoverkompatibel
+    val opprettetAv: String? = null, // bakoverkompatibel
 )
 
 public data class TimerArbeidetDto(
