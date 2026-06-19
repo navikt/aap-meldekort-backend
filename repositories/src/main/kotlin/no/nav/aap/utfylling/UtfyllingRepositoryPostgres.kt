@@ -100,6 +100,7 @@ class UtfyllingRepositoryPostgres(
                 select *
                 from utfylling
                 where utfylling.fagsaknummer = ?
+                order by utfylling.periode desc
             """.trimIndent()
         ) {
             setParams {
