@@ -12,7 +12,7 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.624")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.626")
     implementation("io.micrometer:micrometer-core:1.16.5")
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
