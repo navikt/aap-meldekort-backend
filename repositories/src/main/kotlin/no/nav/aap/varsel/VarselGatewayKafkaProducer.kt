@@ -31,7 +31,7 @@ abstract class VarselGatewayKafkaProducer(kafkaProducerConfig: KafkaProducerConf
         })
     }
 
-    private val topic = requiredConfigForKey("brukervarsel.topic")
+    private val topic = requiredConfigForKey("BRUKERVARSEL_TOPIC")
 
     override fun sendVarsel(
         brukerId: Ident,

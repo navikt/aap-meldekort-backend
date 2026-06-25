@@ -17,9 +17,9 @@ object FakeTexas : FakeServer {
     private val log = LoggerFactory.getLogger(this.javaClass)!!
 
     override fun setProperties(port: Int) {
-        System.setProperty("nais.token.endpoint", "http://localhost:$port/token")
-        System.setProperty("nais.token.exchange.endpoint", "http://localhost:$port/token/exchange")
-        System.setProperty("nais.token.introspection.endpoint", "http://localhost:$port/introspect")
+        System.setProperty("NAIS_TOKEN_ENDPOINT", "http://localhost:$port/token")
+        System.setProperty("NAIS_TOKEN_EXCHANGE_ENDPOINT", "http://localhost:$port/token/exchange")
+        System.setProperty("NAIS_TOKEN_INTROSPECTION_ENDPOINT", "http://localhost:$port/introspect")
     }
 
     override val module: Application.() -> Unit =

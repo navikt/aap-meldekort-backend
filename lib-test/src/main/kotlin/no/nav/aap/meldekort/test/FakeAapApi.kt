@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 object FakeAapApi : FakeServer {
     override fun setProperties(port: Int) {
-        System.setProperty("aap.api.intern.url", "http://localhost:$port")
-        System.setProperty("aap.api.intern.scope", "api://local:aap:api-intern/.default")
+        System.setProperty("AAP_API_INTERN_URL", "http://localhost:$port")
+        System.setProperty("AAP_API_INTERN_SCOPE", "api://local:aap:api-intern/.default")
     }
 
     private val saker = ConcurrentHashMap<String, List<FakeSak>>()

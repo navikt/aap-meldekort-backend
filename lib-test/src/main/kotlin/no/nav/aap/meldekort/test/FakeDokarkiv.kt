@@ -6,15 +6,12 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicInteger
 
 object FakeDokarkiv: FakeServer {
-    val log = LoggerFactory.getLogger(this.javaClass)!!
-
     override fun setProperties(port: Int) {
-        System.setProperty("dokarkiv.url", "http://localhost:$port")
-        System.setProperty("dokarkiv.scope", "dokarkiv-scope")
+        System.setProperty("DOKARKIV_URL", "http://localhost:$port")
+        System.setProperty("DOKARKIV_SCOPE", "dokarkiv-scope")
     }
 
     override val module: Application.() -> Unit = {

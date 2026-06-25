@@ -37,8 +37,8 @@ fun main() {
     val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.1.0"))
     kafkaContainer.start()
     System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
-    System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
-    System.setProperty("brukervarsel.topic", "brukervarsel-topic")
+    System.setProperty("AAP_MELDEKORT_LENKE", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
+    System.setProperty("BRUKERVARSEL_TOPIC", "brukervarsel-topic")
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
 
     GatewayRegistry

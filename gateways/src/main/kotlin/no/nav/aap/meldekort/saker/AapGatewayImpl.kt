@@ -28,10 +28,10 @@ object AapGatewayImpl : AapGateway {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    private val aapApiUrl = requiredConfigForKey("aap.api.intern.url")
+    private val aapApiUrl = requiredConfigForKey("AAP_API_INTERN_URL")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(scope = requiredConfigForKey("aap.api.intern.scope")),
+        ClientConfig(scope = requiredConfigForKey("AAP_API_INTERN_SCOPE")),
         tokenProvider = ClientCredentialsTokenProvider,
         prometheus = prometheus
     )

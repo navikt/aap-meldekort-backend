@@ -185,7 +185,7 @@ class VarselService(
             brukerId = brukerId,
             varsel = varsel,
             varselTekster = varselTekster,
-            lenke = requiredConfigForKey("aap.meldekort.lenke")
+            lenke = requiredConfigForKey("AAP_MELDEKORT_LENKE")
         )
     }
 

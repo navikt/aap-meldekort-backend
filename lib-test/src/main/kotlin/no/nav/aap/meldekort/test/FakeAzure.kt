@@ -20,11 +20,11 @@ object FakeAzure : FakeServer {
 
     override fun setProperties(port: Int) {
         println("AZURE PORT $port")
-        System.setProperty("azure.openid.config.token.endpoint", "http://localhost:$port/token")
-        System.setProperty("azure.app.client.id", "meldekort-backend")
-        System.setProperty("azure.app.client.secret", "")
-        System.setProperty("azure.openid.config.jwks.uri", "http://localhost:$port/jwks")
-        System.setProperty("azure.openid.config.issuer", "fake-azure")
+        System.setProperty("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT", "http://localhost:$port/token")
+        System.setProperty("AZURE_APP_CLIENT_ID", "meldekort-backend")
+        System.setProperty("AZURE_APP_CLIENT_SECRET", "")
+        System.setProperty("AZURE_OPENID_CONFIG_JWKS_URI", "http://localhost:$port/jwks")
+        System.setProperty("AZURE_OPENID_CONFIG_ISSUER", "fake-azure")
         System.setProperty("BEHANDLINGSFLYT_AZP", azp)
     }
 

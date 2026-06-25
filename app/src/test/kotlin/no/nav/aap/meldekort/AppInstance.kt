@@ -64,7 +64,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     init {
         FakeTokenX.port = 0
         FakeServers.start()
-        System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
+        System.setProperty("AAP_MELDEKORT_LENKE", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
 
         GatewayRegistry
             .register<AapGatewayImpl>()
@@ -134,7 +134,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
         )
         return OidcToken(
             client.post<String, FakeServers.TestToken>(
-                URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
+                URI(requiredConfigForKey("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT")),
                 PostRequest("grant_type=client_credentials"),
             )!!.access_token
         )

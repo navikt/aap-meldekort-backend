@@ -11,10 +11,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 object FakeArena : FakeServer {
     override fun setProperties(port: Int) {
-        System.setProperty("meldekortservice.url", "http://localhost:$port")
-        System.setProperty("meldekortservice.scope", "api://meldekortservice:aap:api-intern/.default")
-        System.setProperty("meldekortkontroll.url", "http://localhost:$port")
-        System.setProperty("meldekortkontroll.scope", "api://meldekortservice:aap:api-intern/.default")
+        System.setProperty("MELDEKORTSERVICE_URL", "http://localhost:$port")
+        System.setProperty("MELDEKORTSERVICE_SCOPE", "api://meldekortservice:aap:api-intern/.default")
+        System.setProperty("MELDEKORTKONTROLL_URL", "http://localhost:$port")
+        System.setProperty("MELDEKORTKONTROLL_SCOPE", "api://meldekortservice:aap:api-intern/.default")
     }
 
     private val meldekort = ConcurrentHashMap<String, List<ArenaMeldekort>>()

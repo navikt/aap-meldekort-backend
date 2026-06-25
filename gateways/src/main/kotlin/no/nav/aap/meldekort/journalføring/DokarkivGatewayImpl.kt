@@ -14,10 +14,10 @@ import no.nav.aap.prometheus
 import java.net.URI
 
 object DokarkivGatewayImpl : DokarkivGateway {
-    private val baseUrl = requiredConfigForKey("dokarkiv.url")
+    private val baseUrl = requiredConfigForKey("DOKARKIV_URL")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(scope = requiredConfigForKey("dokarkiv.scope")),
+        ClientConfig(scope = requiredConfigForKey("DOKARKIV_SCOPE")),
         tokenProvider = ClientCredentialsTokenProvider,
         prometheus = prometheus
     )

@@ -70,7 +70,7 @@ class VarselGatewayKafkaProducerTest {
             )
         )
         val topic = "brukervarsel-topic"
-        System.setProperty("brukervarsel.topic", topic)
+        System.setProperty("BRUKERVARSEL_TOPIC", topic)
         System.setProperty("KAFKA_BROKERS", kafkaContainer.bootstrapServers)
 
         val brukerIdent = fødselsnummerGenerator.next()

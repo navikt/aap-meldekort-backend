@@ -15,11 +15,11 @@ import java.net.URI
 
 object DefaultMeldekortServiceGateway : MeldekortServiceGateway {
     val log = LoggerFactory.getLogger(javaClass)
-    private val meldekortUri = URI("${requiredConfigForKey("meldekortservice.url")}/v2/meldekort")
-    private val historiskeMeldekortUri = URI("${requiredConfigForKey("meldekortservice.url")}/v2/historiskemeldekort")
+    private val meldekortUri = URI("${requiredConfigForKey("MELDEKORTSERVICE_URL")}/v2/meldekort")
+    private val historiskeMeldekortUri = URI("${requiredConfigForKey("MELDEKORTSERVICE_URL")}/v2/historiskemeldekort")
 
     private val httpClient = RestClient.withDefaultResponseHandler(
-        ClientConfig(scope = requiredConfigForKey("meldekortservice.scope")),
+        ClientConfig(scope = requiredConfigForKey("MELDEKORTSERVICE_SCOPE")),
         tokenProvider = ClientCredentialsTokenProvider,
         prometheus = prometheus,
     )

@@ -15,7 +15,7 @@ data class MeldekortstatusDto(
             return MeldekortstatusDto(
                 harInnsendteMeldekort = domene.harInnsendteMeldekort,
                 meldekortTilUtfylling = domene.meldekortTilUtfylling.map { meldekort -> MeldekortTilUtfyllingDto.fraDomene(meldekort) },
-                redirectUrl = requiredConfigForKey("aap.meldekort.lenke"),
+                redirectUrl = requiredConfigForKey("AAP_MELDEKORT_LENKE"),
             )
         }
     }

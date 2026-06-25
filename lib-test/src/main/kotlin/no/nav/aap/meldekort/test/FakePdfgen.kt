@@ -9,7 +9,7 @@ import io.ktor.server.routing.*
 
 object FakePdfgen : FakeServer {
     override fun setProperties(port: Int) {
-        System.setProperty("pdfgen.url", "http://localhost:$port")
+        System.setProperty("PDFGEN_URL", "http://localhost:$port")
     }
 
     override val module: Application.() -> Unit = {

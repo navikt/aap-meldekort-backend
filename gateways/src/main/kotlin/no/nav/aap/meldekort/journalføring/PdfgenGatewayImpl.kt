@@ -21,7 +21,7 @@ import java.time.temporal.WeekFields
 import java.util.*
 
 object PdfgenGatewayImpl : PdfgenGateway {
-    private val baseUrl = requiredConfigForKey("pdfgen.url")
+    private val baseUrl = requiredConfigForKey("PDFGEN_URL")
     private val uri = URI("$baseUrl/api/v1/genpdf/meldekort-backend/meldekort")
 
     private val httpClient = RestClient.withDefaultResponseHandler(

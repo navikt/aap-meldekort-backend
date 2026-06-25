@@ -44,7 +44,7 @@ class VarselServiceTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            System.setProperty("aap.meldekort.lenke", "test")
+            System.setProperty("AAP_MELDEKORT_LENKE", "test")
         }
     }
 

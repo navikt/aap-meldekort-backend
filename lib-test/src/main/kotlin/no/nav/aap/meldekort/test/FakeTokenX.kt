@@ -21,12 +21,12 @@ object FakeTokenX : FakeServer {
 
     override fun setProperties(port: Int) {
         println("TokenX PORT $port")
-        System.setProperty("token.x.token.endpoint", "http://localhost:$port/token")
-        System.setProperty("token.x.client.id", "meldekort-backend")
-        System.setProperty("token.x.private.jwk", "")
-        System.setProperty("token.x.jwks.uri", "http://localhost:$port/jwks")
-        System.setProperty("token.x.issuer", "fake-tokendings")
-        System.setProperty("nais.token.exchange.endpoint", "")
+        System.setProperty("TOKEN_X_TOKEN_ENDPOINT", "http://localhost:$port/token")
+        System.setProperty("TOKEN_X_CLIENT_ID", "meldekort-backend")
+        System.setProperty("TOKEN_X_PRIVATE_JWK", "")
+        System.setProperty("TOKEN_X_JWKS_URI", "http://localhost:$port/jwks")
+        System.setProperty("TOKEN_X_ISSUER", "fake-tokendings")
+        System.setProperty("NAIS_TOKEN_EXCHANGE_ENDPOINT", "")
     }
 
     override val module: Application.() -> Unit = {
