@@ -3,7 +3,6 @@ package no.nav.aap.kelvin
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
-import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.utfylling.Svar
@@ -17,7 +16,7 @@ class KelvinMeldeperiodeFlate(
     private val clock: Clock,
 ) : MeldeperiodeFlate {
 
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
+    constructor(repositoryProvider: RepositoryProvider, clock: Clock) : this(
         sakService = KelvinSakService(repositoryProvider, clock),
         kelvinSakRepository = repositoryProvider.provide(),
         aktivitetsInformasjonRepository = repositoryProvider.provide(),

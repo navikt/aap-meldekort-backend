@@ -6,6 +6,8 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.tags
+import no.nav.aap.kelvin.KelvinMeldeperiodeFlate
+import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.sak.Fagsaknummer
@@ -15,6 +17,8 @@ import no.nav.aap.tilgang.SakPathParam
 import no.nav.aap.tilgang.authorizedGet
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.varsel.VarselRepository
+import java.time.Clock
+import java.util.UUID
 import javax.sql.DataSource
 
 internal data class SaksnummerParameter(@param:PathParam("saksnummer") val saksnummer: String)
@@ -23,7 +27,7 @@ private enum class Tags(override val description: String) : APITag {
     DriftAPI("Driftsendepunkter for Paw Patrol"),
 }
 
-fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry) {
+fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry, clock: Clock) {
     route("/api/drift/sak/{saksnummer}/meldekort") {
         authorizedGet<SaksnummerParameter, Any>(
             AuthorizationParamPathConfig(
@@ -37,6 +41,19 @@ fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: Repo
             val dto = dataSource.transaction { connection ->
                 val repositoryProvider = repositoryRegistry.provider(connection)
 
+                val identer = repositoryProvider.provide<KelvinSakRepository>()
+                    .hentIdenter(Fagsaknummer(saksnummer))
+
+                val meldeperiodeFlate = KelvinMeldeperiodeFlate(repositoryProvider, clock)
+
+                val aktuelleMeldeperioder = identer
+                    .map { meldeperiodeFlate.aktuelleMeldeperioder(it) }
+                    .map(AktuelleMeldeperioderDriftsinfo::fra)
+
+                val historiskeMeldeperioder = identer
+                    .flatMap { meldeperiodeFlate.historiskeMeldeperioder(it) }
+                    .map(HistoriskeMeldeperioderDriftsinfo::fra)
+
                 val utfyllinger =
                     repositoryProvider.provide<UtfyllingRepository>()
                         .hentUtfyllinger(Fagsaknummer(saksnummer))
@@ -47,7 +64,7 @@ fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: Repo
                         .hentVarsler(Fagsaknummer(saksnummer))
                         .map { VarselDriftsinfo.fra(it) }
 
-                MeldekortDriftsinfoDto(utfyllinger, varsler)
+                MeldekortDriftsinfoDto(aktuelleMeldeperioder, historiskeMeldeperioder, utfyllinger, varsler)
             }
 
             respond(dto)

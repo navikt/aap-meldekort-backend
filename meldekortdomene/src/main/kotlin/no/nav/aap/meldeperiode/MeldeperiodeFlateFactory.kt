@@ -25,7 +25,7 @@ class MeldeperiodeFlateFactoryImpl(private val clock: Clock): MeldeperiodeFlateF
             log.info("Saksnummer '${saksnummer}' rutes til fagsystem ${sak?.referanse?.system?.name ?: "KELVIN"} for utfylling")
         }
 
-        val flate = KelvinMeldeperiodeFlate(repositoryProvider, gatewayProvider, clock)
+        val flate = KelvinMeldeperiodeFlate(repositoryProvider, clock)
 
         return Pair(saksnummer, flate)
     }

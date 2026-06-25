@@ -88,7 +88,7 @@ fun startHttpServer(
             }
             authenticate(AZURE) {
                 apiRouting {
-                    driftApi(dataSource, repositoryRegistry)
+                    driftApi(dataSource, repositoryRegistry, clock)
                     motorApi(dataSource)
                     behandlingsflytApi(dataSource, repositoryRegistry, GatewayProvider, clock)
                 }
