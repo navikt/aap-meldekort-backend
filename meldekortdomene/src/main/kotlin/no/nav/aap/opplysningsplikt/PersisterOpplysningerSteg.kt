@@ -1,6 +1,6 @@
 package no.nav.aap.opplysningsplikt
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.utfylling.Fravær
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingSteg
@@ -11,7 +11,7 @@ class PersisterOpplysningerSteg(
 ) : UtfyllingSteg {
     override val navn = PERSISTER_OPPLYSNINGER
 
-    override fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
+    override fun utførEffekt(ident: Ident, utfylling: Utfylling) {
         aktivitetsInformasjonRepository.lagreAktivitetsInformasjon(
             ident = utfylling.ident,
             opplysninger = utfylling.svar.aktivitetsInformasjon.map {

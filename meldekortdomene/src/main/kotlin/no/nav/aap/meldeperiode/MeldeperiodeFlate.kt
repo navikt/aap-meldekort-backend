@@ -1,6 +1,6 @@
 package no.nav.aap.meldeperiode
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.utfylling.Svar
 
@@ -10,17 +10,17 @@ interface MeldeperiodeFlate {
         val manglerOpplysninger: Periode?,
         val nesteMeldeperiode: Meldeperiode?,
     )
-    fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): KommendeMeldeperioder
+    fun aktuelleMeldeperioder(ident: Ident): KommendeMeldeperioder
 
     class HistoriskMeldeperiode(
         val meldeperiode: Meldeperiode,
         val totaltAntallTimerIPerioden: Double,
     )
-    fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<HistoriskMeldeperiode>
+    fun historiskeMeldeperioder(ident: Ident): List<HistoriskMeldeperiode>
 
     class PeriodeDetaljer(
         val periode: Periode,
         val svar: Svar,
     )
-    fun periodedetaljer(innloggetBruker: InnloggetBruker, periode: Periode): PeriodeDetaljer
+    fun periodedetaljer(ident: Ident, periode: Periode): PeriodeDetaljer
 }

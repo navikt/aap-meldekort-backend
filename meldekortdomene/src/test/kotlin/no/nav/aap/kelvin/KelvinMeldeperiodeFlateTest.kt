@@ -3,7 +3,6 @@ package no.nav.aap.kelvin
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.Ident
-import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjon
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
@@ -17,8 +16,7 @@ import java.time.LocalDate
 import java.util.*
 
 class KelvinMeldeperiodeFlateTest {
-
-    val innloggetBruker = InnloggetBruker(Ident("12345678901"), "test-token")
+    val ident = Ident("12345678901")
 
     val aktivitetsInformasjonRepository = mockk<AktivitetsInformasjonRepository>()
     val kelvinSakRepository = mockk<KelvinSakRepository>()
@@ -61,7 +59,7 @@ class KelvinMeldeperiodeFlateTest {
     @Test
     fun `skal hente ut aktuelle meldekort hvor ingen er fylt ut med meldekort 8 uker tilbake i tid`() {
         every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns listOf()
-        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
         val periodeTilIGår = Periode(sak.rettighetsperiode.fom, LocalDate.now().minusDays(1))
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(4)
@@ -75,7 +73,7 @@ class KelvinMeldeperiodeFlateTest {
         val aktivitetsInformasjon = utledArbeidedeTimer(aktivitetsInformasjonPerioder)
         every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns aktivitetsInformasjon
 
-        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
         val sistePeriodeTilIGår = Periode(LocalDate.now().minusWeeks(2), LocalDate.now().minusDays(1))
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
@@ -90,7 +88,7 @@ class KelvinMeldeperiodeFlateTest {
         val aktivitetsInformasjon = utledArbeidedeTimer(aktivitetsInformasjonPerioder)
         every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns aktivitetsInformasjon
 
-        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
         assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
@@ -103,7 +101,7 @@ class KelvinMeldeperiodeFlateTest {
         val aktivitetsInformasjon = utledArbeidedeTimer(aktivitetsInformasjonPerioder)
         every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns aktivitetsInformasjon
 
-        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(innloggetBruker)
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
 
         assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
         assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)

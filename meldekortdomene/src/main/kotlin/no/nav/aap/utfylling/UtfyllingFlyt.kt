@@ -1,6 +1,6 @@
 package no.nav.aap.utfylling
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.journalføring.BestillJournalføringSteg
 import no.nav.aap.journalføring.JournalføringService
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -84,7 +84,7 @@ class UtfyllingFlyt(
         val feil: Exception? = null,
     )
 
-    fun kjør(innloggetBruker: InnloggetBruker, utfylling: Utfylling): FlytResultat {
+    fun kjør(ident: Ident, utfylling: Utfylling): FlytResultat {
         check(stegene.any { it.navn == utfylling.aktivtSteg })
         check(!utfylling.erAvsluttet) { "Utfylling er allerede avsluttet"}
 
@@ -98,7 +98,7 @@ class UtfyllingFlyt(
         log.info("neste ikke-tekniske relevante steg er $nesteAktiveSteg")
 
         try {
-            utførEffekter(innloggetBruker, utfylling, nesteAktiveSteg)
+            utførEffekter(ident, utfylling, nesteAktiveSteg)
             log.info("alle effekter opp til $nesteAktiveSteg kjørte vellyket, aktivt steg blir $nesteAktiveSteg")
             return FlytResultat(utfylling.copy(aktivtSteg = nesteAktiveSteg))
         } catch (exception: Exception) {
@@ -156,7 +156,7 @@ class UtfyllingFlyt(
     }
 
     private fun utførEffekter(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfylling: Utfylling,
         nesteAktiveSteg: UtfyllingStegNavn,
     ): Result<Unit> {
@@ -166,7 +166,7 @@ class UtfyllingFlyt(
             }
 
             try {
-                steg.utførEffekt(innloggetBruker, utfylling)
+                steg.utførEffekt(ident, utfylling)
             } catch (e: Exception) {
                 return Result.failure(Exception("effekt for steg ${steg.navn} feilet", e))
             }

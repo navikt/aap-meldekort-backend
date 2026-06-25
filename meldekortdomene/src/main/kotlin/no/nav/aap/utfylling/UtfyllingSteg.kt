@@ -1,6 +1,5 @@
 package no.nav.aap.utfylling
 
-import no.nav.aap.InnloggetBruker
 import no.nav.aap.kelvin.tidligsteInnsendingstidspunktMeldedag
 import no.nav.aap.utfylling.UtfyllingStegNavn.BEKREFT
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_SPØRSMÅL
@@ -11,6 +10,7 @@ import no.nav.aap.utfylling.UtfyllingStegNavn.UTFYLLING
 import no.nav.aap.utfylling.UtfyllingStegNavn.FRAVÆR_UTFYLLING
 import java.time.Clock
 import java.time.LocalDate
+import no.nav.aap.Ident
 
 enum class UtfyllingStegNavn(val erTeknisk: Boolean = false) {
     INTRODUKSJON,
@@ -41,7 +41,7 @@ interface UtfyllingSteg {
     val formkrav: Formkrav get() = mapOf()
 
     /* Må være idempotent! */
-    fun utførEffekt(innloggetBruker: InnloggetBruker, utfylling: Utfylling) {
+    fun utførEffekt(ident: Ident, utfylling: Utfylling) {
     }
 }
 

@@ -1,8 +1,8 @@
 package no.nav.aap.utfylling
 
-import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import java.time.LocalDateTime
+import no.nav.aap.Ident
 
 interface UtfyllingFlate {
     class Metadata(
@@ -30,25 +30,25 @@ interface UtfyllingFlate {
         val feil: String?,
     )
 
-    fun startUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): StartUtfyllingResponse
+    fun startUtfylling(ident: Ident, periode: Periode): StartUtfyllingResponse
 
-    fun startKorrigering(innloggetBruker: InnloggetBruker, periode: Periode): StartUtfyllingResponse
+    fun startKorrigering(ident: Ident, periode: Periode): StartUtfyllingResponse
 
-    fun hentUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse): UtfyllingResponse?
+    fun hentUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse): UtfyllingResponse?
 
     fun lagre(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse
 
     fun nesteOgLagre(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingResponse
 
-    fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse)
+    fun slettUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse)
 }

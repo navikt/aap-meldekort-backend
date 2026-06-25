@@ -37,7 +37,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
         return MDC.putCloseable("utfylling", utfyllingReferanse?.asUuid?.toString()).use {
             dataSource.transaction { connection ->
                 val (saksnummer, flate) = utfyllingFlateFactory.flateForBruker(
-                    innloggetBruker(),
+                    personBrukerIdent(),
                     repositoryProvider = repositoryRegistry.provider(connection),
                     gatewayProvider = GatewayProvider,
                     connection = connection,
@@ -55,7 +55,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
             medFlate {
                 val periode = Periode(body.fom, body.tom)
                 log.info("Starter innsending av meldekort for periode $periode")
-                val resultat = startUtfylling(innloggetBruker(), periode)
+                val resultat = startUtfylling(personBrukerIdent(), periode)
                 StartUtfyllingResponse.fraDomene(resultat)
             }
         } catch (exception: Exception) {
@@ -67,7 +67,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
     route("start-korrigering").post<Unit, StartUtfyllingResponse, StartUtfyllingRequest> { _, body ->
         val response = try {
             medFlate {
-                val resultat = startKorrigering(innloggetBruker(), Periode(body.fom, body.tom))
+                val resultat = startKorrigering(personBrukerIdent(), Periode(body.fom, body.tom))
                 StartUtfyllingResponse.fraDomene(resultat)
             }
         } catch (exception: Exception) {
@@ -83,7 +83,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
         get<Referanse, UtfyllingResponseDto> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val response = medFlate(utfyllingReferanse) {
-                hentUtfylling(innloggetBruker(), utfyllingReferanse)
+                hentUtfylling(personBrukerIdent(), utfyllingReferanse)
                     ?.let { UtfyllingResponseDto.fraDomene(it) }
                     ?: throw VerdiIkkeFunnetException("Fant ingen utfylling for referanse ${params.referanse}")
             }
@@ -94,7 +94,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
         delete<Referanse, Unit> { params ->
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             medFlate(utfyllingReferanse) {
-                slettUtfylling(innloggetBruker(), utfyllingReferanse)
+                slettUtfylling(personBrukerIdent(), utfyllingReferanse)
             }
             respondWithStatus(HttpStatusCode.OK)
         }
@@ -103,7 +103,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val response = medFlate(utfyllingReferanse) {
                 val utfylling = nesteOgLagre(
-                    innloggetBruker = innloggetBruker(),
+                    ident = personBrukerIdent(),
                     utfyllingReferanse = utfyllingReferanse,
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),
@@ -117,7 +117,7 @@ fun NormalOpenAPIRoute.utfyllingApi(
             val utfyllingReferanse = UtfyllingReferanse(params.referanse)
             val response = medFlate(utfyllingReferanse) {
                 val utfylling = lagre(
-                    innloggetBruker = innloggetBruker(),
+                    ident = personBrukerIdent(),
                     utfyllingReferanse = utfyllingReferanse,
                     aktivtSteg = body.nyTilstand.aktivtSteg.tilDomene,
                     svar = body.nyTilstand.svar.tilDomene(),

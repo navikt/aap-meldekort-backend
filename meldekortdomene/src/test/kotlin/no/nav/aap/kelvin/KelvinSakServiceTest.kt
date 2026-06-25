@@ -2,8 +2,6 @@ package no.nav.aap.kelvin
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.aap.Ident
-import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
@@ -14,8 +12,6 @@ import org.assertj.core.api.Assertions.assertThat
 import java.time.*
 
 class KelvinSakServiceTest {
-    val innloggetBruker = InnloggetBruker(Ident("12345678901"), "test-token")
-
     val aktivitetsInformasjonRepository = mockk<AktivitetsInformasjonRepository>()
     val kelvinSakRepository = mockk<KelvinSakRepository>()
     val clock = Clock.systemDefaultZone()

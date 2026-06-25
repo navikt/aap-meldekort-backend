@@ -1,8 +1,7 @@
 package no.nav.aap.meldeperiode
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.kelvin.KelvinMeldeperiodeFlate
-import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
 import java.time.LocalDate
 import no.nav.aap.komponenter.repository.RepositoryProvider
@@ -12,14 +11,14 @@ import org.slf4j.MDC
 import java.time.Clock
 
 interface MeldeperiodeFlateFactory {
-    fun flateForBruker(innloggetBruker: InnloggetBruker, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): Pair<String, MeldeperiodeFlate>
+    fun flateForBruker(ident: Ident, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): Pair<String, MeldeperiodeFlate>
 }
 
 class MeldeperiodeFlateFactoryImpl(private val clock: Clock): MeldeperiodeFlateFactory {
     val log = LoggerFactory.getLogger(javaClass)
 
-    override fun flateForBruker(innloggetBruker: InnloggetBruker, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): Pair<String, MeldeperiodeFlate> {
-        val sak = SakerService(repositoryProvider,gatewayProvider).finnSak(innloggetBruker.ident, LocalDate.now(clock))
+    override fun flateForBruker(ident: Ident, repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): Pair<String, MeldeperiodeFlate> {
+        val sak = SakerService(repositoryProvider,gatewayProvider).finnSak(ident, LocalDate.now(clock))
         val saksnummer = sak?.referanse?.nummer?.asString ?: "NULL"
 
         MDC.putCloseable("saksnummer", saksnummer).use {

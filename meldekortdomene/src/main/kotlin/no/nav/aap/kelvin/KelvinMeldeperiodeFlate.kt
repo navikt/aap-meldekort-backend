@@ -1,6 +1,6 @@
 package no.nav.aap.kelvin
 
-import no.nav.aap.InnloggetBruker
+import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.lookup.gateway.GatewayProvider
@@ -24,15 +24,15 @@ class KelvinMeldeperiodeFlate(
         clock = clock,
     )
 
-    override fun aktuelleMeldeperioder(innloggetBruker: InnloggetBruker): MeldeperiodeFlate.KommendeMeldeperioder {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now(clock))
+    override fun aktuelleMeldeperioder(ident: Ident): MeldeperiodeFlate.KommendeMeldeperioder {
+        val sak = kelvinSakRepository.hentSak(ident, LocalDate.now(clock))
             ?: return MeldeperiodeFlate.KommendeMeldeperioder(
                 antallUbesvarteMeldeperioder = 0,
                 manglerOpplysninger = null,
                 nesteMeldeperiode = null,
             )
 
-        val meldeperioderUtenInnsending = sakService.meldeperioderUtenInnsending(innloggetBruker.ident, sak.referanse)
+        val meldeperioderUtenInnsending = sakService.meldeperioderUtenInnsending(ident, sak.referanse)
 
         val ventende = meldeperioderUtenInnsending
             .takeWhile { it.meldevindu.fom <= LocalDate.now(clock) }
@@ -53,13 +53,13 @@ class KelvinMeldeperiodeFlate(
         )
     }
 
-    override fun historiskeMeldeperioder(innloggetBruker: InnloggetBruker): List<MeldeperiodeFlate.HistoriskMeldeperiode> {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, LocalDate.now(clock)) ?: return emptyList()
+    override fun historiskeMeldeperioder(ident: Ident): List<MeldeperiodeFlate.HistoriskMeldeperiode> {
+        val sak = kelvinSakRepository.hentSak(ident, LocalDate.now(clock)) ?: return emptyList()
 
         val perioder = sakService.hentMeldeperioder(sak.referanse)
 
         val senesteOpplysningsdato =
-            aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(innloggetBruker.ident, sak.referanse)
+            aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(ident, sak.referanse)
                 ?: LocalDate.MIN
 
         /* Her ønsker vi å liste opp meldeperioder hvor:
@@ -71,7 +71,7 @@ class KelvinMeldeperiodeFlate(
             .filter { it.meldeperioden.fom <= senesteOpplysningsdato }
             .reversed()
             .map {
-                val detaljer = periodedetaljer(innloggetBruker, it.meldeperioden)
+                val detaljer = periodedetaljer(ident, it.meldeperioden)
                 MeldeperiodeFlate.HistoriskMeldeperiode(
                     meldeperiode = it,
                     totaltAntallTimerIPerioden = detaljer.svar.aktivitetsInformasjon.sumOf { it.timer ?: 0.0 }
@@ -80,11 +80,11 @@ class KelvinMeldeperiodeFlate(
     }
 
     override fun periodedetaljer(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         periode: Periode
     ): MeldeperiodeFlate.PeriodeDetaljer {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom) ?: error("ingen sak i perioden")
-        val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
+        val sak = kelvinSakRepository.hentSak(ident, periode.fom) ?: error("ingen sak i perioden")
+        val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(ident, sak.referanse, periode)
         return MeldeperiodeFlate.PeriodeDetaljer(
             periode = periode,
             svar = Svar(
