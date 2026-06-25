@@ -1,7 +1,6 @@
 package no.nav.aap.kelvin
 
 import no.nav.aap.Ident
-import no.nav.aap.InnloggetBruker
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.httpklient.exception.UgyldigForespørselException
 import no.nav.aap.komponenter.httpklient.exception.VerdiIkkeFunnetException
@@ -43,22 +42,22 @@ class KelvinUtfyllingFlate(
 
 
     override fun startUtfylling(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         periode: Periode
     ): UtfyllingFlate.StartUtfyllingResponse {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom)
+        val sak = kelvinSakRepository.hentSak(ident, periode.fom)
             ?: return UtfyllingFlate.StartUtfyllingResponse(
                 metadata = null,
                 utfylling = null,
                 feil = "finner ikke sak",
             )
 
-        val utfylling = eksisterendeÅpenUtfylling(innloggetBruker, periode) ?: run {
+        val utfylling = eksisterendeÅpenUtfylling(ident, periode) ?: run {
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
-                ident = innloggetBruker.ident,
+                ident = ident,
                 periode = periode,
                 flyt = run {
                     if (Miljø.erProd()) {
@@ -73,31 +72,31 @@ class KelvinUtfyllingFlate(
         }
 
         return UtfyllingFlate.StartUtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling),
+            metadata = utledMetadata(ident, utfylling),
             utfylling = utfylling,
             feil = null,
         )
     }
 
     override fun startKorrigering(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         periode: Periode
     ): UtfyllingFlate.StartUtfyllingResponse {
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, periode.fom)
+        val sak = kelvinSakRepository.hentSak(ident, periode.fom)
             ?: return UtfyllingFlate.StartUtfyllingResponse(
                 metadata = null,
                 utfylling = null,
                 feil = "finner ikke sak",
             )
 
-        val utfylling = eksisterendeÅpenUtfylling(innloggetBruker, periode) ?: run {
-            val eksisterendeAvsluttetUtfylling = eksisterendeUtfylling(innloggetBruker, periode)
+        val utfylling = eksisterendeÅpenUtfylling(ident, periode) ?: run {
+            val eksisterendeAvsluttetUtfylling = eksisterendeUtfylling(ident, periode)
             val utfyllingReferanse = UtfyllingReferanse.ny()
 
-            val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(innloggetBruker.ident, sak.referanse, periode)
+            val aktivitetsInformasjon = sakService.registrerteAktivitetsInformasjon(ident, sak.referanse, periode)
             nyUtfylling(
                 utfyllingReferanse = utfyllingReferanse,
-                ident = innloggetBruker.ident,
+                ident = ident,
                 periode = periode,
                 flyt = run {
                     if (Miljø.erProd()) {
@@ -119,14 +118,14 @@ class KelvinUtfyllingFlate(
         }
 
         return UtfyllingFlate.StartUtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling),
+            metadata = utledMetadata(ident, utfylling),
             utfylling = utfylling,
             feil = null,
         )
     }
 
     private fun utledMetadata(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfylling: Utfylling,
         brukerHarVedtakIKelvin: Boolean? = null,
         brukerHarSakUnderBehandling: Boolean? = null,
@@ -145,7 +144,7 @@ class KelvinUtfyllingFlate(
             referanse = utfylling.referanse,
             periode = utfylling.periode,
             antallUbesvarteMeldeperioder = sakService.antallUbesvarteMeldeperioder(
-                innloggetBruker.ident,
+                ident,
                 utfylling.fagsak
             ),
             tidligsteInnsendingstidspunkt = tidligsteInnsendingstidspunkt,
@@ -159,13 +158,13 @@ class KelvinUtfyllingFlate(
     }
 
 
-    private fun eksisterendeÅpenUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
+    private fun eksisterendeÅpenUtfylling(ident: Ident, periode: Periode): Utfylling? {
         /* TODO: noen sjekk på gyldighet? Utløpt? */
-        return utfyllingRepository.lastÅpenUtfylling(innloggetBruker.ident, periode)
+        return utfyllingRepository.lastÅpenUtfylling(ident, periode)
     }
 
-    private fun eksisterendeUtfylling(innloggetBruker: InnloggetBruker, periode: Periode): Utfylling? {
-        return utfyllingRepository.lastUtfylling(innloggetBruker.ident, periode)
+    private fun eksisterendeUtfylling(ident: Ident, periode: Periode): Utfylling? {
+        return utfyllingRepository.lastUtfylling(ident, periode)
     }
 
 
@@ -194,52 +193,52 @@ class KelvinUtfyllingFlate(
     }
 
     override fun hentUtfylling(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfyllingReferanse: UtfyllingReferanse
     ): UtfyllingFlate.UtfyllingResponse? {
-        val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse)
+        val utfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse)
             ?: return null
 
-        val sak = kelvinSakRepository.hentSak(innloggetBruker.ident, utfylling.periode.fom)
+        val sak = kelvinSakRepository.hentSak(ident, utfylling.periode.fom)
         val brukerHarVedtakIKelvin = sak?.erLøpende()
         val brukerHarSakUnderBehandling = sak?.erUnderBehandling()
 
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling, brukerHarVedtakIKelvin, brukerHarSakUnderBehandling),
+            metadata = utledMetadata(ident, utfylling, brukerHarVedtakIKelvin, brukerHarSakUnderBehandling),
             utfylling = utfylling,
             feil = null,
         )
     }
 
     override fun nesteOgLagre(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
             svar = svar,
             sistEndret = Instant.now(clock),
         )
-        val utfall = flytProvider(utfylling.flyt).kjør(innloggetBruker, utfylling)
+        val utfall = flytProvider(utfylling.flyt).kjør(ident, utfylling)
         utfyllingRepository.lagreUtfylling(utfall.utfylling)
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling),
+            metadata = utledMetadata(ident, utfylling),
             utfylling = utfall.utfylling,
             feil = utfall.feil?.javaClass?.canonicalName,
         )
     }
 
     override fun lagre(
-        innloggetBruker: InnloggetBruker,
+        ident: Ident,
         utfyllingReferanse: UtfyllingReferanse,
         aktivtSteg: UtfyllingStegNavn,
         svar: Svar,
     ): UtfyllingFlate.UtfyllingResponse {
-        val eksisterendeUtfylling = lastUtfyllingForÅEndre(innloggetBruker.ident, utfyllingReferanse)
+        val eksisterendeUtfylling = lastUtfyllingForÅEndre(ident, utfyllingReferanse)
 
         val utfylling = eksisterendeUtfylling.copy(
             aktivtSteg = aktivtSteg,
@@ -249,7 +248,7 @@ class KelvinUtfyllingFlate(
 
         utfyllingRepository.lagreUtfylling(utfylling)
         return UtfyllingFlate.UtfyllingResponse(
-            metadata = utledMetadata(innloggetBruker, utfylling),
+            metadata = utledMetadata(ident, utfylling),
             utfylling = utfylling,
             feil = null,
         )
@@ -267,11 +266,11 @@ class KelvinUtfyllingFlate(
         return eksisterendeUtfylling
     }
 
-    override fun slettUtfylling(innloggetBruker: InnloggetBruker, utfyllingReferanse: UtfyllingReferanse) {
-        val utfylling = utfyllingRepository.lastUtfylling(innloggetBruker.ident, utfyllingReferanse) ?: return
+    override fun slettUtfylling(ident: Ident, utfyllingReferanse: UtfyllingReferanse) {
+        val utfylling = utfyllingRepository.lastUtfylling(ident, utfyllingReferanse) ?: return
         if (utfylling.erAvsluttet) {
             throw UgyldigForespørselException("Kan ikke slette utfylling som er avsluttet.")
         }
-        utfyllingRepository.slettUtkast(innloggetBruker.ident, utfyllingReferanse)
+        utfyllingRepository.slettUtkast(ident, utfyllingReferanse)
     }
 }

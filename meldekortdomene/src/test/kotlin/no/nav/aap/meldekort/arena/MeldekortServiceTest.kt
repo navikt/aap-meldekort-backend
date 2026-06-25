@@ -15,7 +15,7 @@ package no.nav.aap.meldekort.arena
 //import no.nav.aap.arena.MeldekortService
 //
 //class MeldekortServiceTest {
-//    val innloggetBruker = InnloggetBruker(
+//    val ident = InnloggetBruker(
 //        ident = Ident("9".repeat(11)),
 //        token = "fake.jwt.token",
 //    )
@@ -39,7 +39,7 @@ package no.nav.aap.meldekort.arena
 //            kommendeMeldekort = null,
 //            historiskeMeldekort = null,
 //        )
-//        val meldekort = meldekortService.alleMeldekort(innloggetBruker)
+//        val meldekort = meldekortService.alleMeldekort(ident)
 //        assertNull(meldekort)
 //    }
 //
@@ -49,7 +49,7 @@ package no.nav.aap.meldekort.arena
 //            kommendeMeldekort = kommendeMeldekort,
 //            historiskeMeldekort = listOf(),
 //        )
-//        val meldekort = meldekortService.alleMeldekort(innloggetBruker)
+//        val meldekort = meldekortService.alleMeldekort(ident)
 //
 //        assertThat(meldekort).isSortedAccordingTo { x, y -> x.periode.fom.compareTo(y.periode.fom) }
 //    }

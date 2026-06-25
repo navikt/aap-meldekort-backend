@@ -26,7 +26,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
     fun <T> OpenAPIPipelineResponseContext<*>.medFlate(body: MeldeperiodeFlate.() -> T): T {
         return dataSource.transaction { connection ->
             val (saksnummer, meldeperiodeFlate) = meldeperiodeFlateFactory.flateForBruker(
-                innloggetBruker = innloggetBruker(),
+                ident = personBrukerIdent(),
                 repositoryProvider = repositoryRegistry.provider(connection),
                 gatewayProvider = GatewayProvider
             )
@@ -40,7 +40,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
     route("meldeperiode") {
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
-                val kommendeMeldeperioder = aktuelleMeldeperioder(innloggetBruker())
+                val kommendeMeldeperioder = aktuelleMeldeperioder(personBrukerIdent())
                 log.info("Henter kommende meldeperioder. Fant ${kommendeMeldeperioder.antallUbesvarteMeldeperioder} ubsvarte meldeperioder.")
                 KommendeMeldeperioderDto.fraDomene(kommendeMeldeperioder)
             }
@@ -49,7 +49,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
 
         route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
-                val historiskeMeldeperioder = historiskeMeldeperioder(innloggetBruker())
+                val historiskeMeldeperioder = historiskeMeldeperioder(personBrukerIdent())
                 log.info("Hentet ${historiskeMeldeperioder.size} historiske meldeperioder.")
                 historiskeMeldeperioder.map {
                     HistoriskMeldeperiodeDto.fraDomene(it)
@@ -60,7 +60,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
 
         route("detaljer").post<Unit, PeriodeDetaljerDto, PeriodeDto> { _, request ->
             val response = medFlate {
-                val detaljer = periodedetaljer(innloggetBruker(), Periode(request.fom, request.tom))
+                val detaljer = periodedetaljer(personBrukerIdent(), Periode(request.fom, request.tom))
                 log.info("Henter detaljer for peride ${detaljer.periode}")
                 PeriodeDetaljerDto(detaljer)
             }

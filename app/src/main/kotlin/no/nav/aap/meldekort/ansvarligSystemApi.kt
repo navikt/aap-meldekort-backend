@@ -32,7 +32,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                 kelvinSakRepository = repositoryRegistry.provider(connection).provide(),
             )
 
-            val sak = sakerService.finnSak(innloggetBruker().ident, LocalDate.now(clock))
+            val sak = sakerService.finnSak(personBrukerIdent(), LocalDate.now(clock))
             when (sak?.referanse?.system) {
                 FagsystemNavn.ARENA -> AnsvarligMeldekortløsningDto.FELLES
                 null, FagsystemNavn.KELVIN -> AnsvarligMeldekortløsningDto.AAP
@@ -44,7 +44,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
     route("ansvarlig-system-felles").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
-            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, LocalDate.now(clock))
+            val kelvinSak = kelvinSakRepository.hentSak(personBrukerIdent(), LocalDate.now(clock))
             if (kelvinSak == null)
                 AnsvarligMeldekortløsningDto.FELLES
             else

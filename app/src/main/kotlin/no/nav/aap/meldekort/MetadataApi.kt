@@ -19,7 +19,7 @@ fun NormalOpenAPIRoute.metadataApi(
     route("hent-metadata").get<Unit, MetadataDto> {
         val response = dataSource.transaction { connection ->
             val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
-            val kelvinSak = kelvinSakRepository.hentSak(innloggetBruker().ident, LocalDate.now(clock))
+            val kelvinSak = kelvinSakRepository.hentSak(personBrukerIdent(), LocalDate.now(clock))
             MetadataDto(brukerHarVedtakIKelvin = kelvinSak?.erLøpende(), brukerHarSakUnderBehandling = kelvinSak?.erUnderBehandling())
         }
         respond(response)

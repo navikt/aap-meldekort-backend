@@ -27,8 +27,7 @@ fun NormalOpenAPIRoute.meldekortStatus(
         val response = dataSource.transaction { connection ->
             val meldekortStatusService = MeldekortstatusService(repositoryRegistry.provider(connection), clock)
 
-            val ident = innloggetBruker().ident
-
+            val ident = personBrukerIdent()
             meldekortStatusService.hentMeldekortstatus(ident)?.let { MeldekortstatusDto.fraDomene(it) }
         }
 
@@ -37,7 +36,7 @@ fun NormalOpenAPIRoute.meldekortStatus(
         } else {
             log.info("Fant ikke bruker i Kelvin, sjekker Arena")
             val fellesLandingssideService = FellesLandingssideService(gatewayProvider)
-            val arenaMeldekort = fellesLandingssideService.hentFraArena(innloggetBruker().ident.asString)
+            val arenaMeldekort = fellesLandingssideService.hentFraArena(personBrukerIdent().asString)
 
             if (arenaMeldekort != null) {
                 respond(MeldekortstatusDto.fraDomene(arenaMeldekort))
