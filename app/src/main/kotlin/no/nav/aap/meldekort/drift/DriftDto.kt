@@ -1,6 +1,8 @@
 package no.nav.aap.meldekort.drift
 
 import no.nav.aap.Periode
+import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.utfylling.Svar
 import no.nav.aap.utfylling.Utfylling
@@ -11,9 +13,37 @@ import java.time.Instant
 import java.util.UUID
 
 internal data class MeldekortDriftsinfoDto(
+    val aktuelleMeldeperioder: List<AktuelleMeldeperioderDriftsinfo>,
+    val historiskeMeldeperioder: List<HistoriskeMeldeperioderDriftsinfo>,
     val utfyllinger: List<UtfyllingDriftsinfo>,
     val varsler: List<VarselDriftsinfo>,
 )
+
+internal data class AktuelleMeldeperioderDriftsinfo(
+    val antallUbesvarteMeldeperioder: Int,
+    val manglerOpplysninger: Periode?,
+    val nesteMeldeperiode: Meldeperiode?,
+) {
+    companion object {
+        fun fra(meldeperioder: MeldeperiodeFlate.KommendeMeldeperioder) = AktuelleMeldeperioderDriftsinfo(
+            meldeperioder.antallUbesvarteMeldeperioder,
+            meldeperioder.manglerOpplysninger,
+            meldeperioder.nesteMeldeperiode
+        )
+    }
+}
+
+internal data class HistoriskeMeldeperioderDriftsinfo(
+    val meldeperiode: Meldeperiode,
+    val totaltAntallTimerIPerioden: Double,
+) {
+    companion object {
+        fun fra(meldeperiode: MeldeperiodeFlate.HistoriskMeldeperiode) = HistoriskeMeldeperioderDriftsinfo(
+            meldeperiode.meldeperiode,
+            meldeperiode.totaltAntallTimerIPerioden,
+        )
+    }
+}
 
 internal data class UtfyllingDriftsinfo(
     val referanse: UUID,
