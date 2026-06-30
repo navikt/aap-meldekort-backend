@@ -9,8 +9,8 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation("io.micrometer:micrometer-core:1.16.5")
-    implementation("ch.qos.logback:logback-classic:1.5.32")
+    implementation("io.micrometer:micrometer-core:1.17.0")
+    implementation("ch.qos.logback:logback-classic:1.5.37")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
@@ -19,10 +19,10 @@ dependencies {
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
     implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
-    implementation("org.apache.kafka:kafka-clients:4.2.0")
+    implementation("org.apache.kafka:kafka-clients:4.3.1")
 
-    implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-database-postgresql:12.4.0")
+    implementation("com.zaxxer:HikariCP:7.1.0")
+    implementation("org.flywaydb:flyway-database-postgresql:12.9.0")
     runtimeOnly("org.postgresql:postgresql:42.7.11")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
@@ -34,7 +34,7 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testFixturesImplementation("io.micrometer:micrometer-core:1.16.5")
+    testFixturesImplementation("io.micrometer:micrometer-core:1.17.0")
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
     testImplementation("org.testcontainers:testcontainers-kafka:2.0.5")
