@@ -1,8 +1,8 @@
 val ktorVersion = "3.4.3"
-val komponenterVersjon = "2.0.80"
+val komponenterVersjon = "2.0.81"
 val junitVersjon = "6.0.3"
 val jacksonVersjon = "2.22.0"
-val tilgangVersjon = "1.0.226"
+val tilgangVersjon = "1.0.227"
 
 plugins {
     id("aap.conventions")
