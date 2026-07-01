@@ -3,7 +3,7 @@ plugins {
 }
 
 val komponenterVersjon = "2.0.81"
-val junitVersjon = "6.0.3"
+val junitVersjon = "6.1.0"
 
 dependencies {
     implementation(project(":meldekortdomene"))
