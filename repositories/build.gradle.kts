@@ -22,8 +22,8 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.3.1")
 
     implementation("com.zaxxer:HikariCP:7.1.0")
-    implementation("org.flywaydb:flyway-database-postgresql:12.9.0")
-    runtimeOnly("org.postgresql:postgresql:42.7.11")
+    implementation("org.flywaydb:flyway-database-postgresql:12.10.0")
+    runtimeOnly("org.postgresql:postgresql:42.7.12")
 
     testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
