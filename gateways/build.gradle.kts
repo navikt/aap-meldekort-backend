@@ -2,7 +2,7 @@ plugins {
     id("aap.conventions")
 }
 
-val komponenterVersjon = "2.0.88"
+val komponenterVersjon = "2.0.92"
 val junitVersjon = "6.1.1"
 
 dependencies {
@@ -10,7 +10,7 @@ dependencies {
     implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
     implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
     implementation("ch.qos.logback:logback-classic:1.5.37")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.630")
+    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.632")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
