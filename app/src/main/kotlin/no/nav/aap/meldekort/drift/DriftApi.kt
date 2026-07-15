@@ -18,7 +18,6 @@ import no.nav.aap.tilgang.authorizedGet
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.varsel.VarselRepository
 import java.time.Clock
-import java.util.UUID
 import javax.sql.DataSource
 
 internal data class SaksnummerParameter(@param:PathParam("saksnummer") val saksnummer: String)
@@ -36,13 +35,16 @@ fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: Repo
             ),
             modules = arrayOf(tags(Tags.DriftAPI))
         ) { params ->
-            val saksnummer = params.saksnummer
+            val saksnummer = Fagsaknummer(params.saksnummer)
 
             val dto = dataSource.transaction { connection ->
                 val repositoryProvider = repositoryRegistry.provider(connection)
+                val sakRepository = repositoryProvider.provide<KelvinSakRepository>()
 
-                val identer = repositoryProvider.provide<KelvinSakRepository>()
-                    .hentIdenter(Fagsaknummer(saksnummer))
+                val sak = requireNotNull(sakRepository.hentSak(saksnummer)) {
+                    "Sak med saksnummer ${saksnummer.asString} finnes ikke"
+                }
+                val identer = sakRepository.hentIdenter(saksnummer)
 
                 val meldeperiodeFlate = KelvinMeldeperiodeFlate(repositoryProvider, clock)
 
@@ -56,15 +58,15 @@ fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: Repo
 
                 val utfyllinger =
                     repositoryProvider.provide<UtfyllingRepository>()
-                        .hentUtfyllinger(Fagsaknummer(saksnummer))
+                        .hentUtfyllinger(saksnummer)
                         .map { UtfyllingDriftsinfo.fra(it) }
 
                 val varsler =
                     repositoryProvider.provide<VarselRepository>()
-                        .hentVarsler(Fagsaknummer(saksnummer))
+                        .hentVarsler(saksnummer)
                         .map { VarselDriftsinfo.fra(it) }
 
-                MeldekortDriftsinfoDto(aktuelleMeldeperioder, historiskeMeldeperioder, utfyllinger, varsler)
+                MeldekortDriftsinfoDto(sak, aktuelleMeldeperioder, historiskeMeldeperioder, utfyllinger, varsler)
             }
 
             respond(dto)

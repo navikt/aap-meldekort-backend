@@ -1,6 +1,7 @@
 package no.nav.aap.meldekort.drift
 
 import no.nav.aap.Periode
+import no.nav.aap.kelvin.KelvinSak
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
 import no.nav.aap.sak.FagsakReferanse
@@ -13,6 +14,7 @@ import java.time.Instant
 import java.util.UUID
 
 internal data class MeldekortDriftsinfoDto(
+    val sak: KelvinSak,
     val aktuelleMeldeperioder: List<AktuelleMeldeperioderDriftsinfo>,
     val historiskeMeldeperioder: List<HistoriskeMeldeperioderDriftsinfo>,
     val utfyllinger: List<UtfyllingDriftsinfo>,
