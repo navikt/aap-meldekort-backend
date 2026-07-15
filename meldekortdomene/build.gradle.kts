@@ -1,5 +1,5 @@
 val komponenterVersjon = "2.0.97"
-val junitVersjon = "6.1.1"
+val junitVersjon = "6.1.2"
 
 plugins {
     id("aap.conventions")
