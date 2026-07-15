@@ -279,9 +279,9 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
     override fun hentSak(saksnumer: Fagsaknummer): KelvinSak? {
         return connection.queryFirstOrNull(
             """
-            select kelvin_sak.saksnummer, kelvin_sak.saken_gjelder_for, kelvin_sak.status
+            select saksnummer, saken_gjelder_for, status
             from kelvin_sak
-            where kelvin_sak.saksnummer = ?
+            where saksnummer = ?
         """
         ) {
             setParams {
