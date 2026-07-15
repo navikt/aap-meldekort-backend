@@ -276,6 +276,28 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         }
     }
 
+    override fun hentSak(saksnumer: Fagsaknummer): KelvinSak? {
+        return connection.queryFirstOrNull(
+            """
+            select saksnummer, saken_gjelder_for, status
+            from kelvin_sak
+            where saksnummer = ?
+        """
+        ) {
+            setParams {
+                setString(1, saksnumer.asString)
+            }
+
+            setRowMapper { row ->
+                KelvinSak(
+                    saksnummer = Fagsaknummer(row.getString("saksnummer")),
+                    status = row.getEnumOrNull("status"),
+                    rettighetsperiode = row.getPeriode("saken_gjelder_for").let { Periode(it.fom, it.tom) }
+                )
+            }
+        }
+    }
+
     override fun hentIdenter(saksnummer: Fagsaknummer): List<Ident> {
         return connection.queryList(
             """
