@@ -18,6 +18,7 @@ import no.nav.aap.journalføring.JournalføringJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.komponenter.server.AZURE
 import no.nav.aap.komponenter.server.TOKENX
@@ -29,6 +30,7 @@ import no.nav.aap.meldeperiode.MeldeperiodeFlateFactoryImpl
 import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
+import no.nav.aap.tilgang.TeamAap
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import no.nav.aap.varsel.SendVarselJobbUtfører
@@ -71,7 +73,8 @@ fun startHttpServer(
         )
 
         val motor = startMotor(dataSource, repositoryRegistry, prometheus, clock)
-
+        val påkrevdeRollerMotor = if (Miljø.erProd()) listOf(TeamAap.id) else emptyList() 
+        
         install(StatusPages, StatusPagesConfigHelper.setup())
 
         routing {
@@ -89,7 +92,7 @@ fun startHttpServer(
             authenticate(AZURE) {
                 apiRouting {
                     driftApi(dataSource, repositoryRegistry, clock)
-                    motorApi(dataSource)
+                    motorApi(dataSource, påkrevdeRollerMotor)
                     behandlingsflytApi(dataSource, repositoryRegistry, GatewayProvider, clock)
                 }
             }
