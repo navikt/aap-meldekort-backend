@@ -40,6 +40,7 @@ fun main() {
     System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
     System.setProperty("brukervarsel.topic", "brukervarsel-topic")
     System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+    System.setProperty("NAIS_TEAM_AAP", "nais-team-aap")
 
     GatewayRegistry
         .register<DokarkivGatewayImpl>()

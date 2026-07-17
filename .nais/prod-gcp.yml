@@ -42,6 +42,8 @@ spec:
                 extra:
                     - "NAVident"
                     - "azp_name"
+                groups:
+                  - id: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5 #NAIS_TEAM_AAP
     liveness:
         path: /actuator/live
         initialDelay: 5
@@ -122,3 +124,5 @@ spec:
           value: http://tilgang
         - name: INTEGRASJON_TILGANG_SCOPE
           value: api://prod-gcp.aap.tilgang/.default
+        - name: NAIS_TEAM_AAP
+          value: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5
