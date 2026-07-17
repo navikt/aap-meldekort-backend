@@ -1,4 +1,4 @@
-val komponenterVersjon = "2.0.98"
+val komponenterVersjon = "2.0.100"
 val junitVersjon = "6.1.2"
 
 plugins {
