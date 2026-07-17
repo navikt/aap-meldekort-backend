@@ -44,6 +44,7 @@ object FakeServers : AutoCloseable {
 
     private fun setProperties() {
         System.setProperty("nais.cluster.name", "local")
+        System.setProperty("NAIS_TEAM_AAP", "nais-team-aap")
     }
 
     override fun close() {
