@@ -8,7 +8,7 @@ val ktorVersion = "3.5.1"
 plugins {
     id("aap.conventions")
     id("io.ktor.plugin") version "3.5.1"
-    id("com.gradleup.shadow") version "9.5.1"
+    id("com.gradleup.shadow") version "9.6.0"
 }
 
 application {
