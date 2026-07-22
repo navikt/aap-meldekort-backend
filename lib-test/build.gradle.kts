@@ -1,9 +1,3 @@
-val ktorVersion = "3.5.1"
-val komponenterVersjon = "2.0.108"
-val junitVersjon = "6.1.2"
-val jacksonVersjon = "2.22.1"
-val tilgangVersjon = "1.0.234"
-
 plugins {
     id("aap.conventions")
     id("java-test-fixtures")
@@ -12,30 +6,29 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.635")
-    implementation("io.micrometer:micrometer-core:1.17.0")
-    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:verdityper:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
-    implementation("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
-    implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+    implementation(libs.behandlingsflytKontrakt)
+    implementation(libs.micrometerCore)
+    implementation(libs.httpklient)
+    implementation(libs.verdityper)
+    implementation(libs.dbconnect)
+    implementation(libs.tilgangApiKontrakt)
+    implementation(libs.ktorServerAuth)
+    implementation(libs.ktorServerAuthJwt)
+    implementation(libs.ktorServerCallLogging)
+    implementation(libs.ktorServerContentNegotiation)
+    implementation(libs.ktorServerMetricsMicrometer)
+    implementation(libs.ktorServerNetty)
+    implementation(libs.ktorServerStatusPages)
 
-    implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersjon")
+    implementation(libs.ktorSerializationJackson)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonDatatypeJsr310)
 
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersjon")
+    implementation(libs.logbackClassic)
 
-    implementation("ch.qos.logback:logback-classic:1.5.38")
+    implementation(libs.nimbusJoseJwt)
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.9.1")
-
-    implementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    implementation("org.testcontainers:testcontainers-postgresql:2.0.5")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
+    implementation(libs.junitJupiterApi)
+    implementation(libs.testcontainersPostgresql)
+    implementation(libs.varselKotlinBuilder)
 }

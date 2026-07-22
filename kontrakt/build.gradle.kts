@@ -6,20 +6,16 @@ plugins {
     `java-library`
 }
 
-val tilgangVersjon = "1.0.234"
-val junitVersion = "5.12.0"
-val komponenterVersjon = "2.0.108"
-
 dependencies {
-    api("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    api("no.nav.aap.kelvin:ktor-openapi-generator:$komponenterVersjon")
-    compileOnly("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
+    api(libs.jacksonAnnotations)
+    api(libs.ktorOpenApiGenerator)
+    compileOnly(libs.tilgangApiKontrakt)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("no.nav.aap.tilgang:api-kontrakt:$tilgangVersjon")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-    testImplementation("org.assertj:assertj-core:3.27.7")
-    testImplementation("no.nav.aap.kelvin:json:$komponenterVersjon")
+    testImplementation(libs.junitJupiterApi)
+    testRuntimeOnly(libs.tilgangApiKontrakt)
+    testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(libs.assertjCore)
+    testImplementation(libs.json)
 }
 
 apply(plugin = "maven-publish")

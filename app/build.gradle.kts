@@ -1,14 +1,9 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-val komponenterVersjon = "2.0.108"
-val junitVersjon = "6.1.2"
-val tilgangVersjon = "1.0.234"
-val ktorVersion = "3.5.1"
-
 plugins {
     id("aap.conventions")
-    id("io.ktor.plugin") version "3.5.1"
-    id("com.gradleup.shadow") version "9.6.0"
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.shadow)
 }
 
 application {
@@ -83,34 +78,34 @@ dependencies {
     implementation(project(":gateways"))
     implementation(project(":kontrakt"))
 
-    compileOnly("io.ktor:ktor-http-jvm:$ktorVersion")
-    implementation("no.nav.aap.kelvin:server:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
-    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-    api("no.nav.aap.tilgang:plugin:$tilgangVersjon")
+    compileOnly(libs.ktorHttpJvm)
+    implementation(libs.server)
+    implementation(libs.httpklient)
+    implementation(libs.infrastructure)
+    implementation(libs.motorApi)
+    implementation(libs.motor)
+    implementation(libs.ktorServerStatusPages)
+    api(libs.tilgangPlugin)
 
-    implementation("io.micrometer:micrometer-registry-prometheus:1.17.0")
-    implementation("ch.qos.logback:logback-classic:1.5.38")
-    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
+    implementation(libs.micrometerRegistryPrometheus)
+    implementation(libs.logbackClassic)
+    implementation(libs.logstashLogbackEncoder)
 
-    api("no.nav.aap.kelvin:ktor-openapi-generator:$komponenterVersjon")
+    api(libs.ktorOpenApiGenerator)
 
     testImplementation(testFixtures(project(":repositories")))
-    testImplementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
-    testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
+    testImplementation(libs.dbconnect)
+    testImplementation(libs.dbtest)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
-    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation(libs.junitJupiterApi)
+    testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(libs.assertjCore)
     constraints {
-        implementation("org.apache.commons:commons-compress:1.28.0") {
+        implementation(libs.commonsCompress) {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:testcontainers-kafka:2.0.5")
+    testImplementation(libs.testcontainersKafka)
 }

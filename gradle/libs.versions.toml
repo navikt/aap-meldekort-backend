@@ -1,0 +1,88 @@
+[versions]
+ktor = "3.5.1"
+komponenter = "2.0.108"
+tilgang = "1.0.234"
+junit-jupiter = "6.1.2"
+jackson = "2.22.1"
+micrometer = "1.17.0"
+testcontainers = "2.0.5"
+behandlingsflyt = "0.0.635"
+
+[libraries]
+# Kelvin
+server = { module = "no.nav.aap.kelvin:server", version.ref = "komponenter" }
+httpklient = { module = "no.nav.aap.kelvin:httpklient", version.ref = "komponenter" }
+infrastructure = { module = "no.nav.aap.kelvin:infrastructure", version.ref = "komponenter" }
+motorApi = { module = "no.nav.aap.kelvin:motor-api", version.ref = "komponenter" }
+motor = { module = "no.nav.aap.kelvin:motor", version.ref = "komponenter" }
+dbconnect = { module = "no.nav.aap.kelvin:dbconnect", version.ref = "komponenter" }
+dbmigrering = { module = "no.nav.aap.kelvin:dbmigrering", version.ref = "komponenter" }
+dbtest = { module = "no.nav.aap.kelvin:dbtest", version.ref = "komponenter" }
+json = { module = "no.nav.aap.kelvin:json", version.ref = "komponenter" }
+verdityper = { module = "no.nav.aap.kelvin:verdityper", version.ref = "komponenter" }
+ktorOpenApiGenerator = { module = "no.nav.aap.kelvin:ktor-openapi-generator", version.ref = "komponenter" }
+
+# Tilgang
+tilgangPlugin = { module = "no.nav.aap.tilgang:plugin", version.ref = "tilgang" }
+tilgangApiKontrakt = { module = "no.nav.aap.tilgang:api-kontrakt", version.ref = "tilgang" }
+
+# Behandlingsflyt
+behandlingsflytKontrakt = { module = "no.nav.aap.behandlingsflyt:kontrakt", version.ref = "behandlingsflyt" }
+
+# Ktor
+ktorHttpJvm = { module = "io.ktor:ktor-http-jvm", version.ref = "ktor" }
+ktorServerStatusPages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
+ktorServerAuth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktorServerAuthJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktorServerCallLogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktorServerContentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktorServerMetricsMicrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
+ktorServerNetty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktorSerializationJackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
+
+# Jackson
+jacksonDatabind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jacksonDatatypeJsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version = "2.22" }
+
+# JUnit Jupiter
+junitJupiterApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
+junitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
+
+# Micrometer
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
+micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
+
+# Logging
+logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.5.38" }
+logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
+slf4JApi = { module = "org.slf4j:slf4j-api", version = "2.0.18" }
+
+# Test
+assertjCore = { module = "org.assertj:assertj-core", version = "3.27.7" }
+mockk = { module = "io.mockk:mockk", version = "1.14.11" }
+
+# Database
+hikaricp = { module = "com.zaxxer:HikariCP", version = "7.1.0" }
+flywayDatabasePostgresql = { module = "org.flywaydb:flyway-database-postgresql", version = "12.11.0" }
+postgresql = { module = "org.postgresql:postgresql", version = "42.7.13" }
+
+# Kafka
+kafkaClients = { module = "org.apache.kafka:kafka-clients", version = "4.3.1" }
+
+# Varsel
+varselKotlinBuilder = { module = "no.nav.tms.varsel:kotlin-builder", version = "2.2.0" }
+
+# Testcontainers
+testcontainersKafka = { module = "org.testcontainers:testcontainers-kafka", version.ref = "testcontainers" }
+testcontainersPostgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
+
+# Security
+nimbusJoseJwt = { module = "com.nimbusds:nimbus-jose-jwt", version = "10.9.1" }
+
+# Constraints
+commonsCompress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }
+
+[plugins]
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+shadow = { id = "com.gradleup.shadow", version = "9.6.0" }
