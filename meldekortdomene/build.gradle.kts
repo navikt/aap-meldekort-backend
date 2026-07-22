@@ -1,31 +1,28 @@
-val komponenterVersjon = "2.0.108"
-val junitVersjon = "6.1.2"
-
 plugins {
     id("aap.conventions")
 }
 
 dependencies {
-    implementation("org.slf4j:slf4j-api:2.0.18")
-    implementation("no.nav.aap.behandlingsflyt:kontrakt:0.0.635")
-    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:motor-api:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:httpklient:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:infrastructure:${komponenterVersjon}")
-    implementation("no.nav.aap.kelvin:verdityper:${komponenterVersjon}")
+    implementation(libs.slf4JApi)
+    implementation(libs.behandlingsflytKontrakt)
+    implementation(libs.motor)
+    implementation(libs.motorApi)
+    implementation(libs.httpklient)
+    implementation(libs.infrastructure)
+    implementation(libs.verdityper)
     implementation(kotlin("reflect"))
 
     testImplementation(project(":repositories"))
     testImplementation(project(":lib-test"))
-    testImplementation("no.nav.aap.kelvin:dbtest:${komponenterVersjon}")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
-    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation(libs.dbtest)
+    testImplementation(libs.junitJupiterApi)
+    testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(libs.assertjCore)
     constraints {
-        implementation("org.apache.commons:commons-compress:1.28.0") {
+        implementation(libs.commonsCompress) {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testImplementation("io.mockk:mockk:1.14.11")
+    testImplementation(libs.mockk)
     testImplementation(kotlin("test"))
 }

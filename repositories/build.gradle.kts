@@ -1,6 +1,3 @@
-val komponenterVersjon = "2.0.108"
-val junitVersjon = "6.1.2"
-
 plugins {
     id("aap.conventions")
     id("java-test-fixtures")
@@ -9,33 +6,33 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation("io.micrometer:micrometer-core:1.17.0")
-    implementation("ch.qos.logback:logback-classic:1.5.38")
-    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
+    implementation(libs.micrometerCore)
+    implementation(libs.logbackClassic)
+    implementation(libs.logstashLogbackEncoder)
 
-    implementation("no.nav.aap.kelvin:dbconnect:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:dbmigrering:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:motor:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:infrastructure:$komponenterVersjon")
-    implementation("no.nav.aap.kelvin:json:$komponenterVersjon")
-    implementation("no.nav.tms.varsel:kotlin-builder:2.2.0")
-    implementation("org.apache.kafka:kafka-clients:4.3.1")
+    implementation(libs.dbconnect)
+    implementation(libs.dbmigrering)
+    implementation(libs.motor)
+    implementation(libs.infrastructure)
+    implementation(libs.json)
+    implementation(libs.varselKotlinBuilder)
+    implementation(libs.kafkaClients)
 
-    implementation("com.zaxxer:HikariCP:7.1.0")
-    implementation("org.flywaydb:flyway-database-postgresql:12.11.0")
-    runtimeOnly("org.postgresql:postgresql:42.7.13")
+    implementation(libs.hikaricp)
+    implementation(libs.flywayDatabasePostgresql)
+    runtimeOnly(libs.postgresql)
 
-    testImplementation("no.nav.aap.kelvin:dbtest:$komponenterVersjon")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersjon")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersjon")
-    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation(libs.dbtest)
+    testImplementation(libs.junitJupiterApi)
+    testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(libs.assertjCore)
     constraints {
-        implementation("org.apache.commons:commons-compress:1.28.0") {
+        implementation(libs.commonsCompress) {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testFixturesImplementation("io.micrometer:micrometer-core:1.17.0")
+    testFixturesImplementation(libs.micrometerCore)
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation("org.testcontainers:testcontainers-kafka:2.0.5")
+    testImplementation(libs.testcontainersKafka)
 }
