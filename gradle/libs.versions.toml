@@ -6,7 +6,7 @@ junit-jupiter = "6.1.2"
 jackson = "2.22.1"
 micrometer = "1.17.0"
 testcontainers = "2.0.5"
-behandlingsflyt = "0.0.637"
+behandlingsflyt = "0.0.638"
 
 [libraries]
 # Kelvin
