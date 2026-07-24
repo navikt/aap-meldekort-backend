@@ -11,7 +11,7 @@ application {
 }
 
 tasks {
-    val projectProps by registering(WriteProperties::class) {
+    val projectProps = register<WriteProperties>("projectProps") {
         destinationFile = layout.buildDirectory.file("meldekort-backend-version.properties")
         // Define property.
         property("project.version", getCheckedOutGitCommitHash())
@@ -78,13 +78,11 @@ dependencies {
     implementation(project(":gateways"))
     implementation(project(":kontrakt"))
 
-    compileOnly(libs.ktorHttpJvm)
     implementation(libs.server)
     implementation(libs.httpklient)
     implementation(libs.infrastructure)
     implementation(libs.motorApi)
     implementation(libs.motor)
-    implementation(libs.ktorServerStatusPages)
     api(libs.tilgangPlugin)
 
     implementation(libs.micrometerRegistryPrometheus)
