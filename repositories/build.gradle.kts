@@ -19,7 +19,6 @@ dependencies {
     implementation(libs.kafkaClients)
 
     implementation(libs.hikaricp)
-    implementation(libs.flywayDatabasePostgresql)
 
     testImplementation(libs.dbtest)
     testImplementation(libs.junitJupiterApi)
