@@ -28,7 +28,7 @@ object FakeServers : AutoCloseable {
     private val started = AtomicBoolean(false)
 
     fun start() {
-        if (started.get()) {
+        if (!started.compareAndSet(false, true)) {
             return
         }
 
@@ -38,7 +38,6 @@ object FakeServers : AutoCloseable {
         }
 
         setProperties()
-        started.set(true)
     }
 
 
@@ -49,12 +48,12 @@ object FakeServers : AutoCloseable {
 
     override fun close() {
         logger.info("Closing Servers.")
-        if (!started.get()) {
+        if (!started.compareAndSet(true, false)) {
             return
         }
 
         for ((_, httpServer) in fakeServers) {
-            httpServer.stop(0L, 0L)
+            httpServer.stop(1_000L, 5_000L)
         }
     }
 
