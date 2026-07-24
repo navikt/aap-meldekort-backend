@@ -101,7 +101,7 @@ class JournalføringService(
         val uke2 = utfylling.periode.tom.get(uke)
         val fra = utfylling.periode.fom.format(dateFormatter)
         val til = utfylling.periode.tom.format(dateFormatter)
-        val tittelsuffix = "for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av NAV"
+        val tittelsuffix = "for uke $uke1 - $uke2 ($fra - $til) elektronisk mottatt av Nav"
         val tittel = when (utfylling.flyt) {
             AAP_FLYT, AAP_FLYT_V2 ->
                 "Meldekort $tittelsuffix"
