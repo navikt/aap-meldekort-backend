@@ -33,7 +33,7 @@ object StatusPagesConfigHelper {
                 }
 
                 is HttpConnectTimeoutException -> {
-                    logger.error("Timeout ved kall til '${call.request.local.uri}': ", cause)
+                    logger.warn("Timeout ved kall til '${call.request.local.uri}': ", cause)
                     call.respondWithError(TimeoutException("Forespørselen tok for lang tid. Prøv igjen om litt."))
                 }
 
