@@ -18,9 +18,6 @@ dependencies {
     testImplementation(libs.json)
 }
 
-apply(plugin = "maven-publish")
-apply(plugin = "java-library")
-
 kotlin {
     explicitApi = ExplicitApiMode.Warning
 }

@@ -20,7 +20,6 @@ dependencies {
 
     implementation(libs.hikaricp)
     implementation(libs.flywayDatabasePostgresql)
-    runtimeOnly(libs.postgresql)
 
     testImplementation(libs.dbtest)
     testImplementation(libs.junitJupiterApi)
@@ -31,7 +30,6 @@ dependencies {
             because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
         }
     }
-    testFixturesImplementation(libs.micrometerCore)
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
     testImplementation(libs.testcontainersKafka)
