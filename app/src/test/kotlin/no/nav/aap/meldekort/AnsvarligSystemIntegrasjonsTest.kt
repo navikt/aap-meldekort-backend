@@ -12,12 +12,10 @@ import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.meldekort.test.FakeTokenX
+import no.nav.aap.meldekort.test.FakeTexas
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
@@ -93,7 +91,7 @@ class AnsvarligSystemIntegrasjonsTest {
             return client.get<T>(
                 URI("$baseUrl$path"), GetRequest(
                     additionalHeaders = listOf(
-                        Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                        Header("Authorization", "Bearer ${FakeTexas.issueToken(fnr.asString)}")
                     )
                 )
             )
@@ -113,8 +111,6 @@ class AnsvarligSystemIntegrasjonsTest {
                     port = 0,
                     prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
                     applikasjonsVersjon = "TestApp",
-                    tokenxConfig = TokenxConfig(),
-                    azureConfig = AzureConfig(),
                     dataSource = dataSource,
                     wait = false,
                     repositoryRegistry = postgresRepositoryRegistry,

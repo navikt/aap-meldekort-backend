@@ -8,7 +8,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.Header
 import no.nav.aap.komponenter.httpklient.httpclient.RestClient
 import no.nav.aap.komponenter.httpklient.httpclient.get
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.prometheus
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -20,7 +20,7 @@ object DefaultMeldekortServiceGateway : MeldekortServiceGateway {
 
     private val httpClient = RestClient.withDefaultResponseHandler(
         ClientConfig(scope = requiredConfigForKey("meldekortservice.scope")),
-        tokenProvider = ClientCredentialsTokenProvider,
+        tokenProvider = AzureM2MTokenProvider,
         prometheus = prometheus,
     )
 

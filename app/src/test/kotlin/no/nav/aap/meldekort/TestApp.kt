@@ -7,8 +7,6 @@ import no.nav.aap.Periode
 import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
@@ -16,7 +14,6 @@ import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.meldekort.test.FakeTokenX
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
@@ -31,7 +28,6 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 fun main() {
-    FakeTokenX.port = 8081
     FakeServers.start()
 
     val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.1.0"))
@@ -57,8 +53,6 @@ fun main() {
         port = 8080,
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         applikasjonsVersjon = "TestApp",
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
         dataSource = dataSource,
         repositoryRegistry = postgresRepositoryRegistry,
         clock = Clock.systemDefaultZone(),

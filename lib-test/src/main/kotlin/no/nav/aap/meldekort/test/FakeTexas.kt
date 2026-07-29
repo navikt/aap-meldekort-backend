@@ -12,14 +12,19 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 object FakeTexas : FakeServer {
     private val log = LoggerFactory.getLogger(this.javaClass)!!
+
+    private val azp = UUID.randomUUID().toString()
 
     override fun setProperties(port: Int) {
         System.setProperty("nais.token.endpoint", "http://localhost:$port/token")
         System.setProperty("nais.token.exchange.endpoint", "http://localhost:$port/token/exchange")
         System.setProperty("nais.token.introspection.endpoint", "http://localhost:$port/introspect")
+
+        System.setProperty("BEHANDLINGSFLYT_AZP", azp)
     }
 
     override val module: Application.() -> Unit =
@@ -39,8 +44,17 @@ object FakeTexas : FakeServer {
             routing {
                 post("/token") {
                     val token = TokenGen
-                        .generate("meldekort-backend", "meldekort-backend", listOf())
-                    call.respond(TestToken(access_token = token))
+                        .generate(
+                            issuer = "meldekort-backend",
+                            audience = "meldekort-backend",
+                            claims = listOfNotNull(
+                                "NAVident" to "Lokalsaksbehandler",
+                                "azp_name" to "azp",
+                                "idtyp" to "app",
+                                "azp" to azp
+                            )
+                        )
+                    call.respond(FakeServers.TestToken(access_token = token))
                 }
 
                 post("/token/exchange") {
@@ -54,7 +68,7 @@ object FakeTexas : FakeServer {
                         "meldekort-backend",
                         listOf("NAVIdent" to NAVident)
                     )
-                    call.respond(TestToken(access_token = token))
+                    call.respond(FakeServers.TestToken(access_token = token))
                 }
 
                 post("/introspect") {
@@ -62,4 +76,12 @@ object FakeTexas : FakeServer {
                 }
             }
         }
+
+    fun issueToken(fnr: String): String {
+        return TokenGen.generate(
+            issuer = "fake-tokendings",
+            audience = "meldekort-backend",
+            listOf("pid" to fnr)
+        )
+    }
 }

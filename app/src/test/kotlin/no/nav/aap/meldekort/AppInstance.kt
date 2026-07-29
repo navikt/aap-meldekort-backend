@@ -5,6 +5,7 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.kelvin.KelvinSakService
@@ -21,18 +22,15 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.NoTokenTokenProvider
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.ClientCredentialsTokenProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
+import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
-import no.nav.aap.arena.ArenaMeldekort
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.meldekort.test.FakeTokenX
+import no.nav.aap.meldekort.test.FakeTexas
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepositoryPostgres
 import no.nav.aap.postgresRepositoryRegistry
@@ -57,12 +55,13 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
 
     var idag: LocalDate
         get() = clockHolder.idag
-        set(idag) { clockHolder.idag = idag }
+        set(idag) {
+            clockHolder.idag = idag
+        }
 
     val dataSource = createTestcontainerPostgresDataSource(prometheus)
 
     init {
-        FakeTokenX.port = 0
         FakeServers.start()
         System.setProperty("aap.meldekort.lenke", "https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort")
 
@@ -78,8 +77,6 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
         port = 0,
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         applikasjonsVersjon = "TestApp",
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
         dataSource = dataSource,
         wait = false,
         repositoryRegistry = postgresRepositoryRegistry,
@@ -88,7 +85,13 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
 
     val client: RestClient<InputStream> = RestClient.withDefaultResponseHandler(
         config = ClientConfig(scope = "meldekort-backend"),
-        tokenProvider = ClientCredentialsTokenProvider,
+        tokenProvider = AzureM2MTokenProvider,
+    )
+
+    private val tokenClient: RestClient<InputStream> = RestClient(
+        config = ClientConfig(scope = "behandlingsflyt"),
+        tokenProvider = NoTokenTokenProvider(),
+        responseHandler = DefaultResponseHandler()
     )
 
     val baseUrl: String
@@ -98,7 +101,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
         return client.get<T>(
             URI("$baseUrl$path"), GetRequest(
                 additionalHeaders = listOf(
-                    Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                    Header("Authorization", "Bearer ${FakeTexas.issueToken(fnr.asString)}")
                 )
             )
         )
@@ -109,7 +112,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
             URI("$baseUrl$path"),
             PostRequest(
                 additionalHeaders = listOf(
-                    Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                    Header("Authorization", "Bearer ${FakeTexas.issueToken(fnr.asString)}")
                 ),
                 body = body,
                 currentToken = getToken()
@@ -127,17 +130,12 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
     }
 
     fun getToken(): OidcToken {
-        val client = RestClient(
-            config = ClientConfig(scope = "behandlingsflyt"),
-            tokenProvider = NoTokenTokenProvider(),
-            responseHandler = DefaultResponseHandler()
+        val response = tokenClient.post<Unit, FakeServers.TestToken>(
+            URI.create(requiredConfigForKey("nais.token.endpoint")),
+            PostRequest(Unit)
         )
-        return OidcToken(
-            client.post<String, FakeServers.TestToken>(
-                URI(requiredConfigForKey("azure.openid.config.token.endpoint")),
-                PostRequest("grant_type=client_credentials"),
-            )!!.access_token
-        )
+
+        return OidcToken(response!!.access_token)
     }
 
     fun kelvinSak(
@@ -292,7 +290,12 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
                 sakenGjelderFor = sakenGjelderFor,
                 periode = periode,
                 harDuJobbet = true,
-                aktivitetsInformasjon = dagerJobbet.map { AktivitetsInformasjon(dato = it.dato, timer = it.timerArbeidet) },
+                aktivitetsInformasjon = dagerJobbet.map {
+                    AktivitetsInformasjon(
+                        dato = it.dato,
+                        timer = it.timerArbeidet
+                    )
+                },
                 erDigitalisert = erDigitalisert
             )
         }
