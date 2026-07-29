@@ -16,12 +16,9 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.journalføring.JournalføringJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryRegistry
-import no.nav.aap.komponenter.server.AZURE
-import no.nav.aap.komponenter.server.TOKENX
+import no.nav.aap.komponenter.server.auth.IdentityProvider
 import no.nav.aap.komponenter.server.auth.personBruker
 import no.nav.aap.komponenter.server.commonKtorModule
 import no.nav.aap.lookup.gateway.GatewayProvider
@@ -42,8 +39,6 @@ fun startHttpServer(
     port: Int,
     prometheus: PrometheusMeterRegistry,
     applikasjonsVersjon: String,
-    tokenxConfig: TokenxConfig,
-    azureConfig: AzureConfig,
     dataSource: DataSource,
     wait: Boolean = true,
     repositoryRegistry: RepositoryRegistry,
@@ -68,8 +63,7 @@ fun startHttpServer(
                             <a href="https://tokenx-token-generator.intern.dev.nav.no/api/obo?aud=dev-gcp:aap:meldekort-backend">Token Generator</a> for å få token.
                             """.trimIndent(),
             ),
-            tokenxConfig = tokenxConfig,
-            azureConfig = azureConfig,
+            identityProviders = listOf(IdentityProvider.TOKENX, IdentityProvider.ENTRA_ID)
         )
 
         val motor = startMotor(dataSource, repositoryRegistry, prometheus, clock)
@@ -78,7 +72,7 @@ fun startHttpServer(
         install(StatusPages, StatusPagesConfigHelper.setup())
 
         routing {
-            authenticate(TOKENX) {
+            authenticate(IdentityProvider.TOKENX.value) {
                 apiRouting {
                     route("api") {
                         ansvarligSystemApi(dataSource, repositoryRegistry, clock)
@@ -89,7 +83,7 @@ fun startHttpServer(
                     }
                 }
             }
-            authenticate(AZURE) {
+            authenticate(IdentityProvider.ENTRA_ID.value) {
                 apiRouting {
                     driftApi(dataSource, repositoryRegistry, clock)
                     motorApi(dataSource, påkrevdeRollerMotor)

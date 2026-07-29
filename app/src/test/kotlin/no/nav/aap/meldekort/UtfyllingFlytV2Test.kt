@@ -15,15 +15,13 @@ import no.nav.aap.komponenter.httpklient.httpclient.post
 import no.nav.aap.komponenter.httpklient.httpclient.request.GetRequest
 import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
-import no.nav.aap.meldekort.test.FakeTokenX
+import no.nav.aap.meldekort.test.FakeTexas
 import no.nav.aap.meldekort.test.port
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
@@ -40,7 +38,7 @@ import org.junit.jupiter.api.Test
 import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 class UtfyllingFlytV2Test {
 
@@ -147,7 +145,7 @@ class UtfyllingFlytV2Test {
             DagSvarDto(dato = it, timerArbeidet = 2.0, fravær = null)
         }
 
-       val tilstand = lagTilstand(
+        val tilstand = lagTilstand(
             aktivtSteg = StegDto.FRAVÆR_SPØRSMÅL,
             dager = dagerMedTimer,
             harDuHattAvtalteAktiviteter = true,
@@ -344,7 +342,7 @@ class UtfyllingFlytV2Test {
             return client.get<T>(
                 URI("$baseUrl$path"), GetRequest(
                     additionalHeaders = listOf(
-                        Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                        Header("Authorization", "Bearer ${FakeTexas.issueToken(fnr.asString)}")
                     )
                 )
             )
@@ -355,7 +353,7 @@ class UtfyllingFlytV2Test {
                 URI("$baseUrl$path"),
                 PostRequest(
                     additionalHeaders = listOf(
-                        Header("Authorization", "Bearer ${FakeTokenX.issueToken(fnr.asString)}")
+                        Header("Authorization", "Bearer ${FakeTexas.issueToken(fnr.asString)}")
                     ),
                     body = body
                 )
@@ -365,7 +363,6 @@ class UtfyllingFlytV2Test {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            FakeTokenX.port = 0
             FakeServers.start()
 
             GatewayRegistry
@@ -379,8 +376,6 @@ class UtfyllingFlytV2Test {
                     port = 0,
                     prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
                     applikasjonsVersjon = "TestApp",
-                    tokenxConfig = TokenxConfig(),
-                    azureConfig = AzureConfig(),
                     dataSource = dataSource,
                     wait = false,
                     repositoryRegistry = postgresRepositoryRegistry,

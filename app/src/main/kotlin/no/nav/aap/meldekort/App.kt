@@ -2,8 +2,6 @@ package no.nav.aap.meldekort
 
 import no.nav.aap.DbConfig
 import no.nav.aap.createPostgresDataSource
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureConfig
-import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.tokenx.TokenxConfig
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
@@ -28,8 +26,6 @@ fun main() {
         port = 8080,
         prometheus = prometheus,
         applikasjonsVersjon = ApplikasjonsVersjon.versjon,
-        tokenxConfig = TokenxConfig(),
-        azureConfig = AzureConfig(),
         dataSource = createPostgresDataSource(DbConfig(), prometheus),
         repositoryRegistry = postgresRepositoryRegistry,
         clock = Clock.systemDefaultZone(),
