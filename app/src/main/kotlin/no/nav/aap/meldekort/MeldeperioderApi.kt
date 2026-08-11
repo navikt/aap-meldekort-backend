@@ -41,7 +41,10 @@ fun NormalOpenAPIRoute.meldeperioderApi(
         route("kommende").get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
                 val kommendeMeldeperioder = aktuelleMeldeperioder(personBrukerIdent())
-                log.info("Henter kommende meldeperioder. Fant ${kommendeMeldeperioder.antallUbesvarteMeldeperioder} ubsvarte meldeperioder.")
+                log.info(
+                    "Henter kommende meldeperioder. Fant ${kommendeMeldeperioder.antallUbesvarteMeldeperioder} " +
+                            "ubsvarte meldeperioder. Neste meldeperiode ${kommendeMeldeperioder.nesteMeldeperiode}."
+                )
                 KommendeMeldeperioderDto.fraDomene(kommendeMeldeperioder)
             }
             respond(response)
