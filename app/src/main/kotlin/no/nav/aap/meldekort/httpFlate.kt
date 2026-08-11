@@ -28,6 +28,7 @@ import no.nav.aap.motor.Motor
 import no.nav.aap.motor.api.motorApi
 import no.nav.aap.motor.retry.RetryService
 import no.nav.aap.tilgang.TeamAap
+import no.nav.aap.statistikk.PubliserStatistikkJobbUtfører
 import no.nav.aap.utfylling.SlettGamleUtfyllingJobbUtfører
 import no.nav.aap.utfylling.UtfyllingFlateFactoryImpl
 import no.nav.aap.varsel.SendVarselJobbUtfører
@@ -109,6 +110,7 @@ private fun Application.startMotor(
             JournalføringJobbUtfører.jobbKonstruktør(repositoryRegistry),
             SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
             SendVarselJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
+            PubliserStatistikkJobbUtfører.jobbKonstruktør(repositoryRegistry, prometheus),
         ),
         prometheus = prometheus,
     )
