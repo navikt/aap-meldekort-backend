@@ -142,11 +142,6 @@ private fun Routing.actuator(prometheus: PrometheusMeterRegistry, motor: Motor) 
         }
 
         get("/ready") {
-            val status = HttpStatusCode.OK
-            call.respond(status, "Oppe!")
-        }
-
-        get("/ready") {
             if (motor.kjører()) {
                 val status = HttpStatusCode.OK
                 call.respond(status, "Oppe!")
