@@ -10,7 +10,7 @@ import no.nav.aap.motor.JobbUtfører
 import no.nav.aap.motor.cron.CronExpression
 import java.util.concurrent.atomic.AtomicLong
 
-class PubliserStatistikkJobbUtfører(
+class PubliserMetrikkerJobbUtfører(
     private val statistikkRepository: StatistikkRepository,
 ) : JobbUtfører {
 
@@ -18,7 +18,7 @@ class PubliserStatistikkJobbUtfører(
         val statistikk = statistikkRepository.hentStatistikk()
 
         mottatteMeldekortTotalt.set(statistikk.mottatteMeldekortTotalt)
-        mottatteMeldekortSiste24Timer.set(statistikk.mottatteMeldekortIDag)
+        mottatteMeldekortIDag.set(statistikk.mottatteMeldekortIDag)
         varslerSendtIDag.set(statistikk.varslerSendtIDag)
         varslerInaktivertIDag.set(statistikk.varslerInaktivertIDag)
         varslerPlanlagt.set(statistikk.varslerPlanlagt)
@@ -26,15 +26,15 @@ class PubliserStatistikkJobbUtfører(
 
     companion object {
         private val mottatteMeldekortTotalt = AtomicLong(0)
-        private val mottatteMeldekortSiste24Timer = AtomicLong(0)
+        private val mottatteMeldekortIDag = AtomicLong(0)
         private val varslerSendtIDag = AtomicLong(0)
         private val varslerInaktivertIDag = AtomicLong(0)
         private val varslerPlanlagt = AtomicLong(0)
 
         private val jobbInfo = object : Jobb {
-            override fun beskrivelse() = "Publiser driftsstatistikk til Grafana via Prometheus."
-            override fun type() = "batch.publiserStatistikk"
-            override fun navn() = "Publiser statistikk"
+            override fun beskrivelse() = "Publiserer metrikker for meldekort og varsler"
+            override fun type() = "batch.publiserMetrikker"
+            override fun navn() = "Publiser metrikker"
             override fun cron() = CronExpression.createWithoutSeconds("*/15 * * * *")
             override fun konstruer(connection: DBConnection): JobbUtfører =
                 error("kun intern for jobb info")
@@ -44,7 +44,7 @@ class PubliserStatistikkJobbUtfører(
             Gauge.builder("meldekort_mottatt_totalt", mottatteMeldekortTotalt) { it.get().toDouble() }
                 .description("Totalt antall innsendte meldekort")
                 .register(prometheus)
-            Gauge.builder("meldekort_mottatt_siste_24_timer", mottatteMeldekortSiste24Timer) { it.get().toDouble() }
+            Gauge.builder("meldekort_mottatt_siste_24_timer", mottatteMeldekortIDag) { it.get().toDouble() }
                 .description("Antall meldekort mottatt siste 24 timer")
                 .register(prometheus)
             Gauge.builder("varsler_sendt_i_dag", varslerSendtIDag) { it.get().toDouble() }
@@ -68,7 +68,7 @@ class PubliserStatistikkJobbUtfører(
 
             override fun konstruer(connection: DBConnection): JobbUtfører {
                 val repositoryProvider = repositoryRegistry.provider(connection)
-                return PubliserStatistikkJobbUtfører(repositoryProvider.provide())
+                return PubliserMetrikkerJobbUtfører(repositoryProvider.provide())
             }
         }
     }
