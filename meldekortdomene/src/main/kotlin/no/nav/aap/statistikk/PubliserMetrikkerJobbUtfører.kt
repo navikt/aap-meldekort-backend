@@ -44,8 +44,8 @@ class PubliserMetrikkerJobbUtfører(
             Gauge.builder("meldekort_mottatt_totalt", mottatteMeldekortTotalt) { it.get().toDouble() }
                 .description("Totalt antall innsendte meldekort")
                 .register(prometheus)
-            Gauge.builder("meldekort_mottatt_siste_24_timer", mottatteMeldekortIDag) { it.get().toDouble() }
-                .description("Antall meldekort mottatt siste 24 timer")
+            Gauge.builder("meldekort_mottatt_siste_i_dag", mottatteMeldekortIDag) { it.get().toDouble() }
+                .description("Antall meldekort mottatt i dag")
                 .register(prometheus)
             Gauge.builder("varsler_sendt_i_dag", varslerSendtIDag) { it.get().toDouble() }
                 .description("Antall varsler sendt i dag")
