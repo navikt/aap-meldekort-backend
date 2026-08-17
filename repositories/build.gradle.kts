@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.logstashLogbackEncoder)
 
     implementation(libs.dbconnect)
+    implementation(libs.verdityper)
     implementation(libs.dbmigrering)
     implementation(libs.motor)
     implementation(libs.infrastructure)

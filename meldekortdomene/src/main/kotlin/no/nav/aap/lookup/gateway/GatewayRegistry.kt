@@ -12,7 +12,7 @@ private val logger = LoggerFactory.getLogger(GatewayRegistry::class.java)
 
 object GatewayRegistry {
     private val registry = HashSet<KClass<Gateway>>()
-    private val lock = Object()
+    private val lock = Any()
 
     inline fun <reified T : Gateway> register(): GatewayRegistry {
         return register(T::class)
