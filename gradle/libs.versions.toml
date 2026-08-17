@@ -1,12 +1,12 @@
 [versions]
 ktor = "3.5.2"
-komponenter = "2.0.129"
+komponenter = "2.0.135"
 tilgang = "1.0.234"
 junit-jupiter = "6.1.3"
 jackson = "2.22.2"
 micrometer = "1.17.0"
 testcontainers = "2.0.5"
-behandlingsflyt = "0.0.644"
+behandlingsflyt = "0.0.650"
 
 [libraries]
 # Kelvin
