@@ -22,6 +22,7 @@ import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.assertThrows
 import java.time.Clock
 
 class VarselRepositoryPostgresTest {
@@ -174,21 +175,24 @@ class VarselRepositoryPostgresTest {
                     typeVarsel = TypeVarsel.BESKJED,
                     typeVarselOm = TypeVarselOm.VALGFRITT_OPPLYSNINGSBEHOV,
                     status = VarselStatus.SENDT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2020, 12, 1), LocalDate.of(2020, 12, 22))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer2,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.OPPLYSNINGSBEHOV,
                     status = VarselStatus.SENDT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2020, 12, 1), LocalDate.of(2020, 12, 22))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer3,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.INAKTIVERT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2020, 12, 1), LocalDate.of(2020, 12, 22))
                 )
             )
 
@@ -198,28 +202,32 @@ class VarselRepositoryPostgresTest {
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2021, 1, 12), LocalDate.of(2021, 1, 25))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer2,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2021, 1, 26), LocalDate.of(2021, 2, 8))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer3,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2021, 2, 9), LocalDate.of(2021, 2, 22))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer4,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.OPPLYSNINGSBEHOV,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fortid
+                    sendingstidspunkt = fortid,
+                    forPeriode = Periode(LocalDate.of(2021, 2, 23), LocalDate.of(2021, 3, 8))
                 )
             )
             val fremtidigeVarsler = listOf(
@@ -228,21 +236,24 @@ class VarselRepositoryPostgresTest {
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fremtid
+                    sendingstidspunkt = fremtid,
+                    forPeriode = Periode(LocalDate.of(2021, 3, 9), LocalDate.of(2021, 3, 22))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer3,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fremtid
+                    sendingstidspunkt = fremtid,
+                    forPeriode = Periode(LocalDate.of(2021, 3, 23), LocalDate.of(2021, 4, 5))
                 ),
                 byggVarsel(
                     saksnummer = saksnummer4,
                     typeVarsel = TypeVarsel.OPPGAVE,
                     typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
                     status = VarselStatus.PLANLAGT,
-                    sendingstidspunkt = fremtid
+                    sendingstidspunkt = fremtid,
+                    forPeriode = Periode(LocalDate.of(2021, 4, 6), LocalDate.of(2021, 4, 19))
                 )
             )
 
@@ -263,6 +274,39 @@ class VarselRepositoryPostgresTest {
 
             varselRepo.hentVarslerForUtsending(clock).also {
                 assertThat(it).containsExactlyInAnyOrder(*varslerSomSkalSendes.toTypedArray())
+            }
+        }
+    }
+
+    @Test
+    fun `kan ikke ha to planlagte varsler for samme saksnummer, type og periode`() {
+        val saksnummer = Fagsaknummer("765")
+        val periode = Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 14))
+
+        dataSource.transaction { connection ->
+            val sakRepo = KelvinSakRepositoryPostgres(connection)
+            val varselRepo = VarselRepositoryPostgres(connection)
+
+            opprettSak(sakRepo, saksnummer)
+
+            varselRepo.upsert(
+                byggVarsel(
+                    saksnummer = saksnummer,
+                    typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
+                    status = VarselStatus.PLANLAGT,
+                    forPeriode = periode
+                )
+            )
+
+            assertThrows<Exception> {
+                varselRepo.upsert(
+                    byggVarsel(
+                        saksnummer = saksnummer,
+                        typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE,
+                        status = VarselStatus.PLANLAGT,
+                        forPeriode = periode
+                    )
+                )
             }
         }
     }
