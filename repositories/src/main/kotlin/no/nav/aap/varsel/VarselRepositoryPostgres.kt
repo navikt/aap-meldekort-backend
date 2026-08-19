@@ -57,38 +57,18 @@ class VarselRepositoryPostgres(private val connection: DBConnection) : VarselRep
         }
     }
 
-    override fun slettVarsel(varselId: VarselId) {
+    override fun slettPlanlagtVarsel(varselId: VarselId) {
         connection.execute(
             """
             delete from varsel
-            where varsel_id = ?
+            where varsel_id = ? and status = 'PLANLAGT'
             """
         ) {
             setParams {
                 setUUID(1, varselId.id)
             }
             setResultValidator {
-                require(it == 1)
-            }
-        }
-    }
-
-    override fun slettPlanlagteVarsler(
-        saksnummer: Fagsaknummer,
-        typeVarselOm: TypeVarselOm
-    ) {
-        connection.execute(
-            """
-            delete from varsel
-            where saksnummer = ?
-             and status = ?
-            and type_varsel_om = ?
-            """
-        ) {
-            setParams {
-                setString(1, saksnummer.asString)
-                setEnumName(2, VarselStatus.PLANLAGT)
-                setEnumName(3, typeVarselOm)
+                require(it in 0..1)
             }
         }
     }

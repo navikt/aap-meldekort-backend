@@ -7,7 +7,6 @@ import java.time.Clock
 interface VarselRepository: Repository {
     fun hentVarsler(saksnummer: Fagsaknummer): List<Varsel>
     fun upsert(varsel: Varsel)
-    fun slettVarsel(varselId: VarselId)
-    fun slettPlanlagteVarsler(saksnummer: Fagsaknummer, typeVarselOm: TypeVarselOm)
+    fun slettPlanlagtVarsel(varselId: VarselId)
     fun hentVarslerForUtsending(clock: Clock) : List<Varsel>
 }
