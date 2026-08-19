@@ -96,11 +96,11 @@ class VarselService(
             .filter { it.status == VarselStatus.PLANLAGT && it.typeVarselOm == TypeVarselOm.MELDEPLIKTPERIODE }
 
         eksisterendePlanlagte
-            .filterNot { gammelt -> nyePlanlagteVarsler.any { it.forPeriode == gammelt.forPeriode } }
+            .filter { gammelt -> nyePlanlagteVarsler.none { it.forPeriode == gammelt.forPeriode } }
             .forEach { varselRepository.slettPlanlagtVarsel(it.varselId) }
 
         nyePlanlagteVarsler
-            .filterNot { nytt -> eksisterendePlanlagte.any { it.forPeriode == nytt.forPeriode } }
+            .filter { nytt -> eksisterendePlanlagte.none { it.forPeriode == nytt.forPeriode } }
             .forEach { varselRepository.upsert(it) }
     }
 
