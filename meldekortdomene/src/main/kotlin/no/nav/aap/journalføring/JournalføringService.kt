@@ -69,7 +69,7 @@ class JournalføringService(
         )
         val kelvinSak = kelvinSakRepository.hentSak(ident, LocalDate.now())
         if (unleashGateway.isEnabled(MeldekortFeature.MeldekortBackendTest)) {
-            log.info("Featuretoglge MeldekortBackendTest enabled")
+            log.info("Featuretoggle MeldekortBackendTest enabled")
         }
         val journalpost = journalpost(
             ident = ident,
