@@ -7,6 +7,7 @@ jackson = "2.22.2"
 micrometer = "1.17.0"
 testcontainers = "2.0.5"
 behandlingsflyt = "0.0.652"
+unleash = "10.2.2"
 
 [libraries]
 # Kelvin
@@ -14,6 +15,7 @@ server = { module = "no.nav.aap.kelvin:server", version.ref = "komponenter" }
 httpklient = { module = "no.nav.aap.kelvin:httpklient", version.ref = "komponenter" }
 infrastructure = { module = "no.nav.aap.kelvin:infrastructure", version.ref = "komponenter" }
 motorApi = { module = "no.nav.aap.kelvin:motor-api", version.ref = "komponenter" }
+gateway = { module = "no.nav.aap.kelvin:gateway", version.ref = "komponenter" }
 motor = { module = "no.nav.aap.kelvin:motor", version.ref = "komponenter" }
 dbconnect = { module = "no.nav.aap.kelvin:dbconnect", version.ref = "komponenter" }
 dbmigrering = { module = "no.nav.aap.kelvin:dbmigrering", version.ref = "komponenter" }
@@ -66,6 +68,9 @@ testcontainersPostgresql = { module = "org.testcontainers:testcontainers-postgre
 
 # Security
 nimbusJoseJwt = { module = "com.nimbusds:nimbus-jose-jwt", version = "10.9.1" }
+
+# Unleash
+unleashClientJava = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
 
 # Constraints
 commonsCompress = { module = "org.apache.commons:commons-compress", version = "1.28.0" }

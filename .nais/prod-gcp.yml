@@ -27,6 +27,8 @@ spec:
             destinations:
                 - id: elastic
                 - id: loki
+    envFrom:
+        - secret: kelvin-unleash-api-token
     kafka:
         pool: nav-prod
     prometheus:
@@ -74,6 +76,7 @@ spec:
                   namespace: meldekort
                   cluster: prod-fss
             external:
+                - host: aap-unleash-api.nav.cloud.nais.io
                 - host: dokarkiv.prod-fss-pub.nais.io
                 - host: meldekortservice.prod-fss-pub.nais.io
     gcp:

@@ -13,11 +13,14 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
+import no.nav.aap.unleash.MeldekortFeature
+import no.nav.aap.unleash.UnleashGateway
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_KORRIGERING_FLYT_V2
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
@@ -28,13 +31,16 @@ class JournalføringService(
     private val flytJobbRepository: FlytJobbRepository,
     private val pdfgenGateway: PdfgenGateway,
     private val kelvinSakRepository: KelvinSakRepository,
+    private val unleashGateway: UnleashGateway
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
         gatewayProvider.provide(),
         repositoryProvider.provide(),
         gatewayProvider.provide(),
-        repositoryProvider.provide()
+        repositoryProvider.provide(),
+        gatewayProvider.provide()
     )
+    private val log = LoggerFactory.getLogger(javaClass)
 
     fun bestillJournalføring(ident: Ident, utfylling: Utfylling) {
         flytJobbRepository.leggTil(
@@ -62,6 +68,9 @@ class JournalføringService(
             }
         )
         val kelvinSak = kelvinSakRepository.hentSak(ident, LocalDate.now())
+        if (unleashGateway.isEnabled(MeldekortFeature.MeldekortBackendTest)) {
+            log.info("Featuretoggle MeldekortBackendTest enabled")
+        }
         val journalpost = journalpost(
             ident = ident,
             utfylling = utfylling,
