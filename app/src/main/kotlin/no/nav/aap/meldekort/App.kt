@@ -7,6 +7,7 @@ import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
+import no.nav.aap.meldekort.unleash.UnleashGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.varsel.VarselGatewayKafkaProducerNais
@@ -39,6 +40,7 @@ fun setupRegistries() {
         .register<AapGatewayImpl>()
         .register<DefaultMeldekortServiceGateway>()
         .register<PdfgenGatewayImpl>()
+        .register<UnleashGatewayImpl>()
         .register<VarselGatewayKafkaProducerNais>()
         .status()
 }

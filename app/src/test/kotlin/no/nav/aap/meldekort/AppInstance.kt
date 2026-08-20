@@ -70,6 +70,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
             .register<DokarkivGatewayImpl>()
             .register<PdfgenGatewayImpl>()
             .register<DefaultMeldekortServiceGateway>()
+            .register<FakeUnleashGateway>()
             .register<FakeVarselGateway>()
     }
 
