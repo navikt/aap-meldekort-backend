@@ -28,6 +28,7 @@ import java.time.Clock
 class VarselRepositoryPostgresTest {
 
     private lateinit var dataSource: TestDataSource
+
     @BeforeEach
     fun setUp() {
         dataSource = TestDataSource()
@@ -38,7 +39,7 @@ class VarselRepositoryPostgresTest {
         dataSource.close()
         dataSource = TestDataSource()
     }
-    
+
     @Test
     fun `oppretter, henter, oppdaterer og sletter varsler`() {
         val saksnummer = Fagsaknummer("123")
@@ -63,6 +64,11 @@ class VarselRepositoryPostgresTest {
 
             varselRepo.upsert(varsel)
 
+            val annenSak = Fagsaknummer("321")
+            opprettSak(sakRepo, annenSak)
+            val urelatertVarsel = byggVarsel(saksnummer = annenSak)
+            varselRepo.upsert(urelatertVarsel)
+
             varselRepo.hentVarsler(saksnummer).also { varsler ->
                 assertThat(varsler).containsExactly(varsel)
             }
@@ -85,66 +91,19 @@ class VarselRepositoryPostgresTest {
                 assertThat(varsler).containsExactly(oppdatertVarsel)
             }
 
-            varselRepo.slettVarsel(varsel.varselId)
+            varselRepo.slettPlanlagtVarsel(varsel.varselId)
+            varselRepo.hentVarsler(saksnummer).also { varsler ->
+                assertThat(varsler).containsExactly(oppdatertVarsel) // kun planlagt varsel kan slettes
+            }
 
+            varselRepo.upsert(oppdatertVarsel.copy(status = VarselStatus.PLANLAGT))
+            varselRepo.slettPlanlagtVarsel(varsel.varselId)
             varselRepo.hentVarsler(saksnummer).also { varsler ->
                 assertThat(varsler).isEmpty()
             }
-        }
-    }
 
-    @Test
-    fun `sletter planlagte varsler`() {
-        val saksnummer = Fagsaknummer("1234")
-
-        dataSource.transaction { connection ->
-            val sakRepo = KelvinSakRepositoryPostgres(connection)
-            val varselRepo = VarselRepositoryPostgres(connection)
-
-            opprettSak(sakRepo, saksnummer)
-            val planlagtValselMeldepliktperiode = byggVarsel(
-                saksnummer = saksnummer,
-                status = VarselStatus.PLANLAGT,
-                typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE
-            )
-            val planlagtValselOpplysningsbehov = byggVarsel(
-                saksnummer = saksnummer,
-                status = VarselStatus.PLANLAGT,
-                typeVarselOm = TypeVarselOm.OPPLYSNINGSBEHOV
-            )
-            val sendtValselMeldepliktperiode = byggVarsel(
-                saksnummer = saksnummer,
-                status = VarselStatus.SENDT,
-                typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE
-            )
-            val inaktivertValselMeldepliktperiode = byggVarsel(
-                saksnummer = saksnummer,
-                status = VarselStatus.INAKTIVERT,
-                typeVarselOm = TypeVarselOm.MELDEPLIKTPERIODE
-            )
-
-            varselRepo.upsert(planlagtValselMeldepliktperiode)
-            varselRepo.upsert(planlagtValselOpplysningsbehov)
-            varselRepo.upsert(sendtValselMeldepliktperiode)
-            varselRepo.upsert(inaktivertValselMeldepliktperiode)
-
-            varselRepo.hentVarsler(saksnummer).also { varsler ->
-                assertThat(varsler).containsExactlyInAnyOrder(
-                    planlagtValselMeldepliktperiode,
-                    planlagtValselOpplysningsbehov,
-                    sendtValselMeldepliktperiode,
-                    inaktivertValselMeldepliktperiode
-                )
-            }
-
-            varselRepo.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
-
-            varselRepo.hentVarsler(saksnummer).also { varsler ->
-                assertThat(varsler).containsExactlyInAnyOrder(
-                    planlagtValselOpplysningsbehov,
-                    sendtValselMeldepliktperiode,
-                    inaktivertValselMeldepliktperiode
-                )
+            varselRepo.hentVarsler(urelatertVarsel.saksnummer).also { varsler ->
+                assertThat(varsler).containsExactly(urelatertVarsel)
             }
         }
     }
@@ -269,7 +228,7 @@ class VarselRepositoryPostgresTest {
                         varselRepo.hentVarsler(saksnummer3) +
                         varselRepo.hentVarsler(saksnummer4)
             ).containsExactlyInAnyOrder(
-                * alleVarsler.toTypedArray()
+                *alleVarsler.toTypedArray()
             )
 
             varselRepo.hentVarslerForUtsending(clock).also {

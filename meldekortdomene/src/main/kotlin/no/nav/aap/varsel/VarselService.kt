@@ -55,10 +55,9 @@ class VarselService(
             log.warn("Meldevindu i meldeperioder samsvarer ikke med meldeplikt-perioder fra Kelvin. Saksnummer: ${saksnummer.asString}")
         }
 
-        varselRepository.slettPlanlagteVarsler(saksnummer, TypeVarselOm.MELDEPLIKTPERIODE)
         val sendteVarsler = varselRepository.hentVarsler(saksnummer).filter { it.status == VarselStatus.SENDT }
         inaktiverVarslerForFjernetMeldeplikt(meldeperioderMedMeldeplikt, sendteVarsler)
-        lagreFremtidigeVarsler(saksnummer, meldeperioderMedMeldeplikt, sendteVarsler)
+        oppdaterFremtidigeVarsler(saksnummer, meldeperioderMedMeldeplikt, sendteVarsler)
     }
 
     private fun inaktiverVarslerForFjernetMeldeplikt(
@@ -72,7 +71,7 @@ class VarselService(
             }
     }
 
-    private fun lagreFremtidigeVarsler(
+    private fun oppdaterFremtidigeVarsler(
         saksnummer: Fagsaknummer,
         meldeperioder: List<Meldeperiode>,
         sendteVarsler: List<Varsel>
@@ -89,12 +88,20 @@ class VarselService(
 
                 (erIMeldevinduet && !harSendtVarselForPerioden) || meldevinduIFremtiden
             }
-        fremtidigeMeldeperioder
+        val nyePlanlagteVarsler = fremtidigeMeldeperioder
             .filterNot { harUtfylling(it.meldeperioden, utfyllinger) }
             .map { lagVarsel(saksnummer, it, TypeVarselOm.MELDEPLIKTPERIODE) }
-            .forEach { varsel ->
-                varselRepository.upsert(varsel)
-            }
+
+        val eksisterendePlanlagte = varselRepository.hentVarsler(saksnummer)
+            .filter { it.status == VarselStatus.PLANLAGT && it.typeVarselOm == TypeVarselOm.MELDEPLIKTPERIODE }
+
+        eksisterendePlanlagte
+            .filter { gammelt -> nyePlanlagteVarsler.none { it.forPeriode == gammelt.forPeriode } }
+            .forEach { varselRepository.slettPlanlagtVarsel(it.varselId) }
+
+        nyePlanlagteVarsler
+            .filter { nytt -> eksisterendePlanlagte.none { it.forPeriode == nytt.forPeriode } }
+            .forEach { varselRepository.upsert(it) }
     }
 
     private fun harUtfylling(forPeriode: Periode, utfyllinger: List<Utfylling>): Boolean {
@@ -151,7 +158,7 @@ class VarselService(
                 "Avbryter sending og sletter planlagt varsel som allerede har en utfylling." +
                         "Saksnummer: ${varsel.saksnummer.asString}, varselId: ${varsel.varselId}, forPeriode: ${varsel.forPeriode}, sendingstidspunkt: ${varsel.sendingstidspunkt}"
             )
-            varselRepository.slettVarsel(varsel.varselId)
+            varselRepository.slettPlanlagtVarsel(varsel.varselId)
             return
         }
 
