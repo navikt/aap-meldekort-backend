@@ -92,6 +92,8 @@ spec:
                   value: "write,ddl,role"
                 - name: "pgaudit.log_parameter"
                   value: "on"
+                - name: "pgaudit.log_relation"
+                  value: "on"
               tier: db-custom-1-3840
               diskAutoresize: true
               databases:
