@@ -18,7 +18,7 @@ object FakeServers : AutoCloseable {
 
     private val fakeServers =
         listOf(FakeTexas, FakeTilgang, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
-            .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
+            .map { it to embeddedServer(Netty, port = configuredPort(it), module = it.module) }
 
     init {
         Runtime.getRuntime().addShutdownHook(Thread { close() })
@@ -44,6 +44,13 @@ object FakeServers : AutoCloseable {
     private fun setProperties() {
         System.setProperty("nais.cluster.name", "local")
         System.setProperty("NAIS_TEAM_AAP", "nais-team-aap")
+    }
+
+    private fun configuredPort(server: FakeServer): Int {
+        return when (server) {
+            FakeTexas -> 8081
+            else -> server.port
+        }
     }
 
     override fun close() {

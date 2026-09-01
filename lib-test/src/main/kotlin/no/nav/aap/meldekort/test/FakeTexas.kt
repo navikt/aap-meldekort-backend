@@ -48,10 +48,8 @@ object FakeTexas : FakeServer {
                             issuer = "meldekort-backend",
                             audience = "meldekort-backend",
                             claims = listOfNotNull(
-                                "NAVident" to "Lokalsaksbehandler",
-                                "azp_name" to "azp",
-                                "idtyp" to "app",
-                                "azp" to azp
+                                "acr" to "idporten-loa-substantial",
+                                "pid" to "11111111111",
                             )
                         )
                     call.respond(FakeServers.TestToken(access_token = token))
@@ -59,14 +57,14 @@ object FakeTexas : FakeServer {
 
                 post("/token/exchange") {
                     val body = call.receive<JsonNode>()
-                    val NAVident = JWTParser.parse(body["user_token"].asText())
+                    val personid = JWTParser.parse(body["user_token"].asText())
                         .jwtClaimsSet
-                        .getClaimAsString("NAVident")
+                        .getClaimAsString("pid")
 
                     val token = TokenGen.generate(
                         issuer = "meldekort-backend",
                         "meldekort-backend",
-                        listOf("NAVIdent" to NAVident)
+                        listOf("pid" to personid)
                     )
                     call.respond(FakeServers.TestToken(access_token = token))
                 }
