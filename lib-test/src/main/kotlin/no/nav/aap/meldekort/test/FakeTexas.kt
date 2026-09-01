@@ -48,6 +48,20 @@ object FakeTexas : FakeServer {
                             issuer = "meldekort-backend",
                             audience = "meldekort-backend",
                             claims = listOfNotNull(
+                                "NAVident" to "Lokalsaksbehandler",
+                                "azp_name" to "azp",
+                                "idtyp" to "app",
+                                "azp" to azp
+                            )
+                        )
+                    call.respond(FakeServers.TestToken(access_token = token))
+                }
+                post("/localToken") {
+                    val token = TokenGen
+                        .generate(
+                            issuer = "meldekort-backend",
+                            audience = "meldekort-backend",
+                            claims = listOfNotNull(
                                 "acr" to "idporten-loa-substantial",
                                 "pid" to "11111111111",
                             )
@@ -57,18 +71,17 @@ object FakeTexas : FakeServer {
 
                 post("/token/exchange") {
                     val body = call.receive<JsonNode>()
-                    val personid = JWTParser.parse(body["user_token"].asText())
+                    val NAVident = JWTParser.parse(body["user_token"].asText())
                         .jwtClaimsSet
-                        .getClaimAsString("pid")
+                        .getClaimAsString("NAVident")
 
                     val token = TokenGen.generate(
                         issuer = "meldekort-backend",
                         "meldekort-backend",
-                        listOf("pid" to personid)
+                        listOf("NAVIdent" to NAVident)
                     )
                     call.respond(FakeServers.TestToken(access_token = token))
                 }
-
                 post("/introspect") {
                     call.respond(mapOf("active" to true))
                 }
