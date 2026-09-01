@@ -48,7 +48,7 @@ object FakeServers : AutoCloseable {
 
     private fun configuredPort(server: FakeServer): Int {
         return when (server) {
-            FakeTexas -> 8081
+            FakeTexas -> System.getProperty("nais.token.port")?.toIntOrNull() ?: 0
             else -> server.port
         }
     }

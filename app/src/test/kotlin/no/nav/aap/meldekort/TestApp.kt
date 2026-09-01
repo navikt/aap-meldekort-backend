@@ -28,6 +28,7 @@ import java.time.LocalDate
 import javax.sql.DataSource
 
 fun main() {
+    System.setProperty("nais.token.port", "8081")
     FakeServers.start()
 
     val kafkaContainer = KafkaContainer(DockerImageName.parse("apache/kafka-native:4.1.0"))
