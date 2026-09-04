@@ -11,6 +11,7 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -41,7 +42,9 @@ fun main() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
+        .register<FakeUnleashGateway>()
         .register<PdfgenGatewayImpl>()
+        .register<PdfgeneratorGatewayImpl>()
         .register<VarselGatewayKafkaProducerTestcontainers>()
         .status()
 
