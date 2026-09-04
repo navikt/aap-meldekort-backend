@@ -30,12 +30,14 @@ class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
     private val flytJobbRepository: FlytJobbRepository,
     private val pdfgenGateway: PdfgenGateway,
+    private val pdfgeneratorGateway: PdfgeneratorGateway,
     private val kelvinSakRepository: KelvinSakRepository,
     private val unleashGateway: UnleashGateway
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
         gatewayProvider.provide(),
         repositoryProvider.provide(),
+        gatewayProvider.provide(),
         gatewayProvider.provide(),
         repositoryProvider.provide(),
         gatewayProvider.provide()
@@ -68,20 +70,28 @@ class JournalføringService(
             }
         )
         val kelvinSak = kelvinSakRepository.hentSak(ident, LocalDate.now())
-        if (unleashGateway.isEnabled(MeldekortFeature.MeldekortBackendTest)) {
-            log.info("Featuretoggle MeldekortBackendTest enabled")
-        }
-        val journalpost = journalpost(
-            ident = ident,
-            utfylling = utfylling,
-            meldekort = meldekort,
-            pdf = pdfgenGateway.genererPdf(
+        val pdf = if (unleashGateway.isEnabled(MeldekortFeature.MeldekortKvitteringFraNyPdfgenerator)) {
+            pdfgeneratorGateway.genererPdf(
                 ident = ident,
                 mottatt = utfylling.sistEndret,
                 meldekort = meldekort,
                 utfylling = utfylling,
                 harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
-            ),
+            )
+        } else {
+            pdfgenGateway.genererPdf(
+                ident = ident,
+                mottatt = utfylling.sistEndret,
+                meldekort = meldekort,
+                utfylling = utfylling,
+                harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
+            )
+        }
+        val journalpost = journalpost(
+            ident = ident,
+            utfylling = utfylling,
+            meldekort = meldekort,
+            pdf = pdf,
             fagsakReferanse = fagsakReferanse,
         )
 
