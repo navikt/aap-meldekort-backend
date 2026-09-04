@@ -11,9 +11,11 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
+import no.nav.aap.meldekort.test.FakeUnleashGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import no.nav.aap.sak.FagsakReferanse
@@ -41,7 +43,9 @@ fun main() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
+        .register<FakeUnleashGatewayImpl>()
         .register<PdfgenGatewayImpl>()
+        .register<PdfgeneratorGatewayImpl>()
         .register<VarselGatewayKafkaProducerTestcontainers>()
         .status()
 

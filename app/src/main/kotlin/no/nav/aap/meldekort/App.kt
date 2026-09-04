@@ -5,6 +5,7 @@ import no.nav.aap.createPostgresDataSource
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.unleash.UnleashGatewayImpl
@@ -40,6 +41,7 @@ fun setupRegistries() {
         .register<AapGatewayImpl>()
         .register<DefaultMeldekortServiceGateway>()
         .register<PdfgenGatewayImpl>()
+        .register<PdfgeneratorGatewayImpl>()
         .register<UnleashGatewayImpl>()
         .register<VarselGatewayKafkaProducerNais>()
         .status()
