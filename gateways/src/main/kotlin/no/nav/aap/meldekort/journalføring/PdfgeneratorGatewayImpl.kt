@@ -1,4 +1,4 @@
-package no.nav.aap.meldekort.`journalføring`
+package no.nav.aap.meldekort.journalføring
 
 import no.nav.aap.Ident
 import no.nav.aap.behandlingsflyt.kontrakt.hendelse.dokumenter.Meldekort
@@ -84,10 +84,10 @@ object PdfgeneratorGatewayImpl : PdfgeneratorGateway {
             responseBody.readAllBytes()
         }
         requireNotNull(pdf) {
-            "ingen respons fra pdfgen-meldekort"
+            "ingen respons fra pdfgenerator"
         }
         check(pdf.sliceArray(0..3).contentEquals("%PDF".toByteArray())) {
-            "Body fra dokgen mangler PDF-magic number '%PDF'. Html/json-feilmelding?"
+            "Body fra pdfgenerator mangler PDF-magic number '%PDF'. Html/json-feilmelding?"
         }
         return pdf
     }
