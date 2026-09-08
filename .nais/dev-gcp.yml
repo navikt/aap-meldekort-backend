@@ -85,6 +85,7 @@ spec:
                   cluster: dev-fss
                 - application: api-intern
                 - application: pdfgen-meldekort
+                - application: pdfgenerator
             external:
                 - host: aap-unleash-api.nav.cloud.nais.io
                 - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
@@ -122,6 +123,8 @@ spec:
           value: api://dev-gcp.aap.api-intern/.default
         - name: PDFGEN_URL
           value: http://pdfgen-meldekort.aap
+        - name: PDFGENERATOR_URL
+          value: http://pdfgenerator
         - name: BEHANDLINGSFLYT_AZP
           value: 5b4656d2-e8f0-4df1-9e10-269133df697f
         - name: AAP_MELDEKORT_LENKE

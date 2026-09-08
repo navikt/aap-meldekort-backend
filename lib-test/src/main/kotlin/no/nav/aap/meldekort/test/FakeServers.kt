@@ -17,7 +17,7 @@ object FakeServers : AutoCloseable {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val fakeServers =
-        listOf(FakeTexas, FakeTilgang, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen)
+        listOf(FakeTexas, FakeTilgang, FakeAapApi, FakeArena, FakeDokarkiv, FakePdfgen, FakePdfgenerator)
             .map { it to embeddedServer(Netty, port = it.port, module = it.module) }
 
     init {

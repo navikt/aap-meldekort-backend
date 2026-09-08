@@ -18,6 +18,7 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
+import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
 import no.nav.aap.meldekort.test.FakeServers
@@ -369,7 +370,9 @@ class UtfyllingFlytV2Test {
                 .register<AapGatewayImpl>()
                 .register<DokarkivGatewayImpl>()
                 .register<PdfgenGatewayImpl>()
+                .register<PdfgeneratorGatewayImpl>()
                 .register<FakeVarselGateway>()
+                .register<FakeUnleashGateway>()
 
             embeddedServer = run {
                 startHttpServer(
