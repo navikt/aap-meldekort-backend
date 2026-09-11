@@ -31,13 +31,13 @@ fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: Repo
         authorizedGet<SaksnummerParameter, Any>(
             AuthorizationParamPathConfig(
                 sakPathParam = SakPathParam("saksnummer"),
-                operasjon = Operasjon.DRIFTE,
+                operasjon = Operasjon.DRIFT_LES,
             ),
             modules = arrayOf(tags(Tags.DriftAPI))
         ) { params ->
             val saksnummer = Fagsaknummer(params.saksnummer)
 
-            val dto = dataSource.transaction { connection ->
+            val dto = dataSource.transaction(readOnly = true) { connection ->
                 val repositoryProvider = repositoryRegistry.provider(connection)
                 val sakRepository = repositoryProvider.provide<KelvinSakRepository>()
 
