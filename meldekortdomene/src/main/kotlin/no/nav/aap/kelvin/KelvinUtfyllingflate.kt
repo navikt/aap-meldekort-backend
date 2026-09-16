@@ -60,11 +60,7 @@ class KelvinUtfyllingFlate(
                 ident = ident,
                 periode = periode,
                 flyt = run {
-                    if (Miljø.erProd()) {
-                        AAP_FLYT
-                    } else {
-                        AAP_FLYT_V2
-                    }
+                    AAP_FLYT
                 },
                 svar = Svar.tomt(periode),
                 sak = sak,

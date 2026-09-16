@@ -40,7 +40,9 @@ import java.io.InputStream
 import java.net.URI
 import java.time.LocalDate
 import java.util.*
+import kotlin.test.Ignore
 
+@Ignore // V2 er inntil videre disablet i alle miljøer
 class UtfyllingFlytV2Test {
 
     private val steg = UtfyllingFlytNavn.AAP_FLYT_V2.steg.filterNot(UtfyllingStegNavn::erTeknisk)
