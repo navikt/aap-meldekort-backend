@@ -25,7 +25,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.OidcToken
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.azurecc.AzureM2MTokenProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
-import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
@@ -69,7 +68,6 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
         GatewayRegistry
             .register<AapGatewayImpl>()
             .register<DokarkivGatewayImpl>()
-            .register<PdfgenGatewayImpl>()
             .register<PdfgeneratorGatewayImpl>()
             .register<DefaultMeldekortServiceGateway>()
             .register<FakeUnleashGateway>()

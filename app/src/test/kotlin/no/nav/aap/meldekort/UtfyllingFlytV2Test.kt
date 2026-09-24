@@ -17,7 +17,6 @@ import no.nav.aap.komponenter.httpklient.httpclient.request.PostRequest
 import no.nav.aap.komponenter.httpklient.httpclient.tokenprovider.TokenProvider
 import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
-import no.nav.aap.meldekort.journalføring.PdfgenGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
@@ -371,7 +370,6 @@ class UtfyllingFlytV2Test {
             GatewayRegistry
                 .register<AapGatewayImpl>()
                 .register<DokarkivGatewayImpl>()
-                .register<PdfgenGatewayImpl>()
                 .register<PdfgeneratorGatewayImpl>()
                 .register<FakeVarselGateway>()
                 .register<FakeUnleashGateway>()
