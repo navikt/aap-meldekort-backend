@@ -13,8 +13,6 @@ import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.motor.FlytJobbRepository
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.sak.FagsystemNavn
-import no.nav.aap.unleash.MeldekortFeature
-import no.nav.aap.unleash.UnleashGateway
 import no.nav.aap.utfylling.Utfylling
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT
 import no.nav.aap.utfylling.UtfyllingFlytNavn.AAP_FLYT_V2
@@ -32,16 +30,15 @@ class JournalføringService(
     private val pdfgenGateway: PdfgenGateway,
     private val pdfgeneratorGateway: PdfgeneratorGateway,
     private val kelvinSakRepository: KelvinSakRepository,
-    private val unleashGateway: UnleashGateway
 ) {
-    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider): this(
+    constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
         gatewayProvider.provide(),
         repositoryProvider.provide(),
         gatewayProvider.provide(),
         gatewayProvider.provide(),
         repositoryProvider.provide(),
-        gatewayProvider.provide()
     )
+
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun bestillJournalføring(ident: Ident, utfylling: Utfylling) {
@@ -70,23 +67,13 @@ class JournalføringService(
             }
         )
         val kelvinSak = kelvinSakRepository.hentSak(ident, LocalDate.now())
-        val pdf = if (unleashGateway.isEnabled(MeldekortFeature.MeldekortKvitteringFraNyPdfgenerator)) {
-            pdfgeneratorGateway.genererPdf(
-                ident = ident,
-                mottatt = utfylling.sistEndret,
-                meldekort = meldekort,
-                utfylling = utfylling,
-                harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
-            )
-        } else {
-            pdfgenGateway.genererPdf(
-                ident = ident,
-                mottatt = utfylling.sistEndret,
-                meldekort = meldekort,
-                utfylling = utfylling,
-                harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
-            )
-        }
+        val pdf = pdfgeneratorGateway.genererPdf(
+            ident = ident,
+            mottatt = utfylling.sistEndret,
+            meldekort = meldekort,
+            utfylling = utfylling,
+            harBrukerVedtakIKelvin = kelvinSak?.erLøpende() ?: false
+        )
         val journalpost = journalpost(
             ident = ident,
             utfylling = utfylling,
@@ -124,6 +111,7 @@ class JournalføringService(
         val tittel = when (utfylling.flyt) {
             AAP_FLYT, AAP_FLYT_V2 ->
                 "Meldekort $tittelsuffix"
+
             AAP_KORRIGERING_FLYT, AAP_KORRIGERING_FLYT_V2 ->
                 "Korrigert meldekort $tittelsuffix"
         }
@@ -173,6 +161,7 @@ class JournalføringService(
                     brevkode = when (utfylling.flyt) {
                         AAP_FLYT, AAP_FLYT_V2 ->
                             "NAV 00-10.02"
+
                         AAP_KORRIGERING_FLYT, AAP_KORRIGERING_FLYT_V2 ->
                             "NAV 00-10.03"
                     },
