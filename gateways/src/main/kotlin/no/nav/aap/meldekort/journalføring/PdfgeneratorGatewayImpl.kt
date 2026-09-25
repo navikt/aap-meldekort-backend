@@ -14,7 +14,12 @@ import no.nav.aap.utfylling.Utfylling
 import java.net.URI
 import java.time.DayOfWeek
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 object PdfgeneratorGatewayImpl : PdfgeneratorGateway {
     private val baseUrl = requiredConfigForKey("pdfgenerator.url")
@@ -93,3 +98,40 @@ object PdfgeneratorGatewayImpl : PdfgeneratorGateway {
     }
 }
 
+fun formaterDatoForFrontend(date: LocalDate?): String {
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.forLanguageTag("no-NO"))
+    return date?.format(formatter) ?: ""
+}
+
+fun hentDagNavn(date: LocalDate): String {
+    val dag = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("no-NO"))
+    return dag.replaceFirstChar { it.uppercaseChar() }
+}
+
+fun formaterTimer(number: Double?): String {
+    return when {
+        number == null -> ""
+        number % 1.0 == 0.0 -> number.toInt().toString()
+        else -> number.toString()
+    }
+}
+
+fun hentUkeNummerForDato(dato: LocalDate): String {
+    val ukeFelter = WeekFields.of(Locale.forLanguageTag("no-NO"))
+    return dato.get(ukeFelter.weekOfWeekBasedYear()).toString()
+}
+
+fun hentUkeNummerForPerioen(from: LocalDate?, to: LocalDate?): String {
+    val ukeFelter = WeekFields.of(Locale.forLanguageTag("no-NO"))
+    val uker = generateSequence(from) { it.plusDays(1) }
+        .takeWhile { it <= to }
+        .map { it.get(ukeFelter.weekOfWeekBasedYear()) }
+        .distinct()
+        .toList()
+
+    return when (uker.size) {
+        1 -> "Uke ${uker.first()}"
+        2 -> "Uke ${uker.joinToString(" og ")}"
+        else -> "Uke ${uker.dropLast(1).joinToString(", ")} og ${uker.last()}"
+    }
+}

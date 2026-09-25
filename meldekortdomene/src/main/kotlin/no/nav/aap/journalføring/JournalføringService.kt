@@ -27,14 +27,12 @@ import java.util.*
 class JournalføringService(
     private val dokarkivGateway: DokarkivGateway,
     private val flytJobbRepository: FlytJobbRepository,
-    private val pdfgenGateway: PdfgenGateway,
     private val pdfgeneratorGateway: PdfgeneratorGateway,
     private val kelvinSakRepository: KelvinSakRepository,
 ) {
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider) : this(
         gatewayProvider.provide(),
         repositoryProvider.provide(),
-        gatewayProvider.provide(),
         gatewayProvider.provide(),
         repositoryProvider.provide(),
     )
