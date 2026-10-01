@@ -1,5 +1,5 @@
 [versions]
-ktor = "3.5.2"
+ktor = "3.6.0"
 komponenter = "2.0.173"
 tilgang = "1.0.242"
 junit-jupiter = "6.1.3"
@@ -47,7 +47,7 @@ micrometerCore = { module = "io.micrometer:micrometer-core", version.ref = "micr
 # Logging
 logbackClassic = { module = "ch.qos.logback:logback-classic", version = "1.6.3" }
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "9.0" }
-slf4JApi = { module = "org.slf4j:slf4j-api", version = "2.0.19" }
+slf4JApi = { module = "org.slf4j:slf4j-api", version = "2.0.20" }
 
 # Test
 assertjCore = { module = "org.assertj:assertj-core", version = "3.27.7" }
@@ -67,7 +67,7 @@ testcontainersKafka = { module = "org.testcontainers:testcontainers-kafka", vers
 testcontainersPostgresql = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 
 # Security
-nimbusJoseJwt = { module = "com.nimbusds:nimbus-jose-jwt", version = "10.9.1" }
+nimbusJoseJwt = { module = "com.nimbusds:nimbus-jose-jwt", version = "10.10" }
 
 # Unleash
 unleashClientJava = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
