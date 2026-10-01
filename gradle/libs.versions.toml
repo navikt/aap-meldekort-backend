@@ -1,12 +1,12 @@
 [versions]
 ktor = "3.5.2"
-komponenter = "2.0.172"
+komponenter = "2.0.173"
 tilgang = "1.0.242"
 junit-jupiter = "6.1.3"
 jackson = "2.22.3"
 micrometer = "1.17.1"
 testcontainers = "2.0.5"
-behandlingsflyt = "0.0.667"
+behandlingsflyt = "0.0.669"
 unleash = "12.3.0"
 
 [libraries]
