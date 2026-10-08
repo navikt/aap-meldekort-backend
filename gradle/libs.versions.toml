@@ -1,6 +1,6 @@
 [versions]
 ktor = "3.5.2"
-komponenter = "2.0.173"
+komponenter = "2.0.182"
 tilgang = "1.0.242"
 junit-jupiter = "6.1.3"
 jackson = "2.22.3"
