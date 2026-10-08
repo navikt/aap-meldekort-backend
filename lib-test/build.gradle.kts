@@ -8,20 +8,20 @@ dependencies {
     implementation(project(":repositories"))
     implementation(libs.behandlingsflytKontrakt)
     implementation(libs.server)
-    implementation(libs.micrometerCore)
+    implementation(kelvinLibs.micrometer.prometheus)
     implementation(libs.httpklient)
     implementation(libs.verdityper)
     implementation(libs.dbconnect)
     implementation(libs.tilgangApiKontrakt)
 
-    implementation(libs.jacksonDatabind)
-    implementation(libs.jacksonDatatypeJsr310)
+    implementation(kelvinLibs.jackson.databind)
+    implementation(kelvinLibs.jackson.datatype.jsr310)
 
-    implementation(libs.logbackClassic)
+    implementation(kelvinLibs.logback.classic)
 
-    implementation(libs.nimbusJoseJwt)
+    implementation(kelvinLibs.nimbus.jose.jwt)
 
-    implementation(libs.junitJupiterApi)
-    implementation(libs.testcontainersPostgresql)
+    implementation(kelvinLibs.junit.jupiter.api)
+    implementation(kelvinLibs.testcontainers.postgresql)
     implementation(libs.varselKotlinBuilder)
 }

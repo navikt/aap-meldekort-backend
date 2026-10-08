@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     id("aap.conventions")
-    alias(libs.plugins.ktor)
+    alias(kelvinLibs.plugins.ktor)
     alias(libs.plugins.shadow)
 }
 
@@ -85,9 +85,9 @@ dependencies {
     implementation(libs.motor)
     api(libs.tilgangPlugin)
 
-    implementation(libs.micrometerRegistryPrometheus)
-    implementation(libs.logbackClassic)
-    implementation(libs.logstashLogbackEncoder)
+    implementation(kelvinLibs.micrometer.prometheus)
+    implementation(kelvinLibs.logback.classic)
+    implementation(kelvinLibs.logstash.logback.encoder)
 
     api(libs.ktorOpenApiGenerator)
 
@@ -95,15 +95,8 @@ dependencies {
     testImplementation(libs.dbconnect)
     testImplementation(libs.dbtest)
 
-    testImplementation(libs.junitJupiterApi)
-    testRuntimeOnly(libs.junitJupiterEngine)
-    testImplementation(libs.assertjCore)
-    constraints {
-        implementation(libs.commonsCompress) {
-            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
-        }
-    }
+    testImplementation(kelvinLibs.bundles.junit)
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation(libs.testcontainersKafka)
+    testImplementation(kelvinLibs.testcontainers.kafka)
 }
