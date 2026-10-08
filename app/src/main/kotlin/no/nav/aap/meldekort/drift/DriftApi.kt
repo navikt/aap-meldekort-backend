@@ -28,7 +28,7 @@ private enum class Tags(override val description: String) : APITag {
 
 fun NormalOpenAPIRoute.driftApi(dataSource: DataSource, repositoryRegistry: RepositoryRegistry, clock: Clock) {
     route("/api/drift/sak/{saksnummer}/meldekort") {
-        authorizedGet<SaksnummerParameter, Any>(
+        authorizedGet<SaksnummerParameter, MeldekortDriftsinfoDto>(
             AuthorizationParamPathConfig(
                 sakPathParam = SakPathParam("saksnummer"),
                 operasjon = Operasjon.DRIFT_LES,
