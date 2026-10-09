@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.slf4JApi)
     implementation(libs.behandlingsflytKontrakt)
     implementation(libs.motor)
     implementation(libs.motorApi)
@@ -15,14 +14,7 @@ dependencies {
     testImplementation(project(":repositories"))
     testImplementation(project(":lib-test"))
     testImplementation(libs.dbtest)
-    testImplementation(libs.junitJupiterApi)
-    testRuntimeOnly(libs.junitJupiterEngine)
-    testImplementation(libs.assertjCore)
-    constraints {
-        implementation(libs.commonsCompress) {
-            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
-        }
-    }
-    testImplementation(libs.mockk)
+    testImplementation(kelvinLibs.bundles.junit)
+    testImplementation(kelvinLibs.mockk)
     testImplementation(kotlin("test"))
 }

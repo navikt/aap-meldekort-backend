@@ -6,9 +6,9 @@ plugins {
 dependencies {
     implementation(project(":meldekortdomene"))
 
-    implementation(libs.micrometerCore)
-    implementation(libs.logbackClassic)
-    implementation(libs.logstashLogbackEncoder)
+    implementation(kelvinLibs.micrometer.prometheus)
+    implementation(kelvinLibs.logback.classic)
+    implementation(kelvinLibs.logstash.logback.encoder)
 
     implementation(libs.dbconnect)
     implementation(libs.verdityper)
@@ -17,20 +17,13 @@ dependencies {
     implementation(libs.infrastructure)
     implementation(libs.json)
     implementation(libs.varselKotlinBuilder)
-    implementation(libs.kafkaClients)
+    implementation(kelvinLibs.kafka.clients)
 
-    implementation(libs.hikaricp)
+    implementation(kelvinLibs.hikaricp)
 
     testImplementation(libs.dbtest)
-    testImplementation(libs.junitJupiterApi)
-    testRuntimeOnly(libs.junitJupiterEngine)
-    testImplementation(libs.assertjCore)
-    constraints {
-        implementation(libs.commonsCompress) {
-            because("https://github.com/advisories/GHSA-4g9r-vxhx-9pgx")
-        }
-    }
+    testImplementation(kelvinLibs.bundles.junit)
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
-    testImplementation(libs.testcontainersKafka)
+    testImplementation(kelvinLibs.testcontainers.kafka)
 }

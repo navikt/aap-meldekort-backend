@@ -7,10 +7,9 @@ dependencies {
     implementation(libs.httpklient)
     api(libs.gateway)
     implementation(libs.infrastructure)
-    implementation(libs.logbackClassic)
+    implementation(kelvinLibs.logback.classic)
     implementation(libs.behandlingsflytKontrakt)
-    implementation(libs.unleashClientJava)
+    implementation(kelvinLibs.unleash.client.java)
 
-    testImplementation(libs.junitJupiterApi)
-    testRuntimeOnly(libs.junitJupiterEngine)
+    testImplementation(kelvinLibs.bundles.junit)
 }

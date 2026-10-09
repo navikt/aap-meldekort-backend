@@ -7,14 +7,12 @@ plugins {
 }
 
 dependencies {
-    api(libs.jacksonAnnotations)
+    api(kelvinLibs.jackson.annotations)
     api(libs.ktorOpenApiGenerator)
     compileOnly(libs.tilgangApiKontrakt)
 
-    testImplementation(libs.junitJupiterApi)
     testRuntimeOnly(libs.tilgangApiKontrakt)
-    testRuntimeOnly(libs.junitJupiterEngine)
-    testImplementation(libs.assertjCore)
+    testImplementation(kelvinLibs.bundles.junit)
     testImplementation(libs.json)
 }
 
