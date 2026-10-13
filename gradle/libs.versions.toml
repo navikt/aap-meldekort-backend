@@ -1,6 +1,6 @@
 [versions]
-komponenter = "2.0.183"
-tilgang = "1.0.242"
+komponenter = "2.0.186"
+tilgang = "1.0.243"
 behandlingsflyt = "0.0.669"
 
 [libraries]
