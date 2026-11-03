@@ -85,6 +85,30 @@ object AapGatewayImpl : AapGateway {
         return Saker(saker)
     }
 
+    override fun hentSakerFraArena(ident: Ident): Saker {
+        class ArenaSakResponse(
+            val saksnummer: String,
+            val periode: Periode,
+        )
+
+        val response = requireNotNull(
+            httpClient.retryablePost<_, List<ArenaSakResponse>>(
+                uri = URI(requiredConfigForKey("aap.api.intern.arena.saker.url")),
+                request = PostRequest(
+                    body = mapOf("personidentifikator" to ident.asString),
+                    additionalHeaders = listOf(Header("accept", "application/json")),
+                ),
+            )
+        ) { "Arena-saker mangler respons" }
+
+        return Saker(response.map {
+            GatewaySak(
+                referanse = FagsakReferanse(FagsystemNavn.ARENA, Fagsaknummer(it.saksnummer)),
+                rettighetsperiode = it.periode,
+            )
+        })
+    }
+
     override fun hentMeldeperioder(ident: Ident, periode: Periode): List<Periode> {
         class KelvinPeriode(val fom: LocalDate, val tom: LocalDate)
 
