@@ -2,135 +2,137 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 
 metadata:
-    name: meldekort-backend
-    namespace: aap
-    labels:
-        team: aap
-        sub: meldekort-backend
-        systemkatalog.nav.no/system: SK-268
-    annotations:
-        texas.nais.io/enabled: "true"
+  name: meldekort-backend
+  namespace: aap
+  labels:
+    team: aap
+    sub: meldekort-backend
+    systemkatalog.nav.no/system: SK-268
+  annotations:
+    texas.nais.io/enabled: "true"
 
 spec:
-    ingresses:
-        - https://aap-meldekort-backend.intern.dev.nav.no
-    image: {{image}}
-    port: 8080
-    resources:
-        limits:
-            memory: 512Mi
-        requests:
-            cpu: 500m
-            memory: 512Mi
-    observability:
-        autoInstrumentation:
-            enabled: true
-            runtime: "java"
-        logging:
-            destinations:
-                - id: elastic
-                - id: loki
-    envFrom:
-        - secret: kelvin-unleash-api-token
-    kafka:
-        pool: nav-dev
-    prometheus:
-        enabled: true
-        path: /actuator/metrics
-    tokenx:
-        enabled: true
-    azure:
-        application:
-            enabled: true
-            allowAllUsers: true
-            claims:
-                extra:
-                    - "NAVident"
-                    - "azp_name"
-                groups:
-                  - id: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5 #NAIS_TEAM_AAP
-    liveness:
-        path: /actuator/live
-        initialDelay: 5
-        periodSeconds: 5
-        failureThreshold: 5
-    readiness:
-        path: /actuator/ready
-        initialDelay: 5
-        periodSeconds: 5
-        failureThreshold: 5
-    accessPolicy:
-        inbound:
-            rules:
-                - application: meldekort
-                - application: innsyn
-                - application: behandlingsflyt
-                - application: paw-patrol
-                - application: tokenx-token-generator
-                  namespace: nais
-                - application: meldekort-frontend-q1
-                  namespace: meldekort
-                - application: meldekort-frontend-q2
-                  namespace: meldekort
-                - application: meldekort-landingsside
-                  namespace: meldekort
-        outbound:
-            rules:
-                - application: tilgang
-                - application: meldekortkontroll-api-q2
-                  namespace: meldekort
-                  cluster: dev-fss
-                - application: meldekortservice-q2
-                  namespace: meldekort
-                  cluster: dev-fss
-                - application: api-intern
-                - application: pdfgenerator
-            external:
-                - host: aap-unleash-api.nav.cloud.nais.io
-                - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
-                - host: meldekortservice-q2.dev-fss-pub.nais.io
-                - host: dokarkiv.dev-fss-pub.nais.io
-    gcp:
-        sqlInstances:
-            - type: POSTGRES_16
-              tier: db-f1-micro
-              diskAutoresize: true
-              flags:
-                - name: cloudsql.logical_decoding
-                  value: "on"
-              databases:
-                  - name: meldekort-backend
-                    envVarPrefix: DB
-                    users:
-                      - name: datastream
-    env:
-        - name: MELDEKORTSERVICE_URL
-          value: https://meldekortservice-q2.dev-fss-pub.nais.io/meldekortservice/api
-        - name: MELDEKORTSERVICE_SCOPE
-          value: api://dev-fss.meldekort.meldekortservice-q2/.default
-        - name: MELDEKORTKONTROLL_URL
-          value: https://meldekortkontroll-api-q2.dev-fss-pub.nais.io
-        - name: MELDEKORTKONTROLL_SCOPE
-          value: dev-fss:meldekort:meldekortkontroll-api-q2
-        - name: DOKARKIV_URL
-          value: https://dokarkiv-q2.dev-fss-pub.nais.io
-        - name: DOKARKIV_SCOPE
-          value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
-        - name: AAP_API_INTERN_URL
-          value: http://api-intern.aap/meldekort-backend
-        - name: AAP_API_INTERN_SCOPE
-          value: api://dev-gcp.aap.api-intern/.default
-        - name: PDFGENERATOR_URL
-          value: http://pdfgenerator
-        - name: BEHANDLINGSFLYT_AZP
-          value: 5b4656d2-e8f0-4df1-9e10-269133df697f
-        - name: AAP_MELDEKORT_LENKE
-          value: https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort
-        - name: BRUKERVARSEL_TOPIC
-          value: min-side.aapen-brukervarsel-v1
-        - name: INTEGRASJON_TILGANG_URL
-          value: http://tilgang
-        - name: INTEGRASJON_TILGANG_SCOPE
-          value: api://dev-gcp.aap.tilgang/.default
-        - name: NAIS_TEAM_AAP
-          value: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5
+  ingresses:
+    - https://aap-meldekort-backend.intern.dev.nav.no
+  image: {{image}}
+  port: 8080
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: "java"
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+  envFrom:
+    - secret: kelvin-unleash-api-token
+  kafka:
+    pool: nav-dev
+  prometheus:
+    enabled: true
+    path: /actuator/metrics
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      claims:
+        extra:
+          - "NAVident"
+          - "azp_name"
+        groups:
+          - id: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5 # nais-team-aap
+          - id: bc89623f-4624-4978-ac54-acd048c0f2a5 # 0000-GA-AAP_DRIFT
+          - id: 8e5bc6be-a934-41f0-8a92-e974ea7b80d3 # 0000-GA-AAP_DRIFT_LES
+  liveness:
+    path: /actuator/live
+    initialDelay: 5
+    periodSeconds: 5
+    failureThreshold: 5
+  readiness:
+    path: /actuator/ready
+    initialDelay: 5
+    periodSeconds: 5
+    failureThreshold: 5
+  accessPolicy:
+    inbound:
+      rules:
+        - application: meldekort
+        - application: innsyn
+        - application: behandlingsflyt
+        - application: paw-patrol
+        - application: tokenx-token-generator
+          namespace: nais
+        - application: meldekort-frontend-q1
+          namespace: meldekort
+        - application: meldekort-frontend-q2
+          namespace: meldekort
+        - application: meldekort-landingsside
+          namespace: meldekort
+    outbound:
+      rules:
+        - application: tilgang
+        - application: meldekortkontroll-api-q2
+          namespace: meldekort
+          cluster: dev-fss
+        - application: meldekortservice-q2
+          namespace: meldekort
+          cluster: dev-fss
+        - application: api-intern
+        - application: pdfgenerator
+      external:
+        - host: aap-unleash-api.nav.cloud.nais.io
+        - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
+        - host: meldekortservice-q2.dev-fss-pub.nais.io
+        - host: dokarkiv.dev-fss-pub.nais.io
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_16
+        tier: db-f1-micro
+        diskAutoresize: true
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
+        databases:
+          - name: meldekort-backend
+            envVarPrefix: DB
+            users:
+              - name: datastream
+  env:
+    - name: MELDEKORTSERVICE_URL
+      value: https://meldekortservice-q2.dev-fss-pub.nais.io/meldekortservice/api
+    - name: MELDEKORTSERVICE_SCOPE
+      value: api://dev-fss.meldekort.meldekortservice-q2/.default
+    - name: MELDEKORTKONTROLL_URL
+      value: https://meldekortkontroll-api-q2.dev-fss-pub.nais.io
+    - name: MELDEKORTKONTROLL_SCOPE
+      value: dev-fss:meldekort:meldekortkontroll-api-q2
+    - name: DOKARKIV_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
+    - name: AAP_API_INTERN_URL
+      value: http://api-intern.aap/meldekort-backend
+    - name: AAP_API_INTERN_SCOPE
+      value: api://dev-gcp.aap.api-intern/.default
+    - name: PDFGENERATOR_URL
+      value: http://pdfgenerator
+    - name: BEHANDLINGSFLYT_AZP
+      value: 5b4656d2-e8f0-4df1-9e10-269133df697f
+    - name: AAP_MELDEKORT_LENKE
+      value: https://aap-meldekort.ansatt.dev.nav.no/aap/meldekort
+    - name: BRUKERVARSEL_TOPIC
+      value: min-side.aapen-brukervarsel-v1
+    - name: INTEGRASJON_TILGANG_URL
+      value: http://tilgang
+    - name: INTEGRASJON_TILGANG_SCOPE
+      value: api://dev-gcp.aap.tilgang/.default
+    - name: NAIS_TEAM_AAP
+      value: ee2a0374-97a6-462e-9a05-3cb7be3d8fc5
