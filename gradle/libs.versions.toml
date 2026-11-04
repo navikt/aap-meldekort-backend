@@ -2,6 +2,7 @@
 komponenter = "2.0.186"
 tilgang = "1.0.244"
 behandlingsflyt = "0.0.672"
+arenaoppslag = "0.7.33"
 
 [libraries]
 # Kelvin
@@ -17,6 +18,7 @@ dbtest = { module = "no.nav.aap.kelvin:dbtest", version.ref = "komponenter" }
 json = { module = "no.nav.aap.kelvin:json", version.ref = "komponenter" }
 verdityper = { module = "no.nav.aap.kelvin:verdityper", version.ref = "komponenter" }
 ktorOpenApiGenerator = { module = "no.nav.aap.kelvin:ktor-openapi-generator", version.ref = "komponenter" }
+arenaoppslag-kontrakt = { module = "no.nav.aap.arenaoppslag:kontrakt", version.ref = "arenaoppslag" }
 
 # Tilgang
 tilgangPlugin = { module = "no.nav.aap.tilgang:plugin", version.ref = "tilgang" }

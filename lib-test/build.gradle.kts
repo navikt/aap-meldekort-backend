@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":meldekortdomene"))
     implementation(project(":repositories"))
     implementation(libs.behandlingsflytKontrakt)
+    implementation(libs.arenaoppslag.kontrakt)
     implementation(libs.server)
     implementation(kelvinLibs.micrometer.prometheus)
     implementation(libs.httpklient)
