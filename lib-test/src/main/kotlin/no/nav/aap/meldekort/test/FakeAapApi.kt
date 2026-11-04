@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
 object FakeAapApi : FakeServer {
     override fun setProperties(port: Int) {
         System.setProperty("aap.api.intern.url", "http://localhost:$port")
-        System.setProperty("aap.api.intern.arena.saker.url", "http://localhost:$port/arena/saker")
         System.setProperty("aap.api.intern.scope", "api://local:aap:api-intern/.default")
     }
 
@@ -48,22 +47,6 @@ object FakeAapApi : FakeServer {
             register(ContentType.Application.Json, converter)
         }
         routing {
-            post("/arena/saker") {
-                val fnr = call.receive<JsonNode>().at("/personidentifikator").asText()
-                val arenaSaker = saker[fnr].orEmpty()
-                    .filter { it.referanse.system == ARENA }
-                    .map {
-                        mapOf(
-                            "saksnummer" to it.referanse.nummer.asString,
-                            "periode" to mapOf(
-                                "fom" to it.rettighetsperiode.fom,
-                                "tom" to it.rettighetsperiode.tom,
-                            ),
-                        )
-                    }
-                call.respond(arenaSaker)
-            }
-
             post("/sakerByFnr") {
                 val fnr = call.receive<JsonNode>().at("/personidentifikator").asText()
                 call.respond(saker.getOrDefault(fnr, emptyList()).map {
