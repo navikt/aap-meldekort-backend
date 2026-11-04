@@ -1,5 +1,6 @@
 package no.nav.aap.sak
 
+import no.nav.aap.Periode
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -25,6 +26,16 @@ class Saker(
                 }
             }
             .maxByOrNull { it.rettighetsperiode.tom }
+    }
+
+    fun finnSakSomSlutterIPeriode(periode: Periode): Sak? {
+        val sakerSomSlutterIPerioden = saker.filter {
+            it.rettighetsperiode.tom in periode
+        }
+
+        return sakerSomSlutterIPerioden.maxByOrNull {
+            it.rettighetsperiode.tom
+        }
     }
 
     private fun lagFeilmelding(saker: List<Sak>): String =
