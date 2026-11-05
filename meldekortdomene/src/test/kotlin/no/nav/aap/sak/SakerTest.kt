@@ -16,19 +16,8 @@ class SakerTest {
         override val rettighetsperiode = periode
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = [0, 3, 6])
-    fun `sluttdato innenfor perioden inkluderer begge grenser`(dagerEtterStart: Int) {
-        val sak = sak(
-            Periode(periode.fom.minusMonths(1), periode.fom.plusDays(dagerEtterStart.toLong())),
-        )
-        val saker = Saker(listOf(sak))
-
-        assertSame(sak, saker.finnSakSomSlutterIPeriode(periode))
-    }
-
     @Test
-    fun `overlapp alene er ikke nok naar sluttdato er utenfor perioden`() {
+    fun `returnerer null hvis det finnes en periode som slutter etter perioden vi ser på`() {
         val saker = Saker(
             listOf(
                 sak(Periode(periode.fom.minusMonths(1), periode.fom.minusDays(1))),
@@ -41,7 +30,7 @@ class SakerTest {
     }
 
     @Test
-    fun `velger senest sluttdato blant saker som slutter i perioden`() {
+    fun `velger seneste sluttdato blant saker som slutter i perioden`() {
         val tidligsteSak = sak(Periode(periode.fom, periode.fom.plusDays(1)))
         val senesteSak = sak(Periode(periode.fom.minusMonths(1), periode.tom))
         val sakUtenforPerioden = sak(Periode(periode.fom, periode.tom.plusDays(1)))

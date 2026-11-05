@@ -65,11 +65,13 @@ object ArenaoppslagGatewayImpl : ArenaoppslagGateway {
                 return@mapNotNull null
             }
             val fom = it.fraOgMed
+            // TODO sjekk ut dette
             if (fom == null) {
                 log.info("Ignorerer Arena-vedtak uten fraOgMed")
                 return@mapNotNull null
             }
             val tom = it.tilDato ?: LocalDate.MAX
+            // TODO sjekk ut dette
             if (tom < fom) {
                 log.info("Ignorerer ugyldiggjort Arena-vedtak med tilDato før fraOgMed")
                 return@mapNotNull null

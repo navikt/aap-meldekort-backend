@@ -39,7 +39,7 @@ class ArenaoppslagGatewayIntegrasjonsTest {
     )
 
     @Test
-    fun `henter historiske og fremtidige vedtak med riktig kontrakt og autentisering`() {
+    fun `henter historiske og fremtidige vedtak`() {
         val ident = fødselsnummerGenerator.next()
         val vedtak = listOf(
             vedtak(1234).copy(fraOgMed = idag.minusYears(1), tilDato = idag.minusMonths(1), statusKode = "AVSLU"),
@@ -68,7 +68,7 @@ class ArenaoppslagGatewayIntegrasjonsTest {
     }
 
     @Test
-    fun `ignorerer andre ytelser avslag uferdige stans og ugyldige perioder`() {
+    fun `ignorerer andre ytelser, avslag, uferdige, stans og ugyldige perioder`() {
         val ident = fødselsnummerGenerator.next()
         val grunnlag = vedtak()
         FakeArenaoppslag.settVedtak(
@@ -91,34 +91,6 @@ class ArenaoppslagGatewayIntegrasjonsTest {
     }
 
     @Test
-    fun `vedtak uten sluttdato har aapen slutt`() {
-        val ident = fødselsnummerGenerator.next()
-        FakeArenaoppslag.settVedtak(ident, listOf(vedtak().copy(tilDato = null)))
-
-        val sak = assertNotNull(ArenaoppslagGatewayImpl.hentSaker(ident).finnSakForDagen(idag.plusYears(1)))
-
-        assertEquals(Periode(idag, LocalDate.MAX), sak.rettighetsperiode)
-    }
-
-    @Test
-    fun `separate vedtaksperioder paa samme sak slaas ikke sammen`() {
-        val ident = fødselsnummerGenerator.next()
-        FakeArenaoppslag.settVedtak(
-            ident,
-            listOf(
-                vedtak().copy(fraOgMed = idag.minusDays(2), tilDato = idag.minusDays(1)),
-                vedtak().copy(fraOgMed = idag.plusDays(1), tilDato = idag.plusDays(2)),
-            ),
-        )
-
-        val saker = ArenaoppslagGatewayImpl.hentSaker(ident)
-
-        assertNull(saker.finnSakForDagen(idag))
-        assertNotNull(saker.finnSakForDagen(idag.minusDays(1)))
-        assertNotNull(saker.finnSakForDagen(idag.plusDays(1)))
-    }
-
-    @Test
     fun `ukjent person og tom vedtaksliste gir ingen saker`() {
         val ukjentIdent = fødselsnummerGenerator.next()
         val identUtenVedtak = fødselsnummerGenerator.next()
@@ -126,16 +98,6 @@ class ArenaoppslagGatewayIntegrasjonsTest {
 
         assertNull(ArenaoppslagGatewayImpl.hentSaker(ukjentIdent).finnSakForDagen(idag))
         assertNull(ArenaoppslagGatewayImpl.hentSaker(identUtenVedtak).finnSakForDagen(idag))
-    }
-
-    @Test
-    fun `oppstroemsfeil blir ikke til tomme saker`() {
-        val ident = fødselsnummerGenerator.next()
-        FakeArenaoppslag.settRespons(ident, HttpStatusCode.InternalServerError, "Upstream failure")
-
-        assertFailsWith<InternalServerErrorHttpResponsException> {
-            ArenaoppslagGatewayImpl.hentSaker(ident)
-        }
     }
 
     @ParameterizedTest

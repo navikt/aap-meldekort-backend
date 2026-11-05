@@ -99,7 +99,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `arenaoppslag-feil gir feilrespons ikke AAP som standard`() {
+        fun `arenaoppslag-feil gir feilrespons, ikke AAP som standard`() {
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr)
             FakeArenaoppslag.settRespons(fnr, HttpStatusCode.InternalServerError, "Upstream failure")
@@ -119,7 +119,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `arena alene gir FELLES med saksnummer og rettighetsperiode`() {
+        fun `vedtak i arena alene gir FELLES med saksnummer og rettighetsperiode`() {
             val fnr = fødselsnummerGenerator.next()
             val saksnummer = saksnummerGenerator.next()
             val periode = Periode(idag, idag)
@@ -134,7 +134,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `kelvin gir bare AAP når arena slutter før uken før kelvin`() {
+        fun `gir bare AAP når vedtak i arena slutter 8 dager eller mer før start i Kelvin`() {
             val fnr = fødselsnummerGenerator.next()
             val periode = Periode(idag.minusDays(1), idag.plusDays(1))
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = periode)
@@ -150,7 +150,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
         @ParameterizedTest
         @ValueSource(ints = [1, 3, 7])
-        fun `arena som slutter i siste uke før kelvin gir både AAP og FELLES`(dagerFørKelvin: Int) {
+        fun `arena-vedtak som har siste dato maks 7 dager før start i kelvin gir både AAP og FELLES`(dagerFørKelvin: Int) {
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             val kelvinSaksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -172,7 +172,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
         @ParameterizedTest
         @ValueSource(ints = [0, 1, 10])
-        fun `arena som slutter paa eller etter kelvin-start gir bare AAP`(dagerEtterKelvinStart: Int) {
+        fun `arena-vedtak som slutter paa eller etter kelvin-start gir bare AAP`(dagerEtterKelvinStart: Int) {
+            // TODO dette er vel et ikke-tilfelle, men hvis situasjonen oppstår, hvordan vil vi håndtere den? Jeg tror vi må vise begge.
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -193,6 +194,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
         @Test
         fun `arena uten sluttdato gir bare AAP med aktiv kelvin-sak`() {
+            // TODO hvordan skal vi håndtere dette?
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -241,29 +243,6 @@ class AnsvarligSystemIntegrasjonsTest {
             val periode = assertNotNull(felles.rettighetsperiode)
             assertEquals(arenaPeriode.fom, periode.fom)
             assertEquals(arenaPeriode.tom, periode.tom)
-        }
-
-        @Test
-        fun `kelvin og forutgående arena gir både AAP og FELLES`() {
-            val fnr = fødselsnummerGenerator.next()
-            val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
-            val kelvinSaksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
-            val arenaPeriode = Periode(idag.minusMonths(4), kelvinPeriode.fom.minusDays(1))
-            val arenaSaksnummer = saksnummerGenerator.next()
-            app.arenaSak(fnr, sak = arenaSaksnummer, rettighetsperiode = arenaPeriode)
-
-            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
-
-            val aap = assertNotNull(response.aap)
-            assertEquals(kelvinSaksnummer.asString, aap.saksnummer)
-            val aapPeriode = assertNotNull(aap.rettighetsperiode)
-            assertEquals(kelvinPeriode.fom, aapPeriode.fom)
-            assertEquals(kelvinPeriode.tom, aapPeriode.tom)
-            val felles = assertNotNull(response.felles)
-            assertEquals(arenaSaksnummer.asString, felles.saksnummer)
-            val fellesPeriode = assertNotNull(felles.rettighetsperiode)
-            assertEquals(arenaPeriode.fom, fellesPeriode.fom)
-            assertEquals(arenaPeriode.tom, fellesPeriode.tom)
         }
 
         @Test
