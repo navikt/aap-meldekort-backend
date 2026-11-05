@@ -28,8 +28,8 @@ data class AnsvarligeMeldekortløsningerDto(
 )
 
 data class MeldekortløsningDto(
-    val saksnummer: String?,
-    val rettighetsperiode: PeriodeDto?,
+    val saksnummer: String,
+    val rettighetsperiode: PeriodeDto,
 )
 
 fun NormalOpenAPIRoute.ansvarligSystemApi(
@@ -60,12 +60,12 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                 arenaSaker.finnSakForDagen(idag)
             }
             val response = AnsvarligeMeldekortløsningerDto(
-                aap = if (kelvinSak != null || arenaSak == null) {
+                aap = kelvinSak?.let {
                     MeldekortløsningDto(
-                        saksnummer = kelvinSak?.saksnummer?.asString,
-                        rettighetsperiode = PeriodeDto.ellerNull(kelvinSak?.rettighetsperiode),
+                        saksnummer = it.saksnummer.asString,
+                        rettighetsperiode = PeriodeDto(it.rettighetsperiode),
                     )
-                } else null,
+                },
                 felles = arenaSak?.let {
                     MeldekortløsningDto(
                         saksnummer = it.referanse.nummer.asString,

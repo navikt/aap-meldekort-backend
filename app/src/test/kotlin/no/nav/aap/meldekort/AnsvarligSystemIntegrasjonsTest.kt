@@ -99,7 +99,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `arenaoppslag-feil gir feilrespons, ikke AAP som standard`() {
+        fun `arenaoppslag-feil gir feilrespons, ikke et tomt resultat`() {
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr)
             FakeArenaoppslag.settRespons(fnr, HttpStatusCode.InternalServerError, "Upstream failure")
@@ -110,12 +110,12 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `ingen saker gir AAP uten saksnummer og tom rettighetsperiode`() {
+        fun `ingen saker gir null for begge løsninger`() {
             val fnr = fødselsnummerGenerator.next()
 
             val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals("""{"aap":{"saksnummer":null,"rettighetsperiode":null},"felles":null}""", response.toString())
+            assertEquals("""{"aap":null,"felles":null}""", response.toString())
         }
 
         @Test
@@ -246,13 +246,13 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `historisk arena uten aktiv kelvin gir AAP som standard`() {
+        fun `historisk arena uten aktiv kelvin gir null for begge løsninger`() {
             val fnr = fødselsnummerGenerator.next()
             app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(4), idag.minusDays(1)))
 
             val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals("""{"aap":{"saksnummer":null,"rettighetsperiode":null},"felles":null}""", response.toString())
+            assertEquals("""{"aap":null,"felles":null}""", response.toString())
         }
 
         @Test
@@ -270,14 +270,14 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `Sak i Kelvin med første dag i fremtiden AAP uten saksnummer`() {
+        fun `fremtidig kelvin uten arena gir null for begge løsninger`() {
             val periode = Periode(idag.plusWeeks(2), idag.plusWeeks(6))
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr, rettighetsperiode = periode)
 
             val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals("""{"aap":{"saksnummer":null,"rettighetsperiode":null},"felles":null}""", response.toString())
+            assertEquals("""{"aap":null,"felles":null}""", response.toString())
         }
     }
 
