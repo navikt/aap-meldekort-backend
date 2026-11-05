@@ -87,11 +87,15 @@ spec:
           cluster: dev-fss
         - application: api-intern
         - application: pdfgenerator
+        - application: arenaoppslag
+          namespace: aap
+          cluster: dev-fss
       external:
         - host: aap-unleash-api.nav.cloud.nais.io
         - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io
         - host: meldekortservice-q2.dev-fss-pub.nais.io
         - host: dokarkiv.dev-fss-pub.nais.io
+        - host: arenaoppslag.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -122,6 +126,10 @@ spec:
       value: http://api-intern.aap/meldekort-backend
     - name: AAP_API_INTERN_SCOPE
       value: api://dev-gcp.aap.api-intern/.default
+    - name: INTEGRASJON_ARENAOPPSLAG_URL
+      value: https://arenaoppslag.dev-fss-pub.nais.io
+    - name: INTEGRASJON_ARENAOPPSLAG_SCOPE
+      value: api://dev-fss.aap.arenaoppslag/.default
     - name: PDFGENERATOR_URL
       value: http://pdfgenerator
     - name: BEHANDLINGSFLYT_AZP
