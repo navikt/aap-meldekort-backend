@@ -1,12 +1,18 @@
 package no.nav.aap.kelvin
 
+import no.nav.aap.komponenter.miljo.Miljø
 import java.time.LocalDate
 
 /**
  * Dokumentert på [Confluence](https://confluence.adeo.no/spaces/PAAP/pages/752102586/Tidlig+utbetaling+av+meldekort+i+forbindelse+med+jul+nytt%C3%A5r+og+p%C3%A5ske).
  */
-private val helligdagsunntakJustertMeldedag: Map<LocalDate, LocalDate> = mapOf(
+private val helligdagsunntakJustertMeldedag: Map<LocalDate, LocalDate> = if (Miljø.erProd()) mapOf(
     LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17)
+) else mapOf(
+    LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17),
+    LocalDate.of(2026, 11, 30) to LocalDate.of(2026, 11, 25),
+    LocalDate.of(2026, 12, 7) to LocalDate.of(2026, 12, 2),
+    LocalDate.of(2026, 12, 21) to LocalDate.of(2026, 12, 16)
 )
 
 fun tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode: LocalDate): LocalDate =
