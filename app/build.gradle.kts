@@ -98,5 +98,6 @@ dependencies {
     testImplementation(kelvinLibs.bundles.junit)
     testImplementation(kotlin("test"))
     testImplementation(project(":lib-test"))
+    testImplementation(libs.arenaoppslag.kontrakt)
     testImplementation(kelvinLibs.testcontainers.kafka)
 }

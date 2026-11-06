@@ -4,6 +4,7 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
+import no.nav.aap.arenaoppslag.kontrakt.apiv1.ArenaVedtak
 import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakStatus
 import no.nav.aap.komponenter.dbconnect.transaction
@@ -12,7 +13,9 @@ import no.nav.aap.lookup.gateway.GatewayRegistry
 import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.saker.AapGatewayImpl
+import no.nav.aap.meldekort.saker.ArenaoppslagGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
+import no.nav.aap.meldekort.test.FakeArenaoppslag
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
@@ -41,6 +44,7 @@ fun main() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
+        .register<ArenaoppslagGatewayImpl>()
         .register<FakeUnleashGateway>()
         .register<PdfgeneratorGatewayImpl>()
         .register<VarselGatewayKafkaProducerTestcontainers>()
@@ -75,9 +79,26 @@ private fun opprettMockMeldekort(dataSource: DataSource) {
     FakeAapApi.upsert(
         Ident("2".repeat(11)),
         FakeAapApi.FakeSak(
-            referanse = FagsakReferanse(ARENA, Fagsaknummer("")),
+            referanse = FagsakReferanse(ARENA, Fagsaknummer("2020")),
             rettighetsperiode = rettighetsPeriode,
         )
+    )
+
+    FakeArenaoppslag.settVedtak(
+        Ident("1".repeat(11)),
+        listOf(
+            ArenaVedtak(
+                sakId = 2020,
+                statusKode = "IVERK",
+                vedtaktypeKode = "O",
+                fraOgMed = rettighetsPeriode.fom.minusYears(1),
+                tilDato = rettighetsPeriode.fom.minusDays(1),
+                rettighetkode = "AAP",
+                vedtakId = 1,
+                utfallkode = "JA",
+                aktivitetsfaseKode = "AU"
+            ),
+        ),
     )
 
     dataSource.transaction { connection ->

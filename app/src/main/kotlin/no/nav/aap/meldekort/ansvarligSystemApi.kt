@@ -4,6 +4,8 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
+import no.nav.aap.Periode
+import no.nav.aap.arena.ArenaoppslagGateway
 import no.nav.aap.kelvin.KelvinSakRepository
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.repository.RepositoryRegistry
@@ -20,11 +22,61 @@ enum class AnsvarligMeldekortløsningDto {
     ;
 }
 
+data class AnsvarligeMeldekortløsningerDto(
+    val aap: MeldekortløsningDto?,
+    val felles: MeldekortløsningDto?,
+)
+
+data class MeldekortløsningDto(
+    val saksnummer: String,
+    val rettighetsperiode: PeriodeDto,
+)
+
 fun NormalOpenAPIRoute.ansvarligSystemApi(
     dataSource: DataSource,
     repositoryRegistry: RepositoryRegistry,
     clock: Clock,
 ) {
+    route("v2") {
+        route("ansvarlig-system").get<Unit, AnsvarligeMeldekortløsningerDto> {
+            val ident = personBrukerIdent()
+            val idag = LocalDate.now(clock)
+            val kelvinSak = dataSource.transaction { connection ->
+                val kelvinSakRepository = repositoryRegistry.provider(connection).provide<KelvinSakRepository>()
+                kelvinSakRepository.hentSak(ident, idag)
+            }
+
+            val arenaSaker = GatewayProvider.provide<ArenaoppslagGateway>()
+                .hentSaker(ident)
+            val arenaSak = if (kelvinSak != null) {
+                val førsteDagIKelvin = kelvinSak.rettighetsperiode.fom
+                val ukenFørKelvin = Periode(
+                    fom = førsteDagIKelvin.minusDays(7),
+                    tom = førsteDagIKelvin.minusDays(1),
+                )
+
+                arenaSaker.finnSakSomSlutterIPeriode(ukenFørKelvin)
+            } else {
+                arenaSaker.finnSakForDagen(idag)
+            }
+            val response = AnsvarligeMeldekortløsningerDto(
+                aap = kelvinSak?.let {
+                    MeldekortløsningDto(
+                        saksnummer = it.saksnummer.asString,
+                        rettighetsperiode = PeriodeDto(it.rettighetsperiode),
+                    )
+                },
+                felles = arenaSak?.let {
+                    MeldekortløsningDto(
+                        saksnummer = it.referanse.nummer.asString,
+                        rettighetsperiode = PeriodeDto(it.rettighetsperiode),
+                    )
+                },
+            )
+            respond(response)
+        }
+    }
+
     route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val sakerService = SakerService(
