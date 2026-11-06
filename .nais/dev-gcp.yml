@@ -87,9 +87,6 @@ spec:
           cluster: dev-fss
         - application: api-intern
         - application: pdfgenerator
-        - application: arenaoppslag
-          namespace: aap
-          cluster: dev-fss
       external:
         - host: aap-unleash-api.nav.cloud.nais.io
         - host: meldekortkontroll-api-q2.dev-fss-pub.nais.io

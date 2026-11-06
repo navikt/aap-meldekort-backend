@@ -78,9 +78,6 @@ spec:
         - application: meldekortservice
           namespace: meldekort
           cluster: prod-fss
-        - application: arenaoppslag
-          namespace: aap
-          cluster: prod-fss
       external:
         - host: aap-unleash-api.nav.cloud.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
