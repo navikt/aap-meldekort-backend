@@ -59,21 +59,20 @@ object ArenaoppslagGatewayImpl : ArenaoppslagGateway {
         return Saker(vedtak.mapNotNull {
             if (it.rettighetkode != "AAP" || it.utfallkode != "JA" ||
                 it.statusKode !in setOf("IVERK", "AVSLU") ||
-                it.vedtaktypeKode !in setOf("O", "E", "G") ||
-                it.aktivitetsfaseKode !in setOf("UA", "AU")
+                it.vedtaktypeKode !in setOf("O", "E", "G")
             ) {
                 return@mapNotNull null
             }
+            // det finnes vedtak i arena som ikke har perioder, men de skal være filtrert bort i instruksen over
+            // er med som som guards
             val fom = it.fraOgMed
-            // TODO sjekk ut dette
             if (fom == null) {
                 log.info("Ignorerer Arena-vedtak uten fraOgMed")
                 return@mapNotNull null
             }
             val tom = it.tilDato ?: LocalDate.MAX
-            // TODO sjekk ut dette
             if (tom < fom) {
-                log.info("Ignorerer ugyldiggjort Arena-vedtak med tilDato før fraOgMed")
+                log.info("Ignorerer Arena-vedtak med tilDato før fraOgMed")
                 return@mapNotNull null
             }
             ArenaSak(
