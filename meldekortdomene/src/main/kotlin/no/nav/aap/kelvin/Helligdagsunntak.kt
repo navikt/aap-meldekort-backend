@@ -6,7 +6,7 @@ import java.time.LocalDate
 /**
  * Dokumentert på [Confluence](https://confluence.adeo.no/spaces/PAAP/pages/752102586/Tidlig+utbetaling+av+meldekort+i+forbindelse+med+jul+nytt%C3%A5r+og+p%C3%A5ske).
  */
-private val helligdagsunntakJustertMeldedag: Map<LocalDate, LocalDate> = if (Miljø.erProd()) mapOf(
+private fun helligdagsunntakJustertMeldedag(): Map<LocalDate, LocalDate> = if (Miljø.erProd()) mapOf(
     LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17)
 ) else mapOf(
     LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17),
@@ -16,10 +16,10 @@ private val helligdagsunntakJustertMeldedag: Map<LocalDate, LocalDate> = if (Mil
 )
 
 fun tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode: LocalDate): LocalDate =
-    (helligdagsunntakJustertMeldedag[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
+    (helligdagsunntakJustertMeldedag()[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
 
 fun originalInnsendingstidspunktMeldedag(tidligereInnsendingstidspunkt: LocalDate): LocalDate =
-    helligdagsunntakJustertMeldedag.entries.firstOrNull { it.value == tidligereInnsendingstidspunkt }?.key
+    helligdagsunntakJustertMeldedag().entries.firstOrNull { it.value == tidligereInnsendingstidspunkt }?.key
         ?: tidligereInnsendingstidspunkt
 
 private val helligdagsunntakJustertMeldefrist: Map<LocalDate, LocalDate> = mapOf(
