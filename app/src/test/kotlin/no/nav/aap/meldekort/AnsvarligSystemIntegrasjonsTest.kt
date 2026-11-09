@@ -99,38 +99,38 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `arenaoppslag-feil gir feilrespons, ikke et tomt resultat`() {
+        fun `feil i arenaoppslag propagerer til api-et`() {
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr)
             FakeArenaoppslag.settRespons(fnr, HttpStatusCode.InternalServerError, "Upstream failure")
 
             assertFailsWith<InternalServerErrorHttpResponsException> {
-                app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system")
+                app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system")
             }
         }
 
         @Test
-        fun `ingen saker gir null for begge løsninger`() {
+         fun `når det ikke finnes sak i hverken Arena eller Kelvin er begge løsningene satt til null`() {
             val fnr = fødselsnummerGenerator.next()
 
-            val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
+            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals("""{"aap":null,"felles":null}""", response.toString())
+            assertNull(response.aap)
+            assertNull(response.felles)
         }
 
         @Test
-        fun `vedtak i arena alene gir FELLES med saksnummer og rettighetsperiode`() {
+        fun `når bruker kun har et aktivt vedtak i Arena returneres felles med saksnummer og rettighetsperiode fra Arena`() {
             val fnr = fødselsnummerGenerator.next()
             val saksnummer = saksnummerGenerator.next()
             val periode = Periode(idag, idag)
             app.arenaSak(fnr, sak = saksnummer, rettighetsperiode = periode)
 
-            val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
-
-            assertEquals(
-                """{"aap":null,"felles":{"saksnummer":"${saksnummer.asString}","rettighetsperiode":{"fom":"${periode.fom}","tom":"${periode.tom}"}}}""",
-                response.toString(),
-            )
+            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
+            assertNull(response.aap)
+            assertEquals(saksnummer.asString, response.felles?.saksnummer)
+            assertEquals( periode.fom,response.felles?.rettighetsperiode?.fom)
+            assertEquals( periode.tom,response.felles?.rettighetsperiode?.tom)
         }
 
         @Test
@@ -140,12 +140,13 @@ class AnsvarligSystemIntegrasjonsTest {
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = periode)
             app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(4), periode.fom.minusDays(8)))
 
-            val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
+            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals(
-                """{"aap":{"saksnummer":"${saksnummer.asString}","rettighetsperiode":{"fom":"${periode.fom}","tom":"${periode.tom}"}},"felles":null}""",
-                response.toString(),
-            )
+            assertEquals(saksnummer.asString, response.aap?.saksnummer)
+            assertEquals(periode.fom, response.aap?.rettighetsperiode?.fom)
+            assertEquals(periode.tom, response.aap?.rettighetsperiode?.tom)
+
+            assertNull(response.felles)
         }
 
         @ParameterizedTest
@@ -172,7 +173,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
         @ParameterizedTest
         @ValueSource(ints = [0, 1, 10])
-        fun `arena-vedtak som slutter paa eller etter kelvin-start gir bare AAP`(dagerEtterKelvinStart: Int) {
+         fun `dersom en sak i Arena slutter på eller etter start-dato i Kelvin viser vi kun info om sak i Kelvin`(dagerEtterKelvinStart: Int) {
             // TODO dette er vel et ikke-tilfelle, men hvis situasjonen oppstår, hvordan vil vi håndtere den? Jeg tror vi må vise begge.
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
@@ -194,7 +195,6 @@ class AnsvarligSystemIntegrasjonsTest {
 
         @Test
         fun `arena uten sluttdato gir bare AAP med aktiv kelvin-sak`() {
-            // TODO hvordan skal vi håndtere dette?
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -223,7 +223,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `flere arena-perioder i uken før kelvin velger senest sluttdato`() {
+        fun `når det finnes flere perioden i Arena i uken før vedtak starter i Kelvin velger vi den seneste sluttdatoen`() {
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -246,13 +246,13 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `historisk arena uten aktiv kelvin gir null for begge løsninger`() {
+        fun `historisk sak i Arena, men ingen sak i Kelvin gir tomt svar for begge løsninger`() {
             val fnr = fødselsnummerGenerator.next()
             app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(4), idag.minusDays(1)))
 
-            val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
-
-            assertEquals("""{"aap":null,"felles":null}""", response.toString())
+            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
+            assertNull(response.aap)
+            assertNull(response.felles)
         }
 
         @Test
@@ -270,14 +270,14 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `fremtidig kelvin uten arena gir null for begge løsninger`() {
+        fun `fremtidig sak i kelvin og ingen sak arena gir null for begge løsninger`() {
             val periode = Periode(idag.plusWeeks(2), idag.plusWeeks(6))
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr, rettighetsperiode = periode)
 
-            val response = assertNotNull(app.get<JsonNode>(fnr, "/api/v2/ansvarlig-system"))
-
-            assertEquals("""{"aap":null,"felles":null}""", response.toString())
+            val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
+            assertNull(response.aap)
+            assertNull(response.felles)
         }
     }
 

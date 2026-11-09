@@ -2,8 +2,6 @@ package no.nav.aap.sak
 
 import no.nav.aap.Periode
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import kotlin.test.assertNull
 import kotlin.test.assertSame
@@ -17,7 +15,7 @@ class SakerTest {
     }
 
     @Test
-    fun `returnerer null hvis det finnes en periode som slutter etter perioden vi ser på`() {
+    fun `når seneste til-og-med dato for en sak er etter perioden vi ser på returnerer vi ingen saker`() {
         val saker = Saker(
             listOf(
                 sak(Periode(periode.fom.minusMonths(1), periode.fom.minusDays(1))),
@@ -25,7 +23,6 @@ class SakerTest {
                 sak(Periode(periode.fom.minusMonths(1), LocalDate.MAX)),
             ),
         )
-
         assertNull(saker.finnSakSomSlutterIPeriode(periode))
     }
 
