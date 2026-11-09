@@ -71,8 +71,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.aap)
-            val løsning = assertNotNull(response.felles)
+            assertNull(response.kelvin)
+            val løsning = assertNotNull(response.arena)
             assertEquals("1234", løsning.saksnummer)
             val periode = assertNotNull(løsning.rettighetsperiode)
             assertEquals(idag, periode.fom)
@@ -90,8 +90,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.aap)
-            val løsning = assertNotNull(response.felles)
+            assertNull(response.kelvin)
+            val løsning = assertNotNull(response.arena)
             assertEquals(saksnummer.asString, løsning.saksnummer)
             val responsPeriode = assertNotNull(løsning.rettighetsperiode)
             assertEquals(periode.fom, responsPeriode.fom)
@@ -115,8 +115,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.aap)
-            assertNull(response.felles)
+            assertNull(response.kelvin)
+            assertNull(response.arena)
         }
 
         @Test
@@ -127,10 +127,10 @@ class AnsvarligSystemIntegrasjonsTest {
             app.arenaSak(fnr, sak = saksnummer, rettighetsperiode = periode)
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
-            assertNull(response.aap)
-            assertEquals(saksnummer.asString, response.felles?.saksnummer)
-            assertEquals( periode.fom,response.felles?.rettighetsperiode?.fom)
-            assertEquals( periode.tom,response.felles?.rettighetsperiode?.tom)
+            assertNull(response.kelvin)
+            assertEquals(saksnummer.asString, response.arena?.saksnummer)
+            assertEquals( periode.fom,response.arena?.rettighetsperiode?.fom)
+            assertEquals( periode.tom,response.arena?.rettighetsperiode?.tom)
         }
 
         @Test
@@ -142,11 +142,11 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertEquals(saksnummer.asString, response.aap?.saksnummer)
-            assertEquals(periode.fom, response.aap?.rettighetsperiode?.fom)
-            assertEquals(periode.tom, response.aap?.rettighetsperiode?.tom)
+            assertEquals(saksnummer.asString, response.kelvin?.saksnummer)
+            assertEquals(periode.fom, response.kelvin?.rettighetsperiode?.fom)
+            assertEquals(periode.tom, response.kelvin?.rettighetsperiode?.tom)
 
-            assertNull(response.felles)
+            assertNull(response.arena)
         }
 
         @ParameterizedTest
@@ -162,9 +162,9 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            val aap = assertNotNull(response.aap)
+            val aap = assertNotNull(response.kelvin)
             assertEquals(kelvinSaksnummer.asString, aap.saksnummer)
-            val felles = assertNotNull(response.felles)
+            val felles = assertNotNull(response.arena)
             assertEquals(arenaSaksnummer.asString, felles.saksnummer)
             val periode = assertNotNull(felles.rettighetsperiode)
             assertEquals(arenaPeriode.fom, periode.fom)
@@ -188,8 +188,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.felles)
-            val løsning = assertNotNull(response.aap)
+            assertNull(response.arena)
+            val løsning = assertNotNull(response.kelvin)
             assertEquals(saksnummer.asString, løsning.saksnummer)
         }
 
@@ -217,8 +217,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.felles)
-            val løsning = assertNotNull(response.aap)
+            assertNull(response.arena)
+            val løsning = assertNotNull(response.kelvin)
             assertEquals(saksnummer.asString, løsning.saksnummer)
         }
 
@@ -237,8 +237,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNotNull(response.aap)
-            val felles = assertNotNull(response.felles)
+            assertNotNull(response.kelvin)
+            val felles = assertNotNull(response.arena)
             assertEquals(saksnummer.asString, felles.saksnummer)
             val periode = assertNotNull(felles.rettighetsperiode)
             assertEquals(arenaPeriode.fom, periode.fom)
@@ -251,8 +251,8 @@ class AnsvarligSystemIntegrasjonsTest {
             app.arenaSak(fnr, rettighetsperiode = Periode(idag.minusMonths(4), idag.minusDays(1)))
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
-            assertNull(response.aap)
-            assertNull(response.felles)
+            assertNull(response.kelvin)
+            assertNull(response.arena)
         }
 
         @Test
@@ -264,8 +264,8 @@ class AnsvarligSystemIntegrasjonsTest {
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
 
-            assertNull(response.aap)
-            val løsning = assertNotNull(response.felles)
+            assertNull(response.kelvin)
+            val løsning = assertNotNull(response.arena)
             assertEquals(arenaSaksnummer.asString, løsning.saksnummer)
         }
 
@@ -276,8 +276,8 @@ class AnsvarligSystemIntegrasjonsTest {
             app.kelvinSak(fnr, rettighetsperiode = periode)
 
             val response = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
-            assertNull(response.aap)
-            assertNull(response.felles)
+            assertNull(response.kelvin)
+            assertNull(response.arena)
         }
     }
 

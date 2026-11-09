@@ -23,8 +23,8 @@ enum class AnsvarligMeldekortløsningDto {
 }
 
 data class AnsvarligeMeldekortløsningerDto(
-    val aap: MeldekortløsningDto?,
-    val felles: MeldekortløsningDto?,
+    val kelvin: MeldekortløsningDto?,
+    val arena: MeldekortløsningDto?,
 )
 
 data class MeldekortløsningDto(
@@ -60,13 +60,13 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                 arenaSaker.finnSakForDagen(idag)
             }
             val response = AnsvarligeMeldekortløsningerDto(
-                aap = kelvinSak?.let {
+                kelvin = kelvinSak?.let {
                     MeldekortløsningDto(
                         saksnummer = it.saksnummer.asString,
                         rettighetsperiode = PeriodeDto(it.rettighetsperiode),
                     )
                 },
-                felles = arenaSak?.let {
+                arena = arenaSak?.let {
                     MeldekortløsningDto(
                         saksnummer = it.referanse.nummer.asString,
                         rettighetsperiode = PeriodeDto(it.rettighetsperiode),
