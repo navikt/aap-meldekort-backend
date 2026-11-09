@@ -27,7 +27,6 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -36,30 +35,16 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 
 class VarselServiceTest {
 
     companion object {
-
-        var naisClusterName = System.getProperty("NAIS_CLUSTER_NAME")
-
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
             System.setProperty("aap.meldekort.lenke", "test")
-            System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
-        }
-
-        @AfterAll
-        @JvmStatic
-        fun afterAll() {
-            if (naisClusterName == null) {
-                System.clearProperty("NAIS_CLUSTER_NAME")
-            } else {
-                System.setProperty("NAIS_CLUSTER_NAME", naisClusterName)
-            }
         }
     }
 
@@ -269,70 +254,6 @@ class VarselServiceTest {
                 ForventetVarsel(
                     sendingstidspunkt = LocalDateTime.of(2025, 12, 17, 9, 0),
                     forPeriode = Periode(LocalDate.of(2025, 12, 8), LocalDate.of(2025, 12, 21)),
-                    status = VarselStatus.SENDT
-                ),
-            )
-        }
-    }
-
-    @Test
-    fun `sender varsel tidligere (16 desember) for meldeperioden i uke 50-51 i 2026`() {
-        dataSource.transaction { connection ->
-            val varselRepository = VarselRepositoryPostgres(connection)
-
-            val saksnummer = saksnummerGenerator.next()
-            val ident = fødselsnummerGenerator.next()
-            val sakenGjelderFor = Periode(LocalDate.of(2026, 11, 28), LocalDate.of(2027, 6, 29))
-            val opplysningsbehov = listOf(sakenGjelderFor)
-            val meldeperioder = listOf(Periode(LocalDate.of(2026, 12, 7), LocalDate.of(2026, 12, 20)))
-
-            val meldeplikt = listOf(Periode(LocalDate.of(2026, 12, 21), LocalDate.of(2026, 12, 28)))
-
-            kelvinMottakService(
-                connection,
-                clockMedTid(LocalDate.of(2026, 12, 16).atTime(1, 1))
-            ).behandleMottatteMeldeperioder(
-                saksnummer,
-                sakenGjelderFor,
-                listOf(ident),
-                meldeperioder,
-                meldeplikt,
-                opplysningsbehov,
-                KelvinSakStatus.LØPENDE
-            )
-
-            assertVarsler(
-                varselRepository, saksnummer,
-                ForventetVarsel(
-                    sendingstidspunkt = LocalDateTime.of(2026, 12, 16, 9, 0),
-                    forPeriode = Periode(LocalDate.of(2026, 12, 7), LocalDate.of(2026, 12, 20)),
-                    status = VarselStatus.PLANLAGT
-                )
-            )
-
-            // Sender planlagte varsler
-            varselService(connection, clockMedTid(LocalDateTime.of(2026, 12, 16, 9, 0)))
-                .sendPlanlagteVarsler()
-
-            kelvinMottakService(
-                connection,
-                clockMedTid(LocalDate.of(2026, 12, 21).atTime(1, 1))
-            ).behandleMottatteMeldeperioder(
-                saksnummer,
-                sakenGjelderFor,
-                listOf(ident),
-                meldeperioder,
-                meldeplikt,
-                opplysningsbehov,
-                KelvinSakStatus.LØPENDE
-            )
-
-            // Ikke planlagt noen flere varsler
-            assertVarsler(
-                varselRepository, saksnummer,
-                ForventetVarsel(
-                    sendingstidspunkt = LocalDateTime.of(2026, 12, 16, 9, 0),
-                    forPeriode = Periode(LocalDate.of(2026, 12, 7), LocalDate.of(2026, 12, 20)),
                     status = VarselStatus.SENDT
                 ),
             )

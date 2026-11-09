@@ -6,14 +6,21 @@ import java.time.LocalDate
 /**
  * Dokumentert på [Confluence](https://confluence.adeo.no/spaces/PAAP/pages/752102586/Tidlig+utbetaling+av+meldekort+i+forbindelse+med+jul+nytt%C3%A5r+og+p%C3%A5ske).
  */
-private fun helligdagsunntakJustertMeldedag(): Map<LocalDate, LocalDate> = if (Miljø.erProd()) mapOf(
+val EKSISTERENDE_MELDEDAGUNNTAK_I_PROD = mapOf(
     LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17)
-) else mapOf(
-    LocalDate.of(2025, 12, 22) to LocalDate.of(2025, 12, 17),
-    LocalDate.of(2026, 11, 30) to LocalDate.of(2026, 11, 25),
-    LocalDate.of(2026, 12, 7) to LocalDate.of(2026, 12, 2),
-    LocalDate.of(2026, 12, 21) to LocalDate.of(2026, 12, 16)
 )
+
+val TEST_MELDEDAGUNNTAK_I_DEV = mapOf(
+    LocalDate.of(2026, 11, 30) to LocalDate.of(2026, 11, 25),
+    LocalDate.of(2026, 12, 7) to LocalDate.of(2026, 12, 2)
+)
+
+val KOMMENDE_MELDEDAGUNNTAK_I_PROD = mapOf(
+    LocalDate.of(2026, 12, 21) to LocalDate.of(2026, 12, 16),
+)
+
+fun helligdagsunntakJustertMeldedag(erProd: Boolean = Miljø.erProd()): Map<LocalDate, LocalDate> =
+    EKSISTERENDE_MELDEDAGUNNTAK_I_PROD + if (!erProd) (TEST_MELDEDAGUNNTAK_I_DEV + KOMMENDE_MELDEDAGUNNTAK_I_PROD) else emptyMap()
 
 fun tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode: LocalDate): LocalDate =
     (helligdagsunntakJustertMeldedag()[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
