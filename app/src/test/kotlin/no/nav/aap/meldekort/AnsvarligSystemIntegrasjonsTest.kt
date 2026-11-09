@@ -174,7 +174,7 @@ class AnsvarligSystemIntegrasjonsTest {
         @ParameterizedTest
         @ValueSource(ints = [0, 1, 10])
          fun `dersom en sak i Arena slutter på eller etter start-dato i Kelvin viser vi kun info om sak i Kelvin`(dagerEtterKelvinStart: Int) {
-            // TODO dette er vel et ikke-tilfelle, men hvis situasjonen oppstår, hvordan vil vi håndtere den? Jeg tror vi må vise begge.
+            // dette er vel et ikke-tilfelle, men hvis situasjonen oppstår, hvordan vil vi håndtere den? Jeg tror vi må vise begge, men lar denne testen være inntil videre
             val fnr = fødselsnummerGenerator.next()
             val kelvinPeriode = Periode(idag.minusDays(10), idag.plusDays(10))
             val saksnummer = app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
@@ -256,7 +256,7 @@ class AnsvarligSystemIntegrasjonsTest {
         }
 
         @Test
-        fun `fremtidig kelvin endrer ikke arena-oppslag for dagens dato`() { // TODO jeg er usikker på om denne er korrekt, hva er rettighetsperioden for en sak som ikke er innvilget enda?
+        fun `fremtidig kelvin endrer ikke arena-oppslag for dagens dato`() {
             val fnr = fødselsnummerGenerator.next()
             app.kelvinSak(fnr, rettighetsperiode = Periode(idag.plusWeeks(2), idag.plusWeeks(6)))
             val arenaSaksnummer = saksnummerGenerator.next()
