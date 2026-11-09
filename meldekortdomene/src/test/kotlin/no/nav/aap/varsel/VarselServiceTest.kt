@@ -27,6 +27,7 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepositoryPostgres
 import no.nav.aap.utfylling.UtfyllingStegNavn
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -41,11 +42,24 @@ import kotlin.test.Test
 class VarselServiceTest {
 
     companion object {
+
+        var naisClusterName = System.getProperty("NAIS_CLUSTER_NAME")
+
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
             System.setProperty("aap.meldekort.lenke", "test")
             System.setProperty("NAIS_CLUSTER_NAME", "LOCAL")
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun afterAll() {
+            if (naisClusterName == null) {
+                System.clearProperty("NAIS_CLUSTER_NAME")
+            } else {
+                System.setProperty("NAIS_CLUSTER_NAME", naisClusterName)
+            }
         }
     }
 
