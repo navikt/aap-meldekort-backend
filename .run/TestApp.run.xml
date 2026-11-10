@@ -5,6 +5,7 @@
       <env name="DB_USERNAME" value="postgres" />
       <env name="DB_PASSWORD" value="" />
       <env name="DB_NAME" value="dfs" />
+      <env name="BEHANDLINGSFLYT_AZP" value="5b4656d2-e8f0-4df1-9e10-269133df697f" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.aap.meldekort.TestAppKt" />
     <module name="meldekort-backend.app.test" />

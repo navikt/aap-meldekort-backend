@@ -16,8 +16,8 @@ import no.nav.aap.tilgang.TilgangResponse
 
 object FakeTilgang : FakeServer {
     override fun setProperties(port: Int) {
-        System.setProperty("integrasjon.tilgang.url", "http://localhost:$port")
-        System.setProperty("integrasjon.tilgang.scope", "api://local:aap:tilgang/.default")
+        System.setProperty("INTEGRASJON_TILGANG_URL", "http://localhost:$port")
+        System.setProperty("INTEGRASJON_TILGANG_SCOPE", "api://local:aap:tilgang/.default")
     }
 
     override val module: Application.() -> Unit = {
