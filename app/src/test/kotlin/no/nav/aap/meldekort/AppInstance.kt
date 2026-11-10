@@ -6,6 +6,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.arena.ArenaMeldekort
+import no.nav.aap.arenaoppslag.kontrakt.apiv1.ArenaVedtak
 import no.nav.aap.kelvin.KelvinMottakService
 import no.nav.aap.kelvin.KelvinSakRepositoryPostgres
 import no.nav.aap.kelvin.KelvinSakService
@@ -28,7 +29,9 @@ import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
+import no.nav.aap.meldekort.saker.ArenaoppslagGatewayImpl
 import no.nav.aap.meldekort.test.FakeAapApi
+import no.nav.aap.meldekort.test.FakeArenaoppslag
 import no.nav.aap.meldekort.test.FakeServers
 import no.nav.aap.meldekort.test.FakeTexas
 import no.nav.aap.meldekort.test.port
@@ -67,6 +70,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
 
         GatewayRegistry
             .register<AapGatewayImpl>()
+            .register<ArenaoppslagGatewayImpl>()
             .register<DokarkivGatewayImpl>()
             .register<PdfgeneratorGatewayImpl>()
             .register<DefaultMeldekortServiceGateway>()
@@ -183,15 +187,31 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
         sak: Fagsaknummer? = null,
         rettighetsperiode: Periode? = null,
     ) {
+        val saksnummer = sak ?: saksnummerGenerator.next()
+        val periode = rettighetsperiode ?: Periode(idag.minusMonths(1), idag.plusMonths(1))
         FakeAapApi.upsert(
             fnr,
             FakeAapApi.FakeSak(
                 referanse = FagsakReferanse(
                     FagsystemNavn.ARENA,
-                    (sak ?: saksnummerGenerator.next()),
+                    saksnummer,
                 ),
-                rettighetsperiode = rettighetsperiode ?: Periode(idag.minusMonths(1), idag.plusMonths(1)),
+                rettighetsperiode = periode,
             )
+        )
+        FakeArenaoppslag.leggTilVedtak(
+            fnr,
+            ArenaVedtak(
+                sakId = saksnummer.asString.toInt(),
+                statusKode = "IVERK",
+                vedtaktypeKode = "O",
+                fraOgMed = periode.fom,
+                tilDato = periode.tom,
+                rettighetkode = "AAP",
+                vedtakId = 1,
+                utfallkode = "JA",
+                aktivitetsfaseKode = "AU"
+            ),
         )
     }
 

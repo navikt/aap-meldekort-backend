@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.infrastructure)
     implementation(kelvinLibs.logback.classic)
     implementation(libs.behandlingsflytKontrakt)
+    implementation(libs.arenaoppslag.kontrakt)
     implementation(kelvinLibs.unleash.client.java)
 
     testImplementation(kelvinLibs.bundles.junit)

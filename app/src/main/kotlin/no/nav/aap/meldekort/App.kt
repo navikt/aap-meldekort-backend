@@ -7,6 +7,7 @@ import no.nav.aap.meldekort.journalføring.DokarkivGatewayImpl
 import no.nav.aap.meldekort.journalføring.PdfgeneratorGatewayImpl
 import no.nav.aap.meldekort.meldekort.DefaultMeldekortServiceGateway
 import no.nav.aap.meldekort.saker.AapGatewayImpl
+import no.nav.aap.meldekort.saker.ArenaoppslagGatewayImpl
 import no.nav.aap.meldekort.unleash.UnleashGatewayImpl
 import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
@@ -38,6 +39,7 @@ fun setupRegistries() {
     GatewayRegistry
         .register<DokarkivGatewayImpl>()
         .register<AapGatewayImpl>()
+        .register<ArenaoppslagGatewayImpl>()
         .register<DefaultMeldekortServiceGateway>()
         .register<PdfgeneratorGatewayImpl>()
         .register<UnleashGatewayImpl>()
