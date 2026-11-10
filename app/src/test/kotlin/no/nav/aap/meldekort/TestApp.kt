@@ -51,7 +51,7 @@ fun main() {
     opprettMockMeldekort(dataSource)
 
     startHttpServer(
-        port = 8080,
+        port = 8087,
         prometheus = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
         applikasjonsVersjon = "TestApp",
         dataSource = dataSource,

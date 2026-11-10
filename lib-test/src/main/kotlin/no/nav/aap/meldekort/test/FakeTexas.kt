@@ -17,14 +17,10 @@ import java.util.UUID
 object FakeTexas : FakeServer {
     private val log = LoggerFactory.getLogger(this.javaClass)!!
 
-    private val azp = UUID.randomUUID().toString()
-
     override fun setProperties(port: Int) {
-        System.setProperty("nais.token.endpoint", "http://localhost:$port/token")
-        System.setProperty("nais.token.exchange.endpoint", "http://localhost:$port/token/exchange")
-        System.setProperty("nais.token.introspection.endpoint", "http://localhost:$port/introspect")
-
-        System.setProperty("BEHANDLINGSFLYT_AZP", azp)
+        System.setProperty("NAIS_TOKEN_ENDPOINT", "http://localhost:$port/token")
+        System.setProperty("NAIS_TOKEN_EXCHANGE_ENDPOINT", "http://localhost:$port/token/exchange")
+        System.setProperty("NAIS_TOKEN_INTROSPECTION_ENDPOINT", "http://localhost:$port/introspect")
     }
 
     override val module: Application.() -> Unit =
@@ -51,7 +47,7 @@ object FakeTexas : FakeServer {
                                 "NAVident" to "Lokalsaksbehandler",
                                 "azp_name" to "azp",
                                 "idtyp" to "app",
-                                "azp" to azp
+                                "azp" to "meldekort-backend",
                             )
                         )
                     call.respond(FakeServers.TestToken(access_token = token))
