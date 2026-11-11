@@ -1,6 +1,7 @@
 package no.nav.aap.kelvin
 
 import no.nav.aap.komponenter.miljo.Miljø
+import org.jetbrains.annotations.VisibleForTesting
 import java.time.LocalDate
 
 /**
@@ -19,11 +20,16 @@ val KOMMENDE_MELDEDAGUNNTAK_I_PROD = mapOf(
     LocalDate.of(2026, 12, 21) to LocalDate.of(2026, 12, 16),
 )
 
-fun helligdagsunntakJustertMeldedag(erProd: Boolean = Miljø.erProd()): Map<LocalDate, LocalDate> =
+@VisibleForTesting
+internal fun helligdagsunntakJustertMeldedag(erProd: Boolean = Miljø.erProd()): Map<LocalDate, LocalDate> =
     EKSISTERENDE_MELDEDAGUNNTAK_I_PROD + if (!erProd) (TEST_MELDEDAGUNNTAK_I_DEV + KOMMENDE_MELDEDAGUNNTAK_I_PROD) else emptyMap()
 
+private val erProd = Miljø.erProd()
+
+val aktiveHelligdagsunntakForJustertMeldedag = helligdagsunntakJustertMeldedag(erProd)
+
 fun tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode: LocalDate): LocalDate =
-    (helligdagsunntakJustertMeldedag()[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
+    (aktiveHelligdagsunntakForJustertMeldedag[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
 
 fun originalInnsendingstidspunktMeldedag(tidligereInnsendingstidspunkt: LocalDate): LocalDate =
     helligdagsunntakJustertMeldedag().entries.firstOrNull { it.value == tidligereInnsendingstidspunkt }?.key
