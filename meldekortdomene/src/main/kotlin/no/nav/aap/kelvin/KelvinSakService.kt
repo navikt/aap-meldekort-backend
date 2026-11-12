@@ -4,11 +4,11 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.verdityper.Tid
-import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.utfylling.AktivitetsInformasjon
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -87,18 +87,32 @@ class KelvinSakService(
         return aktivitetsInformasjon.toList()
     }
 
+    /**
+     * Meldeperioder hvor medlemmet mangler innsending og må gi opplysninger.
+     *
+     * Perioder som er fullt dekket av fritak fra meldeplikt er utelatt: behandlingsflyt antar 0 timer
+     * for disse, så medlemmet kan sende inn, men må ikke.
+     */
     fun meldeperioderUtenInnsending(ident: Ident, sak: FagsakReferanse): List<Meldeperiode> {
         val perioder = hentMeldeperioder(sak)
+        val fritak = kelvinSakRepository.hentFritakMeldeplikt(sak.nummer)
         val timerRegistrert = timerRegistrertForMeldeperiodene(perioder, ident, sak)
-        return perioder.filter { periode ->
-            for (meldeperiodeDag in periode.meldeperioden) {
-                val erRegistrertTimerForDag = timerRegistrert.any { it.dato == meldeperiodeDag }
-                if (!erRegistrertTimerForDag) {
-                    return@filter true
-                }
+
+        val (fritatte, påkrevde) = perioder
+            .filter { periode ->
+                periode.meldeperioden.any { dag -> timerRegistrert.none { it.dato == dag } }
             }
-            false
+            .partition { erDekketAvFritak(it, fritak) }
+
+        val antallFritatteMedÅpentMeldevindu = fritatte.count { it.meldevindu.fom <= LocalDate.now(clock) }
+        if (antallFritatteMedÅpentMeldevindu > 0) {
+            log.info(
+                "Hopper over $antallFritatteMedÅpentMeldevindu meldeperioder uten innsending for sak " +
+                        "${sak.nummer.asString} fordi medlemmet har fritak fra meldeplikt"
+            )
         }
+
+        return påkrevde
     }
 
     private fun timerRegistrertForMeldeperiodene(
@@ -123,4 +137,12 @@ class KelvinSakService(
         return null
     }
 
+    companion object {
+        private val log = LoggerFactory.getLogger(KelvinSakService::class.java)
+
+        /* Delvis fritak i en meldeperiode håndteres ikke ennå: da må medlemmet fortsatt sende inn. */
+        fun erDekketAvFritak(meldeperiode: Meldeperiode, fritak: List<Periode>): Boolean {
+            return fritak.isNotEmpty() && meldeperiode.meldeperioden.all { dag -> fritak.any { dag in it } }
+        }
+    }
 }

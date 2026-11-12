@@ -17,6 +17,11 @@ public class MeldeperioderV0(
      * gir oss opplysninger gjennom meldekortet.
      */
     public val opplysningsbehov: List<Periode> = emptyList(),
+
+    /* Perioder hvor medlemmet har fritak fra meldeplikt. Medlemmet kan, men må ikke,
+     * gi opplysninger for disse periodene.
+     */
+    public val fritak: List<Periode> = emptyList(),
 )
 
 public class Ident(

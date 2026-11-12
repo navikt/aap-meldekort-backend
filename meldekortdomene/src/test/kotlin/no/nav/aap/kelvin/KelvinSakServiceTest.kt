@@ -3,6 +3,7 @@ package no.nav.aap.kelvin
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.Periode
+import no.nav.aap.meldeperiode.Meldeperiode
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import org.junit.jupiter.api.Test
@@ -125,6 +126,37 @@ class KelvinSakServiceTest {
 
         val meldeperiode = Periode(LocalDate.of(2026, 3, 16), LocalDate.of(2026, 3, 29))
         assertThat(sakService.finnMeldepliktfristForPeriode(sak.referanse, meldeperiode)).isEqualTo(LocalDate.of(2026, 4, 7).atTime(23, 59))
+    }
+
+    @Test
+    fun `meldeperiode er dekket av fritak når alle dager har fritak, også fordelt på flere fritaksperioder`() {
+        val meldeperiode = Meldeperiode(
+            meldeperioden = Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 16)),
+            meldevindu = Periode(LocalDate.of(2025, 3, 17), LocalDate.of(2025, 3, 24)),
+        )
+
+        assertThat(KelvinSakService.erDekketAvFritak(meldeperiode, emptyList())).isFalse()
+        assertThat(
+            KelvinSakService.erDekketAvFritak(
+                meldeperiode,
+                listOf(Periode(LocalDate.of(2025, 3, 1), LocalDate.of(2025, 3, 31)))
+            )
+        ).isTrue()
+        assertThat(
+            KelvinSakService.erDekketAvFritak(
+                meldeperiode,
+                listOf(
+                    Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 9)),
+                    Periode(LocalDate.of(2025, 3, 10), LocalDate.of(2025, 3, 16)),
+                )
+            )
+        ).isTrue()
+        assertThat(
+            KelvinSakService.erDekketAvFritak(
+                meldeperiode,
+                listOf(Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 15)))
+            )
+        ).isFalse()
     }
 
     private fun gittMeldeplikt(etterUker: Long, opplysningsperiode: Periode) {

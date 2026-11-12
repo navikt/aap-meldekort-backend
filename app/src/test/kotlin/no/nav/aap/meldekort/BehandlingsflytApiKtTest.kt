@@ -48,6 +48,35 @@ class BehandlingsflytApiKtTest {
 
             val meldeperioderFraRepository = kelvinSakRepository.hentMeldeperioder(Fagsaknummer("SAKSNUMMER"))
             assertEquals(meldeperioderFraRepository.map { Periode(it.fom, it.tom)}, meldeperioder)
-        }
-    }
+
+             val fritakFraRepository = kelvinSakRepository.hentFritakMeldeplikt(Fagsaknummer("SAKSNUMMER"))
+             assertEquals(emptyList(), fritakFraRepository.map { Periode(it.fom, it.tom) })
+         }
+     }
+
+     @Test
+     fun `fritak lagres i databasen ved melding fra behandlingsflyt`() {
+         val rettighetsperiode = Periode(fom = LocalDate.of(2025, 3, 3), tom = LocalDate.of(2025, 4, 27))
+         val fritak = listOf(
+             Periode(fom = LocalDate.of(2025, 3, 10), tom = LocalDate.of(2025, 3, 16)),
+             Periode(fom = LocalDate.of(2025, 4, 7), tom = LocalDate.of(2025, 4, 13))
+         )
+         val fnr = fødselsnummerGenerator.next()
+         val meldedata = MeldeperioderV0(
+             sakenGjelderFor = rettighetsperiode,
+             saksnummer = "SAKSNUMMER-FRITAK",
+             personIdenter = listOf(Ident(fnr.asString, fnr.aktiv ?: false)),
+             meldeperioder = emptyList(),
+             meldeplikt = emptyList(),
+             fritak = fritak
+         )
+
+         app.behandlingsflytPost<Unit, MeldeperioderV0>(meldedata)
+         app.dataSource.transaction { dbConnection ->
+             val kelvinSakRepository = postgresRepositoryRegistry.provider(dbConnection).provide<KelvinSakRepository>()
+             val fritakFraRepository =
+                 kelvinSakRepository.hentFritakMeldeplikt(Fagsaknummer("SAKSNUMMER-FRITAK"))
+             assertEquals(fritak, fritakFraRepository.map { Periode(it.fom, it.tom) })
+         }
+     }
  }
