@@ -5,6 +5,7 @@ import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.komponenter.verdityper.Tid
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.erDekketAvFritak
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.FagsakReferanse
 import no.nav.aap.utfylling.AktivitetsInformasjon
@@ -18,6 +19,7 @@ class KelvinSakService(
     private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock,
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     constructor(repositoryProvider: RepositoryProvider, clock: Clock) : this(
         aktivitetsInformasjonRepository = repositoryProvider.provide(),
@@ -102,7 +104,7 @@ class KelvinSakService(
             .filter { periode ->
                 periode.meldeperioden.any { dag -> timerRegistrert.none { it.dato == dag } }
             }
-            .partition { erDekketAvFritak(it, fritak) }
+            .partition { it.erDekketAvFritak(fritak) }
 
         val antallFritatteMedÅpentMeldevindu = fritatte.count { it.meldevindu.fom <= LocalDate.now(clock) }
         if (antallFritatteMedÅpentMeldevindu > 0) {
@@ -135,14 +137,5 @@ class KelvinSakService(
             return muligForlengetMeldefrist.atTime(23, 59)
         }
         return null
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(KelvinSakService::class.java)
-
-        /* Delvis fritak i en meldeperiode håndteres ikke ennå: da må medlemmet fortsatt sende inn. */
-        fun erDekketAvFritak(meldeperiode: Meldeperiode, fritak: List<Periode>): Boolean {
-            return fritak.isNotEmpty() && meldeperiode.meldeperioden.all { dag -> fritak.any { dag in it } }
-        }
     }
 }

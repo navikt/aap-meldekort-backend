@@ -4,6 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
+import no.nav.aap.meldeperiode.erDekketAvFritak
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.utfylling.Svar
 import java.time.Clock
@@ -73,7 +74,7 @@ class KelvinMeldeperiodeFlate(
         return perioder
             .filter {
                 it.meldeperioden.fom <= senesteOpplysningsdato ||
-                        (it.meldeperioden.tom < iDag && KelvinSakService.erDekketAvFritak(it, fritak))
+                        (it.meldeperioden.tom < iDag && it.erDekketAvFritak(fritak))
             }
             .reversed()
             .map {

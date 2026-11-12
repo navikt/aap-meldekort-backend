@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.aap.Periode
 import no.nav.aap.meldeperiode.Meldeperiode
+import no.nav.aap.meldeperiode.erDekketAvFritak
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.sak.Fagsaknummer
 import org.junit.jupiter.api.Test
@@ -135,16 +136,14 @@ class KelvinSakServiceTest {
             meldevindu = Periode(LocalDate.of(2025, 3, 17), LocalDate.of(2025, 3, 24)),
         )
 
-        assertThat(KelvinSakService.erDekketAvFritak(meldeperiode, emptyList())).isFalse()
+        assertThat(meldeperiode.erDekketAvFritak(emptyList())).isFalse()
         assertThat(
-            KelvinSakService.erDekketAvFritak(
-                meldeperiode,
+            meldeperiode.erDekketAvFritak(
                 listOf(Periode(LocalDate.of(2025, 3, 1), LocalDate.of(2025, 3, 31)))
             )
         ).isTrue()
         assertThat(
-            KelvinSakService.erDekketAvFritak(
-                meldeperiode,
+            meldeperiode.erDekketAvFritak(
                 listOf(
                     Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 9)),
                     Periode(LocalDate.of(2025, 3, 10), LocalDate.of(2025, 3, 16)),
@@ -152,8 +151,7 @@ class KelvinSakServiceTest {
             )
         ).isTrue()
         assertThat(
-            KelvinSakService.erDekketAvFritak(
-                meldeperiode,
+            meldeperiode.erDekketAvFritak(
                 listOf(Periode(LocalDate.of(2025, 3, 3), LocalDate.of(2025, 3, 15)))
             )
         ).isFalse()

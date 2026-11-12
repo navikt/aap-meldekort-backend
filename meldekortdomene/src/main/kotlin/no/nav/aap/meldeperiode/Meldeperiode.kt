@@ -8,3 +8,6 @@ data class Meldeperiode(
     /** Dager hvor det å melde seg vil påvirke vurderingen av meldeplikten for denne perioden. */
     val meldevindu: Periode,
 )
+
+fun Meldeperiode.erDekketAvFritak(fritak: List<Periode>): Boolean =
+    fritak.isNotEmpty() && meldeperioden.all { dag -> fritak.any { dag in it } }
