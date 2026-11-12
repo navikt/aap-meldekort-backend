@@ -32,7 +32,7 @@ fun tidligsteInnsendingstidspunktMeldedag(startPåNesteMeldeperiode: LocalDate):
     (aktiveHelligdagsunntakForJustertMeldedag[startPåNesteMeldeperiode] ?: startPåNesteMeldeperiode)
 
 fun originalInnsendingstidspunktMeldedag(tidligereInnsendingstidspunkt: LocalDate): LocalDate =
-    helligdagsunntakJustertMeldedag().entries.firstOrNull { it.value == tidligereInnsendingstidspunkt }?.key
+    aktiveHelligdagsunntakForJustertMeldedag.entries.firstOrNull { it.value == tidligereInnsendingstidspunkt }?.key
         ?: tidligereInnsendingstidspunkt
 
 private val helligdagsunntakJustertMeldefrist: Map<LocalDate, LocalDate> = mapOf(
