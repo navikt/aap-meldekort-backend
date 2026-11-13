@@ -47,4 +47,8 @@ class Saker(
     fun finnSak(fagsakReferanse: FagsakReferanse): Sak? {
         return saker.firstOrNull { it.referanse == fagsakReferanse }
     }
+
+    override fun toString(): String = saker.joinToString(prefix = "Saker(", postfix = ")") {
+        "Sak(referanse=${it.referanse}, rettighetsperiode=${it.rettighetsperiode.fom}, rettighetsperiode=${it.rettighetsperiode.tom})"
+    }
 }

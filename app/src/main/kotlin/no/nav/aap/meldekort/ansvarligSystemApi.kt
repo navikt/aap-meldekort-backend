@@ -12,6 +12,7 @@ import no.nav.aap.komponenter.repository.RepositoryRegistry
 import no.nav.aap.lookup.gateway.GatewayProvider
 import no.nav.aap.sak.FagsystemNavn
 import no.nav.aap.sak.SakerService
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
 import javax.sql.DataSource
@@ -37,6 +38,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
     repositoryRegistry: RepositoryRegistry,
     clock: Clock,
 ) {
+    val log = LoggerFactory.getLogger(javaClass)
     route("v2") {
         route("ansvarlig-system").get<Unit, AnsvarligeMeldekortløsningerDto> {
             val ident = personBrukerIdent()
@@ -48,6 +50,9 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
 
             val arenaSaker = GatewayProvider.provide<ArenaoppslagGateway>()
                 .hentSaker(ident)
+            if (kelvinSak != null) {
+                log.info("Kelvin: ${kelvinSak.saksnummer.asString}, ${kelvinSak.rettighetsperiode.fom} - ${kelvinSak.rettighetsperiode.tom}. Arena: $arenaSaker")
+            }
             val arenaSak = if (kelvinSak != null) {
                 val førsteDagIKelvin = kelvinSak.rettighetsperiode.fom
                 val ukenFørKelvin = Periode(
@@ -57,6 +62,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
 
                 arenaSaker.finnSakSomSlutterIPeriode(ukenFørKelvin)
             } else {
+                log.info("Fant ingen sak i Kelvin, sjekker om vi finner en sak i Arena")
                 arenaSaker.finnSakForDagen(idag)
             }
             val response = AnsvarligeMeldekortløsningerDto(
@@ -73,6 +79,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                     )
                 },
             )
+            log.info("Svarer med følgende response: ${response}")
             respond(response)
         }
     }
