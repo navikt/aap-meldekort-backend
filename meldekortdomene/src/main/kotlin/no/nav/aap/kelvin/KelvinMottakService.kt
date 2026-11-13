@@ -15,6 +15,7 @@ import no.nav.aap.utfylling.UtfyllingReferanse
 import no.nav.aap.utfylling.UtfyllingRepository
 import no.nav.aap.utfylling.UtfyllingStegNavn.KVITTERING
 import no.nav.aap.varsel.VarselService
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Instant
 
@@ -25,6 +26,8 @@ class KelvinMottakService(
     private val aktivitetsInformasjonRepository: AktivitetsInformasjonRepository,
     private val clock: Clock
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     constructor(repositoryProvider: RepositoryProvider, gatewayProvider: GatewayProvider, clock: Clock) : this(
         kelvinSakRepository = repositoryProvider.provide(),
         utfyllingRepository = repositoryProvider.provide(),
@@ -40,8 +43,12 @@ class KelvinMottakService(
         meldeperioder: List<Periode>,
         meldeplikt: List<Periode>,
         opplysningsbehov: List<Periode>,
-        status: KelvinSakStatus?
+        status: KelvinSakStatus?,
+        fritak: List<Periode> = emptyList()
     ) {
+        logger.info(
+            "Mottok meldeperioder for sak ${saksnummer.asString}: ${meldeperioder.size} meldeperioder, ${opplysningsbehov.size} opplysningsbehov, ${fritak.size} fritaksperioder"
+        )
         kelvinSakRepository.upsertSak(
             saksnummer = saksnummer,
             sakenGjelderFor = sakenGjelderFor,
@@ -49,7 +56,8 @@ class KelvinMottakService(
             meldeperioder = meldeperioder,
             meldeplikt = meldeplikt,
             opplysningsbehov = opplysningsbehov,
-            status = status
+            status = status,
+            fritak = fritak
         )
         varselService.planleggFremtidigeVarsler(saksnummer)
     }

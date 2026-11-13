@@ -54,6 +54,65 @@ class KelvinMeldeperiodeFlateTest {
         every { kelvinSakRepository.hentSak(any(), any()) } returns sak
         every { kelvinSakRepository.hentMeldeperioder(any()) } returns meldeperioder
         every { kelvinSakRepository.hentOpplysningsbehov(any()) } returns meldeperioder
+        every { kelvinSakRepository.hentFritakMeldeplikt(any()) } returns emptyList()
+    }
+
+    @Test
+    fun `skal ikke kreve meldekort for perioder som er dekket av fritak fra meldeplikt`() {
+        every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns listOf()
+        every { kelvinSakRepository.hentFritakMeldeplikt(any()) } returns listOf(
+            Periode(sak.rettighetsperiode.fom, sak.rettighetsperiode.fom.plusWeeks(6).minusDays(1))
+        )
+
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
+        val sistePeriodeTilIGår = Periode(LocalDate.now().minusWeeks(2), LocalDate.now().minusDays(1))
+
+        assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(1)
+        assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(sistePeriodeTilIGår)
+        assertThat(aktuellePerioder.manglerOpplysninger).isEqualTo(sistePeriodeTilIGår)
+    }
+
+    @Test
+    fun `skal kreve meldekort for meldeperiode som bare delvis er dekket av fritak`() {
+        every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns listOf()
+        every { kelvinSakRepository.hentFritakMeldeplikt(any()) } returns listOf(
+            Periode(sak.rettighetsperiode.fom.plusDays(7), sak.rettighetsperiode.fom.plusWeeks(6).minusDays(1))
+        )
+
+        val aktuellePerioder = meldeperiodeFlate.aktuelleMeldeperioder(ident)
+
+        assertThat(aktuellePerioder.antallUbesvarteMeldeperioder).isEqualTo(2)
+        assertThat(aktuellePerioder.nesteMeldeperiode?.meldeperioden).isEqualTo(førstePeriode)
+    }
+
+    @Test
+    fun `skal vise passerte fritaksperioder i historikken selv om medlemmet ikke har sendt inn`() {
+        every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns listOf()
+        every { aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(any(), any()) } returns null
+        every { kelvinSakRepository.hentFritakMeldeplikt(any()) } returns listOf(
+            Periode(sak.rettighetsperiode.fom, sak.rettighetsperiode.fom.plusWeeks(6).minusDays(1))
+        )
+
+        val historiske = meldeperiodeFlate.historiskeMeldeperioder(ident)
+
+        assertThat(historiske.map { it.meldeperiode.meldeperioden }).containsExactly(
+            Periode(sak.rettighetsperiode.fom.plusWeeks(4), sak.rettighetsperiode.fom.plusWeeks(6).minusDays(1)),
+            Periode(sak.rettighetsperiode.fom.plusWeeks(2), sak.rettighetsperiode.fom.plusWeeks(4).minusDays(1)),
+            førstePeriode,
+        )
+        assertThat(historiske).allSatisfy { assertThat(it.totaltAntallTimerIPerioden).isEqualTo(0.0) }
+    }
+
+    @Test
+    fun `skal ikke vise fritaksperioder som ikke er passert i historikken`() {
+        every { aktivitetsInformasjonRepository.hentAktivitetsInformasjon(any(), any(), any()) } returns listOf()
+        every { aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(any(), any()) } returns null
+        every { kelvinSakRepository.hentFritakMeldeplikt(any()) } returns listOf(sak.rettighetsperiode)
+
+        val historiske = meldeperiodeFlate.historiskeMeldeperioder(ident)
+
+        assertThat(historiske).hasSize(4)
+        assertThat(historiske).allSatisfy { assertThat(it.meldeperiode.meldeperioden.tom).isBefore(LocalDate.now()) }
     }
 
     @Test
