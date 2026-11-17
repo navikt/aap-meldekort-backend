@@ -19,6 +19,7 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
         meldeplikt: List<Periode>,
         opplysningsbehov: List<Periode>,
         status: KelvinSakStatus?,
+        fritak: List<Periode>,
     ) {
         val sakId = connection.queryFirst(
             """
@@ -118,6 +119,33 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
                 oppdatert = current_timestamp(3)
             """,
             opplysningsbehov
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriode(2, no.nav.aap.komponenter.type.Periode(it.fom, it.tom))
+            }
+        }
+
+        connection.execute(
+            """
+            delete from kelvin_fritak_meldeplikt
+            where sak_id = ? and periode <> all (?::daterange[])
+            """
+        ) {
+            setParams {
+                setLong(1, sakId)
+                setPeriodeArray(2, fritak.map { no.nav.aap.komponenter.type.Periode(it.fom, it.tom) })
+            }
+        }
+
+        connection.executeBatch(
+            """
+                insert into kelvin_fritak_meldeplikt (sak_id, periode)
+                values (?, ?::daterange)
+                on conflict (sak_id, periode) do update set
+                oppdatert = current_timestamp(3)
+            """,
+            fritak
         ) {
             setParams {
                 setLong(1, sakId)
@@ -240,6 +268,24 @@ class KelvinSakRepositoryPostgres(private val connection: DBConnection) : Kelvin
             join kelvin_sak on kelvin_opplysningsbehov.sak_id = kelvin_sak.id
             where kelvin_sak.saksnummer = ?
             order by kelvin_opplysningsbehov.periode
+        """
+        ) {
+            setParams {
+                setString(1, saksnummer.asString)
+            }
+            setRowMapper {
+                it.getPeriode("periode").let { Periode(it.fom, it.tom) }
+            }
+        }
+    }
+
+    override fun hentFritakMeldeplikt(saksnummer: Fagsaknummer): List<Periode> {
+        return connection.queryList(
+            """
+            select kelvin_fritak_meldeplikt.periode from kelvin_fritak_meldeplikt
+            join kelvin_sak on kelvin_fritak_meldeplikt.sak_id = kelvin_sak.id
+            where kelvin_sak.saksnummer = ?
+            order by kelvin_fritak_meldeplikt.periode
         """
         ) {
             setParams {

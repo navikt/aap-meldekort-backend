@@ -14,6 +14,7 @@ interface KelvinSakRepository: Repository {
         meldeplikt: List<Periode>,
         opplysningsbehov: List<Periode>,
         status: KelvinSakStatus?,
+        fritak: List<Periode> = emptyList(),
     )
     fun upsertPersonIdenter(
         saksnummer: Fagsaknummer,
@@ -25,4 +26,5 @@ interface KelvinSakRepository: Repository {
     fun hentMeldeplikt(saksnummer: Fagsaknummer): List<Periode>
     fun hentOpplysningsbehov(saksnummer: Fagsaknummer): List<Periode>
     fun hentIdenter(saksnummer: Fagsaknummer): List<Ident>
+    fun hentFritakMeldeplikt(saksnummer: Fagsaknummer): List<Periode>
 }

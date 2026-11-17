@@ -184,4 +184,46 @@ class KelvinSakRepositoryPostgresTest {
             assertThat(repo.hentIdenter(sak2)).containsExactlyInAnyOrder(fnr2.copy(aktiv = true))
         }
     }
+
+    @Test
+    fun `lagrer og henter fritaksperioder for meldeplikt`() {
+        dataSource.transaction { connection ->
+            val repo = KelvinSakRepositoryPostgres(connection)
+            repo.upsertSak(
+                sak1,
+                periode4,
+                listOf(fnr1),
+                listOf(),
+                listOf(),
+                listOf(),
+                null,
+                fritak = listOf(periode1, periode2)
+            )
+            repo.upsertSak(
+                sak2,
+                periode4,
+                listOf(fnr2),
+                listOf(),
+                listOf(),
+                listOf(),
+                null
+            )
+
+            assertThat(repo.hentFritakMeldeplikt(sak1)).containsExactly(periode2, periode1)
+            assertThat(repo.hentFritakMeldeplikt(sak2)).isEmpty()
+
+            repo.upsertSak(
+                sak1,
+                periode4,
+                listOf(fnr1),
+                listOf(),
+                listOf(),
+                listOf(),
+                null,
+                fritak = listOf(periode3)
+            )
+
+            assertThat(repo.hentFritakMeldeplikt(sak1)).containsExactly(periode3)
+        }
+    }
 }

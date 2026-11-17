@@ -4,6 +4,7 @@ import no.nav.aap.Ident
 import no.nav.aap.Periode
 import no.nav.aap.komponenter.repository.RepositoryProvider
 import no.nav.aap.meldeperiode.MeldeperiodeFlate
+import no.nav.aap.meldeperiode.erDekketAvFritak
 import no.nav.aap.opplysningsplikt.AktivitetsInformasjonRepository
 import no.nav.aap.utfylling.Svar
 import java.time.Clock
@@ -61,13 +62,20 @@ class KelvinMeldeperiodeFlate(
             aktivitetsInformasjonRepository.hentSenesteOpplysningsdato(ident, sak.referanse)
                 ?: LocalDate.MIN
 
+        val fritak = kelvinSakRepository.hentFritakMeldeplikt(sak.referanse.nummer)
+        val iDag = LocalDate.now(clock)
+
         /* Her ønsker vi å liste opp meldeperioder hvor:
          * - medlemmet har gitt opplysninger
-         * - medlemmet har ikke gitt opplysninger, men er heller ikke pliktig til å gi opplysninger (fritak, f.eks.)
+         * - medlemmet har ikke gitt opplysninger, men er heller ikke pliktig til å gi opplysninger (fritak)
+         *   og perioden er passert, slik at medlemmet kan sende inn eller endre opplysninger i etterkant.
          */
 
         return perioder
-            .filter { it.meldeperioden.fom <= senesteOpplysningsdato }
+            .filter {
+                it.meldeperioden.fom <= senesteOpplysningsdato ||
+                        (it.meldeperioden.tom < iDag && it.erDekketAvFritak(fritak))
+            }
             .reversed()
             .map {
                 val detaljer = periodedetaljer(ident, it.meldeperioden)
