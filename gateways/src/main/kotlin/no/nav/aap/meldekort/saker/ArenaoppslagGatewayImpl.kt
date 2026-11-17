@@ -75,8 +75,9 @@ object ArenaoppslagGatewayImpl : ArenaoppslagGateway {
                 log.info("Ignorerer Arena-vedtak med tilDato før fraOgMed")
                 return@mapNotNull null
             }
+            val saksnummer = it.saksnummer ?: ""
             ArenaSak(
-                referanse = FagsakReferanse(FagsystemNavn.ARENA, Fagsaknummer(it.sakId.toString())),
+                referanse = FagsakReferanse(FagsystemNavn.ARENA, Fagsaknummer(saksnummer)),
                 rettighetsperiode = Periode(fom, tom),
             )
         })

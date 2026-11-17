@@ -4,7 +4,6 @@ import io.ktor.http.HttpStatusCode
 import no.nav.aap.Periode
 import no.nav.aap.arenaoppslag.kontrakt.apiv1.ArenaVedtak
 import no.nav.aap.arenaoppslag.kontrakt.apiv1.VedtakForPersonRequest
-import no.nav.aap.komponenter.httpklient.httpclient.error.InternalServerErrorHttpResponsException
 import no.nav.aap.komponenter.httpklient.httpclient.error.ManglerTilgangException
 import no.nav.aap.komponenter.json.DeserializationException
 import no.nav.aap.meldekort.saker.ArenaoppslagGatewayImpl
@@ -28,6 +27,7 @@ class ArenaoppslagGatewayIntegrasjonsTest {
 
     private fun vedtak(sakId: Int = 1234) = ArenaVedtak(
         sakId = sakId,
+        saksnummer = "2026-$sakId",
         statusKode = "IVERK",
         vedtaktypeKode = "O",
         fraOgMed = idag,
@@ -51,7 +51,7 @@ class ArenaoppslagGatewayIntegrasjonsTest {
 
         assertEquals(VedtakForPersonRequest(ident.asString), FakeArenaoppslag.forespørsler[ident.asString])
         vedtak.forEach {
-            val referanse = FagsakReferanse(FagsystemNavn.ARENA, Fagsaknummer(it.sakId.toString()))
+            val referanse = FagsakReferanse(FagsystemNavn.ARENA, Fagsaknummer(assertNotNull(it.saksnummer)))
             val sak = assertNotNull(saker.finnSak(referanse))
             assertEquals(Periode(assertNotNull(it.fraOgMed), assertNotNull(it.tilDato)), sak.rettighetsperiode)
         }

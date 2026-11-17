@@ -89,6 +89,7 @@ private fun opprettMockMeldekort(dataSource: DataSource) {
         listOf(
             ArenaVedtak(
                 sakId = 2020,
+                saksnummer = "2026-10",
                 statusKode = "IVERK",
                 vedtaktypeKode = "O",
                 fraOgMed = rettighetsPeriode.fom.minusYears(1),

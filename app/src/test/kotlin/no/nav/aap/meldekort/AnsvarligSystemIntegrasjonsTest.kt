@@ -62,6 +62,7 @@ class AnsvarligSystemIntegrasjonsTest {
                         utfallkode = "JA",
                         vedtakId = 1,
                         aktivitetsfaseKode = "AU",
+                        saksnummer = "2026-01"
                     ),
                 ),
             )
@@ -73,7 +74,7 @@ class AnsvarligSystemIntegrasjonsTest {
 
             assertNull(response.kelvin)
             val løsning = assertNotNull(response.arena)
-            assertEquals("1234", løsning.saksnummer)
+            assertEquals("2026-01", løsning.saksnummer)
             val periode = assertNotNull(løsning.rettighetsperiode)
             assertEquals(idag, periode.fom)
             assertEquals(idag, periode.tom)
@@ -203,6 +204,7 @@ class AnsvarligSystemIntegrasjonsTest {
                 listOf(
                     ArenaVedtak(
                         sakId = 1234,
+                        saksnummer = "2026-01",
                         statusKode = "IVERK",
                         vedtaktypeKode = "O",
                         fraOgMed = kelvinPeriode.fom.minusMonths(1),
