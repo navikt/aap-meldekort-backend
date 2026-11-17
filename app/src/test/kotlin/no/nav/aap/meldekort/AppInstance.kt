@@ -203,6 +203,7 @@ class AppInstance(initIdag: LocalDate = 6 januar 2025) : AutoCloseable {
             fnr,
             ArenaVedtak(
                 sakId = saksnummer.asString.toInt(),
+                saksnummer = saksnummer.asString,
                 statusKode = "IVERK",
                 vedtaktypeKode = "O",
                 fraOgMed = periode.fom,

@@ -2,7 +2,7 @@
 komponenter = "3.0.3"
 tilgang = "1.0.244"
 behandlingsflyt = "0.0.678"
-arenaoppslag = "0.7.36"
+arenaoppslag = "0.7.37"
 
 [libraries]
 # Kelvin
