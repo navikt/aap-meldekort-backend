@@ -33,7 +33,7 @@ data class MeldekortløsningDto(
     val rettighetsperiode: PeriodeDto,
 )
 
-// første sak ble migrert 17.11.2026, vi trenger ikke sjekke overlapp på saker som starter før dette i Kelvin
+// første sak ble migrert 17.11.2026, vi trenger ikke sjekke om bruker har vedtak i Arena dersom de har en sak i Kelvin som starter før denne datoen
 // dette er å anse som en midlertidig løsning for å begrense trafikken mot Arena frem til vi har en permanent løsning
 private val GRENSE_FOR_ARENAOPPSLAG = LocalDate.of(2026, 11, 17)
 
