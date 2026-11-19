@@ -33,6 +33,10 @@ data class MeldekortløsningDto(
     val rettighetsperiode: PeriodeDto,
 )
 
+// første sak ble migrert 17.11.2026, vi trenger ikke sjekke om bruker har vedtak i Arena dersom de har en sak i Kelvin som starter før denne datoen
+// dette er å anse som en midlertidig løsning for å begrense trafikken mot Arena frem til vi har en permanent løsning
+private val GRENSE_FOR_ARENAOPPSLAG = LocalDate.of(2026, 11, 17)
+
 fun NormalOpenAPIRoute.ansvarligSystemApi(
     dataSource: DataSource,
     repositoryRegistry: RepositoryRegistry,
@@ -48,22 +52,24 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
                 kelvinSakRepository.hentSak(ident, idag)
             }
 
-            val arenaSaker = GatewayProvider.provide<ArenaoppslagGateway>()
-                .hentSaker(ident)
-            if (kelvinSak != null) {
-                log.info("Kelvin: ${kelvinSak.saksnummer.asString}, ${kelvinSak.rettighetsperiode.fom} - ${kelvinSak.rettighetsperiode.tom}. Arena: $arenaSaker")
-            }
-            val arenaSak = if (kelvinSak != null) {
-                val førsteDagIKelvin = kelvinSak.rettighetsperiode.fom
-                val ukenFørKelvin = Periode(
-                    fom = førsteDagIKelvin.minusDays(7),
-                    tom = førsteDagIKelvin.minusDays(1),
-                )
+            val arenaSak = if (kelvinSak == null || kelvinSak.rettighetsperiode.fom > GRENSE_FOR_ARENAOPPSLAG) {
+                val arenaSaker = GatewayProvider.provide<ArenaoppslagGateway>()
+                    .hentSaker(ident)
+                if (kelvinSak != null) {
+                    log.info("Kelvin: ${kelvinSak.saksnummer.asString}, ${kelvinSak.rettighetsperiode.fom} - ${kelvinSak.rettighetsperiode.tom}. Arena: $arenaSaker")
+                    val førsteDagIKelvin = kelvinSak.rettighetsperiode.fom
+                    val ukenFørKelvin = Periode(
+                        fom = førsteDagIKelvin.minusDays(7),
+                        tom = førsteDagIKelvin.minusDays(1),
+                    )
 
-                arenaSaker.finnSakSomSlutterIPeriode(ukenFørKelvin)
+                    arenaSaker.finnSakSomSlutterIPeriode(ukenFørKelvin)
+                } else {
+                    log.info("Fant ingen sak i Kelvin, sjekker om vi finner en sak i Arena")
+                    arenaSaker.finnSakForDagen(idag)
+                }
             } else {
-                log.info("Fant ingen sak i Kelvin, sjekker om vi finner en sak i Arena")
-                arenaSaker.finnSakForDagen(idag)
+                null
             }
             val response = AnsvarligeMeldekortløsningerDto(
                 kelvin = kelvinSak?.let {

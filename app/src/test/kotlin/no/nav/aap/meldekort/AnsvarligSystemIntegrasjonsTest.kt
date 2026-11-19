@@ -27,6 +27,7 @@ import no.nav.aap.postgresRepositoryRegistry
 import no.nav.aap.prometheus
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -46,6 +47,42 @@ class AnsvarligSystemIntegrasjonsTest {
 
     @Nested
     inner class AnsvarligSystemV2 {
+        private val idag = LocalDate.of(2026, 11, 30)
+
+        @BeforeEach
+        fun settDato() {
+            app.idag = idag
+        }
+
+        @Test
+        fun `ikke slå opp mot Arena når sak i Kelvin starter før dato for når første sak ble migrert`() {
+            val datoForFørsteMigrering = LocalDate.of(2026, 11, 17)
+
+            app.idag = LocalDate.of(2026, 11, 18)
+            val fnr = fødselsnummerGenerator.next()
+            val kelvinPeriode = Periode(datoForFørsteMigrering.minusWeeks(2), datoForFørsteMigrering.plusMonths(1))
+            app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
+
+            val respons = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
+            assertNotNull(respons.kelvin)
+            assertNull(respons.arena)
+            assertNull(FakeArenaoppslag.forespørsler[fnr.asString])
+        }
+
+        @Test
+        fun `gjør oppslag mot Arena når sak i Kelvin starter etter dato for når første sak ble migrert`() {
+            val datoForFørsteMigrering = LocalDate.of(2026, 11, 17)
+
+            app.idag = LocalDate.of(2026, 11, 18)
+            val fnr = fødselsnummerGenerator.next()
+            val kelvinPeriode = Periode(datoForFørsteMigrering.plusDays(1), datoForFørsteMigrering.plusMonths(1))
+            app.kelvinSak(fnr, rettighetsperiode = kelvinPeriode)
+
+            val respons = assertNotNull(app.get<AnsvarligeMeldekortløsningerDto>(fnr, "/api/v2/ansvarlig-system"))
+            assertNotNull(respons.kelvin)
+            assertNotNull(FakeArenaoppslag.forespørsler[fnr.asString])
+        }
+
         @Test
         fun `v2 bruker arenaoppslag mens eldre endepunkt fortsatt bruker api-intern`() {
             val fnr = fødselsnummerGenerator.next()
@@ -102,7 +139,7 @@ class AnsvarligSystemIntegrasjonsTest {
         @Test
         fun `feil i arenaoppslag propagerer til api-et`() {
             val fnr = fødselsnummerGenerator.next()
-            app.kelvinSak(fnr)
+            app.kelvinSak(fnr, rettighetsperiode = Periode(idag.minusDays(10), idag.plusDays(10)))
             FakeArenaoppslag.settRespons(fnr, HttpStatusCode.InternalServerError, "Upstream failure")
 
             assertFailsWith<InternalServerErrorHttpResponsException> {
