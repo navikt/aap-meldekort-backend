@@ -3,6 +3,7 @@ package no.nav.aap.meldekort
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
+import kotlinx.coroutines.CancellationException
 import no.nav.aap.komponenter.httpklient.exception.ApiException
 import no.nav.aap.komponenter.httpklient.exception.IkkeTillattException
 import no.nav.aap.komponenter.httpklient.exception.InternfeilException
@@ -17,6 +18,8 @@ object StatusPagesConfigHelper {
     fun setup(): StatusPagesConfig.() -> Unit = {
         exception<Throwable> { call, cause ->
             when (cause) {
+                is CancellationException -> throw cause
+
                 is InternfeilException -> {
                     logger.error(cause.cause?.message ?: cause.message)
                     call.respondWithError(InternfeilException("En ukjent feil oppsto"))

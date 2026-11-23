@@ -16,10 +16,11 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import javax.sql.DataSource
 
-fun NormalOpenAPIRoute.meldeperioderApi(
+internal fun NormalOpenAPIRoute.meldeperioderApi(
     dataSource: DataSource,
     meldeperiodeFlateFactory: MeldeperiodeFlateFactory,
     repositoryRegistry: RepositoryRegistry,
+    kallLogg: KallLogg,
 ) {
     val log = LoggerFactory.getLogger(javaClass)
 
@@ -38,7 +39,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
     }
 
     route("meldeperiode") {
-        route("kommende").get<Unit, KommendeMeldeperioderDto> {
+        route("kommende").medKallLogg(kallLogg).get<Unit, KommendeMeldeperioderDto> {
             val response = medFlate {
                 val kommendeMeldeperioder = aktuelleMeldeperioder(personBrukerIdent())
                 log.info(
@@ -50,7 +51,7 @@ fun NormalOpenAPIRoute.meldeperioderApi(
             respond(response)
         }
 
-        route("historiske").get<Unit, List<HistoriskMeldeperiodeDto>> {
+        route("historiske").medKallLogg(kallLogg).get<Unit, List<HistoriskMeldeperiodeDto>> {
             val response = medFlate {
                 val historiskeMeldeperioder = historiskeMeldeperioder(personBrukerIdent())
                 log.info("Hentet ${historiskeMeldeperioder.size} historiske meldeperioder.")

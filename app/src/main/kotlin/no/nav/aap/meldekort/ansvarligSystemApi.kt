@@ -37,14 +37,15 @@ data class MeldekortløsningDto(
 // dette er å anse som en midlertidig løsning for å begrense trafikken mot Arena frem til vi har en permanent løsning
 private val GRENSE_FOR_ARENAOPPSLAG = LocalDate.of(2026, 11, 17)
 
-fun NormalOpenAPIRoute.ansvarligSystemApi(
+internal fun NormalOpenAPIRoute.ansvarligSystemApi(
     dataSource: DataSource,
     repositoryRegistry: RepositoryRegistry,
     clock: Clock,
+    kallLogg: KallLogg,
 ) {
     val log = LoggerFactory.getLogger(javaClass)
     route("v2") {
-        route("ansvarlig-system").get<Unit, AnsvarligeMeldekortløsningerDto> {
+        route("ansvarlig-system").medKallLogg(kallLogg).get<Unit, AnsvarligeMeldekortløsningerDto> {
             val ident = personBrukerIdent()
             val idag = LocalDate.now(clock)
             val kelvinSak = dataSource.transaction { connection ->
@@ -90,7 +91,7 @@ fun NormalOpenAPIRoute.ansvarligSystemApi(
         }
     }
 
-    route("ansvarlig-system").get<Unit, AnsvarligMeldekortløsningDto> {
+    route("ansvarlig-system").medKallLogg(kallLogg).get<Unit, AnsvarligMeldekortløsningDto> {
         val response = dataSource.transaction { connection ->
             val sakerService = SakerService(
                 aapGateway = GatewayProvider.provide(),

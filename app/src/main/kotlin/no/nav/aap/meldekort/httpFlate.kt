@@ -71,13 +71,14 @@ fun startHttpServer(
         val påkrevdeRollerMotor = if (Miljø.erProd()) listOf(TeamAap.id) else emptyList() 
         
         install(StatusPages, StatusPagesConfigHelper.setup())
+        val kallLogg = KallLogg(dataSource, repositoryRegistry, clock).also { it.install(this) }
 
         routing {
             authenticate(IdentityProvider.TOKENX.value) {
                 apiRouting {
                     route("api") {
-                        ansvarligSystemApi(dataSource, repositoryRegistry, clock)
-                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(clock), repositoryRegistry)
+                        ansvarligSystemApi(dataSource, repositoryRegistry, clock, kallLogg)
+                        meldeperioderApi(dataSource, MeldeperiodeFlateFactoryImpl(clock), repositoryRegistry, kallLogg)
                         utfyllingApi(dataSource, UtfyllingFlateFactoryImpl(clock), repositoryRegistry)
                         metadataApi(dataSource, repositoryRegistry, clock)
                         meldekortStatus(dataSource, repositoryRegistry, clock, GatewayProvider)
