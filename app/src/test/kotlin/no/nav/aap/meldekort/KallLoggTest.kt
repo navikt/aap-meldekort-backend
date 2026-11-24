@@ -52,7 +52,6 @@ import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
@@ -211,14 +210,44 @@ class KallLoggTest {
     }
 
     @Test
-    fun `cancellation reaches server unchanged and leaves initial row without invented response`() {
+    fun `cancellation keeps the usual error response and leaves the initial row in progress`() {
         val log = RecordingLog()
-        val cancellationPropagated = AtomicBoolean()
-        withServer(log, cancellationPropagated) { baseUrl ->
-            runCatching { request("$baseUrl${paths.first()}?cancel") }
+        withServer(log) { baseUrl ->
+            val unlogged = request("$baseUrl/api/other?cancel")
+            val logged = request("$baseUrl${paths.first()}?cancel")
+            assertEquals(500, unlogged.statusCode())
+            assertEquals(unlogged.statusCode(), logged.statusCode())
+            assertEquals(unlogged.body(), logged.body())
             assertEquals(1, log.starts.size)
-            assertTrue(cancellationPropagated.get())
+            assertFalse(log.completionAttempt.await(250, TimeUnit.MILLISECONDS))
             assertTrue(log.completions.isEmpty())
+        }
+    }
+
+    @Test
+    fun `an unresponsive logging write does not prevent the handler from responding`() {
+        val release = CountDownLatch(1)
+        val started = CountDownLatch(1)
+        val log = RecordingLog(beforeStart = {
+            started.countDown()
+            // Model a driver that does not immediately stop on thread interruption.
+            while (release.count > 0) {
+                try {
+                    release.await()
+                } catch (_: InterruptedException) {
+                    continue
+                }
+            }
+        })
+        withServer(log) { baseUrl ->
+            try {
+                val response = request("$baseUrl${paths.first()}")
+                assertEquals(200, response.statusCode())
+                assertEquals(0L, started.count)
+                assertTrue(log.completions.isEmpty())
+            } finally {
+                release.countDown()
+            }
         }
     }
 
@@ -234,7 +263,6 @@ class KallLoggTest {
 
     private fun withServer(
         recordingLog: RecordingLog,
-        cancellationPropagated: AtomicBoolean = AtomicBoolean(),
         testClock: Clock = clock,
         afterAuthentication: () -> Unit = {},
         serializations: AtomicInteger = AtomicInteger(),
@@ -243,17 +271,6 @@ class KallLoggTest {
         val cancellation = CancellationException("business cancellation")
         val server = embeddedServer(Netty, port = 0) {
             install(ContentNegotiation) { jackson() }
-            intercept(ApplicationCallPipeline.Monitoring) {
-                try {
-                    proceed()
-                } catch (cause: CancellationException) {
-                    // Coroutine stack-trace recovery may copy the exception and retain the original as its cause.
-                    cancellationPropagated.set(
-                        generateSequence<Throwable>(cause) { it.cause }.take(16).any { it === cancellation }
-                    )
-                    throw cause
-                }
-            }
             install(StatusPages, StatusPagesConfigHelper.setup())
             authentication {
                 jwt(IdentityProvider.TOKENX.value) {
@@ -289,7 +306,10 @@ class KallLoggTest {
                             post { call.respondText("not logged") }
                         }
                     }
-                    get("/api/other") { call.respondText("not logged") }
+                    get("/api/other") {
+                        if (call.request.queryString() == "cancel") throw cancellation
+                        call.respondText("not logged")
+                    }
                 }
                 get("/entra${paths.first()}") { call.respondText("not logged", ContentType.Text.Plain) }
             }
@@ -315,12 +335,14 @@ class KallLoggTest {
         private val failStart: Boolean = false,
         private val failComplete: Boolean = false,
         private val noMapping: Boolean = false,
+        private val beforeStart: () -> Unit = {},
     ) {
         val starts = CopyOnWriteArrayList<Started>()
         val completions = CopyOnWriteArrayList<Completed>()
         val completionAttempt = CountDownLatch(1)
 
         fun start(ident: Ident, day: LocalDate, entry: KallLoggStart): UUID? {
+            beforeStart()
             if (failStart) error("secret-logging-payload 12345678901")
             starts.add(Started(ident, day, entry))
             return entry.id.takeUnless { noMapping }

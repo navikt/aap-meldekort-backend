@@ -21,14 +21,18 @@ import io.ktor.server.routing.Route
 import io.ktor.util.AttributeKey
 import io.ktor.util.pipeline.PipelinePhase
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withTimeoutOrNull
 import no.nav.aap.Ident
 import no.nav.aap.kallogg.KallLoggRepository
 import no.nav.aap.kallogg.KallLoggStart
 import no.nav.aap.kallogg.KallLoggUtfall
+import no.nav.aap.komponenter.dbconnect.DBConnection
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.httpklient.exception.TimeoutException
 import no.nav.aap.komponenter.repository.RepositoryRegistry
@@ -48,15 +52,19 @@ internal class KallLogg(
     private val start: (Ident, LocalDate, KallLoggStart) -> UUID?,
     private val fullført: (UUID, Instant, Int?, String?, KallLoggUtfall) -> Unit,
 ) {
+    private val writes = Semaphore(2)
+
     constructor(dataSource: DataSource, repositoryRegistry: RepositoryRegistry, clock: Clock) : this(
         clock,
         start = { ident, day, entry ->
             dataSource.transaction { connection ->
+                connection.limitKallLoggStatementTime()
                 repositoryRegistry.provider(connection).provide<KallLoggRepository>().start(ident, day, entry)
             }
         },
         fullført = { id, completedAt, status, body, outcome ->
             dataSource.transaction { connection ->
+                connection.limitKallLoggStatementTime()
                 repositoryRegistry.provider(connection).provide<KallLoggRepository>()
                     .complete(id, completedAt, status, body, outcome)
             }
@@ -83,14 +91,16 @@ internal class KallLogg(
                 null
             }
 
-            // A failed/cancelled send has no known final response: retain the initial IN_PROGRESS row.
-            if (content == null) proceed() else proceedWith(content)
-            if (call.response.isCommitted) {
-                isolated("fullført") {
+            val written = confirmKallLoggTransport(call) {
+                if (content == null) proceed() else proceedWith(content)
+            }
+            if (written) {
+                val completedAt = clock.instant()
+                isolated(application, "fullført") {
                     val status = call.response.status()?.value
                     fullført(
                         entry.id,
-                        clock.instant(),
+                        completedAt,
                         status,
                         capture.body(),
                         when {
@@ -109,7 +119,7 @@ internal class KallLogg(
         getRoute.install(createRouteScopedPlugin("KallLoggAutentisering") {
             on(AuthenticationChecked) { call ->
                 if (call.principal<JWTPrincipal>() == null || call.attributes.contains(entryKey)) return@on
-                isolated("start") {
+                val id = isolated(call.application, "start") {
                     val receivedAt = call.attributes[receivedAtKey]
                     val entry = KallLoggStart(
                         id = UUID.randomUUID(),
@@ -121,8 +131,8 @@ internal class KallLogg(
                         },
                     )
                     start(Ident(call.personBruker().pid), receivedAt.atZone(clock.zone).toLocalDate(), entry)
-                        ?.let { call.attributes.put(entryKey, Entry(it)) }
-                }
+                }?.value
+                if (id != null) call.attributes.put(entryKey, Entry(id))
             }
             on(CallFailed) { call, cause ->
                 call.attributes.getOrNull(entryKey)?.let { entry ->
@@ -201,25 +211,50 @@ internal class KallLogg(
         override fun copy(delegate: OutgoingContent) = MetadataContent(delegate, original)
     }
 
-    private suspend fun isolated(operation: String, block: () -> Unit) {
-        withContext(NonCancellable) {
-            withContext(Dispatchers.IO) {
-                try {
-                    block()
-                } catch (_: Exception) {
-                    logger.error("HTTP call logging failed during {}", operation)
-                }
-            }
+    private suspend fun <T> isolated(scope: CoroutineScope, operation: String, block: () -> T): WriteResult<T>? {
+        val write = submitWrite(scope, operation, block) ?: return null
+        try {
+            val result = withTimeoutOrNull(writeBudgetMillis) { WriteResult(write.await()) }
+            if (result == null) logger.error("HTTP call logging exceeded its deadline during {}", operation)
+            return result?.value
+        } finally {
+            // The request can move on even if the JDBC driver does not promptly honor interruption.
+            write.cancel()
         }
     }
 
-    private class Entry(val id: UUID, var timedOut: Boolean = false, var cancelled: Boolean = false)
+    private fun <T> submitWrite(scope: CoroutineScope, operation: String, block: () -> T) =
+        if (!writes.tryAcquire()) {
+            logger.error("HTTP call logging overloaded during {}", operation)
+            null
+        } else {
+            scope.async(Dispatchers.IO) {
+                try {
+                    WriteResult(runInterruptible { block() })
+                } catch (cause: CancellationException) {
+                    throw cause
+                } catch (_: Exception) {
+                    logger.error("HTTP call logging failed during {}", operation)
+                    null
+                }
+            }.also { write -> write.invokeOnCompletion { writes.release() } }
+        }
+
+    private class WriteResult<T>(val value: T)
 
     private companion object {
+        // Includes connection acquisition, SQL and commit. Never queues extra JDBC work on saturation.
+        const val writeBudgetMillis = 250L
         val logger = LoggerFactory.getLogger(KallLogg::class.java)
         val receivedAtKey = AttributeKey<Instant>("kallogg-mottatt")
         val entryKey = AttributeKey<Entry>("kallogg-oppføring")
     }
+
+    private class Entry(val id: UUID, var timedOut: Boolean = false, var cancelled: Boolean = false)
+}
+
+private fun DBConnection.limitKallLoggStatementTime() {
+    execute("set local statement_timeout = '250ms'")
 }
 
 internal fun NormalOpenAPIRoute.medKallLogg(kallLogg: KallLogg): NormalOpenAPIRoute =
