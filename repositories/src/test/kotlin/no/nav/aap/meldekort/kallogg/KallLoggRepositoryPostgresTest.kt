@@ -22,25 +22,25 @@ import kotlin.test.assertNull
 class KallLoggRepositoryPostgresTest {
     private val dataSource = TestDataSource()
     private val ident = Ident("12345678901")
-    private val today = LocalDate.of(2026, 11, 20)
-    private val receivedAt = Instant.parse("2026-11-20T12:00:00Z")
+    private val iDag = LocalDate.of(2026, 11, 20)
+    private val mottattTidspunkt = Instant.parse("2026-11-20T12:00:00Z")
 
     @AfterEach
-    fun tearDown() {
+    fun ryddOpp() {
         dataSource.close()
     }
 
     @Test
-    fun `stores call against internal person and preserves query values and serialized body`() {
-        createCase("123", listOf(ident))
-        val entry = entry()
-        assertEquals(entry.id, start(ident, entry))
+    fun `lagrer ett innslag i kall-logg`() {
+        opprettSak("123", listOf(ident))
+        val kalloggStart = nyttKalloggStart()
+        assertEquals(kalloggStart.id, registrerKall(ident, kalloggStart))
         val response = """{"value":"quoted \"text\"","items":[1,2]}"""
-        val completedAt = receivedAt.plusSeconds(1)
+        val fullførtTidspunkt = mottattTidspunkt.plusSeconds(1)
 
-        dataSource.transaction { connection ->
-            val repository = postgresRepositoryRegistry.provider(connection).provide<KallLoggRepository>()
-            repository.complete(entry.id, completedAt, 200, response, KallLoggUtfall.COMPLETED)
+        dataSource.transaction { tilkobling ->
+            val kalloggLager = postgresRepositoryRegistry.provider(tilkobling).provide<KallLoggRepository>()
+            kalloggLager.complete(kalloggStart.id, fullførtTidspunkt, 200, response, KallLoggUtfall.COMPLETED)
         }
 
         dataSource.transaction { connection ->
@@ -53,46 +53,46 @@ class KallLoggRepositoryPostgresTest {
                 where cl.id = ?
                 """
             ) {
-                setParams { setUUID(1, entry.id) }
-                setRowMapper {
-                    assertEquals(ident.asString, it.getString("ident"))
-                    assertEquals("BACKEND_CALL", it.getString("entry_type"))
-                    assertEquals(receivedAt, it.getInstant("received_at"))
-                    assertEquals(completedAt, it.getInstant("completed_at"))
-                    assertEquals("GET", it.getString("method"))
-                    assertEquals(entry.path, it.getString("path"))
+                setParams { setUUID(1, kalloggStart.id) }
+                setRowMapper { rad ->
+                    assertEquals(ident.asString, rad.getString("ident"))
+                    assertEquals("BACKEND_CALL", rad.getString("entry_type"))
+                    assertEquals(mottattTidspunkt, rad.getInstant("received_at"))
+                    assertEquals(fullførtTidspunkt, rad.getInstant("completed_at"))
+                    assertEquals("GET", rad.getString("method"))
+                    assertEquals(kalloggStart.path, rad.getString("path"))
                     assertEquals(
-                        entry.queryParameters,
-                        DefaultJsonMapper.fromJson<Map<String, List<String>>>(it.getString("query_parameters"))
+                        kalloggStart.queryParameters,
+                        DefaultJsonMapper.fromJson<Map<String, List<String>>>(rad.getString("query_parameters"))
                     )
-                    assertEquals(200, it.getInt("http_status"))
-                    assertEquals(response, it.getString("response_body"))
-                    assertEquals("COMPLETED", it.getString("outcome"))
+                    assertEquals(200, rad.getInt("http_status"))
+                    assertEquals(response, rad.getString("response_body"))
+                    assertEquals("COMPLETED", rad.getString("outcome"))
                 }
             }
         }
     }
 
     @Test
-    fun `ignores unknown identity and cases outside today's date`() {
-        assertNull(start(ident, entry()))
-        createCase("123", listOf(ident), Periode(today.minusDays(10), today.minusDays(1)))
-        assertNull(start(ident, entry()))
-        createCase("456", listOf(ident), Periode(today.plusDays(1), today.plusDays(10)))
-        assertNull(start(ident, entry()))
-        assertEquals(0, count())
+    fun `uatoriserte brukere og brukere som ikke finnes i system gir ingen logg-innslag`() {
+        assertNull(registrerKall(ident, nyttKalloggStart()))
+        opprettSak("123", listOf(ident), Periode(iDag.minusDays(10), iDag.minusDays(1)))
+        assertNull(registrerKall(ident, nyttKalloggStart()))
+        opprettSak("456", listOf(ident), Periode(iDag.plusDays(1), iDag.plusDays(10)))
+        assertNull(registrerKall(ident, nyttKalloggStart()))
+        assertEquals(0, antallKall())
     }
 
     @Test
-    fun `resolves historical identifiers to same person and selects case for today`() {
-        val previousIdent = Ident("10987654321")
-        createCase("old", listOf(ident), Periode(today.minusYears(1), today.minusDays(1)))
-        createCase("current", listOf(ident, previousIdent))
-        start(ident, entry())
-        start(previousIdent, entry())
+    fun `mapper til gjeldende ident for brukere som har hatt flere identer`() {
+        val tidligereIdent = Ident("10987654321")
+        opprettSak("old", listOf(ident), Periode(iDag.minusYears(1), iDag.minusDays(1)))
+        opprettSak("current", listOf(ident, tidligereIdent))
+        registrerKall(ident, nyttKalloggStart())
+        registrerKall(tidligereIdent, nyttKalloggStart())
 
         dataSource.transaction { connection ->
-            val cases = connection.queryList(
+            val saker = connection.queryList(
                 """
                 select ks.saksnummer
                 from kallogg cl
@@ -100,74 +100,74 @@ class KallLoggRepositoryPostgresTest {
                 join kelvin_sak ks on ks.id = kp.sak_id
                 """
             ) {
-                setRowMapper { it.getString("saksnummer") }
+                setRowMapper { rad -> rad.getString("saksnummer") }
             }
-            assertEquals(listOf("current", "current"), cases)
+            assertEquals(listOf("current", "current"), saker)
         }
     }
 
     @Test
-    fun `initial record survives unrelated rollback and can complete without a response`() {
-        createCase("123", listOf(ident))
-        val entry = entry()
-        start(ident, entry)
+    fun `et kall som blir avbrutt blir logget med status "INTERRUPTED"`() {
+        opprettSak("123", listOf(ident))
+        val kalloggStart = nyttKalloggStart()
+        registrerKall(ident, kalloggStart)
         org.junit.jupiter.api.assertThrows<IllegalStateException> {
             dataSource.transaction<Unit> {
-                error("Business operation rolled back")
+                error("Forretningsoperasjonen ble rullet tilbake")
             }
         }
-        assertEquals(1, count())
+        assertEquals(1, antallKall())
         dataSource.transaction { connection ->
             connection.queryFirst("select outcome, completed_at, http_status, response_body from kallogg") {
-                setRowMapper {
-                    assertEquals("IN_PROGRESS", it.getString("outcome"))
-                    assertNull(it.getInstantOrNull("completed_at"))
-                    assertNull(it.getIntOrNull("http_status"))
-                    assertNull(it.getStringOrNull("response_body"))
+                setRowMapper { rad ->
+                    assertEquals("IN_PROGRESS", rad.getString("outcome"))
+                    assertNull(rad.getInstantOrNull("completed_at"))
+                    assertNull(rad.getIntOrNull("http_status"))
+                    assertNull(rad.getStringOrNull("response_body"))
                 }
             }
             postgresRepositoryRegistry.provider(connection).provide<KallLoggRepository>()
-                .complete(entry.id, receivedAt.plusSeconds(2), null, null, KallLoggUtfall.INTERRUPTED)
+                .complete(kalloggStart.id, mottattTidspunkt.plusSeconds(2), null, null, KallLoggUtfall.INTERRUPTED)
         }
         dataSource.transaction { connection ->
             connection.queryFirst("select outcome, http_status, response_body from kallogg") {
-                setRowMapper {
-                    assertEquals("INTERRUPTED", it.getString("outcome"))
-                    assertNull(it.getIntOrNull("http_status"))
-                    assertNull(it.getStringOrNull("response_body"))
+                setRowMapper { rad ->
+                    assertEquals("INTERRUPTED", rad.getString("outcome"))
+                    assertNull(rad.getIntOrNull("http_status"))
+                    assertNull(rad.getStringOrNull("response_body"))
                 }
             }
         }
     }
 
-    private fun entry() = KallLoggStart(
+    private fun nyttKalloggStart() = KallLoggStart(
         id = UUID.randomUUID(),
-        receivedAt = receivedAt,
+        receivedAt = mottattTidspunkt,
         method = "GET",
         path = "/api/meldeperiode/kommende",
         queryParameters = mapOf("repeated" to listOf("first", "second"), "empty" to listOf("")),
     )
 
-    private fun start(ident: Ident, entry: KallLoggStart) = dataSource.transaction { connection ->
-        postgresRepositoryRegistry.provider(connection).provide<KallLoggRepository>().start(ident, today, entry)
+    private fun registrerKall(ident: Ident, kalloggStart: KallLoggStart) = dataSource.transaction { tilkobling ->
+        postgresRepositoryRegistry.provider(tilkobling).provide<KallLoggRepository>().start(ident, iDag, kalloggStart)
     }
 
-    private fun count() = dataSource.transaction { connection ->
-        connection.queryFirst("select count(*) as count from kallogg") {
-            setRowMapper { it.getInt("count") }
+    private fun antallKall() = dataSource.transaction { tilkobling ->
+        tilkobling.queryFirst("select count(*) as count from kallogg") {
+            setRowMapper { rad -> rad.getInt("count") }
         }
     }
 
-    private fun createCase(
-        number: String,
-        identities: List<Ident>,
-        period: Periode = Periode(today, today.plusDays(30)),
+    private fun opprettSak(
+        saksnummer: String,
+        identer: List<Ident>,
+        periode: Periode = Periode(iDag, iDag.plusDays(30)),
     ) {
         dataSource.transaction { connection ->
             KelvinSakRepositoryPostgres(connection).upsertSak(
-                saksnummer = Fagsaknummer(number),
-                sakenGjelderFor = period,
-                identer = identities,
+                saksnummer = Fagsaknummer(saksnummer),
+                sakenGjelderFor = periode,
+                identer = identer,
                 meldeperioder = emptyList(),
                 meldeplikt = emptyList(),
                 opplysningsbehov = emptyList(),
