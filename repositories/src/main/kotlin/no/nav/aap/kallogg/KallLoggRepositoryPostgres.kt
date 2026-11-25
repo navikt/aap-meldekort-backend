@@ -9,6 +9,29 @@ import java.time.LocalDate
 import java.util.UUID
 
 class KallLoggRepositoryPostgres(private val connection: DBConnection) : KallLoggRepository {
+    override fun slettUtløpte(mottattTilOgMed: Instant, maksAntall: Int): Int {
+        require(maksAntall > 0)
+        return connection.executeReturnUpdated(
+            """
+            with utløpte as (
+                select id
+                from kallogg
+                where received_at <= ?
+                order by received_at
+                limit ?
+            )
+            delete from kallogg
+            using utløpte
+            where kallogg.id = utløpte.id
+            """
+        ) {
+            setParams {
+                setInstant(1, mottattTilOgMed)
+                setInt(2, maksAntall)
+            }
+        }
+    }
+
     override fun start(ident: Ident, paaDag: LocalDate, entry: KallLoggStart): UUID? {
         val personId = connection.queryFirstOrNull<Long>(
             """

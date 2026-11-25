@@ -15,6 +15,7 @@ import io.ktor.server.routing.*
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.aap.Ident
 import no.nav.aap.journalføring.JournalføringJobbUtfører
+import no.nav.aap.kallogg.SlettGamleKallLoggerJobbUtfører
 import no.nav.aap.komponenter.dbconnect.transaction
 import no.nav.aap.komponenter.miljo.Miljø
 import no.nav.aap.komponenter.repository.RepositoryRegistry
@@ -110,6 +111,7 @@ private fun Application.startMotor(
         jobber = listOf(
             JournalføringJobbUtfører.jobbKonstruktør(repositoryRegistry),
             SlettGamleUtfyllingJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
+            SlettGamleKallLoggerJobbUtfører.jobbKonstruktør(dataSource, repositoryRegistry, clock),
             SendVarselJobbUtfører.jobbKonstruktør(repositoryRegistry, clock),
             PubliserMetrikkerJobbUtfører.jobbKonstruktør(repositoryRegistry, prometheus),
         ),

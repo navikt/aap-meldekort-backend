@@ -23,6 +23,8 @@ enum class KallLoggUtfall {
 }
 
 interface KallLoggRepository : Repository {
+    fun slettUtløpte(mottattTilOgMed: Instant, maksAntall: Int): Int
+
     fun start(ident: Ident, paaDag: LocalDate, entry: KallLoggStart): UUID?
 
     fun complete(
