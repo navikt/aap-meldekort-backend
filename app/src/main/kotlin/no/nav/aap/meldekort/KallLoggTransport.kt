@@ -18,20 +18,14 @@ import io.netty.handler.codec.http2.Http2StreamChannel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 
-private const val confirmationTimeoutMillis = 1_000L
+private const val bekreftelsesfristMillis = 1_000L
 
-/**
- * Run the send unchanged, then confirm the outbound writes. Netty promise success is a local
- * transport result, not an acknowledgement from the client.
- */
-internal suspend fun confirmKallLoggTransport(call: ApplicationCall, send: suspend () -> Unit): Boolean {
-    // Routing wraps the engine call but shares its attributes.
+internal suspend fun bekreftKallLoggTransport(call: ApplicationCall, send: suspend () -> Unit): Boolean {
     val engineCall = call as? NettyApplicationCall
         ?: call.attributes.getOrNull(BaseApplicationResponse.EngineResponseAttributeKey)?.call as? NettyApplicationCall
     val context = engineCall?.context
     val observer = if (engineCall != null && context != null && context.channel().isActive && !call.response.isCommitted) {
         val candidate = KallLoggWriteObserver(context.channel() is Http2StreamChannel) {
-            // Ktor sets this lateinit property before signaling its response writer.
             try {
                 engineCall.response.responseMessage
             } catch (_: UninitializedPropertyAccessException) {
@@ -39,7 +33,6 @@ internal suspend fun confirmKallLoggTransport(call: ApplicationCall, send: suspe
             }
         }
         try {
-            // Ktor writes via this context, so handlers after it would not see the writes.
             context.pipeline().addBefore(context.name(), null, candidate)
             candidate
         } catch (_: RuntimeException) {
@@ -52,7 +45,7 @@ internal suspend fun confirmKallLoggTransport(call: ApplicationCall, send: suspe
 
     try {
         send()
-        return observer != null && withTimeoutOrNull(confirmationTimeoutMillis) { observer.await() } == true
+        return observer != null && withTimeoutOrNull(bekreftelsesfristMillis) { observer.await() } == true
     } finally {
         if (observer != null && context != null) detachObserver(context, observer)
     }
@@ -63,7 +56,7 @@ private fun detachObserver(context: ChannelHandlerContext, observer: KallLoggWri
     try {
         if (pipeline.context(observer) != null) pipeline.remove(observer)
     } catch (_: RuntimeException) {
-        // Channel teardown can remove the handler or shut down its executor first.
+        // Ved lukking av channel kan handleren være fjernet eller executoren allerede stoppet.
     }
 }
 
@@ -72,7 +65,6 @@ internal class KallLoggWriteObserver(
     private val responseHead: () -> Any?,
 ) : ChannelDuplexHandler() {
     private val confirmed = CompletableDeferred<Boolean>()
-    // Handler methods and Ktor's write promise listeners run on the channel event loop.
     private val pending = mutableSetOf<ChannelFuture>()
     private var started = false
     private var lastSeen = false
@@ -100,8 +92,6 @@ internal class KallLoggWriteObserver(
             if (!finalHead || message !== responseHead()) return
             started = true
         } else {
-            // Ktor serializes HTTP/1 responses on each connection; HTTP/2 writes here belong
-            // to a single stream. A new head or an unexpected frame makes attribution unsafe.
             val continuation = if (http2) {
                 message is Http2DataFrame || message is Http2HeadersFrame && message.headers().status() == null
             } else {

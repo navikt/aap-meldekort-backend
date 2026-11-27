@@ -91,7 +91,7 @@ internal class KallLogg(
                 null
             }
 
-            val written = confirmKallLoggTransport(call) {
+            val written = bekreftKallLoggTransport(call) {
                 if (content == null) proceed() else proceedWith(content)
             }
             if (written) {
