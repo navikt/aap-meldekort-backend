@@ -31,6 +31,33 @@ class KallLoggRepositoryPostgresTest {
     }
 
     @Test
+    fun `html-snapshots lagres for hvert kall`() {
+        opprettSak("123", listOf(ident))
+        val html = "<p>Snapshot</p>"
+
+        dataSource.transaction { connection ->
+            val repository = postgresRepositoryRegistry.provider(connection).provide<KallLoggRepository>()
+            repository.lagreSnapshot(ident, iDag, mottattTidspunkt, html)
+            repository.lagreSnapshot(ident, iDag, mottattTidspunkt.plusSeconds(10), html)
+        }
+
+        assertEquals(2, antallKall())
+        val snapshots = dataSource.transaction { connection ->
+            connection.queryList(
+                """
+                select kpi.ident, cl.html_snapshot, cl.entry_type, cl.outcome
+                from kallogg cl join kelvin_person_ident kpi on cl.person_id = kpi.person_id
+                """
+            ) {
+                setRowMapper { row ->
+                    listOf(row.getString("ident"), row.getString("html_snapshot"), row.getString("entry_type"), row.getString("outcome"))
+                }
+            }
+        }
+        assertEquals(List(2) { listOf(ident.asString, html, "FRONTEND_SNAPSHOT", "COMPLETED") }, snapshots)
+    }
+
+    @Test
     fun `lagrer ett innslag i kall-logg`() {
         opprettSak("123", listOf(ident))
         val kalloggStart = nyttKalloggStart()
@@ -107,7 +134,7 @@ class KallLoggRepositoryPostgresTest {
     }
 
     @Test
-    fun `et kall som blir avbrutt blir logget med status "INTERRUPTED"`() {
+    fun `et kall som blir avbrutt blir logget med status INTERRUPTED`() {
         opprettSak("123", listOf(ident))
         val kalloggStart = nyttKalloggStart()
         registrerKall(ident, kalloggStart)

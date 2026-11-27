@@ -81,6 +81,8 @@ dependencies {
     implementation(libs.server)
     implementation(libs.httpklient)
     implementation(libs.infrastructure)
+    implementation(libs.json)
+    implementation(libs.jsoup)
     implementation(libs.motorApi)
     implementation(libs.motor)
     api(libs.tilgangPlugin)

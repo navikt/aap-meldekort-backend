@@ -36,6 +36,9 @@ object StatusPagesConfigHelper {
                     logger.warn("Timeout ved kall til '${call.request.local.uri}': ", cause)
                     call.respondWithError(TimeoutException("Forespørselen tok for lang tid. Prøv igjen om litt."))
                 }
+                is SnapshotRequestException -> {
+                    call.respondWithSnapshotError(cause.status, cause.beskrivelse)
+                }
 
                 else -> {
                     logger.error("Ukjent feil ved kall til '${call.request.local.uri}': ", cause)

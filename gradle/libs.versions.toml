@@ -5,6 +5,8 @@ behandlingsflyt = "0.0.678"
 arenaoppslag = "0.7.37"
 
 [libraries]
+jsoup = { module = "org.jsoup:jsoup", version = "1.24.1" }
+
 # Kelvin
 server = { module = "no.nav.aap.kelvin:server", version.ref = "komponenter" }
 httpklient = { module = "no.nav.aap.kelvin:httpklient", version.ref = "komponenter" }

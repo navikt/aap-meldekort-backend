@@ -27,6 +27,8 @@ interface KallLoggRepository : Repository {
 
     fun start(ident: Ident, paaDag: LocalDate, entry: KallLoggStart): UUID?
 
+    fun lagreSnapshot(ident: Ident, paaDag: LocalDate, mottatt: Instant, html: String)
+
     fun complete(
         id: UUID,
         completedAt: Instant,

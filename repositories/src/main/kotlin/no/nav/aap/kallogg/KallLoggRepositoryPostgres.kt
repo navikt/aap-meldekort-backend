@@ -33,21 +33,7 @@ class KallLoggRepositoryPostgres(private val connection: DBConnection) : KallLog
     }
 
     override fun start(ident: Ident, paaDag: LocalDate, entry: KallLoggStart): UUID? {
-        val personId = connection.queryFirstOrNull<Long>(
-            """
-            select kelvin_person.id
-            from kelvin_sak
-            join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
-            join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
-            where kelvin_person_ident.ident = ? and kelvin_sak.saken_gjelder_for @> ?::date
-            """
-        ) {
-            setParams {
-                setString(1, ident.asString)
-                setLocalDate(2, paaDag)
-            }
-            setRowMapper { it.getLong("id") }
-        } ?: return null
+        val personId = finnPersonId(ident, paaDag) ?: return null
 
         connection.execute(
             """
@@ -66,6 +52,39 @@ class KallLoggRepositoryPostgres(private val connection: DBConnection) : KallLog
             }
         }
         return entry.id
+    }
+
+    override fun lagreSnapshot(ident: Ident, paaDag: LocalDate, mottatt: Instant, html: String) {
+        val personId = finnPersonId(ident, paaDag) ?: return
+        connection.execute(
+            """
+            insert into kallogg (id, person_id, entry_type, received_at, outcome, html_snapshot)
+            values (?, ?, 'FRONTEND_SNAPSHOT', ?, 'COMPLETED', ?)
+            """
+        ) {
+            setParams {
+                setUUID(1, UUID.randomUUID())
+                setLong(2, personId)
+                setInstant(3, mottatt)
+                setString(4, html)
+            }
+        }
+    }
+
+    private fun finnPersonId(ident: Ident, paaDag: LocalDate): Long? = connection.queryFirstOrNull<Long>(
+        """
+        select kelvin_person.id
+        from kelvin_sak
+        join kelvin_person on kelvin_sak.id = kelvin_person.sak_id
+        join kelvin_person_ident on kelvin_person.id = kelvin_person_ident.person_id
+        where kelvin_person_ident.ident = ? and kelvin_sak.saken_gjelder_for @> ?::date
+        """
+    ) {
+        setParams {
+            setString(1, ident.asString)
+            setLocalDate(2, paaDag)
+        }
+        setRowMapper { it.getLong("id") }
     }
 
     override fun complete(
